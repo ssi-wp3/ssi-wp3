@@ -40,6 +40,6 @@ for input_filename in progress_bar:
     output_filename = os.path.join(output_directory, f"{filename}.parquet")
     progress_bar.set_description(
         f"Writing {input_filename} to {output_filename}")
-    df = pd.read_excel(input_filename, sep=args.delimiter,
-                       engine="pyarrow", encoding=args.encoding)
+    df = pd.read_csv(input_filename, sep=args.delimiter,
+                     engine="pyarrow", encoding=args.encoding)
     df.to_parquet(output_filename, engine="pyarrow")
