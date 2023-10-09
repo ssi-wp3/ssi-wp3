@@ -9,8 +9,8 @@ parser.add_argument("-i", "--input-directory",
                     help="The directory to read the csv files from")
 parser.add_argument("-o", "--output-directory", default=None,
                     help="The directory to read the parquet files to")
-parser.add_argument("-e", "--extension", default=".xlsx",
-                    help="The extension for the xlsx files")
+parser.add_argument("-e", "--extension", default=".csv",
+                    help="The extension for the csv files")
 args = parser.parse_args()
 
 load_dotenv()
@@ -36,5 +36,5 @@ for input_filename in progress_bar:
     output_filename = os.path.join(output_directory, f"{filename}.parquet")
     progress_bar.set_description(
         f"Writing {input_filename} to {output_filename}")
-    df = pd.read_excel(input_filename, sep=args.delimiter, engine="openpyxl")
+    df = pd.read_excel(input_filename, sep=args.delimiter, engine="pyarrow")
     df.to_parquet(output_filename, engine="pyarrow")
