@@ -11,6 +11,8 @@ parser.add_argument("-o", "--output-directory", default=None,
                     help="The directory to read the parquet files to")
 parser.add_argument("-d", "--delimiter", default=";",
                     help="The delimiter used in the csv files")
+parser.add_argumens("-ec", "--encoding", default="ISO-8859-1",
+                    help="The encoding of the csv files (default: ISO-8859-1)")
 parser.add_argument("-e", "--extension", default=".csv",
                     help="The extension for the csv files")
 args = parser.parse_args()
@@ -38,5 +40,6 @@ for input_filename in progress_bar:
     output_filename = os.path.join(output_directory, f"{filename}.parquet")
     progress_bar.set_description(
         f"Writing {input_filename} to {output_filename}")
-    df = pd.read_excel(input_filename, sep=args.delimiter, engine="pyarrow")
+    df = pd.read_excel(input_filename, sep=args.delimiter,
+                       engine="pyarrow", encoding=args.encoding)
     df.to_parquet(output_filename, engine="pyarrow")
