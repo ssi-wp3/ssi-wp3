@@ -1,2 +1,2 @@
 #!/bin/bash
-pipreqs .
+pipreqs . --force
