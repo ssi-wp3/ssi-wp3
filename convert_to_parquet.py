@@ -40,7 +40,7 @@ progress_bar = tqdm.tqdm(input_filenames)
 # also the number of columns varies per line. Pandas only handles this
 # if we can specify the column names up front
 # TODO change for real columns later
-column_names = [str(i) for i in range(0, 13)]
+# column_names = [str(i) for i in range(0, 13)]
 
 for input_filename in progress_bar:
     filename = os.path.basename(input_filename).replace(args.extension, "")
@@ -48,5 +48,5 @@ for input_filename in progress_bar:
     progress_bar.set_description(
         f"Writing {input_filename} to {output_filename}")
     df = pd.read_csv(input_filename, sep=args.delimiter,
-                     engine="python", encoding=args.encoding, header=None, names=column_names)
+                     engine="python", encoding=args.encoding, header=None)  # , names=column_names)
     df.to_parquet(output_filename, engine="pyarrow")
