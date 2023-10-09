@@ -35,11 +35,18 @@ input_filenames = [os.path.join(input_directory, filename)
 print(
     f"Reading all {args.extension} files from {input_directory} and writing them to {output_directory}")
 progress_bar = tqdm.tqdm(input_filenames)
+
+# The CPI csv files have no header, so we need to set header=None
+# also the number of columns varies per line. Pandas only handles this
+# if we can specify the column names up front
+# TODO change for real columns later
+column_names = [str(i) for i in range(0, 13)]
+
 for input_filename in progress_bar:
     filename = os.path.basename(input_filename).replace(args.extension, "")
     output_filename = os.path.join(output_directory, f"{filename}.parquet")
     progress_bar.set_description(
         f"Writing {input_filename} to {output_filename}")
     df = pd.read_csv(input_filename, sep=args.delimiter,
-                     engine="pyarrow", encoding=args.encoding, header=None)
+                     engine="pyarrow", encoding=args.encoding, header=None, names=column_names)
     df.to_parquet(output_filename, engine="pyarrow")
