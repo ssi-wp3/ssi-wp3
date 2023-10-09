@@ -49,5 +49,5 @@ for input_filename in progress_bar:
         f"Writing {input_filename} to {output_filename}")
 
     df = pd.read_csv(input_filename, sep=args.delimiter,
-                     engine="pyarrow", encoding=args.encoding)
+                     engine="python", encoding=args.encoding)
     df.to_parquet(output_filename, engine="pyarrow")
