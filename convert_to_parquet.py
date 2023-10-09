@@ -48,7 +48,7 @@ for input_filename in progress_bar:
     progress_bar.set_description(
         f"Writing {input_filename} to {output_filename}")
     columns_df = pd.read_csv(input_filename, sep=args.delimiter,
-                             engine="pyarrow", encoding=args.encoding, nrows=1)
+                             encoding=args.encoding, nrows=1)
     column_names = columns_df.columns.tolist()
 
     df = pd.read_csv(input_filename, sep=args.delimiter,
