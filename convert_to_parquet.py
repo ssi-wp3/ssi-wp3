@@ -15,6 +15,8 @@ parser.add_argument("-ec", "--encoding", default="ISO-8859-1",
                     help="The encoding of the csv files (default: ISO-8859-1)")
 parser.add_argument("-e", "--extension", default=".csv",
                     help="The extension for the csv files")
+parser.add_argument("-de", "--decimal", default=",",
+                    help="The decimal separator used in the csv files")
 args = parser.parse_args()
 
 load_dotenv()
@@ -48,6 +50,7 @@ for input_filename in progress_bar:
     progress_bar.set_description(
         f"Writing {input_filename} to {output_filename}")
 
+    # C engine is the only one that can read the CPI files
     df = pd.read_csv(input_filename, sep=args.delimiter,
-                     engine="pyarrow", encoding=args.encoding)
+                     engine="c", encoding=args.encoding, decimal=args.decimal)
     df.to_parquet(output_filename, engine="pyarrow")
