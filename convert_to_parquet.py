@@ -50,7 +50,9 @@ for input_filename in progress_bar:
     progress_bar.set_description(
         f"Writing {input_filename} to {output_filename}")
 
-    header_names = None if filename.lower().startswith("kassa") else [f"column_{i}" for i in range(0, 13)]
+    first_line = pd.read_csv(input_filename, sep=args.delimiter, nrows=1)
+    
+    header_names = None if filename.lower().startswith("kassa") else [f"column_{i}" for i in range(0, len(first_line.columns))]
 
     # C engine is the only one that can read the CPI files
     df = pd.read_csv(input_filename, sep=args.delimiter,
