@@ -1,8 +1,19 @@
 from dotenv import load_dotenv
+from typing import Dict, Any, Optional
 import argparse
 import pandas as pd
 import os
 import tqdm
+
+def get_column_types(filename: str) -> Optional[Dict[str, Any]]:
+    # From Justin's code
+    if filename.startswith("omzeteans"):
+        return {'BgNr': str, 'Maand': str, 'CoicopNr': str, 'CoicopNaam': str, 'IsbaNr': str,
+                'IsbaNaam': str, 'EsbaNr': str, 'EsbaNaam': str, 'Rep_id': str,
+                    'EanNr': str, 'EanNaam': str, 'Omzet': np.float32, 'Aantal': np.float32}
+    elif filename.lower().startswith("output"):
+        return {'BgNr': str, 'BgNaam':str, 'CoicopNr':str, 'CoicopNaam':str, 'IsbaNr':str, 'IsbaNaam':str, 'EsbaNr':str, 'EsbaNaam':str, 'Rep_id':str, 'EanNr': str, 'EanNaam':str } 
+    return None
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-directory",
