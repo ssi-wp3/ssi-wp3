@@ -11,7 +11,6 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
     # From Justin's code, but converted them to english and lower case
     column_types = OrderedDict([
                 ('bg_number', str), 
-                ('bg_name', str),
                 ('month', str), 
                 ('coicop_number', str), 
                 ('coicop_name', str), 
@@ -27,13 +26,10 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
     ])
     
     if filename.lower().startswith("omzeteans"):
-        return OrderedDict([(column_name, column_types[column_name]) 
-                for column_name in column_types.keys()
-                if column_name != 'bg_name'
-        ])
+        return column_types
     elif filename.lower().startswith("output"):
         return OrderedDict([(column_name, column_types[column_name]) 
-            for column_name in ['bg_number', 'bg_name', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', 'ean_number', 'ean_name'] 
+            for column_name in ['bg_number', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', 'ean_number', 'ean_name'] 
         ]) 
     return None
 
