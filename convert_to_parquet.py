@@ -53,7 +53,7 @@ for input_filename in progress_bar:
     header_names = 0 if filename.lower().startswith("kassa") else ["column_{i}" for i in range(0, 13)]
 
     # C engine is the only one that can read the CPI files
-    with open(input_filename, mode="r", encoding="utf8-sig") as csv_file:
+    with open(input_filename, mode="r", encoding="utf-8-sig") as csv_file:
         df = pd.read_csv(csv_file, sep=args.delimiter,
                      engine="c", encoding=args.encoding, decimal=args.decimal, names=header_names)
         df.to_parquet(output_filename, engine="pyarrow")
