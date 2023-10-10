@@ -81,7 +81,7 @@ for input_filename in progress_bar:
 
     # Add header names and types to all but kassa files 
     header_types = get_column_types(filename) 
-    header_names = [name for name in header_types.keys()]
+    header_names = None if not header_types else [name for name in header_types.keys()]
     df = pd.read_csv(input_filename, sep=args.delimiter, engine="pyarrow", 
                      encoding=args.encoding, decimal=args.decimal, 
                      names=header_names, dtype=header_types)
