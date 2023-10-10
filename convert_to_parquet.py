@@ -28,7 +28,7 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
     
     if filename.lower().startswith("omzeteans"):
         return OrderedDict([(column_name, column_types[column_name]) 
-                for column_name in column_types.values()
+                for column_name in column_types.keys()
                 if column_name != 'bg_name'
         ])
     elif filename.lower().startswith("output"):
