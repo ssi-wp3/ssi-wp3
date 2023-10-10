@@ -7,5 +7,5 @@ output_directory=$2
 
 for file in $input_directory/*.csv 
 do
-    tail -c +3 $file | iconv -f cp1252 -t utf-8 | tr -d '\r' > $output_directory/$(basename $file)
+    tail -c +4 $file | iconv -f cp1252 -t utf-8 | tr -d '\r' > $output_directory/$(basename $file)
 done
