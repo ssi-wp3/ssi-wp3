@@ -7,7 +7,7 @@ import os
 import tqdm
 import numpy as np
 
-def get_column_types(filename: str) -> Optional[Dict[str, Any]]:
+def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
     # From Justin's code, but converted them to english and lower case
     column_types = OrderedDict([
                 ('bg_number', str), 
