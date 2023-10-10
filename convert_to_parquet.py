@@ -11,8 +11,8 @@ parser.add_argument("-o", "--output-directory", default=None,
                     help="The directory to read the parquet files to")
 parser.add_argument("-d", "--delimiter", default=";",
                     help="The delimiter used in the csv files")
-parser.add_argument("-ec", "--encoding", default="cp1252",
-                    help="The encoding of the csv files (default: ISO-8859-1)")
+parser.add_argument("-ec", "--encoding", default="utf-8",
+                    help="The encoding of the csv files (default: utf-8)")
 parser.add_argument("-e", "--extension", default=".csv",
                     help="The extension for the csv files")
 parser.add_argument("-de", "--decimal", default=",",
@@ -53,8 +53,6 @@ for input_filename in progress_bar:
     header_names = None if filename.lower().startswith("kassa") else [f"column_{i}" for i in range(0, 13)]
 
     # C engine is the only one that can read the CPI files
-    with open(input_filename, mode="r", encoding=args.encoding) as csv_file:
-        csv_file.seek(3)
-        df = pd.read_csv(csv_file, sep=args.delimiter,
-                     engine="c", encoding=args.encoding, decimal=args.decimal, names=header_names)
-        df.to_parquet(output_filename, engine="pyarrow")
+    df = pd.read_csv(input_filename, sep=args.delimiter,
+                     engine="pyarrow", encoding=args.encoding, decimal=args.decimal, names=header_names)
+    df.to_parquet(output_filename, engine="pyarrow")
