@@ -1,18 +1,40 @@
 from dotenv import load_dotenv
 from typing import Dict, Any, Optional
+from collections import OrderedDict
 import argparse
 import pandas as pd
 import os
 import tqdm
+import numpy as np
 
 def get_column_types(filename: str) -> Optional[Dict[str, Any]]:
-    # From Justin's code
-    if filename.startswith("omzeteans"):
-        return {'BgNr': str, 'Maand': str, 'CoicopNr': str, 'CoicopNaam': str, 'IsbaNr': str,
-                'IsbaNaam': str, 'EsbaNr': str, 'EsbaNaam': str, 'Rep_id': str,
-                    'EanNr': str, 'EanNaam': str, 'Omzet': np.float32, 'Aantal': np.float32}
+    # From Justin's code, but converted them to english and lower case
+    column_types = OrderedDict([
+                ('bg_number', str), 
+                ('bg_name', str),
+                ('month', str), 
+                ('coicop_number', str), 
+                ('coicop_name', str), 
+                ('isba_number', str),
+                ('isba_name', str), 
+                ('esba_number', str), 
+                ('esba_name', str), 
+                ('rep_id', str),
+                ('ean_number', str), 
+                ('ean_name', str), 
+                ('revenue', np.float32), 
+                ('amount', np.float32)
+    ])
+    
+    if filename.lower().startswith("omzeteans"):
+        return OrderedDict([(column_name, column_types[column_name]) 
+                for column_name in column_types.values()
+                if column_name != 'bg_name'
+        ])
     elif filename.lower().startswith("output"):
-        return {'BgNr': str, 'BgNaam':str, 'CoicopNr':str, 'CoicopNaam':str, 'IsbaNr':str, 'IsbaNaam':str, 'EsbaNr':str, 'EsbaNaam':str, 'Rep_id':str, 'EanNr': str, 'EanNaam':str } 
+        return OrderedDict([(column_name, column_types[column_name]) 
+            for column_name in ['bg_number', 'bg_name', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', 'ean_number', 'ean_name'] 
+        ]) 
     return None
 
 parser = argparse.ArgumentParser()
@@ -49,12 +71,6 @@ print(
     f"Reading all {args.extension} files from {input_directory} and writing them to {output_directory}")
 progress_bar = tqdm.tqdm(input_filenames)
 
-# The CPI csv files have no header, so we need to set header=None
-# also the number of columns varies per line. Pandas only handles this
-# if we can specify the column names up front
-# TODO change for real columns later
-# column_names = [str(i) for i in range(0, 13)]
-
 for input_filename in progress_bar:
     filename = os.path.basename(input_filename).replace(args.extension, "")
     output_filename = os.path.join(output_directory, f"{filename}.parquet")
@@ -62,10 +78,11 @@ for input_filename in progress_bar:
         f"Writing {input_filename} to {output_filename}")
 
     first_line = pd.read_csv(input_filename, sep=args.delimiter, nrows=1)
-    
-    header_names = None if filename.lower().startswith("kassa") else [f"column_{i}" for i in range(0, len(first_line.columns))]
 
-    # C engine is the only one that can read the CPI files
-    df = pd.read_csv(input_filename, sep=args.delimiter,
-                     engine="pyarrow", encoding=args.encoding, decimal=args.decimal, names=header_names)
+    # Add header names and types to all but kassa files 
+    header_types = get_column_types(filename) 
+    header_names = [name for name in header_types.keys()]
+    df = pd.read_csv(input_filename, sep=args.delimiter, engine="pyarrow", 
+                     encoding=args.encoding, decimal=args.decimal, 
+                     names=header_names, dtype=header_types)
     df.to_parquet(output_filename, engine="pyarrow")
