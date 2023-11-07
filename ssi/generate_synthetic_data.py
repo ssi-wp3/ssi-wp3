@@ -25,7 +25,7 @@ bg_number = np.random.randint(100000, 999999, num_rows)  # 6-digit supermarket i
 month = np.random.choice([f"{year}{month:02d}" for year in range(start_date, end_date) for month in range(1, 13)], num_rows)  # Year and month
 coicop_number = [f"{i:06d}" for i in np.random.randint(0, 999999, num_rows)]  # 6-digit COICOP label
 coicop_name = [fake.catch_phrase() for _ in range(num_rows)]  # Product names
-ean_number = [f"{i:013d}" for i in np.random.randint(0, 9999999999999, num_rows)]  # EAN product number
+ean_number = [fake.ean() for _ in range(num_rows)]  # EAN product number
 ean_name = [fake.bs() for _ in range(num_rows)]  # Product descriptions
 
 # Create a DataFrame
