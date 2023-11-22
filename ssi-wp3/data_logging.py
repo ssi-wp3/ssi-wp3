@@ -25,3 +25,8 @@ def log_number_of_unique_coicops_per_length(dataframe: pd.DataFrame, coicop_colu
     coicop_length_df = pd.DataFrame(coicop_lengths, index=[0])
     coicop_length_df.to_csv(os.path.join(
         log_directory, "unique_coicops_per_length.csv"), delimiter=delimiter)
+
+
+def log_number_of_coicop_with_leading_zero(dataframe: pd.DataFrame, coicop_column: str, length: int = 5) -> int:
+    return dataframe[dataframe[coicop_column].str.len(
+    ) == length][coicop_column].str.startswith("0").sum()
