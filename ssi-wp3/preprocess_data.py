@@ -3,6 +3,19 @@ import pandas as pd
 import os
 
 
+def log_coicop_lengths(dataframe: pd.DataFrame, coicop_column: str) -> pd.DataFrame:
+    return dataframe[coicop_column].str.len().value_counts().reset_index()
+
+
+def log_coicop_value_counts_per_length(dataframe: pd.DataFrame, coicop_column: str, log_directory: str, delimiter: str = ";") -> pd.DataFrame:
+    coicop_lengths = log_coicop_lengths(dataframe, coicop_column)
+    for coicop_length in coicop_lengths.index:
+        counts = dataframe[dataframe[coicop_column].str.len(
+        ) == coicop_length][coicop_column].value_counts()
+        counts.to_csv(os.path.join(
+            log_directory, f"value_counts_coicop_{coicop_length}.csv"), delimiter=delimiter)
+
+
 def split_coicop(coicop_column: pd.Series) -> pd.DataFrame:
     return pd.DataFrame({"coicop_number": coicop_column,
                          "coicop_division": coicop_column.str[:2],
