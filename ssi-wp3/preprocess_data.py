@@ -23,11 +23,20 @@ def get_category_counts(dataframe: pd.DataFrame, coicop_column: str, product_id_
     return split_coicop_df.merge(coicop_counts, on=coicop_column)
 
 
+def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
+    shorter_columns = dataframe[coicop_column].str.len() == 5
+    dataframe.loc[shorter_columns, coicop_column] = dataframe[shorter_columns][coicop_column].apply(
+        lambda s: f"0{s}")
+    return dataframe
+
+
 def preprocess_data(dataframe: pd.DataFrame, coicop_column: str = "coicop_number", product_id_column: str = "ean_number") -> pd.DataFrame:
     split_coicop_df = get_category_counts(
         dataframe, coicop_column=coicop_column, product_id_column=product_id_column)
     dataframe = dataframe.merge(
         split_coicop_df, on=coicop_column, suffixes=['', '_y'])
+    dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
+    return dataframe
 
 
 def combine_revenue_files(revenue_files: List[str], sort_columns: List[str], sort_order: List[bool],  engine: str = "pyarrow") -> pd.DataFrame:
