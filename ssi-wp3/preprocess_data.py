@@ -13,8 +13,21 @@ def split_coicop(coicop_column: pd.Series) -> pd.DataFrame:
                          })
 
 
+def get_category_counts(dataframe: pd.DataFrame, coicop_column: str, product_id_column: str) -> pd.DataFrame:
+    unique_coicop = pd.Series(
+        dataframe[dataframe[coicop_column].str.len() == 6][coicop_column].unique())
+    split_coicop_df = split_coicop(unique_coicop)
+
+    coicop_counts = dataframe.groupby(by=[coicop_column])[product_id_column].nunique(
+    ).reset_index().rename(columns={product_id_column: "count"})
+    return split_coicop_df.merge(coicop_counts, on=coicop_column)
+
+
 def preprocess_data(dataframe: pd.DataFrame) -> pd.DataFrame:
-    pass
+    split_coicop_df = get_category_counts(
+        dataframe, coicop_column="coicop_number", product_id_column="ean_number")
+    dataframe = dataframe.merge(
+        split_coicop_df, on="coicop_number", suffixes=['', '_y'])
 
 
 def combine_revenue_files(revenue_files: List[str], sort_columns: List[str], sort_order: List[bool],  engine: str = "pyarrow") -> pd.DataFrame:
