@@ -57,7 +57,7 @@ class DataLogger:
                 by=coicop_level_column)[product_id_column].nunique()
         return pd.DataFrame(coicop_level_dict, index=[0])
 
-    def log(self, dataframe: pd.DataFrame, coicop_column: str, coicop_level_columns: List[str], product_id_column: str):
+    def log_before_preprocessing(self, dataframe: pd.DataFrame, coicop_column: str, product_id_column: str):
         log_dataframe_description(dataframe).to_csv(os.path.join(
             self.log_directory, "dataframe_description.csv"), delimiter=self.delimiter)
         log_coicop_lengths(dataframe, coicop_column).to_csv(os.path.join(
@@ -71,9 +71,12 @@ class DataLogger:
             dataframe, coico_column)
         coicop_length_df.to_csv(os.path.join(
             self.log_directory, "unique_coicops_per_length.csv"), delimiter=self.delimiter)
-
         # number_of_coicop_with_leading_zero = log_number_of_coicop_with_leading_zero(
         #    dataframe, coicop_column)
+
+    def log_after_preprocessing(self, dataframe: pd.DataFrame, coicop_column: str, coicop_level_columns: List[str], product_id_column: str):
+        self.log_before_preprocessing(
+            dataframe, coicop_column, product_id_column)
         unique_products_per_coicop_level = log_unique_products_per_coicop_level(
             dataframe, coicop_level_columns, product_id_column)
         unique_products_per_coicop_level.to_csv(os.path.join(
