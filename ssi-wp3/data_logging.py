@@ -1,36 +1,65 @@
+from typing import List
 import pandas as pd
 
 
-def log_dataframe_description(dataframe: pd.DataFrame) -> pd.DataFrame:
-    return dataframe.describe(include="all")
+class DataLogger:
+    def __init__(self, log_directory: str, delimiter: str = ";"):
+        self.__log_directory = log_directory
+        self.__delimiter = delimiter
 
+    @property
+    def log_directory(self) -> str:
+        return self.__log_directory
 
-def log_coicop_lengths(dataframe: pd.DataFrame, coicop_column: str) -> pd.DataFrame:
-    return dataframe[coicop_column].str.len().value_counts().reset_index()
+    @property
+    def delimiter(self) -> str:
+        return self.__delimiter
 
+    @staticmethod
+    def log_dataframe_description(dataframe: pd.DataFrame) -> pd.DataFrame:
+        return dataframe.describe(include="all")
 
-def log_coicop_value_counts_per_length(dataframe: pd.DataFrame, coicop_column: str, log_directory: str, delimiter: str = ";") -> pd.DataFrame:
-    coicop_lengths = log_coicop_lengths(dataframe, coicop_column)
-    for coicop_length in coicop_lengths.index:
-        counts = dataframe[dataframe[coicop_column].str.len(
-        ) == coicop_length][coicop_column].value_counts()
-        counts.to_csv(os.path.join(
-            log_directory, f"value_counts_coicop_{coicop_length}.csv"), delimiter=delimiter)
+    @staticmethod
+    def log_coicop_lengths(dataframe: pd.DataFrame, coicop_column: str) -> pd.DataFrame:
+        return dataframe[coicop_column].str.len().value_counts().reset_index()
 
+    @staticmethod
+    def log_coicop_value_counts_per_length(dataframe: pd.DataFrame, coicop_column: str) -> List[pd.DataFrame]:
+        coicop_lengths = log_coicop_lengths(dataframe, coicop_column)
+        coicop_value_dfs = []
+        for coicop_length in coicop_lengths.index:
+            counts = dataframe[dataframe[coicop_column].str.len(
+            ) == coicop_length][coicop_column].value_counts()
+            coicop_value_dfs.append(counts)
+        return coicop_value_dfs
 
-def log_number_of_unique_coicops_per_length(dataframe: pd.DataFrame, coicop_column: str, log_directory: str, delimiter: str = ";") -> pd.DataFrame:
-    coicop_lengths = log_coicop_lengths(dataframe, coicop_column)
+    @staticmethod
+    def log_number_of_unique_coicops_per_length(dataframe: pd.DataFrame, coicop_column: str) -> pd.DataFrame:
+        coicop_lengths = log_coicop_lengths(dataframe, coicop_column)
 
-    coicop_lengths = dict()
-    for coicop_length in coicop_lengths.index:
-        coicop_lengths[coicop_length] = dataframe[dataframe[coicop_column].str.len(
-        ) == coicop_length][coicop_column].nunique()
+        coicop_lengths = dict()
+        for coicop_length in coicop_lengths.index:
+            coicop_lengths[coicop_length] = dataframe[dataframe[coicop_column].str.len(
+            ) == coicop_length][coicop_column].nunique()
 
-    coicop_length_df = pd.DataFrame(coicop_lengths, index=[0])
-    coicop_length_df.to_csv(os.path.join(
-        log_directory, "unique_coicops_per_length.csv"), delimiter=delimiter)
+        return pd.DataFrame(coicop_lengths, index=[0])
 
+    @staticmethod
+    def log_number_of_coicop_with_leading_zero(dataframe: pd.DataFrame, coicop_column: str, length: int = 5) -> int:
+        return dataframe[dataframe[coicop_column].str.len(
+        ) == length][coicop_column].str.startswith("0").sum()
 
-def log_number_of_coicop_with_leading_zero(dataframe: pd.DataFrame, coicop_column: str, length: int = 5) -> int:
-    return dataframe[dataframe[coicop_column].str.len(
-    ) == length][coicop_column].str.startswith("0").sum()
+    def log(self, dataframe: pd.DataFrame):
+        log_dataframe_description(dataframe).to_csv(os.path.join(
+            self.log_directory, "dataframe_description.csv"), delimiter=self.delimiter)
+        log_coicop_lengths(dataframe, coicop_column).to_csv(os.path.join(
+            self.log_directory, "coicop_lengths.csv"), delimiter=self.delimiter)
+
+        for counts in log_coicop_value_counts_per_length(dataframe, coicop_column):
+            counts.to_csv(os.path.join(
+                self.log_directory, f"value_counts_coicop_{coicop_length}.csv"), delimiter=self.delimiter)
+
+        coicop_length_df = log_number_of_unique_coicops_per_length(
+            dataframe, coico_column)
+        coicop_length_df.to_csv(os.path.join(
+            self.log_directory, "unique_coicops_per_length.csv"), delimiter=self.delimiter)
