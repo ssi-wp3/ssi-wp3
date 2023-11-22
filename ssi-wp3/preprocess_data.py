@@ -40,17 +40,17 @@ def preprocess_data(dataframe: pd.DataFrame, coicop_column: str = "coicop_number
 
 
 def combine_revenue_files(revenue_files: List[str], sort_columns: List[str], sort_order: List[bool],  engine: str = "pyarrow") -> pd.DataFrame:
-    lidl_df = pd.concat([pd.read_parquet(revenue_file, engine=engine)
-                        for revenue_file in revenue_files])
-    lidl_df = lidl_df.sort_values(
+    combined_dataframe = pd.concat([pd.read_parquet(revenue_file, engine=engine)
+                                    for revenue_file in revenue_files])
+    combined_dataframe = combined_dataframe.sort_values(
         by=sort_columns, ascending=sort_order).reset_index(drop=True)
     return lidl_df
 
 
 def combine_revenue_files_in_folder(data_directory: str, supermarket_name: str, sort_columns: List[str], sort_order: List[bool], filename_prefix: str = "Omzet") -> pd.DataFrame:
-    lidl_revenue_files = [os.path.join(data_directory, filename) for filename in os.listdir(
+    revenue_files = [os.path.join(data_directory, filename) for filename in os.listdir(
         data_directory) if filename.startswith(filename_prefix) and supermarket_name in filename]
-    return combine_revenue_files(lidl_revenue_files, sort_columns=sort_columns)
+    return combine_revenue_files(revenue_files, sort_columns=sort_columns, sort_order=sort_order)
 
 
 def save_combined_revenue_files(data_directory: str, output_filename: str, supermarket_name: str, filename_prefix: str = "Omzet", engine: str = "pyarrow"):
