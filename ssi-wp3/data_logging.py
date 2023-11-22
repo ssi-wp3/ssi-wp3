@@ -1,6 +1,10 @@
 import pandas as pd
 
 
+def log_dataframe_description(dataframe: pd.DataFrame) -> pd.DataFrame:
+    return dataframe.describe(include="all")
+
+
 def log_coicop_lengths(dataframe: pd.DataFrame, coicop_column: str) -> pd.DataFrame:
     return dataframe[coicop_column].str.len().value_counts().reset_index()
 
