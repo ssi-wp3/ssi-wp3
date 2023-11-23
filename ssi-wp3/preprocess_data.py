@@ -51,7 +51,7 @@ def combine_revenue_files(revenue_files: List[str], sort_columns: List[str], sor
                                     for revenue_file in revenue_files])
     combined_dataframe = combined_dataframe.sort_values(
         by=sort_columns, ascending=sort_order).reset_index(drop=True)
-    return lidl_df
+    return combined_dataframe
 
 
 def combine_revenue_files_in_folder(data_directory: str, supermarket_name: str, sort_columns: List[str], sort_order: List[bool], filename_prefix: str = "Omzet") -> pd.DataFrame:
