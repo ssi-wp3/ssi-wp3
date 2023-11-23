@@ -56,9 +56,14 @@ def combine_revenue_files(revenue_files: List[str], sort_columns: List[str], sor
     return combined_dataframe
 
 
-def combine_revenue_files_in_folder(data_directory: str, supermarket_name: str, sort_columns: List[str], sort_order: List[bool], filename_prefix: str = "Omzet") -> pd.DataFrame:
-    revenue_files = [os.path.join(data_directory, filename) for filename in os.listdir(
+def get_revenue_files_in_folder(data_directory: str, supermarket_name: str, filename_prefix: str = "Omzet") -> List[str]:
+    return [os.path.join(data_directory, filename) for filename in os.listdir(
         data_directory) if filename.startswith(filename_prefix) and supermarket_name in filename]
+
+
+def combine_revenue_files_in_folder(data_directory: str, supermarket_name: str, sort_columns: List[str], sort_order: List[bool], filename_prefix: str = "Omzet") -> pd.DataFrame:
+    revenue_files = get_revenue_files_in_folder(
+        data_directory, supermarket_name, filename_prefix)
     return combine_revenue_files(revenue_files, sort_columns=sort_columns, sort_order=sort_order)
 
 
