@@ -21,7 +21,7 @@ def generate_fake_coicop_2018(num_rows: int) -> str:
     """
     coicop_data = read_coicop_2018_data()
     coicop_data = coicop_data[coicop_data["coicop_level"] == 5]
-    return coicop_data.sample(num_rows, replace=True)["coicop_number"]
+    return coicop_data.sample(num_rows, replace=True)[["coicop_number", "description"]]
 
 
 def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) -> pd.DataFrame:
@@ -42,9 +42,10 @@ def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) ->
     bg_number = np.random.randint(100000, 999999, num_rows)
     month = np.random.choice([f"{year}{month:02d}" for year in range(
         start_date, end_date) for month in range(1, 13)], num_rows)  # Year and month
-    coicop_number = generate_fake_coicop_2018(num_rows)  # COICOP product code
-    coicop_name = [fake.catch_phrase()
-                   for _ in range(num_rows)]  # Product names
+    fake_coicop_data = generate_fake_coicop_2018(
+        num_rows)  # COICOP product code
+    coicop_number = fake_coicop_data["coicop_number"]
+    coicop_name = fake_coicop_data["description"]
     ean_number = [fake.ean() for _ in range(num_rows)]  # EAN product number
     ean_name = [fake.bs() for _ in range(num_rows)]  # Product descriptions
 
