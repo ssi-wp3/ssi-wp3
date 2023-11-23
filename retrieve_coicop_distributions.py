@@ -8,7 +8,7 @@ import tqdm
 
 def get_coicop_distributions_for_filename(filename: str) -> pd.DataFrame:
     dataframe = pd.read_parquet(filename, engine="pyarrow")
-    dataframe["product_id"] = dataframe["ean_name"].str.apply(hash)
+    dataframe["product_id"] = dataframe["ean_name"].apply(hash)
     return dataframe.groupby(by=["bg_number", "month", "coicop_number"])[
         "product_id"].nunique().reset_index()
 
