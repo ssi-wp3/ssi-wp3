@@ -3,6 +3,17 @@ import numpy as np
 from faker import Faker
 
 
+def generate_fake_coicop_2018() -> str:
+    """Generate fake COICOP data for the SSI project.
+
+    Returns:
+        str: A string with fake COICOP data
+    """
+    coicop_division = ["01"]
+
+    return fake.numerify(text="######")
+
+
 def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) -> pd.DataFrame:
     """Generate fake revenue data for the SSI project.
 
