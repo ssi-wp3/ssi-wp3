@@ -1,0 +1,4 @@
+settings:
+    coicop_column_name: coicop_number
+    product_description_column: ean_name
+    product_id_column: ean_number
