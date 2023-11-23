@@ -28,7 +28,7 @@ load_dotenv(dotenv_path=dotenv_path)
 output_directory = os.getenv("OUTPUT_DIRECTORY")
 preprocessed_files = [os.path.join(output_directory, filename)
                       for filename in os.listdir(output_directory)
-                      if filename.startswith("ssi_") and filename.endswith(".parquet")]
+                      if filename.startswith("ssi_omzet") and filename.endswith(".parquet")]
 
 
 coicop_distributions = pd.concat([get_coicop_distributions_for_filename(preprocessed_file)
