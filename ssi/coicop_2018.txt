@@ -1,79 +1,79 @@
-01 Food and non-alcoholic beverages
-01.1 Food
-01.2 Non-alcoholic beverages
-01.3 Services for processing primary goods for food and non-alcoholic beverages
-02 Alcoholic beverages, tobacco and narcotics
-02.1 Alcoholic beverages
-02.2 Alcohol production services
-02.3 Tobacco
-02.4 Narcotics
-03 Clothing and footwear
-03.1 Clothing
-03.2 Footwear
-04 Housing, water, electricity, gas and other fuels
-04.1 Actual rentals for housing
-04.2 Imputed rentals for housing
-04.3 Maintenance, repair and security of the dwelling
-04.4 Water supply and miscellaneous services relating to the dwelling
-04.5 Electricity, gas and other fuels
-05 Furnishings, household equipment and routine household maintenance
-05.1 Furniture, furnishings, and loose carpets
-05.2 Household textiles
-05.3 Household appliances
-05.4 Glassware, tableware and household utensils
-05.5 Tools and equipment for house and garden
-05.6 Goods and services for routine household maintenance
-06 Health
-06.1 Medicines and health products
-06.2 Outpatient care services
-06.3 Inpatient care services
-06.4 Other health services
-07 Transport
-07.1 Purchase of vehicles
-07.2 Operation of personal transport equipment
-07.3 Passenger transport services
-07.4 Transport services of goods
-08 Information and communication
-08.1 Information and communication equipment
-08.2 Software excluding games
-08.3 Information and communication services
-09 Recreation, sport and culture
-09.1 Recreational durables
-09.2 Other recreational goods
-09.3 Garden products and pets
-09.4 Recreational services
-09.5 Cultural goods
-09.6 Cultural services
-09.7 Newspapers, books and stationery
-09.8 Package holidays
-10 Education services
-10.1 Early childhood and primary education
-10.2 Secondary education
-10.3 Post-secondary non-tertiary education
-10.4 Tertiary education
-10.5 Education not defined by level
-11 Restaurants and accommodation services
-11.1 Food and beverage serving services
-11.2 Accommodation services
-12 Insurance and financial services
-12.1 Insurance
-12.2 Financial services
-13 Personal care, social protection and miscellaneous goods and services
-13.1 Personal care
-13.2 Other personal effects
-13.3 Social protection
-13.9 Other services
-14 Individual consumption expenditure of non-profit institutions serving
-households (NPISHS)
-14.1 Housing
-14.2 Health
-14.3 Recreation and culture
-14.4 Education
-14.5 Social protection
-14.6 Other services
-15 Individual consumption expenditure of general government
-15.1 Housing
-15.2 Health
-15.3 Recreation and culture
-15.4 Education
-15.5 Social protection
+Code;Description
+01;Food and non-alcoholic beverages
+01.1;Food
+01.2;Non-alcoholic beverages
+01.3;Services for processing primary goods for food and non-alcoholic beverages
+02;Alcoholic beverages, tobacco and narcotics
+02.1;Alcoholic beverages
+02.2;Alcohol production services
+02.3;Tobacco
+02.4;Narcotics
+03;Clothing and footwear
+03.1;Clothing
+03.2;Footwear
+04;Housing, water, electricity, gas and other fuels
+04.1;Actual rentals for housing
+04.2;Imputed rentals for housing
+04.3;Maintenance, repair and security of the dwelling
+04.4;Water supply and miscellaneous services relating to the dwelling
+04.5;Electricity, gas and other fuels
+05;Furnishings, household equipment and routine household maintenance
+05.1;Furniture, furnishings, and loose carpets
+05.2;Household textiles
+05.3;Household appliances
+05.4;Glassware, tableware and household utensils
+05.5;Tools and equipment for house and garden
+05.6;Goods and services for routine household maintenance
+06;Health
+06.1;Medicines and health products
+06.2;Outpatient care services
+06.3;Inpatient care services
+06.4;Other health services
+07;Transport
+07.1;Purchase of vehicles
+07.2;Operation of personal transport equipment
+07.3;Passenger transport services
+07.4;Transport services of goods
+08;Information and communication
+08.1;Information and communication equipment
+08.2;Software excluding games
+08.3;Information and communication services
+09;Recreation, sport and culture
+09.1;Recreational durables
+09.2;Other recreational goods
+09.3;Garden products and pets
+09.4;Recreational services
+09.5;Cultural goods
+09.6;Cultural services
+09.7;Newspapers, books and stationery
+09.8;Package holidays
+10;Education services
+10.1;Early childhood and primary education
+10.2;Secondary education
+10.3;Post-secondary non-tertiary education
+10.4;Tertiary education
+10.5;Education not defined by level
+11;Restaurants and accommodation services
+11.1;Food and beverage serving services
+11.2;Accommodation services
+12;Insurance and financial services
+12.1;Insurance
+12.2;Financial services
+13;Personal care, social protection and miscellaneous goods and services
+13.1;Personal care
+13.2;Other personal effects
+13.3;Social protection
+13.9;Other services
+14;Individual consumption expenditure of non-profit institutions serving households (NPISHS)
+14.1;Housing
+14.2;Health
+14.3;Recreation and culture
+14.4;Education
+14.5;Social protection
+14.6;Other services
+15;Individual consumption expenditure of general government
+15.1;Housing
+15.2;Health
+15.3;Recreation and culture
+15.4;Education
+15.5;Social protection
