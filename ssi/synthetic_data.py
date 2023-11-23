@@ -4,7 +4,7 @@ from faker import Faker
 
 
 def read_coicop_2018_data() -> pd.DataFrame:
-    coicop_data = pd.read_csv('./coicop_2018', sep=",").rename(
+    coicop_data = pd.read_csv('./ssi/coicop_2018.txt', sep=",").rename(
         columns={"CODE_COICOP_2018": "coicop_number", "HEADING_COICOP_2018": "description"})
 
     coicop_data["coicop_number"] = coicop_data["coicop_number"].str.replace(
@@ -13,15 +13,15 @@ def read_coicop_2018_data() -> pd.DataFrame:
     return coicop_data
 
 
-def generate_fake_coicop_2018() -> str:
+def generate_fake_coicop_2018(num_rows: int) -> str:
     """Generate fake COICOP data for the SSI project.
 
     Returns:
         str: A string with fake COICOP data
     """
     coicop_data = read_coicop_2018_data()
-
-    return fake.numerify(text="######")
+    coicop_data = coicop_data[coicop_data["coicop_level"] == 5]
+    return coicop_data.sample(num_rows, replace=True)["coicop_number"]
 
 
 def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) -> pd.DataFrame:
@@ -42,8 +42,7 @@ def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) ->
     bg_number = np.random.randint(100000, 999999, num_rows)
     month = np.random.choice([f"{year}{month:02d}" for year in range(
         start_date, end_date) for month in range(1, 13)], num_rows)  # Year and month
-    coicop_number = [f"{i:06d}" for i in np.random.randint(
-        0, 999999, num_rows)]  # 6-digit COICOP label
+    coicop_number = generate_fake_coicop_2018(num_rows)  # COICOP product code
     coicop_name = [fake.catch_phrase()
                    for _ in range(num_rows)]  # Product names
     ean_number = [fake.ean() for _ in range(num_rows)]  # EAN product number
