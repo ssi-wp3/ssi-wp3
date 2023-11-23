@@ -1,4 +1,5 @@
 from typing import List
+from .data_logging import DataLogger
 import pandas as pd
 import os
 
@@ -60,8 +61,16 @@ def combine_revenue_files_in_folder(data_directory: str, supermarket_name: str, 
     return combine_revenue_files(revenue_files, sort_columns=sort_columns, sort_order=sort_order)
 
 
-def save_combined_revenue_files(data_directory: str, output_filename: str, supermarket_name: str, filename_prefix: str = "Omzet", engine: str = "pyarrow"):
+def save_combined_revenue_files(data_directory: str, output_filename: str, supermarket_name: str, log_directory: str, filename_prefix: str = "Omzet", engine: str = "pyarrow"):
+    data_logger = DataLogger(log_directory)
+
     combined_df = combine_revenue_files_in_folder(
         data_directory, supermarket_name, filename_prefix, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True])
+    data_logger.log_before_preprocessing(combined_df, "coicop_number")
+
+    combined_df = preprocess_data(combined_df)
+
+    # data_logger.log_after_preprocessing(combined_df, "coicop_number", )
+
     combined_df.to_parquet(os.path.join(
         data_directory, output_filename), engine=engine)
