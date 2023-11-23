@@ -3,13 +3,23 @@ import numpy as np
 from faker import Faker
 
 
+def read_coicop_2018_data() -> pd.DataFrame:
+    coicop_data = pd.read_csv('./coicop_2018', sep=",").rename(
+        columns={"CODE_COICOP_2018": "coicop_number", "HEADING_COICOP_2018": "description"})
+
+    coicop_data["coicop_number"] = coicop_data["coicop_number"].str.replace(
+        ".", "")
+    coicop_data["coicop_level"] = coicop_data["coicop_number"].str.len() - 1
+    return coicop_data
+
+
 def generate_fake_coicop_2018() -> str:
     """Generate fake COICOP data for the SSI project.
 
     Returns:
         str: A string with fake COICOP data
     """
-    coicop_division = ["01"]
+    coicop_data = read_coicop_2018_data()
 
     return fake.numerify(text="######")
 
