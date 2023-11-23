@@ -30,12 +30,19 @@ def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_numbe
     return dataframe
 
 
+def add_unique_product_id(dataframe: pd.DataFrame, product_description_column: str = "ean_name") -> pd.DataFrame:
+    dataframe["product_id"] = dataframe[product_description_column].str.apply(
+        hash)
+    return dataframe
+
+
 def preprocess_data(dataframe: pd.DataFrame, coicop_column: str = "coicop_number", product_id_column: str = "ean_number") -> pd.DataFrame:
     split_coicop_df = get_category_counts(
         dataframe, coicop_column=coicop_column, product_id_column=product_id_column)
     dataframe = dataframe.merge(
         split_coicop_df, on=coicop_column, suffixes=['', '_y'])
     dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
+    dataframe = add_unique_product_id(dataframe)
     return dataframe
 
 
