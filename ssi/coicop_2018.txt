@@ -135,10 +135,49 @@ Code;Description
 03.2.2.0;Cleaning, repair, and hire of footwear (S)
 04;Housing, water, electricity, gas and other fuels
 04.1;Actual rentals for housing
+04.1.1;Actual rentals paid by tenants for main residence (S)
+04.1.1.0;Actual rentals paid by tenants for main residence (S)
+04.1.2;Other actual rentals (S)
+04.1.2.1;Actual rentals paid by tenants for secondary residences (S)
+04.1.2.2;Garage rentals and other rentals paid by tenants (S)
 04.2;Imputed rentals for housing
+04.2.1;Imputed rentals of owner-occupiers for main residence (S)
+04.2.1.0;Imputed rentals of owner-occupiers for main residence (S)
+04.2.2;Other imputed rentals (S)
+04.2.2.0;Other imputed rentals (S)
 04.3;Maintenance, repair and security of the dwelling
+04.3.1;Security equipment and materials for the maintenance and repair of the dwelling (ND)
+04.3.1.1;Materials for the maintenance and repair of the dwelling (ND)
+04.3.1.2;Security equipment (SD)
+04.3.2;Services for the maintenance, repair and security of the dwelling (S)
+04.3.2.0;Services for the maintenance, repair and security of the dwelling (S)
 04.4;Water supply and miscellaneous services relating to the dwelling
+04.4.1;Water supply (ND)
+04.4.1.1;Water supply through network systems (ND)
+04.4.1.2;Water supply through other systems (ND)
+04.4.2;Refuse collection (S)
+04.4.2.0;Refuse collection (S)
+04.4.3;Sewage collection (S)
+04.4.3.1;Sewage collection through sewer systems (S)
+04.4.3.2;Sewage collection through onsite sanitation systems (S)
+04.4.4;Other services relating to the dwelling n.e.c. (S)
+04.4.4.1;Maintenance charges in multi-occupied buildings (S)
+04.4.4.9;Other services related to dwelling (S)
 04.5;Electricity, gas and other fuels
+04.5.1;Electricity (ND)
+04.5.1.0;Electricity (ND)
+04.5.2;Gas (ND)
+04.5.2.1;Natural gas through networks (ND)
+04.5.2.2;Liquefied hydrocarbons (ND)
+04.5.3;Liquid fuels (ND)
+04.5.3.0;Liquid fuels (ND)
+04.5.4;Solid fuels (ND)
+04.5.4.1;Coal, coal briquettes and peat (ND)
+04.5.4.2;Wood fuel, including pellets and briquettes (ND)
+04.5.4.3;Charcoal (ND)
+04.5.4.9;Other solid fuels (ND)
+04.5.5;Other energy for heating and cooling (ND)
+04.5.5.0;Other energy for heating and cooling (ND)
 05;Furnishings, household equipment and routine household maintenance
 05.1;Furniture, furnishings, and loose carpets
 05.2;Household textiles
