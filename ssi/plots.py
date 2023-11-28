@@ -9,12 +9,12 @@ def calculate_and_plot_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray, 
     plot_confusion_matrix(matrix)
 
 
-def plot_confusion_matrix(confusion_matrix):
+def plot_confusion_matrix(confusion_matrix: np.array, title: str = 'Confusion matrix'):
     # Create a heatmap
     sns.heatmap(confusion_matrix, annot=True, fmt='d')
 
     # Customize the plot
-    plt.title('Confusion Matrix')
+    plt.title(title)
     plt.xlabel('Predicted')
     plt.ylabel('Actual')
 
