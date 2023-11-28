@@ -1,7 +1,8 @@
-import pandas as pd
-import numpy as np
 from typing import List
 from faker import Faker
+import pandas as pd
+import numpy as np
+import random
 
 
 def read_coicop_2018_data() -> pd.DataFrame:
@@ -31,7 +32,7 @@ def generate_supermarked_ids(num_rows: int) -> List[str]:
         num_rows (int): The number of rows to generate
     """
     supermarked_ids = ["995001", "995002", "995003"]
-    return np.random.choices(supermarked_ids, k=num_rows) 
+    return random.choices(supermarked_ids, k=num_rows) 
 
 def generate_dates(num_rows: int, start_date: str, end_date: str) -> List[str]:
     """Generate fake dates for the SSI project.
@@ -44,7 +45,7 @@ def generate_dates(num_rows: int, start_date: str, end_date: str) -> List[str]:
     dates = [f"{year}{month:02d}" 
              for year in range(start_date, end_date) 
              for month in range(1, 13)]
-    return np.random.choice(dates, num_rows).sorted()
+    return random.choices(dates, k=num_rows).sort()
 
 def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) -> pd.DataFrame:
     """Generate fake revenue data for the SSI project.

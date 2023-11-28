@@ -23,6 +23,10 @@ load_dotenv(dotenv_path=dotenv_path)
 
 
 output_directory = os.getenv("OUTPUT_DIRECTORY")
+if not os.path.exists(output_directory):
+    print(f"Creating output directory {output_directory}")
+    os.makedirs(output_directory)
+
 print(f"Writing synthetic data to {output_directory}/{args.output}")
 dataframe = generate_fake_revenue_data(num_rows, start_date, end_date)
 print(dataframe.head())
