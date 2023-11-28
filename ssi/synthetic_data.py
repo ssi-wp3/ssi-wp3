@@ -44,7 +44,7 @@ def generate_dates(num_rows: int, start_date: str, end_date: str) -> List[str]:
     dates = [f"{year}{month:02d}" 
              for year in range(start_date, end_date) 
              for month in range(1, 13)]
-    return np.random.choice(dates, num_rows)
+    return np.random.choice(dates, num_rows).sorted()
 
 def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) -> pd.DataFrame:
     """Generate fake revenue data for the SSI project.
