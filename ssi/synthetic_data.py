@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from typing import List
 from faker import Faker
 
 
@@ -23,9 +24,27 @@ def generate_fake_coicop_2018(num_rows: int) -> str:
     coicop_data = coicop_data[coicop_data["coicop_level"] == 5]
     return coicop_data.sample(num_rows, replace=True)[["coicop_number", "description"]]
 
-def supermarked_ids(num_rows: int) -> str:
+def generate_supermarked_ids(num_rows: int) -> List[str]:
+    """Generate fake supermarked ids for the SSI project.
+    
+    Args:
+        num_rows (int): The number of rows to generate
+    """
     supermarked_ids = ["995001", "995002", "995003"]
-    return np.random.choice(supermarked_ids, num_rows) 
+    return np.random.choices(supermarked_ids, k=num_rows) 
+
+def generate_dates(num_rows: int, start_date: str, end_date: str) -> List[str]:
+    """Generate fake dates for the SSI project.
+    
+    Args:
+        num_rows (int): The number of rows to generate
+        start_date (str): The start date of the data
+        end_date (str): The end date of the data
+    """
+    dates = [f"{year}{month:02d}" 
+             for year in range(start_date, end_date) 
+             for month in range(1, 13)]
+    return np.random.choice(dates, num_rows)
 
 def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) -> pd.DataFrame:
     """Generate fake revenue data for the SSI project.
@@ -42,9 +61,8 @@ def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) ->
 
     # Generate synthetic data
     # 6-digit supermarket identifier
-    bg_number = supermarked_ids(num_rows)
-    month = np.random.choice([f"{year}{month:02d}" for year in range(
-        start_date, end_date) for month in range(1, 13)], num_rows)  # Year and month
+    bg_number = generate_supermarked_ids(num_rows)
+    month = generate_dates(num_rows, start_date, end_date) # Year and month
     fake_coicop_data = generate_fake_coicop_2018(
         num_rows)  # COICOP product code
     coicop_number = fake_coicop_data["coicop_number"]
