@@ -45,7 +45,7 @@ def generate_dates(num_rows: int, start_date: str, end_date: str) -> List[str]:
     dates = [f"{year}{month:02d}" 
              for year in range(start_date, end_date) 
              for month in range(1, 13)]
-    return random.choices(dates, k=num_rows).sort()
+    return sorted(random.choices(dates, k=num_rows))
 
 def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) -> pd.DataFrame:
     """Generate fake revenue data for the SSI project.
@@ -72,7 +72,7 @@ def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) ->
     ean_name = [fake.bs() for _ in range(num_rows)]  # Product descriptions
 
     # Create a DataFrame
-    return pd.DataFrame({
+    fake_data_df = pd.DataFrame({
         'bg_number': bg_number,
         'month': month,
         'coicop_number': coicop_number,
@@ -80,3 +80,4 @@ def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) ->
         'ean_number': ean_number,
         'ean_name': ean_name
     })
+    return fake_data_df.sort_values(by=["bg_number", "month", "coicop_number"])
