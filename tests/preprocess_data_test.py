@@ -47,3 +47,10 @@ class TestPreprocessData(unittest.TestCase):
     def test_split_coicop_returns_coicop_subsubclasses(self):
         self.assertTrue(self.coicop_series.equals(split_coicop(
             self.coicop_series).coicop_subsubclass))
+
+    def test_add_unique_product_id(self):
+        dataframe = pd.DataFrame(
+            {"ean_name": ["product1", "product2", "product3"]})
+        dataframe = add_unique_product_id(dataframe)
+        self.assertTrue(dataframe["product_id"].equals(
+            pd.Series([hash("product1"), hash("product2"), hash("product3")])))

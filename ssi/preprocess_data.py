@@ -33,7 +33,7 @@ def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_numbe
 
 
 def add_unique_product_id(dataframe: pd.DataFrame, product_description_column: str = "ean_name") -> pd.DataFrame:
-    dataframe["product_id"] = dataframe[product_description_column].str.apply(
+    dataframe["product_id"] = dataframe[product_description_column].apply(
         hash)
     return dataframe
 
