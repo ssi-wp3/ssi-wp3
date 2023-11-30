@@ -72,4 +72,8 @@ class TestPreprocessData(unittest.TestCase):
             pd.Series(["01120", "02231", "12342", "05453", "06564"])))
 
     def test_get_category_counts(self):
-        pass
+        dataframe = pd.DataFrame({
+            "coicop_number": ["011201", "011201", "022312", "022312", "022312",
+                              "123423", "054534", "054534", "054534", "054534",
+                              "065645", "065645", "065645", "065645", "065645"],
+            "product_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]})
