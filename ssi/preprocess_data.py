@@ -11,8 +11,14 @@ def split_coicop(coicop_column: pd.Series) -> pd.DataFrame:
                          "coicop_group": coicop_column.str[:3],
                          "coicop_class": coicop_column.str[:4],
                          "coicop_subclass": coicop_column.str[:5],
-                         "coicop_subsubclass": coicop_column,
                          })
+
+
+def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
+    shorter_columns = dataframe[coicop_column].str.len() == 5
+    dataframe.loc[shorter_columns, coicop_column] = dataframe[shorter_columns][coicop_column].apply(
+        lambda s: f"0{s}")
+    return dataframe
 
 
 def get_category_counts(dataframe: pd.DataFrame, coicop_column: str, product_id_column: str) -> pd.DataFrame:
@@ -25,13 +31,6 @@ def get_category_counts(dataframe: pd.DataFrame, coicop_column: str, product_id_
     return split_coicop_df.merge(coicop_counts, on=coicop_column)
 
 
-def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
-    shorter_columns = dataframe[coicop_column].str.len() == 5
-    dataframe.loc[shorter_columns, coicop_column] = dataframe[shorter_columns][coicop_column].apply(
-        lambda s: f"0{s}")
-    return dataframe
-
-
 def add_unique_product_id(dataframe: pd.DataFrame, product_description_column: str = "ean_name") -> pd.DataFrame:
     dataframe["product_id"] = dataframe[product_description_column].apply(
         hash)
@@ -39,11 +38,11 @@ def add_unique_product_id(dataframe: pd.DataFrame, product_description_column: s
 
 
 def preprocess_data(dataframe: pd.DataFrame, coicop_column: str = "coicop_number", product_id_column: str = "ean_number") -> pd.DataFrame:
+    dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
     split_coicop_df = get_category_counts(
         dataframe, coicop_column=coicop_column, product_id_column=product_id_column)
     dataframe = dataframe.merge(
         split_coicop_df, on=coicop_column, suffixes=['', '_y'])
-    dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
     dataframe = add_unique_product_id(dataframe)
     return dataframe
 

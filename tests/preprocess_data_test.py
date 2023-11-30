@@ -44,10 +44,6 @@ class TestPreprocessData(unittest.TestCase):
         self.assertTrue(coicop_subclass.equals(split_coicop(
             self.coicop_series).coicop_subclass))
 
-    def test_split_coicop_returns_coicop_subsubclasses(self):
-        self.assertTrue(self.coicop_series.equals(split_coicop(
-            self.coicop_series).coicop_subsubclass))
-
     def test_add_leading_zero(self):
         dataframe = pd.DataFrame(
             {"coicop_number": ["1234", "12345", "123456"]})
