@@ -85,3 +85,65 @@ class TestPreprocessData(unittest.TestCase):
             dataframe, coicop_column="coicop_number", product_id_column="product_id")
         self.assertTrue(category_counts.sort_values(by="coicop_number")["count"].equals(
             pd.Series([1, 3, 3, 4, 1])))
+
+    def test_get_revenue_files_in_folder(self):
+        data_directory = os.path.join(os.getcwd(), "tests", "data")
+        os.makedirs(data_directory, exist_ok=True)
+
+        revenue_files = {
+            "AH": 2,
+            "Jumbo": 4,
+            "Lidl": 1,
+            "Plus": 3
+        }
+
+        for supermarket_name, number_of_files in revenue_files.items():
+            for i in range(number_of_files):
+                filename = f"Omzet_{supermarket_name}_{i}.parquet"
+                with open(os.path.join(data_directory, filename), "w") as f:
+                    f.write("")
+
+        revenue_files_ah = get_revenue_files_in_folder(data_directory, "AH")
+        self.assertTrue(len(revenue_files_ah) == 2)
+        self.assertTrue(all([os.path.isfile(revenue_file)
+                        for revenue_file in revenue_files_ah]))
+        self.assertEqual(set([
+            os.path.join(data_directory, "Omzet_AH_0.parquet"),
+            os.path.join(data_directory, "Omzet_AH_1.parquet")
+        ]), set(revenue_files_ah))
+
+        revenue_files_jumbo = get_revenue_files_in_folder(
+            data_directory, "Jumbo")
+        self.assertTrue(len(revenue_files_jumbo) == 4)
+        self.assertTrue(all([os.path.isfile(revenue_file)
+                        for revenue_file in revenue_files_jumbo]))
+        self.assertEqual(set([
+            os.path.join(data_directory, "Omzet_Jumbo_0.parquet"),
+            os.path.join(data_directory, "Omzet_Jumbo_1.parquet"),
+            os.path.join(data_directory, "Omzet_Jumbo_2.parquet"),
+            os.path.join(data_directory, "Omzet_Jumbo_3.parquet")
+        ]), set(revenue_files_jumbo))
+
+        revenue_files_lidl = get_revenue_files_in_folder(
+            data_directory, "Lidl")
+        self.assertTrue(len(revenue_files_lidl) == 1)
+        self.assertTrue(all([os.path.isfile(revenue_file)
+                        for revenue_file in revenue_files_lidl]))
+        self.assertEqual(os.path.join(
+            data_directory, "Omzet_Lidl_0.parquet"), revenue_files_lidl[0])
+
+        revenue_files_plus = get_revenue_files_in_folder(
+            data_directory, "Plus")
+        self.assertTrue(len(revenue_files_plus) == 3)
+        self.assertTrue(all([os.path.isfile(revenue_file)
+                        for revenue_file in revenue_files_plus]))
+        self.assertEqual(set([
+            os.path.join(data_directory, "Omzet_Plus_0.parquet"),
+            os.path.join(data_directory, "Omzet_Plus_1.parquet"),
+            os.path.join(data_directory, "Omzet_Plus_2.parquet")
+        ]), set(revenue_files_plus))
+
+        for supermarket_name, number_of_files in revenue_files.items():
+            for i in range(number_of_files):
+                filename = f"Omzet_{supermarket_name}_{i}.parquet"
+                os.remove(os.path.join(data_directory, filename))

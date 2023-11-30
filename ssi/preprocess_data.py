@@ -51,17 +51,17 @@ def preprocess_data(dataframe: pd.DataFrame, coicop_column: str = "coicop_number
     return dataframe
 
 
+def get_revenue_files_in_folder(data_directory: str, supermarket_name: str, filename_prefix: str = "Omzet") -> List[str]:
+    return [os.path.join(data_directory, filename) for filename in os.listdir(
+        data_directory) if filename.startswith(filename_prefix) and supermarket_name in filename]
+
+
 def combine_revenue_files(revenue_files: List[str], sort_columns: List[str], sort_order: List[bool], engine: str = "pyarrow") -> pd.DataFrame:
     combined_dataframe = pd.concat([pd.read_parquet(revenue_file, engine=engine)
                                     for revenue_file in tqdm.tqdm(revenue_files)])
     combined_dataframe = combined_dataframe.sort_values(
         by=sort_columns, ascending=sort_order).reset_index(drop=True)
     return combined_dataframe
-
-
-def get_revenue_files_in_folder(data_directory: str, supermarket_name: str, filename_prefix: str = "Omzet") -> List[str]:
-    return [os.path.join(data_directory, filename) for filename in os.listdir(
-        data_directory) if filename.startswith(filename_prefix) and supermarket_name in filename]
 
 
 def combine_revenue_files_in_folder(data_directory: str, supermarket_name: str, sort_columns: List[str], sort_order: List[bool], filename_prefix: str = "Omzet") -> pd.DataFrame:
