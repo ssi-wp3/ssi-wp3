@@ -25,7 +25,7 @@ class DataLogger:
         return dataframe[coicop_column].str.len().value_counts().reset_index()
 
     @staticmethod
-    def log_coicop_value_counts_per_length(dataframe: pd.DataFrame, coicop_column: str) -> Dict[pd.DataFrame]:
+    def log_coicop_value_counts_per_length(dataframe: pd.DataFrame, coicop_column: str) -> List[pd.DataFrame]:
         coicop_lengths = DataLogger.log_coicop_lengths(
             dataframe, coicop_column)
         coicop_value_dfs = dict()
