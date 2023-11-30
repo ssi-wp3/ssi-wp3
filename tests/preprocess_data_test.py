@@ -9,5 +9,5 @@ class TestPreprocessData(unittest.TestCase):
             "011201", "022312", "123423", "054534", "065645"
         ])
 
-        self.assertEqual(coicop_series, split_coicop(
-            coicop_series).coicop_number)
+        self.assertTrue(coicop_series.equals(split_coicop(
+            coicop_series).coicop_number))
