@@ -48,6 +48,13 @@ class TestPreprocessData(unittest.TestCase):
         self.assertTrue(self.coicop_series.equals(split_coicop(
             self.coicop_series).coicop_subsubclass))
 
+    def test_add_leading_zero(self):
+        dataframe = pd.DataFrame(
+            {"coicop_number": ["1234", "12345", "123456"]})
+        dataframe = add_leading_zero(dataframe)
+        self.assertTrue(dataframe["coicop_number"].equals(
+            pd.Series(["1234", "012345", "123456"])))
+
     def test_add_unique_product_id(self):
         dataframe = pd.DataFrame(
             {"ean_name": ["product1", "product2", "product3"]})
