@@ -1,6 +1,7 @@
 from ssi.preprocess_data import *
 import unittest
 import pandas as pd
+import os
 
 
 class TestPreprocessData(unittest.TestCase):
