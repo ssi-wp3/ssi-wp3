@@ -86,6 +86,31 @@ class TestPreprocessData(unittest.TestCase):
         self.assertTrue(category_counts.sort_values(by="coicop_number")["count"].equals(
             pd.Series([1, 3, 3, 4, 1])))
 
+    def test_filter_columns(self):
+        dataframe = pd.DataFrame({
+            "coicop_number": ["011201" for _ in range(10)],
+            "product_id": [i for i in range(10)],
+            "product_name": [f"product_{i}" for i in range(10)],
+            "isba_number": [i for i in range(10)],
+            "isba_name": [f"isba_{i}" for i in range(10)],
+            "ean_number": [i for i in range(10)],
+            "ean_name": [f"ean_{i}" for i in range(10)]
+        })
+        filtered_dataframe1 = filter_columns(
+            dataframe, columns=["coicop_number"])
+        self.assertTrue(["coicop_number"] ==
+                        filtered_dataframe1.columns.tolist())
+
+        filtered_dataframe2 = filter_columns(
+            dataframe, columns=["coicop_number", "product_id"])
+        self.assertTrue(["coicop_number", "product_id"]
+                        == filtered_dataframe2.columns.tolist())
+
+        filtered_dataframe3 = filter_columns(
+            dataframe, columns=["coicop_number", "product_id", "product_name"])
+        self.assertTrue(["coicop_number", "product_id",
+                        "product_name"] == filtered_dataframe3.columns.tolist())
+
     def test_get_revenue_files_in_folder(self):
         data_directory = os.path.join(os.getcwd(), "tests", "data")
         os.makedirs(data_directory, exist_ok=True)

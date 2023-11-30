@@ -39,6 +39,11 @@ def add_unique_product_id(dataframe: pd.DataFrame, product_description_column: s
     return dataframe
 
 
+def filter_columns(dataframe: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+    print(columns)
+    return dataframe[columns]
+
+
 def preprocess_data(dataframe: pd.DataFrame, coicop_column: str = "coicop_number", product_id_column: str = "ean_number") -> pd.DataFrame:
     dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
     dataframe = add_unique_product_id(dataframe)
