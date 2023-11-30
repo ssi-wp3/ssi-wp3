@@ -21,14 +21,16 @@ def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_numbe
     return dataframe
 
 
-def get_category_counts(dataframe: pd.DataFrame, coicop_column: str, product_id_column: str) -> pd.DataFrame:
+def add_coicop_levels(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
     unique_coicop = pd.Series(
         dataframe[dataframe[coicop_column].str.len() == 6][coicop_column].unique())
     split_coicop_df = split_coicop(unique_coicop)
+    return dataframe.merge(split_coicop_df, on=coicop_column, suffixes=['', '_y'])
 
-    coicop_counts = dataframe.groupby(by=[coicop_column])[product_id_column].nunique(
+
+def get_category_counts(dataframe: pd.DataFrame, coicop_column: str, product_id_column: str) -> pd.DataFrame:
+    return dataframe.groupby(by=[coicop_column])[product_id_column].nunique(
     ).reset_index().rename(columns={product_id_column: "count"})
-    return split_coicop_df.merge(coicop_counts, on=coicop_column)
 
 
 def add_unique_product_id(dataframe: pd.DataFrame, product_description_column: str = "ean_name") -> pd.DataFrame:
@@ -39,11 +41,13 @@ def add_unique_product_id(dataframe: pd.DataFrame, product_description_column: s
 
 def preprocess_data(dataframe: pd.DataFrame, coicop_column: str = "coicop_number", product_id_column: str = "ean_number") -> pd.DataFrame:
     dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
+    dataframe = add_unique_product_id(dataframe)
+    dataframe = add_coicop_levels(dataframe, coicop_column=coicop_column)
+
     split_coicop_df = get_category_counts(
         dataframe, coicop_column=coicop_column, product_id_column=product_id_column)
-    dataframe = dataframe.merge(
+    dataframe.merge(
         split_coicop_df, on=coicop_column, suffixes=['', '_y'])
-    dataframe = add_unique_product_id(dataframe)
     return dataframe
 
 

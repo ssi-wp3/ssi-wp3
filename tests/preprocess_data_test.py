@@ -57,3 +57,19 @@ class TestPreprocessData(unittest.TestCase):
         dataframe = add_unique_product_id(dataframe)
         self.assertTrue(dataframe["product_id"].equals(
             pd.Series([hash("product1"), hash("product2"), hash("product3")])))
+
+    def test_add_coicop_levels(self):
+        dataframe = pd.DataFrame(
+            {"coicop_number": ["011201", "022312", "123423", "054534", "065645"]})
+        dataframe = add_coicop_levels(dataframe)
+        self.assertTrue(dataframe["coicop_division"].equals(
+            pd.Series(["01", "02", "12", "05", "06"])))
+        self.assertTrue(dataframe["coicop_group"].equals(
+            pd.Series(["011", "022", "123", "054", "065"])))
+        self.assertTrue(dataframe["coicop_class"].equals(
+            pd.Series(["0112", "0223", "1234", "0545", "0656"])))
+        self.assertTrue(dataframe["coicop_subclass"].equals(
+            pd.Series(["01120", "02231", "12342", "05453", "06564"])))
+
+    def test_get_category_counts(self):
+        pass
