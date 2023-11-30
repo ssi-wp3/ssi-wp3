@@ -76,4 +76,11 @@ class TestPreprocessData(unittest.TestCase):
             "coicop_number": ["011201", "011201", "022312", "022312", "022312",
                               "123423", "054534", "054534", "054534", "054534",
                               "065645", "065645", "065645", "065645", "065645"],
-            "product_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]})
+            "product_id": [1, 1, 2, 3, 4,
+                           5, 6, 6, 8, 9,
+                           10, 11, 11, 12, 13]})
+
+        category_counts = get_category_counts(
+            dataframe, coicop_column="coicop_number", product_id_column="product_id")
+        self.assertTrue(category_counts.sort_values(by="coicop_number")["count"].equals(
+            pd.Series([1, 3, 3, 4, 1])))
