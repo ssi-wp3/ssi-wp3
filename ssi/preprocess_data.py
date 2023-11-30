@@ -40,7 +40,6 @@ def add_unique_product_id(dataframe: pd.DataFrame, product_description_column: s
 
 
 def filter_columns(dataframe: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-    print(columns)
     return dataframe[columns]
 
 
