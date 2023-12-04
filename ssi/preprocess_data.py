@@ -84,6 +84,7 @@ def save_combined_revenue_files(data_directory: str,
                                 selected_columns: List[str],
                                 coicop_column: str = "coicop_number",
                                 product_id_column: str = "product_id",
+                                product_description_column: str = "ean_name",
                                 filename_prefix: str = "Omzet", engine: str = "pyarrow"):
     data_logger = DataLogger(log_directory)
 
@@ -92,7 +93,8 @@ def save_combined_revenue_files(data_directory: str,
     data_logger.log_before_preprocessing(combined_df, coicop_column)
 
     combined_df = preprocess_data(
-        combined_df, columns=selected_columns, coicop_column=coicop_column, product_id_column=product_id_column)
+        combined_df, columns=selected_columns, coicop_column=coicop_column,
+        product_id_column=product_id_column, product_description_column=product_description_column)
 
     # data_logger.log_after_preprocessing(combined_df, coicop_column )
 
