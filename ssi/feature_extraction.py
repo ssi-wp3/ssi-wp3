@@ -1,5 +1,6 @@
-from enum import Enum
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from enum import Enum
+from typing import Dict
 import pandas as pd
 import spacy
 import tqdm
@@ -25,19 +26,24 @@ class SpacyFeatureExtractor:
 
 
 class FeatureExtractorFactory:
+    def __init__(self):
+        self._feature_extractors = None
+
     @property
-    def feature_extractors(self):
-        return {
-            FeatureExtractorType.count_vectorizer: CountVectorizer(analyzer='word', token_pattern=r'\w{2,}', max_features=5000),
-            FeatureExtractorType.tfidf_word: TfidfVectorizer(analyzer='word', token_pattern=r'\w{2,}', max_features=5000),
-            FeatureExtractorType.tfidf_char: TfidfVectorizer(analyzer='char', token_pattern=r'\w{2,}', ngram_range=(2, 3), max_features=5000),
-            FeatureExtractorType.tfidf_char34: TfidfVectorizer(analyzer='char', token_pattern=r'\w{2,}', ngram_range=(3, 4), max_features=5000),
-            FeatureExtractorType.count_char: CountVectorizer(analyzer='char', token_pattern=r'\w{2,}', max_features=5000),
-            FeatureExtractorType.spacy_nl_sm: SpacyFeatureExtractor('nl_core_news_sm'),
-            FeatureExtractorType.spacy_nl_md: SpacyFeatureExtractor('nl_core_news_md'),
-            FeatureExtractorType.spacy_nl_lg: SpacyFeatureExtractor(
-                'nl_core_news_lg')
-        }
+    def feature_extractors(self) -> Dict[FeatureExtractorType, object]:
+        if not self._feature_extractors:
+            self._feature_extractors = {
+                FeatureExtractorType.count_vectorizer: CountVectorizer(analyzer='word', token_pattern=r'\w{2,}', max_features=5000),
+                FeatureExtractorType.tfidf_word: TfidfVectorizer(analyzer='word', token_pattern=r'\w{2,}', max_features=5000),
+                FeatureExtractorType.tfidf_char: TfidfVectorizer(analyzer='char', token_pattern=r'\w{2,}', ngram_range=(2, 3), max_features=5000),
+                FeatureExtractorType.tfidf_char34: TfidfVectorizer(analyzer='char', token_pattern=r'\w{2,}', ngram_range=(3, 4), max_features=5000),
+                FeatureExtractorType.count_char: CountVectorizer(analyzer='char', token_pattern=r'\w{2,}', max_features=5000),
+                FeatureExtractorType.spacy_nl_sm: SpacyFeatureExtractor('nl_core_news_sm'),
+                FeatureExtractorType.spacy_nl_md: SpacyFeatureExtractor('nl_core_news_md'),
+                FeatureExtractorType.spacy_nl_lg: SpacyFeatureExtractor(
+                    'nl_core_news_lg')
+            }
+        return self._feature_extractors
 
     @property
     def feature_extractor_types(self):
