@@ -1,5 +1,6 @@
 from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from ssi.synthetic_data import generate_fake_revenue_data
 import unittest
 
 
@@ -22,3 +23,11 @@ class FeatureExtractionTest(unittest.TestCase):
                                    SpacyFeatureExtractor))
         self.assertTrue(isinstance(factory.create_feature_extractor(FeatureExtractorType.spacy_nl_lg),
                                    SpacyFeatureExtractor))
+
+    def test_add_feature_vectors(self):
+        dataframe = generate_fake_revenue_data(100, 2018, 2021)
+        factory = FeatureExtractorFactory()
+        feature_df = factory.add_feature_vectors(
+            dataframe, "coicop_name", "cv_features", FeatureExtractorType.count_vectorizer)
+        self.assertTrue("cv_features" in feature_df.columns)
+        self.assertEqual(len(feature_df["cv_features"][0]), 5000)
