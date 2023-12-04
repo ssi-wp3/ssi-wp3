@@ -1,4 +1,5 @@
 from ssi.preprocess_data import *
+from ssi.synthetic_data import generate_fake_revenue_data
 import unittest
 import pandas as pd
 import os
@@ -215,3 +216,35 @@ class TestPreprocessData(unittest.TestCase):
             for i in range(number_of_files):
                 filename = f"Omzet_{supermarket_name}_{i}.parquet"
                 os.remove(os.path.join(data_directory, filename))
+
+    def test_combine_revenue_files(self):
+        data_directory = os.path.join(os.getcwd(), "tests", "data")
+        os.makedirs(data_directory, exist_ok=True)
+
+        revenue_files = {
+            "AH": 2,
+            "Jumbo": 4,
+            "Lidl": 1,
+            "Plus": 3
+        }
+
+        # Generate some fake data
+        filenames = []
+        dataframes = []
+        years = list(range(2018, 2022))
+        for supermarket_name, number_of_files in revenue_files.items():
+            for i in range(number_of_files):
+                dataframe = generate_fake_revenue_data(
+                    50, years[i], years[i])
+                filenames.append(os.path.join(
+                    data_directory, f"Omzet_{supermarket_name}_{i}.parquet"))
+                dataframe.to_parquet(filenames[-1])
+                dataframes.append(dataframe)
+
+        combined_dataframe = combine_revenue_files(
+            filenames, sort_columns=["bg_number", "month"], sort_order=[True, True])
+        self.assertEqual(500, len(combined_dataframe))
+        self.assertEqual(["995001", "995002", "995003"], combined_dataframe["bg_number"].unique(
+        ).tolist())
+        self.assertEqual([f"{year}{month:02d}" for year in years for month in range(
+            1, 13)], combined_dataframe["month"].unique().tolist())
