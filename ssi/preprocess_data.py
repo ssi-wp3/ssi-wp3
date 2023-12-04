@@ -85,6 +85,8 @@ def save_combined_revenue_files(data_directory: str,
                                 coicop_column: str = "coicop_number",
                                 product_id_column: str = "product_id",
                                 product_description_column: str = "ean_name",
+                                coicop_level_columns: List[str] = [
+                                    "coicop_division", "coicop_group", "coicop_class", "coicop_subclass"],
                                 filename_prefix: str = "Omzet", engine: str = "pyarrow"):
     data_logger = DataLogger(log_directory)
 
@@ -96,7 +98,8 @@ def save_combined_revenue_files(data_directory: str,
         combined_df, columns=selected_columns, coicop_column=coicop_column,
         product_id_column=product_id_column, product_description_column=product_description_column)
 
-    # data_logger.log_after_preprocessing(combined_df, coicop_column )
+    data_logger.log_after_preprocessing(
+        combined_df, coicop_column, coicop_level_columns, product_id_column)
 
     combined_df.to_parquet(os.path.join(
         data_directory, output_filename), engine=engine)
