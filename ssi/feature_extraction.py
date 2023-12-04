@@ -1,7 +1,8 @@
 from enum import Enum
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-import spacy
 import pandas as pd
+import spacy
+import tqdm
 
 
 class FeatureExtractorType(Enum):
@@ -58,3 +59,12 @@ class FeatureExtractorFactory:
         vectors = feature_extractor.fit_transform(dataframe[source_column])
         dataframe[destination_column] = list(vectors)
         return dataframe
+
+    def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, filename: str):
+        with tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
+            for feature_extractor_type in self.feature_extractor_types.keys():
+                dataframe = self.add_feature_vectors(
+                    dataframe, source_column, f'feature_vectors_{feature_extractor_type}', feature_extractor_type)
+                dataframe.to_parquet(
+                    f'{filename}_{feature_extractor_type}.parquet')
+                progress_bar.update()
