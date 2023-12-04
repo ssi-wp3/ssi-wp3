@@ -63,7 +63,7 @@ class FeatureExtractorFactory:
         feature_extractor = self.create_feature_extractor(
             feature_extractor_type)
         vectors = feature_extractor.fit_transform(dataframe[source_column])
-        dataframe[destination_column] = list(vectors)
+        dataframe[destination_column] = list(vectors.toarray())
         return dataframe
 
     def extract_features_and_save(self, dataframe: pd.DataFrame, source_column: str, filename: str, feature_extractor_type: FeatureExtractorType):

@@ -28,6 +28,7 @@ class FeatureExtractionTest(unittest.TestCase):
         dataframe = generate_fake_revenue_data(100, 2018, 2021)
         factory = FeatureExtractorFactory()
         feature_df = factory.add_feature_vectors(
-            dataframe, "coicop_name", "cv_features", FeatureExtractorType.count_vectorizer)
+            dataframe, "coicop_name", "cv_features", FeatureExtractorType.count_vectorizer).reset_index(drop=True)
         self.assertTrue("cv_features" in feature_df.columns)
+
         self.assertEqual(len(feature_df["cv_features"][0]), 5000)
