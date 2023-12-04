@@ -1,5 +1,6 @@
 from enum import Enum
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+import spacy
 
 
 class FeatureExtractorType(Enum):
