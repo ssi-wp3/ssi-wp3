@@ -125,7 +125,7 @@ class TestPreprocessData(unittest.TestCase):
         })
 
         processed_dataframe = preprocess_data(
-            dataframe, columns=["coicop_number", "ean_number", "ean_name"], )
+            dataframe, columns=["coicop_number", "ean_number", "ean_name"], coicop_column="coicop_number", product_id_column="product_id")
         self.assertEqual(len(dataframe), len(processed_dataframe))
         self.assertEqual([6] * len(processed_dataframe),
                          processed_dataframe["coicop_number"].str.len().tolist())
