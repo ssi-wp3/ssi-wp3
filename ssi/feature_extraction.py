@@ -1,6 +1,7 @@
 from enum import Enum
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 import spacy
+import pandas as pd
 
 
 class FeatureExtractorType(Enum):
@@ -46,3 +47,14 @@ class FeatureExtractorFactory:
             return self.feature_extractors[feature_extractor_type]
         else:
             raise ValueError("Invalid type")
+
+    def add_feature_vectors(self,
+                            dataframe: pd.DataFrame,
+                            source_column: str,
+                            destination_column: str,
+                            feature_extractor_type: FeatureExtractorType) -> pd.DataFrame:
+        feature_extractor = self.create_feature_extractor(
+            feature_extractor_type)
+        vectors = feature_extractor.fit_transform(dataframe[source_column])
+        dataframe[destination_column] = list(vectors)
+        return dataframe
