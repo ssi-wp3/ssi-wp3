@@ -79,7 +79,7 @@ def save_combined_revenue_files(data_directory: str, output_filename: str, super
     data_logger = DataLogger(log_directory)
 
     combined_df = combine_revenue_files_in_folder(
-        data_directory, supermarket_name, filename_prefix, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True])
+        data_directory, supermarket_name, filename_prefix, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True, True])
     data_logger.log_before_preprocessing(combined_df, "coicop_number")
 
     combined_df = preprocess_data(combined_df)

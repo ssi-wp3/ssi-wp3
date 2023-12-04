@@ -242,9 +242,42 @@ class TestPreprocessData(unittest.TestCase):
                 dataframes.append(dataframe)
 
         combined_dataframe = combine_revenue_files(
-            filenames, sort_columns=["bg_number", "month"], sort_order=[True, True])
+            filenames, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True])
         self.assertEqual(500, len(combined_dataframe))
-        self.assertEqual(["995001", "995002", "995003"], combined_dataframe["bg_number"].unique(
-        ).tolist())
-        self.assertEqual([f"{year}{month:02d}" for year in years for month in range(
-            1, 13)], combined_dataframe["month"].unique().tolist())
+
+        expected_dataframe = pd.concat(dataframes).sort_values(
+            by=["bg_number", "month", "coicop_number"], ascending=[True, True, True]).reset_index(drop=True)
+        self.assertTrue(expected_dataframe.equals(combined_dataframe))
+
+    def test_combine_revenue_files_in_folder(self):
+        data_directory = os.path.join(os.getcwd(), "tests", "data")
+        os.makedirs(data_directory, exist_ok=True)
+
+        revenue_files = {
+            "AH": 2,
+            "Jumbo": 4,
+            "Lidl": 1,
+            "Plus": 3
+        }
+
+        # Generate some fake data
+        filenames = []
+        years = list(range(2018, 2022))
+        for supermarket_name, number_of_files in revenue_files.items():
+            for i in range(number_of_files):
+                dataframe = generate_fake_revenue_data(
+                    50, years[i], years[i])
+                filenames.append(os.path.join(
+                    data_directory, f"Omzet_{supermarket_name}_{i}.parquet"))
+                dataframe.to_parquet(filenames[-1])
+
+        number_of_files_read = 0
+        for i, (supermarket_name, number_of_files) in enumerate(revenue_files.items()):
+            supermarket_dataframe = combine_revenue_files_in_folder(
+                data_directory, supermarket_name, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True])
+            self.assertEqual(number_of_files * 50, len(supermarket_dataframe))
+            expected_dataframe = pd.concat([pd.read_parquet(filename) for filename in filenames[number_of_files_read:number_of_files_read+number_of_files]]).sort_values(
+                by=["bg_number", "month", "coicop_number"], ascending=[True, True, True]).reset_index(drop=True)
+
+            self.assertTrue(expected_dataframe.equals(supermarket_dataframe))
+            number_of_files_read += number_of_files
