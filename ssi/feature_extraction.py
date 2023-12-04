@@ -60,11 +60,15 @@ class FeatureExtractorFactory:
         dataframe[destination_column] = list(vectors)
         return dataframe
 
+    def extract_features_and_save(self, dataframe: pd.DataFrame, source_column: str, filename: str, feature_extractor_type: FeatureExtractorType):
+        dataframe = self.add_feature_vectors(
+            dataframe, source_column, f'feature_vectors_{feature_extractor_type}', feature_extractor_type)
+        dataframe.to_parquet(
+            f'{filename}_{feature_extractor_type}.parquet')
+
     def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, filename: str):
         with tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
             for feature_extractor_type in self.feature_extractor_types.keys():
-                dataframe = self.add_feature_vectors(
-                    dataframe, source_column, f'feature_vectors_{feature_extractor_type}', feature_extractor_type)
-                dataframe.to_parquet(
-                    f'{filename}_{feature_extractor_type}.parquet')
+                self.extract_features_and_save(dataframe,
+                                               source_column, filename, feature_extractor_type)
                 progress_bar.update()
