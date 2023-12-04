@@ -130,7 +130,7 @@ class TestPreprocessData(unittest.TestCase):
                          processed_dataframe["coicop_number"].str.len().tolist())
         self.assertEqual(["coicop_number", "ean_number", "ean_name",
                          "product_id", "coicop_division", "coicop_group",
-                          "coicop_class", "coicop_subclass"],
+                          "coicop_class", "coicop_subclass", "count"],
                          processed_dataframe.columns.tolist())
         self.assertEqual(["011201", "011201", "022312", "022312", "022312",
                           "123423", "054534", "054534", "054534", "054534",
@@ -150,6 +150,9 @@ class TestPreprocessData(unittest.TestCase):
         self.assertEqual(["01120", "01120", "02231", "02231", "02231",
                           "12342", "05453", "05453", "05453", "05453",
                           "06564", "06564", "06564", "06564", "06564"], processed_dataframe["coicop_subclass"].tolist())
+        self.assertEqual([2, 2, 3, 3, 3,
+                          1, 4, 4, 4, 4,
+                          5, 5, 5, 5, 5], processed_dataframe["count"].tolist())
 
     def test_get_revenue_files_in_folder(self):
         data_directory = os.path.join(os.getcwd(), "tests", "data")

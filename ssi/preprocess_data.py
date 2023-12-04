@@ -51,7 +51,7 @@ def preprocess_data(dataframe: pd.DataFrame, columns: List[str], coicop_column: 
 
     split_coicop_df = get_category_counts(
         dataframe, coicop_column=coicop_column, product_id_column=product_id_column)
-    dataframe.merge(
+    dataframe = dataframe.merge(
         split_coicop_df, on=coicop_column, suffixes=['', '_y'])
     return dataframe
 
