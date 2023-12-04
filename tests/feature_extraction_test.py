@@ -1,4 +1,4 @@
-from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType
+from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 import unittest
 
@@ -17,8 +17,8 @@ class FeatureExtractionTest(unittest.TestCase):
         self.assertTrue(isinstance(factory.create_feature_extractor(FeatureExtractorType.count_char),
                                    CountVectorizer))
         self.assertTrue(isinstance(factory.create_feature_extractor(FeatureExtractorType.spacy_nl_sm),
-                                   FeatureExtractorFactory.feature_extractors[FeatureExtractorType.spacy_nl_sm]))
+                                   SpacyFeatureExtractor))
         self.assertTrue(isinstance(factory.create_feature_extractor(FeatureExtractorType.spacy_nl_md),
-                                   FeatureExtractorFactory.feature_extractors[FeatureExtractorType.spacy_nl_md]))
+                                   SpacyFeatureExtractor))
         self.assertTrue(isinstance(factory.create_feature_extractor(FeatureExtractorType.spacy_nl_lg),
-                                   FeatureExtractorFactory.feature_extractors[FeatureExtractorType.spacy_nl_lg]))
+                                   SpacyFeatureExtractor))
