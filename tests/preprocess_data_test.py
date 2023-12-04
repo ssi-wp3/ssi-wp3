@@ -111,6 +111,46 @@ class TestPreprocessData(unittest.TestCase):
         self.assertTrue(["coicop_number", "product_id",
                         "product_name"] == filtered_dataframe3.columns.tolist())
 
+    def test_preprocess_data(self):
+        dataframe = pd.DataFrame({
+            "coicop_number": ["11201", "11201", "22312", "22312", "022312",
+                              "123423", "54534", "054534", "54534", "54534",
+                              "65645", "065645", "65645", "65645", "065645"],
+            "product_name": [f"product_{i}" for i in range(15)],
+            "isba_number": [i for i in range(15)],
+            "isba_name": [f"isba_{i}" for i in range(15)],
+            "ean_number": [i for i in range(15)],
+            "ean_name": [f"ean_{i}" for i in range(15)]
+        })
+
+        processed_dataframe = preprocess_data(
+            dataframe, columns=["coicop_number", "ean_number", "ean_name"], )
+        self.assertEqual(len(dataframe), len(processed_dataframe))
+        self.assertEqual([6] * len(processed_dataframe),
+                         processed_dataframe["coicop_number"].str.len().tolist())
+        self.assertEqual(["coicop_number", "ean_number", "ean_name",
+                         "product_id", "coicop_division", "coicop_group",
+                          "coicop_class", "coicop_subclass"],
+                         processed_dataframe.columns.tolist())
+        self.assertEqual(["011201", "011201", "022312", "022312", "022312",
+                          "123423", "054534", "054534", "054534", "054534",
+                          "065645", "065645", "065645", "065645", "065645"],
+                         processed_dataframe["coicop_number"].tolist())
+        self.assertEqual([hash(f"ean_{i}") for i in range(
+            15)], processed_dataframe["product_id"].tolist())
+        self.assertEqual(["01", "01", "02", "02", "02",
+                          "12", "05", "05", "05", "05",
+                          "06", "06", "06", "06", "06"], processed_dataframe["coicop_division"].tolist())
+        self.assertEqual(["011", "011", "022", "022", "022",
+                          "123", "054", "054", "054", "054",
+                          "065", "065", "065", "065", "065"], processed_dataframe["coicop_group"].tolist())
+        self.assertEqual(["0112", "0112", "0223", "0223", "0223",
+                          "1234", "0545", "0545", "0545", "0545",
+                          "0656", "0656", "0656", "0656", "0656"], processed_dataframe["coicop_class"].tolist())
+        self.assertEqual(["01120", "01120", "02231", "02231", "02231",
+                          "12342", "05453", "05453", "05453", "05453",
+                          "06564", "06564", "06564", "06564", "06564"], processed_dataframe["coicop_subclass"].tolist())
+
     def test_get_revenue_files_in_folder(self):
         data_directory = os.path.join(os.getcwd(), "tests", "data")
         os.makedirs(data_directory, exist_ok=True)
