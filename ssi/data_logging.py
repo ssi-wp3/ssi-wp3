@@ -79,7 +79,7 @@ class DataLogger:
 
     def log_after_preprocessing(self, dataframe: pd.DataFrame, coicop_column: str, coicop_level_columns: List[str], product_id_column: str, filename_prefix: str = "after"):
         self.log_before_preprocessing(
-            dataframe, coicop_column, product_id_column, filename_prefix=filename_prefix)
+            dataframe, coicop_column, filename_prefix=filename_prefix)
         unique_products_per_coicop_level = DataLogger.log_unique_products_per_coicop_level(
             dataframe, coicop_level_columns, product_id_column)
         unique_products_per_coicop_level.to_csv(os.path.join(
