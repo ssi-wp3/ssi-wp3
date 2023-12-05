@@ -1,4 +1,5 @@
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from scipy.sparse import issparse
 from enum import Enum
 from typing import Dict
 from .files import get_feature_filename
@@ -64,7 +65,7 @@ class FeatureExtractorFactory:
         feature_extractor = self.create_feature_extractor(
             feature_extractor_type)
         vectors = feature_extractor.fit_transform(dataframe[source_column])
-        dataframe[destination_column] = list(vectors.toarray())
+        dataframe[destination_column] = list(vectors.toarray()) if issparse(vectors) else list(vectors)
         return dataframe
 
     def extract_features_and_save(self, dataframe: pd.DataFrame, source_column: str, destination_column: str, filename: str, feature_extractor_type: FeatureExtractorType):
@@ -73,8 +74,8 @@ class FeatureExtractorFactory:
         dataframe.to_parquet(filename, engine="pyarrow")
 
     def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, supermarket_name: str):
-        with tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
-            for feature_extractor_type in self.feature_extractor_types.keys():
+        with tqdm.tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
+            for feature_extractor_type in self.feature_extractor_types:
                 progress_bar.set_description(
                     f"Extracting features of type {feature_extractor_type.value}")
                 self.extract_features_and_save(dataframe,
