@@ -84,7 +84,9 @@ def save_combined_revenue_files(data_directory: str,
                                 coicop_level_columns: List[str] = [
                                     "coicop_division", "coicop_group", "coicop_class", "coicop_subclass"],
                                 filename_prefix: str = "Omzet", engine: str = "pyarrow"):
-    data_logger = DataLogger(log_directory)
+    
+    supermarket_log_directory = os.path.join(log_directory, supermarket_name)
+    data_logger = DataLogger(supermarket_log_directory)
 
     combined_df = combine_revenue_files_in_folder(
         data_directory, supermarket_name, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True], filename_prefix=filename_prefix)
