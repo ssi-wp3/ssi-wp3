@@ -1,4 +1,4 @@
-from ssi.files import get_revenue_files_in_folder, get_feature_filename, get_features_files_in_directory
+from ssi.files import get_revenue_files_in_folder, get_feature_filename, get_features_files_in_directory, get_combined_revenue_filename
 from test_utils import get_test_path
 import unittest
 import os
@@ -84,3 +84,9 @@ class FilesTest(unittest.TestCase):
         feature_filenames = get_features_files_in_directory(get_test_path(""))
         self.assertEqual(len(expected_feature_filenames), len(feature_filenames))
         self.assertEqual(set(expected_feature_filenames), set(feature_filenames))
+
+    def test_get_combined_revenue_filename(self):
+        self.assertEqual("ssi_ah_revenue.parquet", get_combined_revenue_filename("AH"))
+        self.assertEqual("ssi_jumbo_revenue.parquet", get_combined_revenue_filename("Jumbo"))
+        self.assertEqual("ssi_lidl_revenue.parquet", get_combined_revenue_filename("Lidl"))
+        self.assertEqual("ssi_plus_revenue.parquet", get_combined_revenue_filename("Plus"))

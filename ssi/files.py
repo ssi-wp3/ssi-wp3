@@ -15,3 +15,5 @@ def get_features_files_in_directory(directory: str, extension: str = ".parquet")
             for filename in os.listdir(directory) 
             if filename.startswith("ssi_features_") and filename.endswith(extension)]
 
+def get_combined_revenue_filename(supermarket_name: str) -> str:
+    return f"ssi_{supermarket_name.lower()}_revenue.parquet"
