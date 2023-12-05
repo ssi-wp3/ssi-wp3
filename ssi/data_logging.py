@@ -25,23 +25,23 @@ class DataLogger:
         return dataframe[coicop_column].str.len().value_counts().reset_index()
 
     @staticmethod
-    def log_coicop_value_counts_per_length(dataframe: pd.DataFrame, coicop_column: str) -> List[pd.DataFrame]:
+    def log_coicop_value_counts_per_length(dataframe: pd.DataFrame, coicop_column: str) -> Dict[int, pd.DataFrame]:
         coicop_lengths = DataLogger.log_coicop_lengths(
             dataframe, coicop_column)
         coicop_value_dfs = dict()
         for coicop_length in coicop_lengths.index:
             counts = dataframe[dataframe[coicop_column].str.len(
             ) == coicop_length][coicop_column].value_counts()
-            coicop_value_dfs[coicop_length].append(counts)
+            coicop_value_dfs[coicop_length] = counts
         return coicop_value_dfs
 
     @staticmethod
     def log_number_of_unique_coicops_per_length(dataframe: pd.DataFrame, coicop_column: str) -> pd.DataFrame:
-        coicop_lengths = DataLogger.log_coicop_lengths(
+        coicop_lengths_df = DataLogger.log_coicop_lengths(
             dataframe, coicop_column)
 
         coicop_lengths = dict()
-        for coicop_length in coicop_lengths.index:
+        for coicop_length in coicop_lengths_df.index:
             coicop_lengths[coicop_length] = dataframe[dataframe[coicop_column].str.len(
             ) == coicop_length][coicop_column].nunique()
 
