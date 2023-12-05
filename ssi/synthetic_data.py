@@ -1,5 +1,6 @@
 from typing import List
 from faker import Faker
+from .preprocess_data import preprocess_data
 import pandas as pd
 import numpy as np
 import random
@@ -50,7 +51,7 @@ def generate_dates(num_rows: int, start_date: str, end_date: str) -> List[str]:
     return sorted(random.choices(dates, k=num_rows))
 
 
-def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) -> pd.DataFrame:
+def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int) -> pd.DataFrame:
     """Generate fake revenue data for the SSI project.
 
     Args:
@@ -84,3 +85,10 @@ def generate_fake_revenue_data(num_rows: int, start_date: str, end_date: str) ->
         'ean_name': ean_name
     })
     return fake_data_df.sort_values(by=["bg_number", "month", "coicop_number"])
+
+def generate_fake_data_with_coicop_levels(num_rows: int, start_date: int, end_date: int) -> pd.DataFrame:
+    dataframe = generate_fake_revenue_data(num_rows, start_date, end_date)
+    dataframe = preprocess_data(dataframe, ["bg_number", "month", "coicop_number", 
+                                            "coicop_name", "ean_number", "ean_name"], 
+                                            "coicop_number", "product_id", "ean_name")
+    return dataframe
