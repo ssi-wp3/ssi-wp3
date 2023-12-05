@@ -1,4 +1,5 @@
 from ssi.preprocess_data import save_combined_revenue_files
+from ssi.files import get_combined_revenue_filename
 from pathlib import Path
 from dotenv import load_dotenv
 import argparse
@@ -26,7 +27,7 @@ if not os.path.exists(log_directory):
     os.makedirs(log_directory)
 
 save_combined_revenue_files(data_directory=output_directory, 
-                            output_filename=f"ssi_{args.supermarket_name.lower()}_revenue.parquet", 
+                            output_filename=get_combined_revenue_filename(args.supermarket_name), 
                             supermarket_name=args.supermarket_name,
                             log_directory=log_directory,
                             selected_columns=args.selected_columns,
