@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from faker import Faker
 from .preprocess_data import preprocess_data
 import pandas as pd
@@ -27,13 +27,13 @@ def generate_fake_coicop_2018(num_rows: int) -> str:
     return coicop_data.sample(num_rows, replace=True)[["coicop_number", "description"]]
 
 
-def generate_supermarked_ids(num_rows: int) -> List[str]:
+def generate_supermarked_ids(num_rows: int, supermarket_id: Optional[str] = None) -> List[str]:
     """Generate fake supermarked ids for the SSI project.
 
     Args:
         num_rows (int): The number of rows to generate
     """
-    supermarked_ids = ["995001", "995002", "995003"]
+    supermarked_ids = ["995001", "995002", "995003"] if not supermarket_id else [supermarket_id]
     return random.choices(supermarked_ids, k=num_rows)
 
 
@@ -51,7 +51,7 @@ def generate_dates(num_rows: int, start_date: str, end_date: str) -> List[str]:
     return sorted(random.choices(dates, k=num_rows))
 
 
-def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int) -> pd.DataFrame:
+def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int, supermarket_id: Optional[str] = None) -> pd.DataFrame:
     """Generate fake revenue data for the SSI project.
 
     Args:
@@ -66,7 +66,7 @@ def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int) ->
 
     # Generate synthetic data
     # 6-digit supermarket identifier
-    bg_number = generate_supermarked_ids(num_rows)
+    bg_number = generate_supermarked_ids(num_rows, supermarket_id)
     month = generate_dates(num_rows, start_date, end_date)  # Year and month
     fake_coicop_data = generate_fake_coicop_2018(
         num_rows)  # COICOP product code
