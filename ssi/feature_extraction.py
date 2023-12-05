@@ -1,13 +1,18 @@
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from enum import Enum
-from typing import Dict
+from typing import Dict, List
 import pandas as pd
 import spacy
 import tqdm
+import os
 
 def get_feature_filename(feature_extractor_type: str) -> str:
     return f"ssi_features_{feature_extractor_type}.parquet"
 
+def get_features_files_in_directory(directory: str) -> List[str]:
+    return [filename 
+            for filename in os.listdir(directory) 
+            if filename.startswith("ssi_features_") and filename.endswith(".parquet")]
 
 class FeatureExtractorType(Enum):
     count_vectorizer = 'count_vectorizer'

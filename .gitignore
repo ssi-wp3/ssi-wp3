@@ -163,3 +163,4 @@ Notebooks/plots
 
 fake_data/
 settings.yaml
+*.parquet
