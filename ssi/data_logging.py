@@ -62,18 +62,18 @@ class DataLogger:
 
     def log_before_preprocessing(self, dataframe: pd.DataFrame, coicop_column: str, filename_prefix: str = "before"):
         DataLogger.log_dataframe_description(dataframe).to_csv(os.path.join(
-            self.log_directory, f"{filename_prefix}_dataframe_description.csv"), delimiter=self.delimiter)
+            self.log_directory, f"{filename_prefix}_dataframe_description.csv"), sep=self.delimiter)
         DataLogger.log_coicop_lengths(dataframe, coicop_column).to_csv(os.path.join(
-            self.log_directory, f"{filename_prefix}_coicop_lengths.csv"), delimiter=self.delimiter)
+            self.log_directory, f"{filename_prefix}_coicop_lengths.csv"), sep=self.delimiter)
 
         for coicop_length, counts in DataLogger.log_coicop_value_counts_per_length(dataframe, coicop_column).items():
             counts.to_csv(os.path.join(
-                self.log_directory, f"{filename_prefix}_value_counts_coicop_{coicop_length}.csv"), delimiter=self.delimiter)
+                self.log_directory, f"{filename_prefix}_value_counts_coicop_{coicop_length}.csv"), sep=self.delimiter)
 
         coicop_length_df = DataLogger.log_number_of_unique_coicops_per_length(
             dataframe, coicop_column)
         coicop_length_df.to_csv(os.path.join(
-            self.log_directory, f"{filename_prefix}_unique_coicops_per_length.csv"), delimiter=self.delimiter)
+            self.log_directory, f"{filename_prefix}_unique_coicops_per_length.csv"), sep=self.delimiter)
         # number_of_coicop_with_leading_zero = log_number_of_coicop_with_leading_zero(
         #    dataframe, coicop_column)
 
@@ -83,4 +83,4 @@ class DataLogger:
         unique_products_per_coicop_level = DataLogger.log_unique_products_per_coicop_level(
             dataframe, coicop_level_columns, product_id_column)
         unique_products_per_coicop_level.to_csv(os.path.join(
-            self.log_directory, f"{filename_prefix}_unique_products_per_coicop_level.csv"), delimiter=self.delimiter)
+            self.log_directory, f"{filename_prefix}_unique_products_per_coicop_level.csv"), sep=self.delimiter)
