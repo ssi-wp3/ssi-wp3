@@ -5,6 +5,9 @@ import pandas as pd
 import spacy
 import tqdm
 
+def get_feature_filename(feature_extractor_type: str) -> str:
+    return f"ssi_features_{feature_extractor_type}.parquet"
+
 
 class FeatureExtractorType(Enum):
     count_vectorizer = 'count_vectorizer'
@@ -75,5 +78,5 @@ class FeatureExtractorFactory:
         with tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
             for feature_extractor_type in self.feature_extractor_types.keys():
                 self.extract_features_and_save(dataframe,
-                                               source_column, f"features_{feature_extractor_type.value}", filename, feature_extractor_type)
+                                               source_column, get_feature_filename(feature_extractor_type.value), filename, feature_extractor_type)
                 progress_bar.update()

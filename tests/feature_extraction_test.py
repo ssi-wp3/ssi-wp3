@@ -1,4 +1,4 @@
-from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor
+from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor, get_feature_filename
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from ssi.synthetic_data import generate_fake_revenue_data
 from test_utils import get_test_path
@@ -8,6 +8,15 @@ import pandas as pd
 class FeatureExtractionTest(unittest.TestCase):
     def test_feature_extractor_type_to_string(self):
         self.assertEqual("count_vectorizer", f"{FeatureExtractorType.count_vectorizer.value}")
+
+    def test_get_feature_filename(self):
+        self.assertEqual("ssi_features_count_vectorizer.parquet", get_feature_filename("count_vectorizer"))
+        self.assertEqual("ssi_features_tfidf_word.parquet", get_feature_filename("tfidf_word"))
+        self.assertEqual("ssi_features_tfidf_char.parquet", get_feature_filename("tfidf_char"))
+        self.assertEqual("ssi_features_tfidf_char34.parquet", get_feature_filename("tfidf_char34"))
+        self.assertEqual("ssi_features_count_char.parquet", get_feature_filename("count_char"))
+        self.assertEqual("ssi_features_spacy_nl_sm.parquet", get_feature_filename("spacy_nl_sm"))
+        self.assertEqual("ssi_features_spacy_nl_md.parquet", get_feature_filename("spacy_nl_md"))
 
 
     def test_create_feature_extractor(self):
