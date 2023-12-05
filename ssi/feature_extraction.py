@@ -65,6 +65,7 @@ class FeatureExtractorFactory:
         feature_extractor = self.create_feature_extractor(
             feature_extractor_type)
         vectors = feature_extractor.fit_transform(dataframe[source_column])
+        # TODO: crashes on vectors.toarray() because it runs out of memory, batch the fit_transform?
         dataframe[destination_column] = list(vectors.toarray()) if issparse(vectors) else list(vectors)
         return dataframe
 
