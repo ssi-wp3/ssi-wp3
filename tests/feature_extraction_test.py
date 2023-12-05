@@ -1,6 +1,6 @@
-from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor, get_feature_filename, get_features_files_in_directory
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor
 from ssi.synthetic_data import generate_fake_revenue_data
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from test_utils import get_test_path
 import unittest
 import pandas as pd
@@ -8,25 +8,6 @@ import pandas as pd
 class FeatureExtractionTest(unittest.TestCase):
     def test_feature_extractor_type_to_string(self):
         self.assertEqual("count_vectorizer", f"{FeatureExtractorType.count_vectorizer.value}")
-
-    def test_get_feature_filename(self):
-        self.assertEqual("ssi_features_count_vectorizer.parquet", get_feature_filename("count_vectorizer"))
-        self.assertEqual("ssi_features_tfidf_word.parquet", get_feature_filename("tfidf_word"))
-        self.assertEqual("ssi_features_tfidf_char.parquet", get_feature_filename("tfidf_char"))
-        self.assertEqual("ssi_features_tfidf_char34.parquet", get_feature_filename("tfidf_char34"))
-        self.assertEqual("ssi_features_count_char.parquet", get_feature_filename("count_char"))
-        self.assertEqual("ssi_features_spacy_nl_sm.parquet", get_feature_filename("spacy_nl_sm"))
-        self.assertEqual("ssi_features_spacy_nl_md.parquet", get_feature_filename("spacy_nl_md"))
-
-    def test_get_features_files_in_directory(self):
-        expected_feature_filenames = [get_feature_filename(f"feature_extractor_{i}") for i in range(10)]
-        for feature_filename in expected_feature_filenames:
-            with open(get_test_path(feature_filename), "w") as file:
-                file.write("test")
-        
-        feature_filenames = get_features_files_in_directory(get_test_path(""))
-        self.assertEqual(len(expected_feature_filenames), len(feature_filenames))
-        self.assertEqual(set(expected_feature_filenames), set(feature_filenames))
 
 
     def test_create_feature_extractor(self):

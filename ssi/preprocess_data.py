@@ -1,5 +1,6 @@
 from typing import List
 from .data_logging import DataLogger
+from .files import get_revenue_files_in_folder
 import pandas as pd
 import os
 import tqdm
@@ -56,11 +57,6 @@ def preprocess_data(dataframe: pd.DataFrame, columns: List[str], coicop_column: 
     dataframe = dataframe.merge(
         split_coicop_df, on=coicop_column, suffixes=['', '_y'])
     return dataframe
-
-
-def get_revenue_files_in_folder(data_directory: str, supermarket_name: str, filename_prefix: str = "Omzet") -> List[str]:
-    return [os.path.join(data_directory, filename) for filename in os.listdir(
-        data_directory) if filename.startswith(filename_prefix) and supermarket_name in filename]
 
 
 def combine_revenue_files(revenue_files: List[str], sort_columns: List[str], sort_order: List[bool], engine: str = "pyarrow") -> pd.DataFrame:
