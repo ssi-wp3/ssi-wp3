@@ -26,7 +26,7 @@ if not os.path.exists(log_directory):
     os.makedirs(log_directory)
 
 save_combined_revenue_files(data_directory=output_directory, 
-                            output_filename="ssi_", 
+                            output_filename=f"ssi_{args.supermarket_name.lower()}_revenue.parquet", 
                             supermarket_name=args.supermarket_name,
                             log_directory=log_directory,
                             selected_columns=args.selected_columns,
