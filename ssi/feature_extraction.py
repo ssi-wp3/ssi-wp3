@@ -72,11 +72,11 @@ class FeatureExtractorFactory:
             dataframe, source_column, destination_column, feature_extractor_type)
         dataframe.to_parquet(filename, engine="pyarrow")
 
-    def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str):
+    def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, supermarket_name: str):
         with tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
             for feature_extractor_type in self.feature_extractor_types.keys():
                 progress_bar.set_description(
                     f"Extracting features of type {feature_extractor_type.value}")
                 self.extract_features_and_save(dataframe,
-                                               source_column, f"features_{feature_extractor_type.value}", get_feature_filename(feature_extractor_type.value), feature_extractor_type)
+                                               source_column, f"features_{feature_extractor_type.value}", get_feature_filename(feature_extractor_type.value, supermarket_name), feature_extractor_type)
                 progress_bar.update()

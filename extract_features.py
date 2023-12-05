@@ -1,5 +1,5 @@
 from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType
-from ssi.files import get_combined_revenue_files_in_directory 
+from ssi.files import get_combined_revenue_files_in_directory, get_supermarket_name 
 from pathlib import Path
 from dotenv import load_dotenv
 import pandas as pd
@@ -26,5 +26,6 @@ feature_extractor_factory = FeatureExtractorFactory()
 for combined_revenue_file in get_combined_revenue_files_in_directory(output_directory):
     print(f"Extracting features from {combined_revenue_file}")
     revenue_dataframe = pd.read_parquet(combined_revenue_file, engine="pyarrow")
-    feature_extractor_factory.extract_all_features_and_save(revenue_dataframe, args.coicop_column)
+    supermarket_name = get_supermarket_name(combined_revenue_file)
+    feature_extractor_factory.extract_all_features_and_save(revenue_dataframe, args.coicop_column, supermarket_name=supermarket_name)
 
