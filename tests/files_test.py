@@ -1,4 +1,4 @@
-from ssi.files import get_revenue_files_in_folder, get_feature_filename, get_features_files_in_directory, get_combined_revenue_filename
+from ssi.files import get_revenue_files_in_folder, get_feature_filename, get_features_files_in_directory, get_combined_revenue_filename, get_combined_revenue_files_in_directory
 from test_utils import get_test_path
 import unittest
 import os
@@ -90,3 +90,17 @@ class FilesTest(unittest.TestCase):
         self.assertEqual("ssi_jumbo_revenue.parquet", get_combined_revenue_filename("Jumbo"))
         self.assertEqual("ssi_lidl_revenue.parquet", get_combined_revenue_filename("Lidl"))
         self.assertEqual("ssi_plus_revenue.parquet", get_combined_revenue_filename("Plus"))
+
+    def test_get_combined_revenue_files_in_directory(self):
+        data_directory = get_test_path("")
+        os.makedirs(data_directory, exist_ok=True)
+
+        for supermarket_name in ["AH", "Jumbo", "Lidl", "Plus"]:
+            with open(os.path.join(data_directory, get_combined_revenue_filename(supermarket_name)), "w") as file:
+                file.write("test")
+
+        expected_filenames = [os.path.join(data_directory, get_combined_revenue_filename(supermarket_name)) 
+                              for supermarket_name in ["AH", "Jumbo", "Lidl", "Plus"]]
+        combined_revenue_files = get_combined_revenue_files_in_directory(data_directory)
+        self.assertEqual(4, len(combined_revenue_files))
+        self.assertEqual(set(expected_filenames), set(combined_revenue_files))
