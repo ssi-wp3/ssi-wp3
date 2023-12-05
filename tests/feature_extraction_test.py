@@ -6,6 +6,10 @@ import unittest
 import pandas as pd
 
 class FeatureExtractionTest(unittest.TestCase):
+    def test_feature_extractor_type_to_string(self):
+        self.assertEqual("count_vectorizer", f"{FeatureExtractorType.count_vectorizer.value}")
+
+
     def test_create_feature_extractor(self):
         factory = FeatureExtractorFactory()
         self.assertTrue(isinstance(factory.create_feature_extractor(
