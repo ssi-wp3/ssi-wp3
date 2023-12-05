@@ -16,6 +16,26 @@ class DataLogger:
     def delimiter(self) -> str:
         return self.__delimiter
 
+    def log_dataframe(self, dataframe: pd.DataFrame, filename: str, index: bool = False):
+        csv_directory = os.path.join(self.log_directory, "csv")
+        if not os.path.exists(csv_directory):
+            print(f"Creating log directory {csv_directory}")
+            os.makedirs(csv_directory)
+
+        html_directory = os.path.join(self.log_directory, "html")
+        if not os.path.exists(html_directory):
+            print(f"Creating log directory {html_directory}")
+            os.makedirs(html_directory)
+        
+        dataframe.to_csv(os.path.join(
+            csv_directory, filename + ".csv"), sep=self.delimiter, index=index)
+
+        if isinstance(dataframe, pd.Series):
+            dataframe = pd.DataFrame(dataframe)
+
+        dataframe.to_html(os.path.join(html_directory, filename + ".html"))
+        
+
     @staticmethod
     def log_dataframe_description(dataframe: pd.DataFrame) -> pd.DataFrame:
         return dataframe.describe(include="all")
@@ -61,19 +81,15 @@ class DataLogger:
         return pd.DataFrame(coicop_level_dict, index=[0])
 
     def log_before_preprocessing(self, dataframe: pd.DataFrame, coicop_column: str, filename_prefix: str = "before"):
-        DataLogger.log_dataframe_description(dataframe).to_csv(os.path.join(
-            self.log_directory, f"{filename_prefix}_dataframe_description.csv"), sep=self.delimiter)
-        DataLogger.log_coicop_lengths(dataframe, coicop_column).to_csv(os.path.join(
-            self.log_directory, f"{filename_prefix}_coicop_lengths.csv"), sep=self.delimiter)
+        self.log_dataframe(DataLogger.log_dataframe_description(dataframe), f"{filename_prefix}_dataframe_description")
+        self.log_dataframe(DataLogger.log_coicop_lengths(dataframe, coicop_column), f"{filename_prefix}_coicop_lengths")
 
         for coicop_length, counts in DataLogger.log_coicop_value_counts_per_length(dataframe, coicop_column).items():
-            counts.to_csv(os.path.join(
-                self.log_directory, f"{filename_prefix}_value_counts_coicop_{coicop_length}.csv"), sep=self.delimiter)
+            self.log_dataframe(counts, f"{filename_prefix}_value_counts_coicop_{coicop_length}")
 
         coicop_length_df = DataLogger.log_number_of_unique_coicops_per_length(
             dataframe, coicop_column)
-        coicop_length_df.to_csv(os.path.join(
-            self.log_directory, f"{filename_prefix}_unique_coicops_per_length.csv"), sep=self.delimiter)
+        self.log_dataframe(coicop_length_df, f"{filename_prefix}_unique_coicops_per_length")
         # number_of_coicop_with_leading_zero = log_number_of_coicop_with_leading_zero(
         #    dataframe, coicop_column)
 
@@ -82,5 +98,4 @@ class DataLogger:
             dataframe, coicop_column, filename_prefix=filename_prefix)
         unique_products_per_coicop_level = DataLogger.log_unique_products_per_coicop_level(
             dataframe, coicop_level_columns, product_id_column)
-        unique_products_per_coicop_level.to_csv(os.path.join(
-            self.log_directory, f"{filename_prefix}_unique_products_per_coicop_level.csv"), sep=self.delimiter)
+        self.log_dataframe(unique_products_per_coicop_level, f"{filename_prefix}_unique_products_per_coicop_level")
