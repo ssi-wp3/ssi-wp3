@@ -33,7 +33,8 @@ def generate_supermarked_ids(num_rows: int, supermarket_id: Optional[str] = None
     Args:
         num_rows (int): The number of rows to generate
     """
-    supermarked_ids = ["995001", "995002", "995003"] if not supermarket_id else [supermarket_id]
+    supermarked_ids = ["995001", "995002",
+                       "995003"] if not supermarket_id else [supermarket_id]
     return random.choices(supermarked_ids, k=num_rows)
 
 
@@ -84,11 +85,12 @@ def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int, su
         'ean_number': ean_number,
         'ean_name': ean_name
     })
-    return fake_data_df.sort_values(by=["bg_number", "month", "coicop_number"])
+    return fake_data_df.sort_values(by=["bg_number", "month", "coicop_number"]).reset_index(drop=True)
+
 
 def generate_fake_data_with_coicop_levels(num_rows: int, start_date: int, end_date: int) -> pd.DataFrame:
     dataframe = generate_fake_revenue_data(num_rows, start_date, end_date)
-    dataframe = preprocess_data(dataframe, ["bg_number", "month", "coicop_number", 
-                                            "coicop_name", "ean_number", "ean_name"], 
-                                            "coicop_number", "product_id", "ean_name")
+    dataframe = preprocess_data(dataframe, ["bg_number", "month", "coicop_number",
+                                            "coicop_name", "ean_number", "ean_name"],
+                                "coicop_number", "product_id", "ean_name")
     return dataframe

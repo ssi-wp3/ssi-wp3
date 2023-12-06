@@ -93,8 +93,9 @@ class FeatureExtractorFactory:
         for i in range(0, len(dataframe), batch_size):
             batch = dataframe.iloc[i:i+batch_size]
             vectors = feature_extractor.fit_transform(batch[source_column])
-            vectors_df = pd.DataFrame({destination_column: list(
-                vectors.toarray()) if issparse(vectors) else list(vectors)})
+            vectors_df = batch.copy()
+            vectors_df[destination_column] = list(
+                vectors.toarray()) if issparse(vectors) else list(vectors)
             # Create directory if it does not exist
             os.makedirs(os.path.dirname(filename), exist_ok=True)
 
@@ -103,8 +104,6 @@ class FeatureExtractorFactory:
                 pq_writer = pq.ParquetWriter(filename, table.schema)
             pq_writer.write_table(table)
 
-            # vectors_df.to_parquet(filename, engine='pyarrow', index=False,
-            #                      append=True if i > 0 else False)
         if pq_writer:
             pq_writer.close()
 

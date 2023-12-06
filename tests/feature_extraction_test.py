@@ -55,5 +55,9 @@ class FeatureExtractionTest(unittest.TestCase):
         self.assertEqual(dataframe.columns.tolist() +
                          ["cv_features"], feature_df.columns.tolist())
         self.assertEqual(100, len(feature_df))
+
+        print(dataframe.head())
+        print(expected_feature_df.head())
+        print(feature_df.head())
         self.assertTrue(expected_feature_df.equals(
-            feature_df.reset_index(drop=True)))
+            feature_df))
