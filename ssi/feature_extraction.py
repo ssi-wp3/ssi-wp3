@@ -4,8 +4,11 @@ from enum import Enum
 from typing import Dict
 from .files import get_feature_filename
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 import spacy
 import tqdm
+import os
 
 
 class FeatureExtractorType(Enum):
@@ -68,13 +71,24 @@ class FeatureExtractorFactory:
         feature_extractor = self.create_feature_extractor(
             feature_extractor_type)
 
+        pq_writer = None
         for i in range(0, len(dataframe), batch_size):
             batch = dataframe.iloc[i:i+batch_size]
             vectors = feature_extractor.fit_transform(batch[source_column])
             vectors_df = pd.DataFrame({destination_column: list(
                 vectors.toarray()) if issparse(vectors) else list(vectors)})
-            vectors_df.to_parquet(filename, engine='pyarrow', index=False,
-                                  compression='gzip', append=True if i > 0 else False)
+            # Create directory if it does not exist
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+            table = pa.Table.from_pandas(vectors_df)
+            if i == 0:
+                pq_writer = pq.ParquetWriter(filename, table.schema)
+            pq_writer.write_table(table)
+
+            # vectors_df.to_parquet(filename, engine='pyarrow', index=False,
+            #                      append=True if i > 0 else False)
+        if pq_writer:
+            pq_writer.close()
 
     def extract_features_and_save(self, dataframe: pd.DataFrame, source_column: str, destination_column: str, filename: str, feature_extractor_type: FeatureExtractorType):
         self.add_feature_vectors(
