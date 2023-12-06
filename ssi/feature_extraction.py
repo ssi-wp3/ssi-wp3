@@ -78,8 +78,6 @@ class FeatureExtractorFactory:
             vectors_df = pd.DataFrame({destination_column: list(
                 vectors.toarray()) if issparse(vectors) else list(vectors)})
             # Create directory if it does not exist
-            print(
-                f"Creating directory {os.path.dirname(filename)} for {filename}")
             os.makedirs(os.path.dirname(filename), exist_ok=True)
 
             table = pa.Table.from_pandas(vectors_df)
