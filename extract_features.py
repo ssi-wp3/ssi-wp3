@@ -32,6 +32,5 @@ for combined_revenue_file in get_combined_revenue_files_in_directory(output_dire
     revenue_dataframe = pd.read_parquet(
         combined_revenue_file, engine="pyarrow")
     supermarket_name = get_supermarket_name(combined_revenue_file)
-    print(f"Supermarket name: {supermarket_name}")
     feature_extractor_factory.extract_all_features_and_save(
         revenue_dataframe, args.coicop_column, supermarket_name=supermarket_name, output_directory=features_directory)

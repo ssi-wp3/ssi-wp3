@@ -101,7 +101,6 @@ class FeatureExtractorFactory:
             for feature_extractor_type in self.feature_extractor_types:
                 feature_filename = os.path.join(output_directory, get_feature_filename(
                     feature_extractor_type.value, supermarket_name))
-                print("Extracting features to", output_directory)
                 progress_bar.set_description(
                     f"Extracting features of type {feature_extractor_type.value} to {feature_filename}")
                 self.extract_features_and_save(dataframe,
