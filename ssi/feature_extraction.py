@@ -96,11 +96,12 @@ class FeatureExtractorFactory:
         self.add_feature_vectors(
             dataframe, source_column, destination_column, feature_extractor_type, filename=filename)
 
-    def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, supermarket_name: str):
+    def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, supermarket_name: str, output_directory: str):
         with tqdm.tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
             for feature_extractor_type in self.feature_extractor_types:
-                feature_filename = get_feature_filename(
-                    feature_extractor_type.value, supermarket_name)
+                feature_filename = os.path.join(output_directory, get_feature_filename(
+                    feature_extractor_type.value, supermarket_name))
+                print("Extracting features to", output_directory)
                 progress_bar.set_description(
                     f"Extracting features of type {feature_extractor_type.value} to {feature_filename}")
                 self.extract_features_and_save(dataframe,

@@ -3,6 +3,7 @@ from test_utils import get_test_path, remove_test_files
 import unittest
 import os
 
+
 class FilesTest(unittest.TestCase):
     def setUp(self) -> None:
         remove_test_files()
@@ -70,45 +71,64 @@ class FilesTest(unittest.TestCase):
                 os.remove(os.path.join(data_directory, filename))
 
     def test_get_feature_filename(self):
-            self.assertEqual("ssi_supermarket1_count_vectorizer_features.parquet", get_feature_filename("count_vectorizer", "supermarket1"))
-            self.assertEqual("ssi_supermarket2_count_vectorizer_features.parquet", get_feature_filename("count_vectorizer", "supermarket2"))
-            self.assertEqual("ssi_supermarket2_tfidf_word_features.parquet", get_feature_filename("tfidf_word", "supermarket2"))
-            self.assertEqual("ssi_supermarket3_tfidf_char_features.parquet", get_feature_filename("tfidf_char", "supermarket3"))
-            self.assertEqual("ssi_supermarket1_tfidf_char34_features.parquet", get_feature_filename("tfidf_char34", "supermarket1"))
-            self.assertEqual("ssi_supermarket2_count_char_features.parquet", get_feature_filename("count_char", "supermarket2"))
-            self.assertEqual("ssi_supermarket3_spacy_nl_sm_features.parquet", get_feature_filename("spacy_nl_sm", "supermarket3"))
-            self.assertEqual("ssi_supermarket1_spacy_nl_md_features.parquet", get_feature_filename("spacy_nl_md", "supermarket1"))
+        self.assertEqual("ssi_supermarket1_count_vectorizer_features.parquet",
+                         get_feature_filename("count_vectorizer", "supermarket1"))
+        self.assertEqual("ssi_supermarket2_count_vectorizer_features.parquet",
+                         get_feature_filename("count_vectorizer", "supermarket2"))
+        self.assertEqual("ssi_supermarket2_tfidf_word_features.parquet",
+                         get_feature_filename("tfidf_word", "supermarket2"))
+        self.assertEqual("ssi_supermarket3_tfidf_char_features.parquet",
+                         get_feature_filename("tfidf_char", "supermarket3"))
+        self.assertEqual("ssi_supermarket1_tfidf_char34_features.parquet",
+                         get_feature_filename("tfidf_char34", "supermarket1"))
+        self.assertEqual("ssi_supermarket2_count_char_features.parquet",
+                         get_feature_filename("count_char", "supermarket2"))
+        self.assertEqual("ssi_supermarket3_spacy_nl_sm_features.parquet",
+                         get_feature_filename("spacy_nl_sm", "supermarket3"))
+        self.assertEqual("ssi_supermarket1_spacy_nl_md_features.parquet",
+                         get_feature_filename("spacy_nl_md", "supermarket1"))
 
     def test_get_features_files_in_directory(self):
-        expected_feature_filenames = [get_feature_filename(f"feature_extractor_{i}", supermarket_name) 
-                                      for i in range(10) 
+        expected_feature_filenames = [get_feature_filename(f"feature_extractor_{i}", supermarket_name)
+                                      for i in range(10)
                                       for supermarket_name in ["AH", "Jumbo", "Lidl", "Plus"]
-        ]
+                                      ]
         for feature_filename in expected_feature_filenames:
             with open(get_test_path(feature_filename), "w") as file:
                 file.write("test")
-        
+
         feature_filenames = get_features_files_in_directory(get_test_path(""))
-        self.assertEqual(len(expected_feature_filenames), len(feature_filenames))
-        self.assertEqual(set(expected_feature_filenames), set(feature_filenames))
+        self.assertEqual(len(expected_feature_filenames),
+                         len(feature_filenames))
+        self.assertEqual(set(expected_feature_filenames),
+                         set(feature_filenames))
 
     def test_get_combined_revenue_filename(self):
-        self.assertEqual("ssi_ah_revenue.parquet", get_combined_revenue_filename("AH"))
-        self.assertEqual("ssi_jumbo_revenue.parquet", get_combined_revenue_filename("Jumbo"))
-        self.assertEqual("ssi_lidl_revenue.parquet", get_combined_revenue_filename("Lidl"))
-        self.assertEqual("ssi_plus_revenue.parquet", get_combined_revenue_filename("Plus"))
-
+        self.assertEqual("ssi_ah_revenue.parquet",
+                         get_combined_revenue_filename("AH"))
+        self.assertEqual("ssi_jumbo_revenue.parquet",
+                         get_combined_revenue_filename("Jumbo"))
+        self.assertEqual("ssi_lidl_revenue.parquet",
+                         get_combined_revenue_filename("Lidl"))
+        self.assertEqual("ssi_plus_revenue.parquet",
+                         get_combined_revenue_filename("Plus"))
 
     def test_get_supermarket_name_from_standardized_filename(self):
         self.assertEqual("ah", get_supermarket_name("ssi_ah_revenue.parquet"))
-        self.assertEqual("jumbo", get_supermarket_name("ssi_jumbo_revenue.parquet"))
-        self.assertEqual("lidl", get_supermarket_name("ssi_lidl_revenue.parquet"))
-        self.assertEqual("plus", get_supermarket_name("ssi_plus_revenue.parquet"))
-        self.assertEqual("ah", get_supermarket_name("ssi_ah_count_vectorizer_features.parquet"))
-        self.assertEqual("jumbo", get_supermarket_name("ssi_jumbo_count_vectorizer_features.parquet"))
-        self.assertEqual("lidl", get_supermarket_name("ssi_lidl_count_vectorizer_features.parquet"))
-        self.assertEqual("plus", get_supermarket_name("ssi_plus_count_vectorizer_features.parquet"))
-
+        self.assertEqual("jumbo", get_supermarket_name(
+            "path/to/ssi_jumbo_revenue.parquet"))
+        self.assertEqual("lidl", get_supermarket_name(
+            "other_path_to/ssi_lidl_revenue.parquet"))
+        self.assertEqual("plus", get_supermarket_name(
+            "ssi_plus_revenue.parquet"))
+        self.assertEqual("ah", get_supermarket_name(
+            "fake_data/ssi_ah_count_vectorizer_features.parquet"))
+        self.assertEqual("jumbo", get_supermarket_name(
+            "ssi_jumbo_count_vectorizer_features.parquet"))
+        self.assertEqual("lidl", get_supermarket_name(
+            "ssi_lidl_count_vectorizer_features.parquet"))
+        self.assertEqual("plus", get_supermarket_name(
+            "ssi_plus_count_vectorizer_features.parquet"))
 
     def test_get_combined_revenue_files_in_directory(self):
         data_directory = get_test_path("")
@@ -118,8 +138,9 @@ class FilesTest(unittest.TestCase):
             with open(os.path.join(data_directory, get_combined_revenue_filename(supermarket_name)), "w") as file:
                 file.write("test")
 
-        expected_filenames = [os.path.join(data_directory, get_combined_revenue_filename(supermarket_name)) 
+        expected_filenames = [os.path.join(data_directory, get_combined_revenue_filename(supermarket_name))
                               for supermarket_name in ["AH", "Jumbo", "Lidl", "Plus"]]
-        combined_revenue_files = get_combined_revenue_files_in_directory(data_directory)
+        combined_revenue_files = get_combined_revenue_files_in_directory(
+            data_directory)
         self.assertEqual(4, len(combined_revenue_files))
         self.assertEqual(set(expected_filenames), set(combined_revenue_files))
