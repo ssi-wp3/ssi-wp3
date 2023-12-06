@@ -61,18 +61,24 @@ class FeatureExtractorFactory:
                             dataframe: pd.DataFrame,
                             source_column: str,
                             destination_column: str,
-                            feature_extractor_type: FeatureExtractorType) -> pd.DataFrame:
+                            feature_extractor_type: FeatureExtractorType,
+                            filename: str,
+                            batch_size: int = 1000,
+                            ):
         feature_extractor = self.create_feature_extractor(
             feature_extractor_type)
-        vectors = feature_extractor.fit_transform(dataframe[source_column])
-        # TODO: crashes on vectors.toarray() because it runs out of memory, batch the fit_transform?
-        dataframe[destination_column] = list(vectors.toarray()) if issparse(vectors) else list(vectors)
-        return dataframe
+
+        for i in range(0, len(dataframe), batch_size):
+            batch = dataframe.iloc[i:i+batch_size]
+            vectors = feature_extractor.fit_transform(batch[source_column])
+            vectors_df = pd.DataFrame({destination_column: list(
+                vectors.toarray()) if issparse(vectors) else list(vectors)})
+            vectors_df.to_parquet(filename, engine='pyarrow', index=False,
+                                  compression='gzip', append=True if i > 0 else False)
 
     def extract_features_and_save(self, dataframe: pd.DataFrame, source_column: str, destination_column: str, filename: str, feature_extractor_type: FeatureExtractorType):
-        dataframe = self.add_feature_vectors(
-            dataframe, source_column, destination_column, feature_extractor_type)
-        dataframe.to_parquet(filename, engine="pyarrow")
+        self.add_feature_vectors(
+            dataframe, source_column, destination_column, feature_extractor_type, filename=filename)
 
     def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, supermarket_name: str):
         with tqdm.tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
