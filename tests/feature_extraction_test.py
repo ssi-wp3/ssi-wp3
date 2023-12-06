@@ -5,10 +5,11 @@ from test_utils import get_test_path
 import unittest
 import pandas as pd
 
+
 class FeatureExtractionTest(unittest.TestCase):
     def test_feature_extractor_type_to_string(self):
-        self.assertEqual("count_vectorizer", f"{FeatureExtractorType.count_vectorizer.value}")
-
+        self.assertEqual("count_vectorizer",
+                         f"{FeatureExtractorType.count_vectorizer.value}")
 
     def test_create_feature_extractor(self):
         factory = FeatureExtractorFactory()
@@ -37,22 +38,22 @@ class FeatureExtractionTest(unittest.TestCase):
         self.assertTrue("cv_features" in feature_df.columns)
         self.assertEqual(100, len(feature_df))
 
-
     def test_extract_features_and_save(self):
         dataframe = generate_fake_revenue_data(100, 2018, 2021)
         factory = FeatureExtractorFactory()
 
         test_path = get_test_path("test.parquet")
-        
+
         factory.extract_features_and_save(
-            dataframe, "coicop_name", "cv_features", test_path, FeatureExtractorType.count_vectorizer)
-        
+            dataframe, "coicop_name", "cv_features", test_path, FeatureExtractorType.test_extractor)
+
         feature_df = pd.read_parquet(test_path, engine="pyarrow")
 
-        expected_feature_df = factory.add_feature_vectors(
-            dataframe, "coicop_name", "cv_features", FeatureExtractorType.count_vectorizer).reset_index(drop=True)
+        expected_feature_df = dataframe.copy()
+        expected_feature_df["cv_features"] = [[i, 0] for i in range(0, 100)]
 
-        self.assertTrue("cv_features" in feature_df.columns)
+        self.assertEqual(dataframe.columns.tolist() +
+                         ["cv_features"], feature_df.columns.tolist())
         self.assertEqual(100, len(feature_df))
-        self.assertTrue(expected_feature_df.equals(feature_df.reset_index(drop=True)))
-
+        self.assertTrue(expected_feature_df.equals(
+            feature_df.reset_index(drop=True)))

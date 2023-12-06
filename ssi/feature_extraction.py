@@ -12,6 +12,7 @@ import os
 
 
 class FeatureExtractorType(Enum):
+    test_extractor = 'test_extractor'
     count_vectorizer = 'count_vectorizer'
     tfidf_word = 'tfidf_word'
     tfidf_char = 'tfidf_char'
@@ -20,6 +21,22 @@ class FeatureExtractorType(Enum):
     spacy_nl_sm = 'spacy_nl_sm'
     spacy_nl_md = 'spacy_nl_md'
     spacy_nl_lg = 'spacy_nl_lg'
+
+
+class TestFeatureExtractor:
+    def __init__(self) -> None:
+        self._counter = 0
+
+    @property
+    def counter(self):
+        return self._counter
+
+    def fit_transform(self, data):
+        vectors = []
+        for text in data:
+            vectors.append([self._counter, 0])
+            self._counter += 1
+        return vectors
 
 
 class SpacyFeatureExtractor:
@@ -38,6 +55,7 @@ class FeatureExtractorFactory:
     def feature_extractors(self) -> Dict[FeatureExtractorType, object]:
         if not self._feature_extractors:
             self._feature_extractors = {
+                FeatureExtractorType.test_extractor: TestFeatureExtractor(),
                 FeatureExtractorType.count_vectorizer: CountVectorizer(analyzer='word', token_pattern=r'\w{2,}', max_features=5000),
                 FeatureExtractorType.tfidf_word: TfidfVectorizer(analyzer='word', token_pattern=r'\w{2,}', max_features=5000),
                 FeatureExtractorType.tfidf_char: TfidfVectorizer(analyzer='char', token_pattern=r'\w{2,}', ngram_range=(2, 3), max_features=5000),
