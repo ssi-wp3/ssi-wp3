@@ -58,9 +58,9 @@ class FeatureExtractorFactory:
                 FeatureExtractorType.test_extractor: TestFeatureExtractor(),
                 FeatureExtractorType.count_vectorizer: CountVectorizer(analyzer='word', token_pattern=r'\w{2,}', max_features=5000),
                 FeatureExtractorType.tfidf_word: TfidfVectorizer(analyzer='word', token_pattern=r'\w{2,}', max_features=5000),
-                FeatureExtractorType.tfidf_char: TfidfVectorizer(analyzer='char', token_pattern=r'\w{2,}', ngram_range=(2, 3), max_features=5000),
-                FeatureExtractorType.tfidf_char34: TfidfVectorizer(analyzer='char', token_pattern=r'\w{2,}', ngram_range=(3, 4), max_features=5000),
-                FeatureExtractorType.count_char: CountVectorizer(analyzer='char', token_pattern=r'\w{2,}', max_features=5000),
+                FeatureExtractorType.tfidf_char: TfidfVectorizer(analyzer='char', ngram_range=(2, 3), max_features=5000),
+                FeatureExtractorType.tfidf_char34: TfidfVectorizer(analyzer='char', ngram_range=(3, 4), max_features=5000),
+                FeatureExtractorType.count_char: CountVectorizer(analyzer='char', max_features=5000),
                 FeatureExtractorType.spacy_nl_sm: SpacyFeatureExtractor('nl_core_news_sm'),
                 FeatureExtractorType.spacy_nl_md: SpacyFeatureExtractor('nl_core_news_md'),
                 FeatureExtractorType.spacy_nl_lg: SpacyFeatureExtractor(
