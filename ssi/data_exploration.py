@@ -171,5 +171,8 @@ class ProductAnalysis:
                 dataframe, coicop_level)
 
     def analyze_products(self, dataframe: pd.DataFrame):
+        # Small hack to rename "month" column
+        dataframe = dataframe.rename(columns={"month": self.year_month_column},
+                                     inplace=True)
         self.plot_sunburst(dataframe, amount_column="count")
         self.perform_product_level_analysis(dataframe)
