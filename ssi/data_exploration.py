@@ -1,10 +1,11 @@
 from typing import List
 from .preprocess_data import split_month_year_column
 from .plots import sunburst_coicop_levels
+from wordcloud import WordCloud
 import pandas as pd
 import os
 import tqdm
-from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 
 def export_dataframe(dataframe: pd.DataFrame, path: str, filename: str, index: bool = False, delimiter: str = ";"):
@@ -121,6 +122,16 @@ class ProductAnalysis:
         wordcloud.generate_from_text(product_descriptions).to_file(filename)
 
     def retrieve_product_counts(self, dataframe: pd.DataFrame, coicop_level: str):
+        self.export_product_counts(dataframe, coicop_level)
+        self.plot_product_counts(coicop_level)
+
+    def plot_product_counts(self, coicop_level: str):
+        for count_category in ["_counts_per_year", "counts_per_year_month", "_counts_per_category_per_year", "_counts_per_category_per_year_month"]:
+            data_files = [os.path.join(self.data_directory, filename)
+                          for filename in os.listdir(self.data_directory)
+                          if filename.startswith(f"products_{self.supermarket_name}_{coicop_level}") and filename.endswith(count_category)]
+
+    def export_product_counts(self, dataframe, coicop_level):
         for product_id_column in self.product_id_columns:
             self.export_product_counts_per_time_unit(
                 dataframe, coicop_level, product_id_column)
