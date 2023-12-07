@@ -29,7 +29,7 @@ class DataExplorationTest(unittest.TestCase):
         }, index=["2018", "2019", "2020"])
 
         counts_per_year_df = get_product_counts_per_time(
-            dataframe, "time", "year_month", "product_id")
+            dataframe, "year", "year_month", "product_id")
 
         self.assertTrue(expected_dataframe.equals(counts_per_year_df))
 
