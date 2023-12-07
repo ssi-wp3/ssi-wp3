@@ -7,6 +7,25 @@ import tqdm
 from wordcloud import WordCloud
 
 
+def export_dataframe(dataframe: pd.DataFrame, path: str, filename: str, index: bool = False, delimiter: str = ";"):
+    csv_directory = os.path.join(path, "csv")
+
+    print(f"Creating log directory {csv_directory}")
+    os.makedirs(csv_directory, exist_ok=True)
+
+    html_directory = os.path.join(path, "html")
+    print(f"Creating log directory {html_directory}")
+    os.makedirs(html_directory, exist_ok=True)
+
+    dataframe.to_csv(os.path.join(
+        csv_directory, filename + ".csv"), sep=delimiter, index=index)
+
+    if isinstance(dataframe, pd.Series):
+        dataframe = pd.DataFrame(dataframe)
+
+    dataframe.to_html(os.path.join(html_directory, filename + ".html"))
+
+
 def filter_coicop_level(dataframe: pd.DataFrame, coicop_level_column: str, coicop_level_value: str) -> pd.DataFrame:
     return dataframe[dataframe[coicop_level_column] == coicop_level_value]
 
@@ -79,11 +98,29 @@ class ProductAnalysis:
             dataframe[product_description_column].tolist())
         wordcloud.generate_from_text(product_descriptions).to_file(filename)
 
+    def retrieve_product_counts(self, dataframe: pd.DataFrame, coicop_level: str):
+        product_counts_per_year_df = get_product_counts_per_time(
+            dataframe, "year", "year_month", "product_id")
+        product_counts_per_year_df.to_csv(os.path.join(
+            self.data_directory, f"products_{self.supermarket_name}_{coicop_level}_product_counts_per_year.csv"))
+
+        product_counts_per_year_month_df = get_product_counts_per_time(
+            dataframe, "year_month", "year_month", "product_id")
+        product_counts_per_year_month_df.to_csv(os.path.join(
+            self.data_directory, f"products_{self.supermarket_name}_{coicop_level}_product_counts_per_year_month.csv"))
+
+        product_counts_per_category_per_year_df = get_product_counts_per_category_and_time(
+            dataframe, "year", "year_month", "product_id", coicop_level)
+        product_counts_per_category_per_year_df.to_csv(os.path.join(
+            self.data_directory, f"products_{self.supermarket_name}_{coicop_level}_product_counts_per_category_per_year.csv"))
+
     def perform_product_analysis_per_coicop_level(self, dataframe: pd.DataFrame, coicop_level: str, product_description_column: str = "ean_name"):
         coicop_level_values = dataframe[coicop_level].unique()
 
         self.plot_wordcloud(dataframe, product_description_column, os.path.join(self.wordcloud_plot_directory,
                                                                                 f"products_{self.supermarket_name}_{coicop_level}_all_wordcloud.png"))
+
+        self.retrieve_product_counts(dataframe, coicop_level)
         for coicop_level_value in coicop_level_values:
             coicop_level_value_df = filter_coicop_level(
                 dataframe, coicop_level, coicop_level_value)
