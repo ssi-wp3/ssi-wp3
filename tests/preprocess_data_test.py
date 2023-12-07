@@ -54,6 +54,16 @@ class TestPreprocessData(unittest.TestCase):
         self.assertEqual(("2020", "01"), split_month_year("202001"))
         self.assertEqual(("2020", "12"), split_month_year("202012"))
 
+    def test_split_month_year_dataframe(self):
+        dataframe = pd.DataFrame(
+            {"month_year": ["201801", "201810", "201901", "201911", "202001", "202012"]})
+        dataframe = split_month_year_column(
+            dataframe, month_year_column="month_year")
+        self.assertTrue(dataframe["year"].equals(
+            pd.Series(["2018", "2018", "2019", "2019", "2020", "2020"])))
+        self.assertTrue(dataframe["month"].equals(
+            pd.Series(["01", "10", "01", "11", "01", "12"])))
+
     def test_add_leading_zero(self):
         dataframe = pd.DataFrame(
             {"coicop_number": ["1234", "12345", "123456"]})

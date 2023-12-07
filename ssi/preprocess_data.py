@@ -22,6 +22,12 @@ def split_month_year(month_year_string: str) -> Tuple[str, str]:
     return month_year_string[:4], month_year_string[4:]
 
 
+def split_month_year_column(dataframe: pd.DataFrame, month_year_column: str = "month") -> pd.DataFrame:
+    dataframe["year"], dataframe["month"] = zip(
+        *dataframe[month_year_column].apply(split_month_year))
+    return dataframe
+
+
 def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
     shorter_columns = dataframe[coicop_column].str.len() == 5
     dataframe.loc[shorter_columns, coicop_column] = dataframe[shorter_columns][coicop_column].apply(
