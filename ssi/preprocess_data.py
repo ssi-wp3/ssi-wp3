@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from .data_logging import DataLogger
 from .files import get_revenue_files_in_folder
 from .constants import Constants
@@ -16,6 +16,10 @@ def split_coicop(coicop_column: pd.Series) -> pd.DataFrame:
     return pd.DataFrame({column: coicop_column.str[:index + 2]
                         for index, column in enumerate(Constants.COICOP_LEVELS_COLUMNS)
                          })
+
+
+def split_month_year(month_year_string: str) -> Tuple[str, str]:
+    return month_year_string[:4], month_year_string[4:]
 
 
 def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:

@@ -46,6 +46,14 @@ class TestPreprocessData(unittest.TestCase):
         self.assertTrue(coicop_subclass.equals(split_coicop(
             self.coicop_series).coicop_subclass))
 
+    def test_split_month_year(self):
+        self.assertEqual(("2018", "01"), split_month_year("201801"))
+        self.assertEqual(("2018", "10"), split_month_year("201810"))
+        self.assertEqual(("2019", "01"), split_month_year("201901"))
+        self.assertEqual(("2019", "11"), split_month_year("201911"))
+        self.assertEqual(("2020", "01"), split_month_year("202001"))
+        self.assertEqual(("2020", "12"), split_month_year("202012"))
+
     def test_add_leading_zero(self):
         dataframe = pd.DataFrame(
             {"coicop_number": ["1234", "12345", "123456"]})
@@ -154,7 +162,6 @@ class TestPreprocessData(unittest.TestCase):
         self.assertEqual([2, 2, 3, 3, 3,
                           1, 4, 4, 4, 4,
                           5, 5, 5, 5, 5], processed_dataframe["count"].tolist())
-
 
     def test_combine_revenue_files(self):
         data_directory = os.path.join(os.getcwd(), "tests", "data")
