@@ -1,5 +1,5 @@
 from typing import Dict, List
-from .data_exploration import export_dataframe
+from .data_utils import export_dataframe
 import pandas as pd
 import os
 

@@ -1,30 +1,12 @@
 from typing import List
 from .preprocess_data import split_month_year_column
 from .plots import sunburst_coicop_levels
+from .data_utils import export_dataframe
 from wordcloud import WordCloud
 import pandas as pd
 import os
 import tqdm
 import matplotlib.pyplot as plt
-
-
-def export_dataframe(dataframe: pd.DataFrame, path: str, filename: str, index: bool = False, delimiter: str = ";"):
-    csv_directory = os.path.join(path, "csv")
-
-    print(f"Creating log directory {csv_directory}")
-    os.makedirs(csv_directory, exist_ok=True)
-
-    html_directory = os.path.join(path, "html")
-    print(f"Creating log directory {html_directory}")
-    os.makedirs(html_directory, exist_ok=True)
-
-    dataframe.to_csv(os.path.join(
-        csv_directory, filename + ".csv"), sep=delimiter, index=index)
-
-    if isinstance(dataframe, pd.Series):
-        dataframe = pd.DataFrame(dataframe)
-
-    dataframe.to_html(os.path.join(html_directory, filename + ".html"))
 
 
 def filter_coicop_level(dataframe: pd.DataFrame, coicop_level_column: str, coicop_level_value: str) -> pd.DataFrame:
@@ -162,7 +144,7 @@ class ProductAnalysis:
 
     def perform_product_analysis_per_coicop_level(self, dataframe: pd.DataFrame, coicop_level: str, product_description_column: str = "ean_name"):
         coicop_level_values = dataframe[coicop_level].unique()
-
+        os.makedirs(self.wordcloud_plot_directory, exist_ok=True)
         self.plot_wordcloud(dataframe, product_description_column, os.path.join(self.wordcloud_plot_directory,
                                                                                 f"products_{self.supermarket_name}_{coicop_level}_all_wordcloud.png"))
 
@@ -183,7 +165,7 @@ class ProductAnalysis:
 
     def analyze_products(self, dataframe: pd.DataFrame):
         # Small hack to rename "month" column
-        dataframe = dataframe.rename(columns={"month": self.year_month_column},
-                                     inplace=True)
+        dataframe.rename(columns={"month": self.year_month_column},
+                         inplace=True)
         self.plot_sunburst(dataframe, amount_column="count")
         self.perform_product_level_analysis(dataframe)
