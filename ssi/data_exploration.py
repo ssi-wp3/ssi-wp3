@@ -41,6 +41,10 @@ class ProductAnalysis:
         return self.__plot_directory
 
     @property
+    def wordcloud_plot_directory(self):
+        return os.path.join(self.plot_directory, "wordclouds")
+
+    @property
     def supermarket_name(self):
         return self.__supermarket_name
 
@@ -62,13 +66,15 @@ class ProductAnalysis:
 
     def perform_product_analysis_per_coicop_level(self, dataframe: pd.DataFrame, coicop_level: str, product_description_column: str = "ean_name"):
         coicop_level_values = dataframe[coicop_level].unique()
-        self.plot_wordcloud(dataframe, product_description_column, os.path.join(self.plot_directory,
+
+        self.plot_wordcloud(dataframe, product_description_column, os.path.join(self.wordcloud_plot_directory,
                                                                                 f"products_{self.supermarket_name}_{coicop_level}_all_wordcloud.png"))
         for coicop_level_value in coicop_level_values:
             coicop_level_value_df = filter_coicop_level(
                 dataframe, coicop_level, coicop_level_value)
+
             wordcloud_filename = os.path.join(
-                self.plot_directory, f"products_{self.supermarket_name}_{coicop_level}_{coicop_level_value}_wordcloud.png")
+                self.wordcloud_plot_directory, f"products_{self.supermarket_name}_{coicop_level}_{coicop_level_value}_wordcloud.png")
             self.plot_wordcloud(coicop_level_value_df,
                                 product_description_column, wordcloud_filename)
 
