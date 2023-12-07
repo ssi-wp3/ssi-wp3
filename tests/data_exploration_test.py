@@ -1,5 +1,5 @@
 from ssi.synthetic_data import generate_fake_data_with_coicop_levels
-from ssi.data_exploration import filter_coicop_level, get_product_counts_per_year, get_product_counts_per_category_per_year
+from ssi.data_exploration import filter_coicop_level, get_product_counts_per_year, get_product_counts_per_category_and_time
 import pandas as pd
 import unittest
 
@@ -47,7 +47,7 @@ class DataExplorationTest(unittest.TestCase):
                 "2020", "02"), ("2020", "03")], names=["year", "coicop_division"])
         )
 
-        counts_per_year_df = get_product_counts_per_category_per_year(
-            dataframe, "year_month", "product_id", "coicop_division")
+        counts_per_year_df = get_product_counts_per_category_and_time(
+            dataframe, "year", "year_month", "product_id", "coicop_division")
 
         self.assertTrue(expected_dataframe.equals(counts_per_year_df))

@@ -33,10 +33,10 @@ def get_product_counts_per_year(dataframe: pd.DataFrame, year_month_column: str,
     return pd.DataFrame(dataframe).rename(columns={product_id_column: agg_column_name})
 
 
-def get_product_counts_per_category_per_year(dataframe: pd.DataFrame, year_month_column: str, product_id_column: str, coicop_level_column: str, agg_column_name: str = "count") -> pd.DataFrame:
+def get_product_counts_per_category_and_time(dataframe: pd.DataFrame, time_column: str, year_month_column: str, product_id_column: str, coicop_level_column: str, agg_column_name: str = "count") -> pd.DataFrame:
     dataframe = split_month_year_column(dataframe, year_month_column)
     dataframe = dataframe.groupby(
-        ["year", coicop_level_column])[product_id_column].nunique()
+        [time_column, coicop_level_column])[product_id_column].nunique()
     return pd.DataFrame(dataframe).rename(columns={product_id_column: agg_column_name})
 
 
