@@ -3,7 +3,7 @@ from .plots import sunburst_coicop_levels
 import pandas as pd
 import os
 import tqdm
-import wordcloud
+from wordcloud import WordCloud
 
 
 def filter_coicop_level(dataframe: pd.DataFrame, coicop_level_column: str, coicop_level_value: str) -> pd.DataFrame:
@@ -48,14 +48,14 @@ class ProductAnalysis:
     def coicop_level_columns(self):
         return self.__coicop_level_columns
 
-    def plot_sunburst(self, dataframe: pd.DataFrame):
+    def plot_sunburst(self, dataframe: pd.DataFrame, amount_column: str):
         sunburst_filename = os.path.join(
             self.plot_directory, f"products_{self.supermarket_name}_sunburst.html")
         sunburst_coicop_levels(
-            dataframe, self.coicop_level_columns, self.plot_directory, sunburst_filename)
+            dataframe, self.coicop_level_columns, amount_column, sunburst_filename)
 
     def plot_wordcloud(self, dataframe: pd.DataFrame, product_description_column: str, filename: str):
-        wordcloud = wordcloud.WordCloud()
+        wordcloud = WordCloud()
         product_descriptions = " ".join(
             dataframe[product_description_column].tolist())
         wordcloud.generate_from_text(product_descriptions).to_file(filename)
@@ -78,5 +78,5 @@ class ProductAnalysis:
                 dataframe, coicop_level)
 
     def analyze_products(self, dataframe: pd.DataFrame):
-        self.plot_sunburst(dataframe)
+        self.plot_sunburst(dataframe, amount_column="count")
         self.perform_product_level_analysis(dataframe)

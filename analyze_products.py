@@ -32,7 +32,7 @@ with tqdm.tqdm(total=len(feature_filenames)) as progress_bar:
 
         data_directory = os.path.join(output_directory, supermarket_name)
         supermarket_plot_directory = os.path.join(
-            data_directory, supermarket_name)
+            data_directory, "plots")
         os.makedirs(supermarket_plot_directory, exist_ok=True)
 
         product_analysis = ProductAnalysis(data_directory=data_directory,
