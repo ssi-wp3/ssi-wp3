@@ -41,8 +41,11 @@ class DataExplorationTest(unittest.TestCase):
         })
 
         expected_dataframe = pd.DataFrame({
-            "count": [2, 2, 1, 1, 2]
-        }, index=[("2018", "01"), ("2019", "01"), ("2019", "02"), ("2020", "02"), ("2020", "03")])
+            "count": [2, 2, 1, 2, 2]
+        },
+            index=pd.MultiIndex.from_tuples(tuples=[("2018", "01"), ("2019", "01"), ("2019", "02"), (
+                "2020", "02"), ("2020", "03")], names=["year", "coicop_division"])
+        )
 
         counts_per_year_df = get_product_counts_per_category_per_year(
             dataframe, "year_month", "product_id", "coicop_division")
