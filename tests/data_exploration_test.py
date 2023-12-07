@@ -33,6 +33,21 @@ class DataExplorationTest(unittest.TestCase):
 
         self.assertTrue(expected_dataframe.equals(counts_per_year_df))
 
+    def test_get_product_counts_per_year_month(self):
+        dataframe = pd.DataFrame({
+            "year_month": ["201801", "201801", "201901", "201902", "201903", "202001", "202002", "202003", "202004", "202004"],
+            "product_id": [1, 2, 1, 2, 2, 3, 1, 2, 3, 1]
+        })
+
+        expected_dataframe = pd.DataFrame({
+            "count": [2, 1, 1, 1, 1, 1, 1, 2]
+        }, index=["201801", "201901", "201902", "201903", "202001", "202002", "202003", "202004"])
+
+        counts_per_year_df = get_product_counts_per_time(
+            dataframe, "year_month", "year_month", "product_id")
+
+        self.assertTrue(expected_dataframe.equals(counts_per_year_df))
+
     def test_get_product_counts_per_category_per_year(self):
         dataframe = pd.DataFrame({
             "year_month": ["201801", "201801", "201901", "201902", "201903", "202001", "202002", "202003", "202004", "202004"],
