@@ -1,17 +1,20 @@
 from typing import List
 from .data_logging import DataLogger
 from .files import get_revenue_files_in_folder
+from .constants import Constants
 import pandas as pd
 import os
 import tqdm
 
 
 def split_coicop(coicop_column: pd.Series) -> pd.DataFrame:
-    return pd.DataFrame({"coicop_number": coicop_column,
-                         "coicop_division": coicop_column.str[:2],
-                         "coicop_group": coicop_column.str[:3],
-                         "coicop_class": coicop_column.str[:4],
-                         "coicop_subclass": coicop_column.str[:5],
+    # "coicop_number": coicop_column,
+    # "coicop_division": coicop_column.str[:2],
+    # "coicop_group": coicop_column.str[:3],
+    # "coicop_class": coicop_column.str[:4],
+    # "coicop_subclass": coicop_column.str[:5],
+    return pd.DataFrame({column: coicop_column.str[:index + 2]
+                        for index, column in enumerate(Constants.COICOP_LEVELS_COLUMNS)
                          })
 
 
@@ -84,7 +87,7 @@ def save_combined_revenue_files(data_directory: str,
                                 coicop_level_columns: List[str] = [
                                     "coicop_division", "coicop_group", "coicop_class", "coicop_subclass"],
                                 filename_prefix: str = "Omzet", engine: str = "pyarrow"):
-    
+
     supermarket_log_directory = os.path.join(log_directory, supermarket_name)
     data_logger = DataLogger(supermarket_log_directory)
 
