@@ -26,10 +26,10 @@ def write_filtered_coicop_level_files(dataframe: pd.DataFrame, coicop_level_colu
                 progress_bar.update(1)
 
 
-def get_product_counts_per_year(dataframe: pd.DataFrame, year_month_column: str, product_id_column: str, agg_column_name: str = "count") -> pd.DataFrame:
+def get_product_counts_per_time(dataframe: pd.DataFrame, time_column: str, year_month_column: str, product_id_column: str, agg_column_name: str = "count") -> pd.DataFrame:
     dataframe = split_month_year_column(dataframe, year_month_column)
     dataframe = dataframe.groupby(
-        ["year"])[product_id_column].nunique()
+        [time_column])[product_id_column].nunique()
     return pd.DataFrame(dataframe).rename(columns={product_id_column: agg_column_name})
 
 
