@@ -1,4 +1,5 @@
 from typing import List
+from .plots import sunburst_coicop_levels
 import pandas as pd
 import os
 import tqdm
@@ -46,5 +47,11 @@ class ProductAnalysis:
     def coicop_level_columns(self):
         return self.__coicop_level_columns
 
+    def plot_sunburst(self, dataframe: pd.DataFrame):
+        sunburst_filename = os.path.join(
+            self.plot_directory, f"products_{self.supermarket_name}_sunburst.html")
+        sunburst_coicop_levels(
+            dataframe, self.coicop_level_columns, self.plot_directory, sunburst_filename)
+
     def analyze_products(self, dataframe: pd.DataFrame):
-        pass
+        self.plot_sunburst(dataframe)
