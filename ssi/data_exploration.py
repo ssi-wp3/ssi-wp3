@@ -62,6 +62,8 @@ class ProductAnalysis:
 
     def perform_product_analysis_per_coicop_level(self, dataframe: pd.DataFrame, coicop_level: str, product_description_column: str = "ean_name"):
         coicop_level_values = dataframe[coicop_level].unique()
+        self.plot_wordcloud(dataframe, product_description_column, os.path.join(self.plot_directory,
+                                                                                f"products_{self.supermarket_name}_{coicop_level}_all_wordcloud.png"))
         for coicop_level_value in coicop_level_values:
             coicop_level_value_df = filter_coicop_level(
                 dataframe, coicop_level, coicop_level_value)
