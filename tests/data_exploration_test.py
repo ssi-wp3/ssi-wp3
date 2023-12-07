@@ -1,5 +1,5 @@
 from ssi.synthetic_data import generate_fake_data_with_coicop_levels
-from ssi.data_exploration import filter_coicop_level, get_product_counts_per_year
+from ssi.data_exploration import filter_coicop_level, get_product_counts_per_year, get_product_counts_per_category_per_year
 import pandas as pd
 import unittest
 
@@ -27,10 +27,24 @@ class DataExplorationTest(unittest.TestCase):
         expected_dataframe = pd.DataFrame({
             "count": [2, 2, 3]
         }, index=["2018", "2019", "2020"])
-        print(expected_dataframe.head())
 
         counts_per_year_df = get_product_counts_per_year(
             dataframe, "year_month", "product_id")
 
-        print(counts_per_year_df.head())
+        self.assertTrue(expected_dataframe.equals(counts_per_year_df))
+
+    def test_get_product_counts_per_category_per_year(self):
+        dataframe = pd.DataFrame({
+            "year_month": ["201801", "201801", "201901", "201902", "201903", "202001", "202002", "202003", "202004", "202004"],
+            "product_id": [1, 2, 1, 2, 2, 3, 5, 6, 7, 5],
+            "coicop_division": ["01", "01", "01", "01", "02", "02", "02", "03", "03", "02"]
+        })
+
+        expected_dataframe = pd.DataFrame({
+            "count": [2, 2, 1, 1, 2]
+        }, index=[("2018", "01"), ("2019", "01"), ("2019", "02"), ("2020", "02"), ("2020", "03")])
+
+        counts_per_year_df = get_product_counts_per_category_per_year(
+            dataframe, "year_month", "product_id", "coicop_division")
+
         self.assertTrue(expected_dataframe.equals(counts_per_year_df))
