@@ -167,5 +167,6 @@ class ProductAnalysis:
         # Small hack to rename "month" column
         dataframe.rename(columns={"month": self.year_month_column},
                          inplace=True)
+        print(dataframe.columns)
         self.plot_sunburst(dataframe, amount_column="count")
         self.perform_product_level_analysis(dataframe)

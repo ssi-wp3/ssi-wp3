@@ -10,6 +10,8 @@ import os
 parser = argparse.ArgumentParser(description='Preprocess data')
 parser.add_argument("-c", "--coicop-column", type=str, default="coicop_number",
                     help="Name of the column containing the coicop numbers")
+parser.add_argument("-b", "--batch-size", type=int,
+                    default=10000, help="Batch size for feature extraction")
 args = parser.parse_args()
 
 # load environment variables from .env file for project
@@ -33,4 +35,4 @@ for combined_revenue_file in get_combined_revenue_files_in_directory(output_dire
         combined_revenue_file, engine="pyarrow")
     supermarket_name = get_supermarket_name(combined_revenue_file)
     feature_extractor_factory.extract_all_features_and_save(
-        revenue_dataframe, args.coicop_column, supermarket_name=supermarket_name, output_directory=features_directory)
+        revenue_dataframe, args.coicop_column, supermarket_name=supermarket_name, output_directory=features_directory, batch_size=args.batch_size)

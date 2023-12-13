@@ -90,16 +90,17 @@ class FeatureExtractorFactory:
             feature_extractor_type)
 
         pq_writer = None
-        for i in range(0, len(dataframe), batch_size):
-            batch = dataframe.iloc[i:i+batch_size]
-            vectors = feature_extractor.fit_transform(batch[source_column])
-            vectors_df = batch.copy()
-            vectors_df[destination_column] = list(
-                vectors.toarray()) if issparse(vectors) else list(vectors)
-            # Create directory if it does not exist
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-            table = pa.Table.from_pandas(vectors_df)
+        # Create directory if it does not exist
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        for i in range(0, len(dataframe), batch_size):
+            batch_df = dataframe.iloc[i:i+batch_size].copy()
+            vectors = feature_extractor.fit_transform(batch_df[source_column])
+
+            batch_df[destination_column] = list(
+                vectors.toarray()) if issparse(vectors) else list(vectors)
+
+            table = pa.Table.from_pandas(batch_df)
             if i == 0:
                 pq_writer = pq.ParquetWriter(filename, table.schema)
             pq_writer.write_table(table)
@@ -107,11 +108,11 @@ class FeatureExtractorFactory:
         if pq_writer:
             pq_writer.close()
 
-    def extract_features_and_save(self, dataframe: pd.DataFrame, source_column: str, destination_column: str, filename: str, feature_extractor_type: FeatureExtractorType):
+    def extract_features_and_save(self, dataframe: pd.DataFrame, source_column: str, destination_column: str, filename: str, feature_extractor_type: FeatureExtractorType, batch_size: int = 1000):
         self.add_feature_vectors(
-            dataframe, source_column, destination_column, feature_extractor_type, filename=filename)
+            dataframe, source_column, destination_column, feature_extractor_type, filename=filename, batch_size=batch_size)
 
-    def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, supermarket_name: str, output_directory: str):
+    def extract_all_features_and_save(self, dataframe: pd.DataFrame, source_column: str, supermarket_name: str, output_directory: str, batch_size: int = 1000):
         with tqdm.tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
             for feature_extractor_type in self.feature_extractor_types:
                 feature_filename = os.path.join(output_directory, get_feature_filename(
@@ -119,5 +120,5 @@ class FeatureExtractorFactory:
                 progress_bar.set_description(
                     f"Extracting features of type {feature_extractor_type.value} to {feature_filename}")
                 self.extract_features_and_save(dataframe,
-                                               source_column, f"features_{feature_extractor_type.value}", feature_filename, feature_extractor_type)
+                                               source_column, f"features_{feature_extractor_type.value}", feature_filename, feature_extractor_type, batch_size=batch_size)
                 progress_bar.update()
