@@ -8,8 +8,8 @@ import os
 
 
 parser = argparse.ArgumentParser(description='Preprocess data')
-parser.add_argument("-c", "--coicop-column", type=str, default="coicop_number",
-                    help="Name of the column containing the coicop numbers")
+parser.add_argument("-s", "--source-column", type=str, default="ean_name",
+                    help="Name of the column containing the (receipt) text to extract features from")
 parser.add_argument("-b", "--batch-size", type=int,
                     default=10000, help="Batch size for feature extraction")
 args = parser.parse_args()
@@ -35,4 +35,8 @@ for combined_revenue_file in get_combined_revenue_files_in_directory(output_dire
         combined_revenue_file, engine="pyarrow")
     supermarket_name = get_supermarket_name(combined_revenue_file)
     feature_extractor_factory.extract_all_features_and_save(
-        revenue_dataframe, args.coicop_column, supermarket_name=supermarket_name, output_directory=features_directory, batch_size=args.batch_size)
+        dataframe=revenue_dataframe,
+        source_column=args.source_column,
+        supermarket_name=supermarket_name,
+        output_directory=features_directory,
+        batch_size=args.batch_size)
