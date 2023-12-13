@@ -1,7 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from scipy.sparse import issparse
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 from .files import get_feature_filename
 import pandas as pd
 import pyarrow as pa
@@ -85,6 +85,7 @@ class FeatureExtractorFactory:
                             feature_extractor_type: FeatureExtractorType,
                             filename: str,
                             batch_size: int,
+                            progress_bar: Optional[tqdm.tqdm] = None
                             ):
         feature_extractor = self.create_feature_extractor(
             feature_extractor_type)
@@ -94,6 +95,9 @@ class FeatureExtractorFactory:
         # Create directory if it does not exist
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         for i in range(0, len(dataframe), batch_size):
+            if progress_bar:
+                progress_bar.set_description(f"Encoding batch {i} out of {len(dataframe) / batch_size} for {feature_extractor_type}")
+
             batch_df = dataframe.iloc[i:i+batch_size].copy()
             vectors = feature_extractor.fit_transform(batch_df[source_column])
 
@@ -114,9 +118,10 @@ class FeatureExtractorFactory:
                                   destination_column: str,
                                   filename: str,
                                   feature_extractor_type: FeatureExtractorType,
-                                  batch_size: int = 1000):
+                                  batch_size: int = 1000,
+                                  progress_bar: Optional[tqdm.tqdm] = None):
         self.add_feature_vectors(
-            dataframe, source_column, destination_column, feature_extractor_type, filename=filename, batch_size=batch_size)
+            dataframe, source_column, destination_column, feature_extractor_type, filename=filename, batch_size=batch_size, progress_bar=progress_bar)
 
     def extract_all_features_and_save(self,
                                       dataframe: pd.DataFrame,
@@ -135,5 +140,6 @@ class FeatureExtractorFactory:
                                                f"features_{feature_extractor_type.value}",
                                                feature_filename,
                                                feature_extractor_type,
-                                               batch_size=batch_size)
+                                               batch_size=batch_size
+                                               progress_bar=progress_bar)
                 progress_bar.update()
