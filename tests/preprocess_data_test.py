@@ -130,6 +130,30 @@ class TestPreprocessData(unittest.TestCase):
         self.assertTrue(["coicop_number", "product_id",
                         "product_name"] == filtered_dataframe3.columns.tolist())
 
+    def test_rename_columns(self):
+        dataframe = pd.DataFrame({
+            "coicop_number": ["011201" for _ in range(10)],
+            "product_id": [i for i in range(10)],
+            "product_name": [f"product_{i}" for i in range(10)],
+            "isba_number": [i for i in range(10)],
+            "isba_name": [f"isba_{i}" for i in range(10)],
+            "ean_number": [i for i in range(10)],
+            "ean_name": [f"ean_{i}" for i in range(10)]
+        })
+
+        renamed_dataframe = rename_columns(dataframe, {
+            "coicop_number": "coicop",
+            "product_id": "id",
+            "product_name": "name",
+            "isba_number": "isba",
+            "isba_name": "isba_name",
+            "ean_number": "ean",
+            "ean_name": "ean_name"
+        })
+
+        self.assertEqual(["coicop", "id", "name", "isba", "isba_name",
+                          "ean", "ean_name"], renamed_dataframe.columns.tolist())
+
     def test_preprocess_data(self):
         dataframe = pd.DataFrame({
             "coicop_number": ["11201", "11201", "22312", "22312", "022312",
