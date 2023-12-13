@@ -44,8 +44,9 @@ class SpacyFeatureExtractor:
     def __init__(self, model_name):
         self.nlp = spacy.load(model_name)
 
+    # To speed up: https://github.com/explosion/spaCy/discussions/8402
     def fit_transform(self, data):
-        return [self.nlp(text).vector for text in data]
+        return [doc.vector for doc in self.nlp.pipe(data)]
 
 
 class FeatureExtractorFactory:
