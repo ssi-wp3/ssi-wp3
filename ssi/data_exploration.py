@@ -107,11 +107,11 @@ class ProductAnalysis:
         self.export_product_counts(dataframe, coicop_level)
         self.plot_product_counts(coicop_level)
 
-    def plot_product_counts(self, coicop_level: str):
+    def plot_product_counts(self, coicop_level: str, product_id_column: str):
         for count_category in ["_counts_per_year", "counts_per_year_month", "_counts_per_category_per_year", "_counts_per_category_per_year_month"]:
             data_files = [os.path.join(self.data_directory, filename)
                           for filename in os.listdir(self.data_directory)
-                          if filename.startswith(f"products_{self.supermarket_name}_{coicop_level}") and filename.endswith(count_category)]
+                          if filename.startswith(f"products_{self.supermarket_name}_{coicop_level}_{product_id_column}") and filename.endswith(count_category)]
 
     def export_product_counts(self, dataframe, coicop_level):
         for product_id_column in self.product_id_columns:
