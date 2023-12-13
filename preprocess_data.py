@@ -7,13 +7,20 @@ import os
 
 
 parser = argparse.ArgumentParser(description='Preprocess data')
-parser.add_argument("-s", "--supermarket-name", type=str, required=True, help="Name of the supermarket")
-parser.add_argument("-c", "--coicop-column", type=str, default="coicop_number", help="Name of the column containing the coicop numbers")
-parser.add_argument("-p", "--product-id-column", type=str, default="product_id", help="Name of the column containing the product ids")
-parser.add_argument("-pd", "--product-description-column", type=str, default="ean_name", help="Name of the column containing the product descriptions")
-parser.add_argument("-clv", "--coicop-level-columns", nargs="+", type=str, default=["coicop_division", "coicop_group", "coicop_class", "coicop_subclass"], help="Names of the columns containing the coicop levels")
-parser.add_argument("-sc", "--selected-columns", nargs="+", type=str, default=["bg_number", "month", "coicop_number", "ean_name"], help="Names of the columns to select")
-parser.add_argument("-fp", "--filename-prefix", type=str, default="Omzet", help="Prefix of the revenue files")
+parser.add_argument("-s", "--supermarket-name", type=str,
+                    required=True, help="Name of the supermarket")
+parser.add_argument("-c", "--coicop-column", type=str, default="coicop_number",
+                    help="Name of the column containing the coicop numbers")
+parser.add_argument("-p", "--product-id-column", type=str, default="product_id",
+                    help="Name of the column containing the product ids")
+parser.add_argument("-pd", "--product-description-column", type=str, default="ean_name",
+                    help="Name of the column containing the product descriptions")
+parser.add_argument("-clv", "--coicop-level-columns", nargs="+", type=str, default=[
+                    "coicop_division", "coicop_group", "coicop_class", "coicop_subclass"], help="Names of the columns containing the coicop levels")
+parser.add_argument("-sc", "--selected-columns", nargs="+", type=str, default=[
+                    "bg_number", "month", "coicop_number", "ean_number", "ean_name"], help="Names of the columns to select")
+parser.add_argument("-fp", "--filename-prefix", type=str,
+                    default="Omzet", help="Prefix of the revenue files")
 args = parser.parse_args()
 
 # load environment variables from .env file for project
@@ -26,8 +33,9 @@ if not os.path.exists(log_directory):
     print(f"Creating log directory {log_directory}")
     os.makedirs(log_directory)
 
-save_combined_revenue_files(data_directory=output_directory, 
-                            output_filename=get_combined_revenue_filename(args.supermarket_name), 
+save_combined_revenue_files(data_directory=output_directory,
+                            output_filename=get_combined_revenue_filename(
+                                args.supermarket_name),
                             supermarket_name=args.supermarket_name,
                             log_directory=log_directory,
                             selected_columns=args.selected_columns,
