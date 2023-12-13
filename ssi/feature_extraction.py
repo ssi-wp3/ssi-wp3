@@ -84,7 +84,7 @@ class FeatureExtractorFactory:
                             destination_column: str,
                             feature_extractor_type: FeatureExtractorType,
                             filename: str,
-                            batch_size: int = 1000,
+                            batch_size: int,
                             ):
         feature_extractor = self.create_feature_extractor(
             feature_extractor_type)
