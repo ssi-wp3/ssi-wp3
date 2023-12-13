@@ -127,6 +127,7 @@ class ProductAnalysis:
                          f"products_{self.supermarket_name}_{coicop_level}_{product_id_column}_counts_per_category_per_year_month")
 
     def plot_product_counts(self, dataframe: pd.DataFrame, coicop_level: str, filename: str, time_column: str, count_column: str = "count"):
+        # TODO use index as x-axis
         fig = px.bar(dataframe, x=time_column, y=count_column,
                      title=f"Number of products per {time_column} for {coicop_level}")
         fig.write_html(filename)
