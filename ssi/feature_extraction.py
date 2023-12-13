@@ -74,7 +74,9 @@ class FeatureExtractorFactory:
 
     @property
     def feature_extractor_types(self):
-        return self.feature_extractors.keys()
+        return [feature_extractor_type
+                for feature_extractor_type in self.feature_extractors.keys()
+                if feature_extractor_type != FeatureExtractorType.test_extractor]
 
     def create_feature_extractor(self, feature_extractor_type: FeatureExtractorType):
         if feature_extractor_type in self.feature_extractors:
