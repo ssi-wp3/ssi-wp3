@@ -8,6 +8,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import spacy
 import tqdm
+import math
 import os
 
 
@@ -97,7 +98,7 @@ class FeatureExtractorFactory:
         for i in range(0, len(dataframe), batch_size):
             if progress_bar:
                 progress_bar.set_description(
-                    f"Encoding batch {i} out of {len(dataframe) / batch_size} for {feature_extractor_type}")
+                    f"Encoding batch {i // batch_size} out of {math.ceil(len(dataframe) / batch_size)} for {feature_extractor_type}")
 
             batch_df = dataframe.iloc[i:i+batch_size].copy()
             vectors = feature_extractor.fit_transform(batch_df[source_column])
