@@ -10,6 +10,10 @@ import os
 parser = argparse.ArgumentParser(description='Preprocess data')
 parser.add_argument("-s", "--source-column", type=str, default="ean_name",
                     help="Name of the column containing the (receipt) text to extract features from")
+parser.add_argument("-f", "--feature-extractors", type=str, nargs="+", default=[],
+                    choices=[
+                        feature_extractor_type.value for feature_extractor_type in FeatureExtractorType],
+                    help="Feature extractors to use")
 parser.add_argument("-b", "--batch-size", type=int,
                     default=10000, help="Batch size for feature extraction")
 args = parser.parse_args()
@@ -39,4 +43,6 @@ for combined_revenue_file in get_combined_revenue_files_in_directory(output_dire
         source_column=args.source_column,
         supermarket_name=supermarket_name,
         output_directory=features_directory,
+        feature_extractors=[FeatureExtractorType(
+            feature_extractor) for feature_extractor in args.feature_extractors],
         batch_size=args.batch_size)
