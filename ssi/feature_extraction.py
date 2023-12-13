@@ -1,7 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from scipy.sparse import issparse
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from .files import get_feature_filename
 import pandas as pd
 import pyarrow as pa
@@ -133,9 +133,11 @@ class FeatureExtractorFactory:
                                       source_column: str,
                                       supermarket_name: str,
                                       output_directory: str,
+                                      feature_extractors: Optional[List[FeatureExtractorType]] = None,
                                       batch_size: int = 1000):
+        feature_extractors = self.feature_extractor_types if not feature_extractors else feature_extractors
         with tqdm.tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
-            for feature_extractor_type in self.feature_extractor_types:
+            for feature_extractor_type in feature_extractors:
                 feature_filename = os.path.join(output_directory, get_feature_filename(
                     feature_extractor_type.value, supermarket_name))
                 progress_bar.set_description(
