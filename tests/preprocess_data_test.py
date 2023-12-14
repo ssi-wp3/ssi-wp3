@@ -156,9 +156,11 @@ class TestPreprocessData(unittest.TestCase):
 
     def test_preprocess_data(self):
         dataframe = pd.DataFrame({
+            "bg_number": [1 for _ in range(15)],
             "coicop_number": ["11201", "11201", "22312", "22312", "022312",
                               "123423", "54534", "054534", "54534", "54534",
                               "65645", "065645", "65645", "65645", "065645"],
+            "month": ["20180{i}" for i in range(15)],
             "product_name": [f"product_{i}" for i in range(15)],
             "isba_number": [i for i in range(15)],
             "isba_name": [f"isba_{i}" for i in range(15)],
@@ -167,11 +169,11 @@ class TestPreprocessData(unittest.TestCase):
         })
 
         processed_dataframe = preprocess_data(
-            dataframe, columns=["coicop_number", "ean_number", "ean_name"], coicop_column="coicop_number", product_id_column="product_id")
+            dataframe, columns=["bg_number", "month", "coicop_number", "ean_number", "ean_name"], coicop_column="coicop_number", product_id_column="product_id")
         self.assertEqual(len(dataframe), len(processed_dataframe))
         self.assertEqual([6] * len(processed_dataframe),
                          processed_dataframe["coicop_number"].str.len().tolist())
-        self.assertEqual(["coicop_number", "ean_number", "ean_name",
+        self.assertEqual(["supermarket_id", "year_month", "coicop_number", "ean_number", "ean_name",
                          "product_id", "coicop_division", "coicop_group",
                           "coicop_class", "coicop_subclass", "count"],
                          processed_dataframe.columns.tolist())
