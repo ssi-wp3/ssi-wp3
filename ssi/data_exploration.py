@@ -139,10 +139,9 @@ class ProductAnalysis:
             self.plot_directory, f"{counts_per_time_filename}.html"), time_column)
 
     def export_all_product_counts_per_time_unit(self, dataframe, product_id_column):
-        self.export_products_counts_per_time_unit(
-            dataframe, self.supermarket_name, product_id_column, self.year_column)
-        self.export_products_counts_per_time_unit(
-            dataframe, self.supermarket_name, product_id_column, self.year_month_column)
+        for time_column in [self.year_column, self.year_month_column]:
+            self.export_products_counts_per_time_unit(
+                dataframe, self.supermarket_name, product_id_column, time_column)
 
     def perform_product_analysis_per_coicop_level(self, dataframe: pd.DataFrame, coicop_level: str, product_description_column: str = "ean_name"):
         coicop_level_values = dataframe[coicop_level].unique()
