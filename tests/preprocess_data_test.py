@@ -176,6 +176,7 @@ class TestPreprocessData(unittest.TestCase):
         self.assertEqual([6] * len(processed_dataframe),
                          processed_dataframe["coicop_number"].str.len().tolist())
         self.assertEqual(["supermarket_id", "year_month", "coicop_number", "ean_number", "ean_name",
+                          "year", "month",
                          "product_id", "coicop_division", "coicop_group",
                           "coicop_class", "coicop_subclass", "count"],
                          processed_dataframe.columns.tolist())
@@ -186,6 +187,12 @@ class TestPreprocessData(unittest.TestCase):
                           "201806", "201807", "201808", "201809", "201810",
                           "201811", "201812", "201901", "201902", "201903"],
                          processed_dataframe["year_month"].tolist())
+        self.assertEqual(["2018", "2018", "2018", "2018", "2018", "2018",
+                          "2018", "2018", "2018", "2018", "2018", "2018",
+                          "2019", "2019", "2019"], processed_dataframe["year"].tolist())
+        self.assertEqual(["01", "02", "03", "04", "05",
+                          "06", "07", "08", "09", "10",
+                          "11", "12", "01", "02", "03"], processed_dataframe["month"].tolist())
 
         self.assertEqual(["011201", "011201", "022312", "022312", "022312",
                           "123423", "054534", "054534", "054534", "054534",
