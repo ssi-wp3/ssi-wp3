@@ -7,6 +7,7 @@ import pandas as pd
 import os
 import tqdm
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 
 def filter_coicop_level(dataframe: pd.DataFrame, coicop_level_column: str, coicop_level_value: str) -> pd.DataFrame:
@@ -28,15 +29,13 @@ def write_filtered_coicop_level_files(dataframe: pd.DataFrame, coicop_level_colu
                 progress_bar.update(1)
 
 
-def get_product_counts_per_time(dataframe: pd.DataFrame, time_column: str, year_month_column: str, product_id_column: str, agg_column_name: str = "count") -> pd.DataFrame:
-    dataframe = split_month_year_column(dataframe, year_month_column)
+def get_product_counts_per_time(dataframe: pd.DataFrame, time_column: str, product_id_column: str, agg_column_name: str = "count") -> pd.DataFrame:
     dataframe = dataframe.groupby(
         [time_column])[product_id_column].nunique()
     return pd.DataFrame(dataframe).rename(columns={product_id_column: agg_column_name})
 
 
-def get_product_counts_per_category_and_time(dataframe: pd.DataFrame, time_column: str, year_month_column: str, product_id_column: str, coicop_level_column: str, agg_column_name: str = "count") -> pd.DataFrame:
-    dataframe = split_month_year_column(dataframe, year_month_column)
+def get_product_counts_per_category_and_time(dataframe: pd.DataFrame, time_column: str, product_id_column: str, coicop_level_column: str, agg_column_name: str = "count") -> pd.DataFrame:
     dataframe = dataframe.groupby(
         [time_column, coicop_level_column])[product_id_column].nunique()
     return pd.DataFrame(dataframe).rename(columns={product_id_column: agg_column_name})
@@ -105,42 +104,44 @@ class ProductAnalysis:
 
     def retrieve_product_counts(self, dataframe: pd.DataFrame, coicop_level: str):
         self.export_product_counts(dataframe, coicop_level)
-        self.plot_product_counts(coicop_level)
-
-    def plot_product_counts(self, coicop_level: str):
-        for count_category in ["_counts_per_year", "counts_per_year_month", "_counts_per_category_per_year", "_counts_per_category_per_year_month"]:
-            data_files = [os.path.join(self.data_directory, filename)
-                          for filename in os.listdir(self.data_directory)
-                          if filename.startswith(f"products_{self.supermarket_name}_{coicop_level}") and filename.endswith(count_category)]
+        # self.plot_product_counts(coicop_level)
 
     def export_product_counts(self, dataframe, coicop_level):
         for product_id_column in self.product_id_columns:
-            self.export_product_counts_per_time_unit(
-                dataframe, coicop_level, product_id_column)
             self.export_product_counts_per_category_and_time(
                 dataframe, coicop_level, product_id_column)
 
     def export_product_counts_per_category_and_time(self, dataframe, coicop_level, product_id_column):
         product_counts_per_category_per_year_df = get_product_counts_per_category_and_time(
-            dataframe, self.year_column, self.year_month_column, product_id_column, coicop_level)
+            dataframe, self.year_column, product_id_column, coicop_level)
         export_dataframe(product_counts_per_category_per_year_df, self.data_directory,
                          f"products_{self.supermarket_name}_{coicop_level}_{product_id_column}_counts_per_category_per_year")
 
         product_counts_per_category_per_year_month_df = get_product_counts_per_category_and_time(
-            dataframe, self.year_month_column, self.year_month_column, product_id_column, coicop_level)
+            dataframe, self.year_month_column, product_id_column, coicop_level)
         export_dataframe(product_counts_per_category_per_year_month_df, self.data_directory,
                          f"products_{self.supermarket_name}_{coicop_level}_{product_id_column}_counts_per_category_per_year_month")
 
-    def export_product_counts_per_time_unit(self, dataframe, coicop_level, product_id_column):
-        product_counts_per_year_df = get_product_counts_per_time(
-            dataframe, self.year_column, self.year_month_column, product_id_column)
-        export_dataframe(product_counts_per_year_df, self.data_directory,
-                         f"products_{self.supermarket_name}_{coicop_level}_{product_id_column}_counts_per_year")
+    def plot_product_counts(self, dataframe: pd.DataFrame, filename: str, time_column: str, count_column: str = "count"):
+        # TODO use index as x-axis
+        fig = px.bar(dataframe, x=dataframe.index, y=count_column,
+                     title=f"Number of products per {time_column}")
+        fig.write_html(filename)
 
-        product_counts_per_year_month_df = get_product_counts_per_time(
-            dataframe, self.year_month_column, self.year_month_column, product_id_column)
-        export_dataframe(product_counts_per_year_month_df, self.data_directory,
-                         f"products_{self.supermarket_name}_{coicop_level}_{product_id_column}_counts_per_year_month")
+    def export_products_counts_per_time_unit(self, dataframe: pd.DataFrame, supermarket_name: str, product_id_column: str, time_column: str):
+        product_counts_per_time_df = get_product_counts_per_time(
+            dataframe, time_column, product_id_column)
+
+        counts_per_time_filename = f"products_{supermarket_name}_{product_id_column}_counts_per_{time_column}"
+        export_dataframe(product_counts_per_time_df, self.data_directory,
+                         counts_per_time_filename)
+        self.plot_product_counts(product_counts_per_time_df, os.path.join(
+            self.plot_directory, f"{counts_per_time_filename}.html"), time_column)
+
+    def export_all_product_counts_per_time_unit(self, dataframe, product_id_column):
+        for time_column in [self.year_column, self.year_month_column]:
+            self.export_products_counts_per_time_unit(
+                dataframe, self.supermarket_name, product_id_column, time_column)
 
     def perform_product_analysis_per_coicop_level(self, dataframe: pd.DataFrame, coicop_level: str, product_description_column: str = "ean_name"):
         coicop_level_values = dataframe[coicop_level].unique()
@@ -159,14 +160,15 @@ class ProductAnalysis:
                                 product_description_column, wordcloud_filename)
 
     def perform_product_level_analysis(self, dataframe: pd.DataFrame):
+        # Export product counts per time unit based on unique occurrences of product_id
+        for product_id_column in self.product_id_columns:
+            self.export_all_product_counts_per_time_unit(
+                dataframe, product_id_column)
+
         for coicop_level in self.coicop_level_columns:
             self.perform_product_analysis_per_coicop_level(
                 dataframe, coicop_level)
 
     def analyze_products(self, dataframe: pd.DataFrame):
-        # Small hack to rename "month" column
-        dataframe.rename(columns={"month": self.year_month_column},
-                         inplace=True)
-        print(dataframe.columns)
         self.plot_sunburst(dataframe, amount_column="count")
         self.perform_product_level_analysis(dataframe)
