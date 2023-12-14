@@ -3,6 +3,7 @@ from ssi.synthetic_data import generate_fake_revenue_data
 import unittest
 import pandas as pd
 import os
+import datetime
 
 
 class TestPreprocessData(unittest.TestCase):
@@ -160,7 +161,8 @@ class TestPreprocessData(unittest.TestCase):
             "coicop_number": ["11201", "11201", "22312", "22312", "022312",
                               "123423", "54534", "054534", "54534", "54534",
                               "65645", "065645", "65645", "65645", "065645"],
-            "month": ["20180{i}" for i in range(15)],
+            "month": [(datetime.date(2018, 1, 1) + datetime.timedelta(days=31*i)).strftime("%Y%m")
+                      for i in range(15)],
             "product_name": [f"product_{i}" for i in range(15)],
             "isba_number": [i for i in range(15)],
             "isba_name": [f"isba_{i}" for i in range(15)],
@@ -177,6 +179,14 @@ class TestPreprocessData(unittest.TestCase):
                          "product_id", "coicop_division", "coicop_group",
                           "coicop_class", "coicop_subclass", "count"],
                          processed_dataframe.columns.tolist())
+        self.assertEqual([1 for _ in range(15)],
+                         processed_dataframe["supermarket_id"].tolist())
+
+        self.assertEqual(["201801", "201802", "201803", "201804", "201805",
+                          "201806", "201807", "201808", "201809", "201810",
+                          "201811", "201812", "201901", "201902", "201903"],
+                         processed_dataframe["year_month"].tolist())
+
         self.assertEqual(["011201", "011201", "022312", "022312", "022312",
                           "123423", "054534", "054534", "054534", "054534",
                           "065645", "065645", "065645", "065645", "065645"],
