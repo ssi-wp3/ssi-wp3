@@ -35,23 +35,7 @@ there may be a delay in when the supermarket delivers the product inventory to t
 Also, supermarkets can decide not to deliver scanner data or to stop delivering scanner
 data. The sample of supermarkets may therefore not be representative nor complete. In addition, not all the products in the inventory will be labeled.
 
-- Does it really contain all the products in the inventory of a supermarket or is it a sample?
-- Do we have scanner data on an individual level? Per bank-account or per receipt?
-
-The CPI scanner data pipeline:
-
-1. Convert CPI csv to parquet files. Two kind of files:
-   - Files with receipt texts
-   - Files with supermarket revenue
-2. Pre-process CPI data:
-   1. Combine separate files (if any)
-   2. Filter out unused columns
-   3. Rename the columns to a standardized format
-   4. Unify the length of the COICOP numbers (6 digits, prepend zeroes)
-   5. Split the month_year column in two separate columns for month and year
-   6. Add a unique product id: a hash based on the receipt text
-   7. Split the COICOP number into columns for each COICOP level.
-   8. Get the number of products in each column
+More information about the CPI scanner data can be found [here](./CPI%20scanner%20data.md)
 
 ## String matching
 
