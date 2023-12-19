@@ -104,7 +104,8 @@ def save_combined_revenue_files(data_directory: str,
                                 product_description_column: str = "ean_name",
                                 coicop_level_columns: List[str] = [
                                     "coicop_division", "coicop_group", "coicop_class", "coicop_subclass"],
-                                filename_prefix: str = "Omzet", engine: str = "pyarrow"):
+                                filename_prefix: str = "Omzet",
+                                engine: str = "pyarrow"):
 
     supermarket_log_directory = os.path.join(log_directory, supermarket_name)
     data_logger = DataLogger(supermarket_log_directory)
