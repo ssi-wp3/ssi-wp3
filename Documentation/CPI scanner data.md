@@ -68,6 +68,14 @@ for both supermarkets. Check code of @HBS.
 
 ## Analysis of Feature Space
 
+- Distances of features to the centroid in their group:
+  - Euclidean distances to centroid in Euclidean space
+  - Cosine distances to centroid in Cosine space
+- Adversarial Validation, see [here](https://www.kaggle.com/code/carlmcbrideellis/what-is-adversarial-validation),
+  try to predict the supermarket from the receipt texts. If we can train a good classifier, the receipt texts from the
+  supermarkets come from a different distribution. Hence, it will be difficult to use a classifier trained on one
+  supermarket for another supermarket.
+
 ## Evaluation of the ML performance
 
 - Train time evaluation; how well does the algorithm perform?
