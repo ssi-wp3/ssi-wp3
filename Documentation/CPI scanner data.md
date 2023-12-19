@@ -42,6 +42,7 @@ for both supermarkets. Check code of @HBS.
 - Do all COICOP numbers have the same length?
   - For a five level COICOP classification we expect 6 digits; level one has two digits, classes 1-9 starting with a zero, i.e. 01-09.
   - Give a value counts of the COICOP number lengths.
+  - Check how many products cannot be extended to length 6.
   - Check how many unique COICOP numbers there are in the dataset.
   - Do any of the COICOP numbers already start with a 0?
 - Are EAN numbers unique?
@@ -51,12 +52,15 @@ for both supermarkets. Check code of @HBS.
   - Do we see most transitions from/to the 99 or "other" category?
   - Do transitions appear over time? For example 99 -> specific COICOP level
   - Chord diagram of EAN numbers?
+  - Parallel coordinate plot of EAN numbers over time?
 - Count number of unique products per COICOP level (level 1 until 5).
   - EAN numbers
   - Unique receipt texts.
   - Sunburst plots; gives hierarchical plot of product hierarchies
   - Number of unique texts per time unit (year/year-month)
   - Number of unique texts per time unit and COICOP category
+  - Chord diagram of product hashes
+  - Parallel coordinate plot of product hashes
 - Check the types of product descriptions in each COICOP level:
   - Manually by looking a some random product descriptions
   - By creating word clouds
