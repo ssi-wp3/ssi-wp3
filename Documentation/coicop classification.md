@@ -48,7 +48,9 @@ The CPI scanner data pipeline:
    2. Rename the columns to a standardized format
    3. Unify the length of the COICOP numbers (6 digits, prepend zeroes)
    4. Split the month_year column in two separate columns for month and year
-   5.
+   5. Add a unique product id: a hash based on the receipt text
+   6. Split the COICOP number into columns for each COICOP level.
+   7. Get the number of products in each column
 
 ## String matching
 
