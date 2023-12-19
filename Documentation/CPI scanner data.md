@@ -30,18 +30,39 @@ The CPI scanner data pipeline:
    - CountVectorizer
    - TFIDFVectorizer
    - Word embeddings: spacy NL embeddings.
-4. Train a ML classifier on the extracted features
+4. Train an ML classifier on the extracted features
 
 ## Analysis of COICOP levels/Product texts
 
 - CBS uses an old COICOP classification from before 2018. Which COICOP classification?
+- Do all COICOP numbers have the same length?
+  - For a five level COICOP classification we expect 6 digits; level one has two digits, classes 1-9 starting with a zero, i.e. 01-09.
+  - Give a value counts of the COICOP number lengths.
+  - Check how many unique COICOP numbers there are in the dataset.
+  - Do any of the COICOP numbers already start with a 0?
 - Are EAN numbers unique?
   - Do they always belong to the same COICOP category?
   - Do they always have the same (or similar) receipt text?
+  - Create a "transition" matrix, which EAN goes from which COICOP level to which?
+  - Do we see most transitions from/to the 99 or "other" category?
+  - Do transitions appear over time? For example 99 -> specific COICOP level
+  - Chord diagram of EAN numbers?
+- Count number of unique products per COICOP level (level 1 until 5).
+  - EAN numbers
+  - Unique receipt texts.
+  - Sunburst plots; gives hierarchical plot of product hierarchies
+  - Number of unique texts per time unit (year/year-month)
+  - Number of unique texts per time unit and COICOP category
+- Check the types of product descriptions in each COICOP level:
+  - Manually by looking a some random product descriptions
+  - By creating word clouds
+- Do receipt text/product descriptions change category?
 
 ## Analysis of Feature Space
 
 ## Evaluation of the ML performance
 
 - Train time evaluation; how well does the algorithm perform?
+  - Learning curve!
 - Evaluation in production; how well does the algorithm perform over time?
+  - F1 of algorithm trained on one time period, tested on other time periods. GroupKFold on years?
