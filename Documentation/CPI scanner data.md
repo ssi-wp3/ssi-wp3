@@ -73,7 +73,12 @@ for both supermarkets. Check code of @HBS.
   - Cosine distances to centroid in Cosine space
   - Create boxplots, use IQR to detect outliers
   - Plot the number of outliers per month/year, based on a centroid calculated for one month/year.
+  - Centroid distance may not say anything: circular clusters (db-scan example sklearn)
 - Apply Outlier/Novelty detection methods
+- PCA:
+  - which dimensions have highest variance, how many do we need?
+  - may be a better space to calculate distances (both euclidean as cosine).
+  - maybe outliers can be detected better in this space?
 - Adversarial Validation, see [here](https://www.kaggle.com/code/carlmcbrideellis/what-is-adversarial-validation),
   try to predict the supermarket from the receipt texts. If we can train a good classifier, the receipt texts from the
   supermarkets come from a different distribution. Hence, it will be difficult to use a classifier trained on one
