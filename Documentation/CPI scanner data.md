@@ -74,3 +74,4 @@ for both supermarkets. Check code of @HBS.
   - Learning curve!
 - Evaluation in production; how well does the algorithm perform over time?
   - F1 of algorithm trained on one time period, tested on other time periods. GroupKFold on years?
+- Should we train our own embedding?
