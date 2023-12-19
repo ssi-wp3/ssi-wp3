@@ -71,6 +71,9 @@ for both supermarkets. Check code of @HBS.
 - Distances of features to the centroid in their group:
   - Euclidean distances to centroid in Euclidean space
   - Cosine distances to centroid in Cosine space
+  - Create boxplots, use IQR to detect outliers
+  - Plot the number of outliers per month/year, based on a centroid calculated for one month/year.
+- Apply Outlier/Novelty detection methods
 - Adversarial Validation, see [here](https://www.kaggle.com/code/carlmcbrideellis/what-is-adversarial-validation),
   try to predict the supermarket from the receipt texts. If we can train a good classifier, the receipt texts from the
   supermarkets come from a different distribution. Hence, it will be difficult to use a classifier trained on one
