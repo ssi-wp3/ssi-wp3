@@ -22,7 +22,9 @@ Products on receipts can be manually labeled with their COICOP category. The lab
 - Can we say something about individual behavior? How often do individuals buy the same products.
 - Receipts say something about real-world behavior on an individual or household level, wherease CPI data says something about collective behavior. Or do we have scanner data per receipt?
 
-Labeled receipts can be used as testing material for both the OCR as the COICOP classification. OCR sometimes detects letters/words wrong. To test the effects of these distortions on COICOP classification we need real-world data, i.e. labeled receipts.
+Labeled receipts can be used as testing material for both the OCR as the COICOP
+classification. OCR sometimes detects letters/words wrong. To test the effects of these
+distortions on COICOP classification we need real-world data, i.e. labeled receipts.
 
 ### CPI scanner data
 
@@ -31,10 +33,22 @@ period of time. The advantage is that it contains an integral view of the invent
 supermarket at a certain time. The disadvantages can be that this view is not real-time;
 there may be a delay in when the supermarket delivers the product inventory to the NSI.
 Also, supermarkets can decide not to deliver scanner data or to stop delivering scanner
-data. The sample of supermarkets may therefore not be representative nor complete.
+data. The sample of supermarkets may therefore not be representative nor complete. In addition, not all the products in the inventory will be labeled.
 
 - Does it really contain all the products in the inventory of a supermarket or is it a sample?
 - Do we have scanner data on an individual level? Per bank-account or per receipt?
+
+The CPI scanner data pipeline:
+
+1. Convert CPI csv to parquet files. Two kind of files:
+   - Files with receipt texts
+   - Files with supermarket revenue
+2. Pre-process CPI data:
+   1. Filter out unused columns
+   2. Rename the columns to a standardized format
+   3. Unify the length of the COICOP numbers (6 digits, prepend zeroes)
+   4. Split the month_year column in two separate columns for month and year
+   5.
 
 ## String matching
 
