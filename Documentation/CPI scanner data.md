@@ -30,3 +30,17 @@ The CPI scanner data pipeline:
    - CountVectorizer
    - TFIDFVectorizer
    - Word embeddings: spacy NL embeddings.
+4. Train a ML classifier on the extracted features
+
+## Analysis of COICOP levels/Product texts
+
+- Are EAN numbers unique?
+  - Do they always belong to the same COICOP category?
+  - Do they always have the same (or similar) receipt text?
+
+## Analysis of Feature Space
+
+## Evaluation of the ML performance
+
+- Train time evaluation; how well does the algorithm perform?
+- Evaluation in production; how well does the algorithm perform over time?
