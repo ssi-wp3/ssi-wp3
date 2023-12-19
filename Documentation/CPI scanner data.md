@@ -10,6 +10,8 @@ data. The sample of supermarkets may therefore not be representative nor complet
 - Does it really contain all the products in the inventory of a supermarket or is it a sample?
 - Do we have scanner data on an individual level? Per bank-account or per receipt?
 
+## CPI scanner data pipeline
+
 The CPI scanner data pipeline:
 
 1. Convert CPI csv to parquet files. Two kind of files:
@@ -24,3 +26,7 @@ The CPI scanner data pipeline:
    6. Add a unique product id: a hash based on the receipt text
    7. Split the COICOP number into columns for each COICOP level.
    8. Get the number of products in each column
+3. Extract features from the receipt text using:
+   - CountVectorizer
+   - TFIDFVectorizer
+   - Word embeddings: spacy NL embeddings.
