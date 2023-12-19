@@ -32,6 +32,10 @@ The CPI scanner data pipeline:
    - Word embeddings: spacy NL embeddings.
 4. Train an ML classifier on the extracted features
 
+Note: Lidl uses EAN name from the revenue file for receipt text, whereas Plus uses a
+separate file for the receipt text and the revenue. Provide one unified file formate
+for both supermarkets. Check code of @HBS.
+
 ## Analysis of COICOP levels/Product texts
 
 - CBS uses an old COICOP classification from before 2018. Which COICOP classification?
