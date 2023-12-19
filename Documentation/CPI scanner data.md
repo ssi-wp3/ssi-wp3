@@ -34,6 +34,7 @@ The CPI scanner data pipeline:
 
 ## Analysis of COICOP levels/Product texts
 
+- CBS uses an old COICOP classification from before 2018. Which COICOP classification?
 - Are EAN numbers unique?
   - Do they always belong to the same COICOP category?
   - Do they always have the same (or similar) receipt text?
