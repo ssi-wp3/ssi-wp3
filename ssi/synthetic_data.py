@@ -83,7 +83,9 @@ def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int, su
         'coicop_number': coicop_number,
         'coicop_name': coicop_name,
         'ean_number': ean_number,
-        'ean_name': ean_name
+        'ean_name': ean_name,
+        'revenue': np.random.randint(100, 1000, size=num_rows),
+        'amount': np.random.randint(1, 10, size=num_rows)
     })
     return fake_data_df.sort_values(by=["bg_number", "month", "coicop_number"]).reset_index(drop=True)
 
