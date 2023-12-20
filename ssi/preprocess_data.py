@@ -98,21 +98,20 @@ def save_combined_revenue_files(data_directory: str,
                                 output_filename: str,
                                 supermarket_name: str,
                                 log_directory: str,
+                                sort_columns: Dict[str, bool],
                                 selected_columns: List[str],
+                                coicop_level_columns: List[str],                                column_mapping: Dict[str, str] = dict(),
                                 coicop_column: str = "coicop_number",
                                 product_id_column: str = "product_id",
                                 product_description_column: str = "ean_name",
-                                coicop_level_columns: List[str] = [
-                                    "coicop_division", "coicop_group", "coicop_class", "coicop_subclass"],
                                 filename_prefix: str = "Omzet",
-                                month_year_column: str = "month",
                                 engine: str = "pyarrow"):
 
     supermarket_log_directory = os.path.join(log_directory, supermarket_name)
     data_logger = DataLogger(supermarket_log_directory)
 
     combined_df = combine_revenue_files_in_folder(
-        data_directory, supermarket_name, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True], filename_prefix=filename_prefix)
+        data_directory, supermarket_name, sort_columns=list(sort_columns.keys()), sort_order=list(sort_columns.values()), filename_prefix=filename_prefix)
     data_logger.log_before_preprocessing(combined_df, coicop_column)
 
     combined_df = preprocess_data(
@@ -121,8 +120,7 @@ def save_combined_revenue_files(data_directory: str,
         coicop_column=coicop_column,
         product_id_column=product_id_column,
         product_description_column=product_description_column,
-        column_mapping={"bg_number": "supermarket_id",
-                        month_year_column: "year_month"}
+        column_mapping=column_mapping
     )
 
     data_logger.log_after_preprocessing(
