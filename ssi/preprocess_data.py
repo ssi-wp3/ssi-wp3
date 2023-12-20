@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from .data_logging import DataLogger
 from .files import get_revenue_files_in_folder
 from .constants import Constants
@@ -61,11 +61,16 @@ def rename_columns(dataframe: pd.DataFrame, column_mapping: dict) -> pd.DataFram
     return dataframe.rename(columns=column_mapping)
 
 
-def preprocess_data(dataframe: pd.DataFrame, columns: List[str], coicop_column: str, product_id_column: str,
-                    product_description_column: str = "ean_name", month_year_column: str = "month") -> pd.DataFrame:
+def preprocess_data(dataframe: pd.DataFrame,
+                    columns: List[str],
+                    coicop_column: str,
+                    product_id_column: str,
+                    product_description_column: str,
+                    column_mapping: Dict[str, str] = dict(),
+                    ) -> pd.DataFrame:
     dataframe = filter_columns(dataframe, columns)
     dataframe = rename_columns(
-        dataframe, {"bg_number": "supermarket_id", month_year_column: "year_month"})
+        dataframe, column_mapping)
     dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
     dataframe = split_month_year_column(
         dataframe, month_year_column="year_month")
@@ -105,6 +110,7 @@ def save_combined_revenue_files(data_directory: str,
                                 coicop_level_columns: List[str] = [
                                     "coicop_division", "coicop_group", "coicop_class", "coicop_subclass"],
                                 filename_prefix: str = "Omzet",
+                                month_year_column: str = "month",
                                 engine: str = "pyarrow"):
 
     supermarket_log_directory = os.path.join(log_directory, supermarket_name)
@@ -115,8 +121,14 @@ def save_combined_revenue_files(data_directory: str,
     data_logger.log_before_preprocessing(combined_df, coicop_column)
 
     combined_df = preprocess_data(
-        combined_df, columns=selected_columns, coicop_column=coicop_column,
-        product_id_column=product_id_column, product_description_column=product_description_column)
+        combined_df,
+        columns=selected_columns,
+        coicop_column=coicop_column,
+        product_id_column=product_id_column,
+        product_description_column=product_description_column,
+        column_mapping={"bg_number": "supermarket_id",
+                        month_year_column: "year_month"}
+    )
 
     data_logger.log_after_preprocessing(
         combined_df, coicop_column, coicop_level_columns, product_id_column)

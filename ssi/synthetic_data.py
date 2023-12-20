@@ -92,5 +92,5 @@ def generate_fake_data_with_coicop_levels(num_rows: int, start_date: int, end_da
     dataframe = generate_fake_revenue_data(num_rows, start_date, end_date)
     dataframe = preprocess_data(dataframe, ["bg_number", "month", "coicop_number",
                                             "coicop_name", "ean_number", "ean_name"],
-                                "coicop_number", "product_id", "ean_name")
+                                "coicop_number", "product_id", "ean_name", column_mapping={"bg_number": "supermarket_id", "month": "year_month"})
     return dataframe

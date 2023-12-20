@@ -20,7 +20,7 @@ class DataExplorationTest(unittest.TestCase):
 
     def test_get_product_counts_per_year(self):
         dataframe = pd.DataFrame({
-            "year_month": ["201801", "201801", "201901", "201902", "201903", "202001", "202002", "202003", "202004", "202004"],
+            "year": ["2018", "2018", "2019", "2019", "2019", "2020", "2020", "2020", "2020", "2020"],
             "product_id": [1, 2, 1, 2, 2, 3, 1, 2, 3, 1]
         })
 
@@ -29,7 +29,10 @@ class DataExplorationTest(unittest.TestCase):
         }, index=["2018", "2019", "2020"])
 
         counts_per_year_df = get_product_counts_per_time(
-            dataframe, "year", "year_month", "product_id")
+            dataframe, "year", "product_id")
+
+        print(expected_dataframe)
+        print(counts_per_year_df)
 
         self.assertTrue(expected_dataframe.equals(counts_per_year_df))
 
@@ -44,13 +47,13 @@ class DataExplorationTest(unittest.TestCase):
         }, index=["201801", "201901", "201902", "201903", "202001", "202002", "202003", "202004"])
 
         counts_per_year_df = get_product_counts_per_time(
-            dataframe, "year_month", "year_month", "product_id")
+            dataframe, "year_month", "product_id")
 
         self.assertTrue(expected_dataframe.equals(counts_per_year_df))
 
     def test_get_product_counts_per_category_per_year(self):
         dataframe = pd.DataFrame({
-            "year_month": ["201801", "201801", "201901", "201902", "201903", "202001", "202002", "202003", "202004", "202004"],
+            "year": ["2018", "2018", "2019", "2019", "2019", "2020", "2020", "2020", "2020", "2020"],
             "product_id": [1, 2, 1, 2, 2, 3, 5, 6, 7, 5],
             "coicop_division": ["01", "01", "01", "01", "02", "02", "02", "03", "03", "02"]
         })
@@ -63,7 +66,7 @@ class DataExplorationTest(unittest.TestCase):
         )
 
         counts_per_year_df = get_product_counts_per_category_and_time(
-            dataframe, "year", "year_month", "product_id", "coicop_division")
+            dataframe, "year", "product_id", "coicop_division")
 
         self.assertTrue(expected_dataframe.equals(counts_per_year_df))
 
@@ -82,6 +85,6 @@ class DataExplorationTest(unittest.TestCase):
         )
 
         counts_per_year_df = get_product_counts_per_category_and_time(
-            dataframe, "year_month", "year_month", "product_id", "coicop_division")
+            dataframe, "year_month", "product_id", "coicop_division")
 
         self.assertTrue(expected_dataframe.equals(counts_per_year_df))

@@ -171,11 +171,19 @@ class TestPreprocessData(unittest.TestCase):
         })
 
         processed_dataframe = preprocess_data(
-            dataframe, columns=["bg_number", "month", "coicop_number", "ean_number", "ean_name"], coicop_column="coicop_number", product_id_column="product_id")
+            dataframe,
+            columns=["bg_number", "month",
+                     "coicop_number", "ean_number", "ean_name"],
+            coicop_column="coicop_number",
+            product_id_column="product_id",
+            product_description_column="receipt_text",
+            column_mapping={"bg_number": "supermarket_id",
+                            "month": "year_month", "ean_name": "receipt_text"},
+        )
         self.assertEqual(len(dataframe), len(processed_dataframe))
         self.assertEqual([6] * len(processed_dataframe),
                          processed_dataframe["coicop_number"].str.len().tolist())
-        self.assertEqual(["supermarket_id", "year_month", "coicop_number", "ean_number", "ean_name",
+        self.assertEqual(["supermarket_id", "year_month", "coicop_number", "ean_number", "receipt_text",
                           "year", "month",
                          "product_id", "coicop_division", "coicop_group",
                           "coicop_class", "coicop_subclass", "count"],
