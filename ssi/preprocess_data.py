@@ -61,7 +61,7 @@ def preprocess_data(dataframe: pd.DataFrame,
                     coicop_column: str,
                     product_id_column: str,
                     product_description_column: str,
-                    column_mapping: Dict[str, str] = dict(),
+                    column_mapping: Dict[str, str],
                     ) -> pd.DataFrame:
     dataframe = filter_columns(dataframe, columns)
     dataframe = rename_columns(
@@ -100,7 +100,8 @@ def save_combined_revenue_files(data_directory: str,
                                 log_directory: str,
                                 sort_columns: Dict[str, bool],
                                 selected_columns: List[str],
-                                coicop_level_columns: List[str],                                column_mapping: Dict[str, str] = dict(),
+                                coicop_level_columns: List[str],
+                                column_mapping: Dict[str, str],
                                 coicop_column: str = "coicop_number",
                                 product_id_column: str = "product_id",
                                 product_description_column: str = "ean_name",
