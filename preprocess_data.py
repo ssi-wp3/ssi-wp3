@@ -18,8 +18,8 @@ parser.add_argument("-pd", "--product-description-column", type=str, default="ea
                     help="Name of the column containing the product descriptions")
 parser.add_argument("-clv", "--coicop-level-columns", nargs="+", type=str,
                     default=[], help="Names of the columns containing the coicop levels")
-parser.add_argument("-sc", "--selected-columns", nargs="+", type=str, default=[
-                    "bg_number", "month", "coicop_number", "ean_number", "ean_name"], help="Names of the columns to select")
+parser.add_argument("-sc", "--selected-columns", nargs="+",
+                    type=str, default=[], help="Names of the columns to select")
 parser.add_argument("-fp", "--filename-prefix", type=str,
                     default="Omzet", help="Prefix of the revenue files")
 args = parser.parse_args()
@@ -34,6 +34,8 @@ if not os.path.exists(log_directory):
     print(f"Creating log directory {log_directory}")
     os.makedirs(log_directory)
 
+selected_columns = ["bg_number", "month", "coicop_number", "ean_number", "ean_name",
+                    "revenue", "amount"] if not args.selected_columns else args.selected_columns
 sort_columns = {"bg_number": True, "month": True, "coicop_number": True}
 column_mapping = {"bg_number": "supermarket_id", "month": "year_month"}
 coicop_level_columns = Constants.COICOP_LEVELS_COLUMNS if not args.coicop_level_columns else args.coicop_level_columns
@@ -44,7 +46,7 @@ save_combined_revenue_files(data_directory=output_directory,
                             supermarket_name=args.supermarket_name,
                             log_directory=log_directory,
                             sort_columns=sort_columns,
-                            selected_columns=args.selected_columns,
+                            selected_columns=selected_columns,
                             coicop_level_columns=args.coicop_level_columns,
                             column_mapping=column_mapping,
                             coicop_column=args.coicop_column,
