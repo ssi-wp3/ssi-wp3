@@ -8,11 +8,6 @@ import tqdm
 
 
 def split_coicop(coicop_column: pd.Series) -> pd.DataFrame:
-    # "coicop_number": coicop_column,
-    # "coicop_division": coicop_column.str[:2],
-    # "coicop_group": coicop_column.str[:3],
-    # "coicop_class": coicop_column.str[:4],
-    # "coicop_subclass": coicop_column.str[:5],
     return pd.DataFrame({column: coicop_column.str[:index + 2]
                         for index, column in enumerate(Constants.COICOP_LEVELS_COLUMNS)
                          })

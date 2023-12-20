@@ -22,7 +22,7 @@ class TestPreprocessData(unittest.TestCase):
         ])
 
         self.assertTrue(coicop_division.equals(split_coicop(
-            self.coicop_series).coicop_division))
+            self.coicop_series).coicop_level_1))
 
     def test_split_coicop_returns_coicop_groups(self):
         coicop_group = pd.Series([
@@ -30,7 +30,7 @@ class TestPreprocessData(unittest.TestCase):
         ])
 
         self.assertTrue(coicop_group.equals(split_coicop(
-            self.coicop_series).coicop_group))
+            self.coicop_series).coicop_level_2))
 
     def test_split_coicop_returns_coicop_classes(self):
         coicop_class = pd.Series([
@@ -38,14 +38,14 @@ class TestPreprocessData(unittest.TestCase):
         ])
 
         self.assertTrue(coicop_class.equals(split_coicop(
-            self.coicop_series).coicop_class))
+            self.coicop_series).coicop_level_3))
 
     def test_split_coicop_returns_coicop_subclasses(self):
         coicop_subclass = pd.Series([
             "01120", "02231", "12342", "05453", "06564"
         ])
         self.assertTrue(coicop_subclass.equals(split_coicop(
-            self.coicop_series).coicop_subclass))
+            self.coicop_series).coicop_level_4))
 
     def test_split_month_year(self):
         self.assertEqual(("2018", "01"), split_month_year("201801"))
@@ -83,13 +83,13 @@ class TestPreprocessData(unittest.TestCase):
         dataframe = pd.DataFrame(
             {"coicop_number": ["011201", "022312", "123423", "054534", "065645"]})
         dataframe = add_coicop_levels(dataframe)
-        self.assertTrue(dataframe["coicop_division"].equals(
+        self.assertTrue(dataframe["coicop_level_1"].equals(
             pd.Series(["01", "02", "12", "05", "06"])))
-        self.assertTrue(dataframe["coicop_group"].equals(
+        self.assertTrue(dataframe["coicop_level_2"].equals(
             pd.Series(["011", "022", "123", "054", "065"])))
-        self.assertTrue(dataframe["coicop_class"].equals(
+        self.assertTrue(dataframe["coicop_level_3"].equals(
             pd.Series(["0112", "0223", "1234", "0545", "0656"])))
-        self.assertTrue(dataframe["coicop_subclass"].equals(
+        self.assertTrue(dataframe["coicop_level_4"].equals(
             pd.Series(["01120", "02231", "12342", "05453", "06564"])))
 
     def test_get_category_counts(self):
@@ -185,8 +185,8 @@ class TestPreprocessData(unittest.TestCase):
                          processed_dataframe["coicop_number"].str.len().tolist())
         self.assertEqual(["supermarket_id", "year_month", "coicop_number", "ean_number", "receipt_text",
                           "year", "month",
-                         "product_id", "coicop_division", "coicop_group",
-                          "coicop_class", "coicop_subclass", "count"],
+                         "product_id", "coicop_level_1", "coicop_level_2",
+                          "coicop_level_3", "coicop_level_4", "count"],
                          processed_dataframe.columns.tolist())
         self.assertEqual([1 for _ in range(15)],
                          processed_dataframe["supermarket_id"].tolist())
@@ -210,16 +210,16 @@ class TestPreprocessData(unittest.TestCase):
             15)], processed_dataframe["product_id"].tolist())
         self.assertEqual(["01", "01", "02", "02", "02",
                           "12", "05", "05", "05", "05",
-                          "06", "06", "06", "06", "06"], processed_dataframe["coicop_division"].tolist())
+                          "06", "06", "06", "06", "06"], processed_dataframe["coicop_level_1"].tolist())
         self.assertEqual(["011", "011", "022", "022", "022",
                           "123", "054", "054", "054", "054",
-                          "065", "065", "065", "065", "065"], processed_dataframe["coicop_group"].tolist())
+                          "065", "065", "065", "065", "065"], processed_dataframe["coicop_level_2"].tolist())
         self.assertEqual(["0112", "0112", "0223", "0223", "0223",
                           "1234", "0545", "0545", "0545", "0545",
-                          "0656", "0656", "0656", "0656", "0656"], processed_dataframe["coicop_class"].tolist())
+                          "0656", "0656", "0656", "0656", "0656"], processed_dataframe["coicop_level_3"].tolist())
         self.assertEqual(["01120", "01120", "02231", "02231", "02231",
                           "12342", "05453", "05453", "05453", "05453",
-                          "06564", "06564", "06564", "06564", "06564"], processed_dataframe["coicop_subclass"].tolist())
+                          "06564", "06564", "06564", "06564", "06564"], processed_dataframe["coicop_level_4"].tolist())
         self.assertEqual([2, 2, 3, 3, 3,
                           1, 4, 4, 4, 4,
                           5, 5, 5, 5, 5], processed_dataframe["count"].tolist())
