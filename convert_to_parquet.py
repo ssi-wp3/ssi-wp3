@@ -7,31 +7,40 @@ import os
 import tqdm
 import numpy as np
 
+
 def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
     # From Justin's code, but converted them to english and lower case
     column_types = OrderedDict([
-                ('bg_number', str), 
-                ('month', str), 
-                ('coicop_number', str), 
-                ('coicop_name', str), 
-                ('isba_number', str),
-                ('isba_name', str), 
-                ('esba_number', str), 
-                ('esba_name', str), 
-                ('rep_id', str),
-                ('ean_number', str), 
-                ('ean_name', str), 
-                ('revenue', np.float32), 
-                ('amount', np.float32)
+        ('bg_number', str),
+        ('month', str),
+        ('coicop_number', str),
+        ('coicop_name', str),
+        ('isba_number', str),
+        ('isba_name', str),
+        ('esba_number', str),
+        ('esba_name', str),
+        ('rep_id', str),
+        ('ean_number', str),
+        ('ean_name', str),
+        ('revenue', np.float32),
+        ('amount', np.float32)
     ])
-    
+
     if filename.lower().startswith("omzeteans"):
         return column_types
     elif filename.lower().startswith("output"):
-        return OrderedDict([(column_name, column_types[column_name]) 
-            for column_name in ['bg_number', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', 'ean_number', 'ean_name'] 
-        ]) 
+        return OrderedDict([(column_name, column_types[column_name])
+                            for column_name in ['bg_number', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', 'ean_number', 'ean_name']
+                            ])
+    elif filename.lower().startswith("kassabon"):
+        return OrderedDict([
+            ('start_date', str),
+            ('ean_number', str),
+            ('receipt_text', str),
+            ('rep_id', str)
+        ])
     return None
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-directory",
@@ -75,10 +84,11 @@ for input_filename in progress_bar:
 
     first_line = pd.read_csv(input_filename, sep=args.delimiter, nrows=1)
 
-    # Add header names and types to all but kassa files 
-    header_types = get_column_types(filename) 
-    header_names = None if not header_types else [name for name in header_types.keys()]
-    df = pd.read_csv(input_filename, sep=args.delimiter, engine="pyarrow", 
-                     encoding=args.encoding, decimal=args.decimal, 
-                     names=header_names, dtype=header_types)
+    # Add header names and types to all but kassa files
+    header_types = get_column_types(filename)
+    header_names = None if not header_types else [
+        name for name in header_types.keys()]
+    df = pd.read_csv(input_filename, sep=args.delimiter, engine="pyarrow",
+                     encoding=args.encoding, decimal=args.decimal,
+                     names=header_names, dtype=header_types, parse_dates=True)
     df.to_parquet(output_filename, engine="pyarrow")
