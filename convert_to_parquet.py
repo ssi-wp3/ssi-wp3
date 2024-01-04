@@ -34,11 +34,22 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
                             ])
     elif filename.lower().startswith("kassabon"):
         return OrderedDict([
-            ('start_date', str),
-            ('ean_number', str),
-            ('receipt_text', str),
-            ('rep_id', str)
+            ('Datum_vanaf', str),
+            ('Ean', str),
+            ('Kassabon', str),
+            ('RPK_rep_id', str)
         ])
+    return None
+
+
+def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
+    if filename.lower().startswith("kassabon"):
+        return {
+            'Datum_vanaf': 'start_date',
+            'Ean': 'ean_number',
+            'Kassabon': 'receipt_text',
+            'RPK_rep_id': 'rep_id'
+        }
     return None
 
 
@@ -90,6 +101,9 @@ for input_filename in progress_bar:
         name for name in header_types.keys()]
     df = pd.read_csv(input_filename, sep=args.delimiter, engine="pyarrow",
                      encoding=args.encoding, decimal=args.decimal,
-                     header=0 if filename.lower().startswith("kassabon") else "infer",
                      names=header_names, dtype=header_types, parse_dates=True)
+
+    columns_to_rename = get_columns_to_rename(filename)
+    if columns_to_rename:
+        df = df.rename(columns=columns_to_rename)
     df.to_parquet(output_filename, engine="pyarrow")
