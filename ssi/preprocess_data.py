@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from .data_logging import DataLogger
 from .files import get_revenue_files_in_folder
 from .constants import Constants
@@ -48,8 +48,8 @@ def add_unique_product_id(dataframe: pd.DataFrame, column_name: str = "product_i
     return dataframe
 
 
-def filter_columns(dataframe: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-    return dataframe[columns]
+def filter_columns(dataframe: pd.DataFrame, columns: Optional[List[str]]) -> pd.DataFrame:
+    return dataframe if not columns else dataframe[columns]
 
 
 def rename_columns(dataframe: pd.DataFrame, column_mapping: dict) -> pd.DataFrame:
