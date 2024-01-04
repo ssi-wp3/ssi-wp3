@@ -32,13 +32,6 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
         return OrderedDict([(column_name, column_types[column_name])
                             for column_name in ['bg_number', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', 'ean_number', 'ean_name']
                             ])
-    elif filename.lower().startswith("kassabon"):
-        return OrderedDict([
-            ('Datum_vanaf', str),
-            ('Ean', str),
-            ('Kassabon', str),
-            ('RPK_rep_id', str)
-        ])
     return None
 
 
