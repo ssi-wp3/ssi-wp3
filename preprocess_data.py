@@ -34,7 +34,7 @@ if not os.path.exists(log_directory):
     print(f"Creating log directory {log_directory}")
     os.makedirs(log_directory)
 
-selected_columns = ["bg_number", "month", "coicop_number", "ean_number", "ean_name",
+selected_columns = ["bg_number", "month", "coicop_number", "rep_id", "ean_number", "ean_name",
                     "revenue", "amount"] if not args.selected_columns else args.selected_columns
 sort_columns = {"bg_number": True, "month": True, "coicop_number": True}
 column_mapping = {"bg_number": "supermarket_id", "month": "year_month"}
