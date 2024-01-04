@@ -90,6 +90,6 @@ for input_filename in progress_bar:
         name for name in header_types.keys()]
     df = pd.read_csv(input_filename, sep=args.delimiter, engine="pyarrow",
                      encoding=args.encoding, decimal=args.decimal,
-                     header=0 if filename.lower().startswith("kassabon") else "infer"
+                     header=0 if filename.lower().startswith("kassabon") else "infer",
                      names=header_names, dtype=header_types, parse_dates=True)
     df.to_parquet(output_filename, engine="pyarrow")
