@@ -13,6 +13,31 @@
 
 \section{Introduction}
 
+Train a ML classifier to classify receipt texts to COICOP labels:
+- Several levels of COICOP
+- Receipt text for Plus and LIDL supermarkets
+- Encode receipt text as a vector, several methods: 
+    - Several encodings have different qualities, evaluate quality of these encodings
+    - Which encoding/embedding works the best?
+    - Do we need to train our own embedding?
+    - How do vector distances differ between COICOP categories?
+    
+Can we find new products easily? Outlier/Novelty detection methods:    
+    - Cluster on vectors of receipt text
+
+- Train on one supermarket, evaluate on other supermarket
+- Which product categories are most difficult to classify?
+- Which product caterogies are classified best/worst?
+- How do supermarkets differ in their product categories?
+
+String distances:
+- How do string distances differ between COICOP categories?
+
+From previous work it became clear that ML classifier performance degrades over time
+- Evaluate degradation of performance over time:
+    - Train on one year, evaluate on next year
+
+
 
 
 \end{document}
