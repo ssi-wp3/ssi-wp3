@@ -13,14 +13,27 @@
 
 \section{Introduction}
 
+Process:
+- Data preparation
+- Data analysis
+- Train ML classifier
+- Evaluate ML classifier:
+    - After training
+    - On new data (for instance different supermarket)
+    - Over time (train on one year, evaluate on next year)
+
+
+
+
 Train a ML classifier to classify receipt texts to COICOP labels:
 - Several levels of COICOP
 - Receipt text for Plus and LIDL supermarkets
 - Encode receipt text as a vector, several methods: 
     - Several encodings have different qualities, evaluate quality of these encodings
     - Which encoding/embedding works the best?
-    - Do we need to train our own embedding?
-    - How do vector distances differ between COICOP categories?
+    - How do vector distances differ between COICOP categories? How? Which base-model?
+- Do receipt text change COICOP label and if so how often?
+- How often do unique identifiers such as EAN codes change? On what COICOP level do they change?
     
 Can we find new products easily? Outlier/Novelty detection methods:    
     - Cluster on vectors of receipt text
@@ -32,6 +45,12 @@ Can we find new products easily? Outlier/Novelty detection methods:
 
 String distances:
 - How do string distances differ between COICOP categories?
+
+Manual labeling by participants:
+- How do we show participants a list of relevant COICOP categories?
+- Which level of COICOP category?
+- Can we evaluate the quality of the manual labels? By comparing random selection of top k-labels with a 
+bootstrap method?
 
 From previous work it became clear that ML classifier performance degrades over time
 - Evaluate degradation of performance over time:
