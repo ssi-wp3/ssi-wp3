@@ -16,6 +16,8 @@ parser.add_argument("-f", "--feature-extractors", type=str, nargs="+", default=[
                     help="Feature extractors to use")
 parser.add_argument("-b", "--batch-size", type=int,
                     default=10000, help="Batch size for feature extraction")
+parser.add_argument("-i", "--input-filename", type=str,
+                    default=None, help="A specific source file to use")
 args = parser.parse_args()
 
 # load environment variables from .env file for project
@@ -34,6 +36,11 @@ if not os.path.exists(features_directory):
 feature_extractor_factory = FeatureExtractorFactory()
 
 for combined_revenue_file in get_combined_revenue_files_in_directory(output_directory):
+    if args.input_filename and args.input_filename != combined_revenue_file:
+        print(
+            f"Skipping {combined_revenue_file} because it does not match {args.input_filename}")
+        continue
+
     print(f"Extracting features from {combined_revenue_file}")
     revenue_dataframe = pd.read_parquet(
         combined_revenue_file, engine="pyarrow")
