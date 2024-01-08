@@ -26,7 +26,13 @@ Process:
 
 
 Train a ML classifier to classify receipt texts to COICOP labels:
+- What are common ways to classify short texts?
 - Several levels of COICOP
+    - One classifier for deepest COICOP level?
+    - One classifier for each COICOP level? If so, how to combine these classifiers?
+    - Can we use sales data as a prior for the classifier? For instance, number of products sold, 
+    or the revenue of a product?
+    - Which COICOP level is sufficient for our purposes? i.e. the SSI/HBS app and survey?
 - Receipt text for Plus and LIDL supermarkets
 - Encode receipt text as a vector, several methods: 
     - Several encodings have different qualities, evaluate quality of these encodings
@@ -34,6 +40,8 @@ Train a ML classifier to classify receipt texts to COICOP labels:
     - How do vector distances differ between COICOP categories? How? Which base-model?
 - Do receipt text change COICOP label and if so how often?
 - How often do unique identifiers such as EAN codes change? On what COICOP level do they change?
+- What about the supermarkets for which we do not have data? 
+- What about other stores for which we do not have any labeled data?
     
 Can we find new products easily? Outlier/Novelty detection methods:    
     - Cluster on vectors of receipt text
