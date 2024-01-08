@@ -36,7 +36,7 @@ if not os.path.exists(features_directory):
 feature_extractor_factory = FeatureExtractorFactory()
 
 for combined_revenue_file in get_combined_revenue_files_in_directory(output_directory):
-    if args.input_filename and args.input_filename != combined_revenue_file:
+    if args.input_filename and args.input_filename != os.path.basename(combined_revenue_file):
         print(
             f"Skipping {combined_revenue_file} because it does not match {args.input_filename}")
         continue
