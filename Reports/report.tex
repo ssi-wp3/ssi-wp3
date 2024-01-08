@@ -14,7 +14,12 @@
 \section{Introduction}
 
 Process:
-- Data preparation
+- Data preparation:
+    - LIDL revenue data already contains receipt texts, EAN name = receipt text
+    - Plus revenue data does not contain receipt texts, the receipt texts are in another file and need to became
+    coupled on an internal identifier called rep id. Plus revenue data is available for a larger time period than the
+    Plus receipt data. What do we do with the data before the receipt texts are available?
+
 - Data analysis
 - Train ML classifier
 - Evaluate ML classifier:
