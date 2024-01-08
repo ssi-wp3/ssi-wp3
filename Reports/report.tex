@@ -50,7 +50,11 @@ Train a ML classifier to classify receipt texts to COICOP labels:
 - Does adding the product labels from the ean\_name column improve the classifier?
 - How much data do we need to train a classifier?
 - Which metric to use to evaluate the classifier?
-    
+- Will fine-tuning a model trained on one country (NL) make it easier to train a model better on another country (DE)?
+- Can we make a multi-lingual model?
+    - And if so, will this model make it easier for countries with only manually labeled data to train a model?
+    - How much data do we need when training a model from scratch vs. how much data do we need when fine-tuning a model?
+
 Can we find new products easily? Outlier/Novelty detection methods:    
     - Cluster on vectors of receipt text:
         - Check labels of text with cluster labels and see if some receipt texts should be part of another cluster based on the vector
