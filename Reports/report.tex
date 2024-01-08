@@ -52,7 +52,9 @@ Train a ML classifier to classify receipt texts to COICOP labels:
 - Which metric to use to evaluate the classifier?
     
 Can we find new products easily? Outlier/Novelty detection methods:    
-    - Cluster on vectors of receipt text
+    - Cluster on vectors of receipt text:
+        - Check labels of text with cluster labels and see if some receipt texts should be part of another cluster based on the vector
+        this gives an idea of the quality of the COICOP classification but can also give an idea about the quality of the embedding
 
 - Train on one supermarket, evaluate on other supermarket
 - Which product categories are most difficult to classify?
