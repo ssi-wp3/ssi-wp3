@@ -1,16 +1,24 @@
 from ssi.feature_extraction import FeatureExtractorType
+from ssi.train_model import ModelType, train_model_with_feature_extractors
 import argparse
-import os
-import joblib
 
 
 def main(args):
-    pass
+    train_model_with_feature_extractors(args.input_filename,
+                                        args.receipt_text_column,
+                                        args.coicop_column,
+                                        [FeatureExtractorType(
+                                            feature_extractor)
+                                            for feature_extractor in args.feature_extractors],
+                                        ModelType(args.model),
+                                        args.test_size,
+                                        args.output_filename)
 
 
 if __name__ == "__main__":
     feature_extractor_choices = [feature_extractor_type.value
                                  for feature_extractor_type in FeatureExtractorType]
+    model_choices = [model_type.value for model_type in ModelType]
 
     parser = argparse.ArgumentParser(description='Train a COICOP classifier')
     parser.add_argument("-i", "--input-filename", type=str,
@@ -22,7 +30,7 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--feature-extractors", type=str, nargs="+", default=[],
                         choices=feature_extractor_choices,
                         help="Feature extractors to use")
-    parser.add_argument("-m", "--model", type=str, required=True,
+    parser.add_argument("-m", "--model", type=str, choices=model_choices, required=True,
                         help="The model to use")
     parser.add_argument("-o", "--output-filename", type=str,
                         required=True, help="The output filename for the pipeline")
