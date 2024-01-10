@@ -1,3 +1,4 @@
+from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType
 import argparse
 import os
 import joblib
@@ -8,6 +9,9 @@ def main(args):
 
 
 if __name__ == "__main__":
+    feature_extractor_choices = [feature_extractor_type.value
+                                 for feature_extractor_type in FeatureExtractorType]
+
     parser = argparse.ArgumentParser(description='Train a COICOP classifier')
     parser.add_argument("-i", "--input-filename", type=str,
                         required=True, help="The input filename in parquet format")
@@ -15,8 +19,9 @@ if __name__ == "__main__":
                         help="The column name containing the receipt text")
     parser.add_argument("-c", "--coicop-column", type=str, default="coicop",
                         help="The column name containing the COICOP code")
-    parser.add_argument("-f", "--feature-extractor", type=str,
-                        required=True, help="The feature extractor to use")
+    parser.add_argument("-f", "--feature-extractors", type=str, nargs="+", default=[],
+                        choices=feature_extractor_choices,
+                        help="Feature extractors to use")
     parser.add_argument("-m", "--model", type=str, required=True,
                         help="The model to use")
     parser.add_argument("-o", "--output-filename", type=str,
