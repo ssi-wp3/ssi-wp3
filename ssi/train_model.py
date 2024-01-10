@@ -73,7 +73,7 @@ def train_model(dataframe: pd.DataFrame,
     y_pred = pipeline.predict(test_df[receipt_text_column])
     evaluation_dict = evaluate(y_true, y_pred)
 
-    return pipeline
+    return pipeline, evaluation_dict
 
 
 def train_model_with_feature_extractors(input_filename: str,
@@ -89,14 +89,21 @@ def train_model_with_feature_extractors(input_filename: str,
     for feature_extractor in progress_bar:
         progress_bar.set_description(
             f"Training model {model_type} with {feature_extractor}")
-        trained_pipeline = train_model(dataframe, receipt_text_column,
-                                       coicop_column, feature_extractor, model_type, test_size)
+        trained_pipeline, evaluate_dict = train_model(dataframe, receipt_text_column,
+                                                      coicop_column, feature_extractor, model_type, test_size)
 
         model_path = os.path.join(
             output_path, f"{model_type.value}_{feature_extractor}.pipeline")
         progress_bar.set_description(
             f"Saving model {model_type.value} with {feature_extractor} to {model_path}")
         joblib.dump(trained_pipeline, model_path)
+
+        evaluation_path = os.path.join(
+            output_path, f"{model_type.value}_{feature_extractor}.evaluation.json")
+        progress_bar.set_description(
+            f"Saving evaluation {model_type.value} with {feature_extractor} to {evaluation_path}")
+        pd.DataFrame(evaluate_dict, index=[0]).to_json(
+            evaluation_path, orient="columns")
 
 
 def train_models(input_filename: str,
