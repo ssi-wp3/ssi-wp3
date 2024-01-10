@@ -1,9 +1,12 @@
 from .feature_extraction import FeatureExtractorType, FeatureExtractorFactory
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 from typing import List, Dict
 from enum import Enum
 import pandas as pd
+import numpy as np
 import tqdm
 import joblib
 import os
@@ -32,11 +35,23 @@ class ModelFactory:
             raise ValueError("Invalid model type: {model_type}")
 
 
+def evaluate(y_true: np.array, y_pred: np.array) -> Dict[str, object]:
+    return {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred, average="macro"),
+        "recall": recall_score(y_true, y_pred, average="macro"),
+        "f1": f1_score(y_true, y_pred, average="macro"),
+        "classification_report": classification_report(y_true, y_pred),
+        "confusion_matrix": confusion_matrix(y_true, y_pred).tolist()
+    }
+
+
 def train_model(dataframe: pd.DataFrame,
                 receipt_text_column: str,
                 coicop_column: str,
                 feature_extractor: FeatureExtractorType,
-                model_type: ModelType):
+                model_type: ModelType,
+                test_size: float):
     model_factory = ModelFactory()
     model = model_factory.create_model(model_type)
 
@@ -49,7 +64,15 @@ def train_model(dataframe: pd.DataFrame,
         ('classifier', model)
     ])
 
-    pipeline.fit(dataframe[receipt_text_column], dataframe[coicop_column])
+    train_df, test_df = train_test_split(
+        dataframe, test_size=test_size, stratify=dataframe[coicop_column])
+
+    pipeline.fit(train_df[receipt_text_column], test_df[coicop_column])
+
+    y_true = test_df[coicop_column]
+    y_pred = pipeline.predict(test_df[receipt_text_column])
+    evaluation_dict = evaluate(y_true, y_pred)
+
     return pipeline
 
 
@@ -58,6 +81,7 @@ def train_model_with_feature_extractors(input_filename: str,
                                         coicop_column: str,
                                         feature_extractors: List[FeatureExtractorType],
                                         model_type: ModelType,
+                                        test_size: float,
                                         output_path: str):
     dataframe = pd.read_parquet(input_filename, engine="pyarrow")
 
@@ -66,7 +90,7 @@ def train_model_with_feature_extractors(input_filename: str,
         progress_bar.set_description(
             f"Training model {model_type} with {feature_extractor}")
         trained_pipeline = train_model(dataframe, receipt_text_column,
-                                       coicop_column, feature_extractor, model_type)
+                                       coicop_column, feature_extractor, model_type, test_size)
 
         model_path = os.path.join(
             output_path, f"{model_type.value}_{feature_extractor}.pipeline")
@@ -80,6 +104,7 @@ def train_models(input_filename: str,
                  coicop_column: str,
                  feature_extractors: List[FeatureExtractorType],
                  model_types: List[ModelType],
+                 test_size: float,
                  output_path: str):
     progress_bar = tqdm.tqdm(model_types)
     for model_type in progress_bar:
@@ -89,4 +114,5 @@ def train_models(input_filename: str,
                                             coicop_column,
                                             feature_extractors,
                                             model_type,
+                                            test_size,
                                             output_path)

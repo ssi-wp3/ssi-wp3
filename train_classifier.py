@@ -1,4 +1,4 @@
-from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType
+from ssi.feature_extraction import FeatureExtractorType
 import argparse
 import os
 import joblib
@@ -26,5 +26,7 @@ if __name__ == "__main__":
                         help="The model to use")
     parser.add_argument("-o", "--output-filename", type=str,
                         required=True, help="The output filename for the pipeline")
+    parser.add_argument("-t", "--test-size", type=float, default=0.2,
+                        help="The test size for the train/test split")
     args = parser.parse_args()
     main(args)
