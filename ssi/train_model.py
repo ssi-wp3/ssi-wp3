@@ -32,7 +32,7 @@ class ModelFactory:
         # From: https://stackoverflow.com/questions/42160313/how-to-list-all-classification-regression-clustering-algorithms-in-scikit-learn
         if not self._models:
             self._models = {model_name: lambda **kwargs: model(**kwargs)
-                            for model_name, model in all_estimators()}
+                            for model_name, model in all_estimators(type_filter=self.model_type_filter)}
 
         return self._models
 
