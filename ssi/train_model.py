@@ -63,9 +63,8 @@ def train_model(dataframe: pd.DataFrame,
 
     pipeline = Pipeline([
         ('features', feature_extractor),
-        ('classifier', model),
-        verbose=verbose
-    ])
+        ('classifier', model)
+    ], verbose=verbose)
 
     train_df, test_df = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[coicop_column])
