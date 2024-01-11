@@ -1,6 +1,7 @@
 from .feature_extraction import FeatureExtractorType, FeatureExtractorFactory
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
+from sklearn.utils.discovery import all_estimators
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 from typing import List, Dict, Callable
@@ -13,24 +14,29 @@ import os
 import json
 
 
-class ModelType(Enum):
-    logistic_regression = "logistic_regression"
-
-
 class ModelFactory:
-    def __init__(self):
+    def __init__(self, type_filter: str = "classifier"):
         self._models = None
+        self._model_type_filter = type_filter
 
     @property
-    def models(self) -> Dict[ModelType, Callable[[Dict[str, object]], object]]:
+    def model_type_filter(self) -> str:
+        return self._model_type_filter
+
+    @property
+    def model_names(self) -> List[str]:
+        return list(self.models.keys())
+
+    @property
+    def models(self) -> Dict[str, Callable[[Dict[str, object]], object]]:
+        # From: https://stackoverflow.com/questions/42160313/how-to-list-all-classification-regression-clustering-algorithms-in-scikit-learn
         if not self._models:
-            self._models = {
-                ModelType.logistic_regression: lambda **kwargs: LogisticRegression(
-                    **kwargs)
-            }
+            self._models = {model_name: lambda **kwargs: model(**kwargs)
+                            for model_name, model in all_estimators(type_filter=self.model_type_filter)}
+
         return self._models
 
-    def create_model(self, model_type: ModelType, **model_kwargs):
+    def create_model(self, model_type: str, **model_kwargs):
         if model_type in self.models:
             return self.models[model_type](**model_kwargs)
         else:
@@ -52,7 +58,7 @@ def train_model(dataframe: pd.DataFrame,
                 receipt_text_column: str,
                 coicop_column: str,
                 feature_extractor: FeatureExtractorType,
-                model_type: ModelType,
+                model_type: str,
                 test_size: float,
                 number_of_jobs: int = -1,
                 verbose: bool = False):
@@ -85,7 +91,7 @@ def train_model_with_feature_extractors(input_filename: str,
                                         receipt_text_column: str,
                                         coicop_column: str,
                                         feature_extractors: List[FeatureExtractorType],
-                                        model_type: ModelType,
+                                        model_type: str,
                                         test_size: float,
                                         output_path: str,
                                         number_of_jobs: int = -1,
@@ -118,7 +124,7 @@ def train_models(input_filename: str,
                  receipt_text_column: str,
                  coicop_column: str,
                  feature_extractors: List[FeatureExtractorType],
-                 model_types: List[ModelType],
+                 model_types: List[str],
                  test_size: float,
                  output_path: str,
                  number_of_jobs: int = -1,
