@@ -13,7 +13,8 @@ def main(args):
                                         feature_extractors,
                                         ModelType(args.model),
                                         args.test_size,
-                                        args.output_filename)
+                                        args.output_filename,
+                                        args.verbose)
 
 
 if __name__ == "__main__":
@@ -37,5 +38,7 @@ if __name__ == "__main__":
                         required=True, help="The output filename for the pipeline")
     parser.add_argument("-t", "--test-size", type=float, default=0.2,
                         help="The test size for the train/test split")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="Verbose output")
     args = parser.parse_args()
     main(args)
