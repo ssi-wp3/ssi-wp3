@@ -4,6 +4,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.utils.discovery import all_estimators
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
+from sklearn.ensemble._voting import _BaseVoting
 from typing import List, Dict, Callable
 from enum import Enum
 import pandas as pd
@@ -32,7 +33,9 @@ class ModelFactory:
         # From: https://stackoverflow.com/questions/42160313/how-to-list-all-classification-regression-clustering-algorithms-in-scikit-learn
         if not self._models:
             self._models = {model_name: lambda **kwargs: model(**kwargs)
-                            for model_name, model in all_estimators(type_filter=self.model_type_filter)}
+                            for model_name, model in all_estimators(type_filter=self.model_type_filter)
+                            if not issubclass(model, _BaseVoting)
+                            }
 
         return self._models
 
