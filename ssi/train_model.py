@@ -33,7 +33,7 @@ class ModelFactory:
     def models(self) -> Dict[str, Callable[[Dict[str, object]], object]]:
         # From: https://stackoverflow.com/questions/42160313/how-to-list-all-classification-regression-clustering-algorithms-in-scikit-learn
         if not self._models:
-            self._models = {model_name: lambda **kwargs: model(**kwargs)
+            self._models = {model_name: model
                             for model_name, model in all_estimators(type_filter=self.model_type_filter)
                             if not issubclass(model, _BaseVoting) and not issubclass(model, _BaseStacking)
                             }
