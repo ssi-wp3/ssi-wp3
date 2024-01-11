@@ -1,5 +1,5 @@
 from ssi.feature_extraction import FeatureExtractorType
-from ssi.train_model import ModelType, train_model_with_feature_extractors
+from ssi.train_model import ModelFactory, train_model_with_feature_extractors
 import argparse
 
 
@@ -11,7 +11,7 @@ def main(args):
                                         args.receipt_text_column,
                                         args.coicop_column,
                                         feature_extractors,
-                                        ModelType(args.model),
+                                        args.model,
                                         args.test_size,
                                         args.output_filename,
                                         args.number_of_jobs,
@@ -21,7 +21,7 @@ def main(args):
 if __name__ == "__main__":
     feature_extractor_choices = [feature_extractor_type.value
                                  for feature_extractor_type in FeatureExtractorType]
-    model_choices = [model_type.value for model_type in ModelType]
+    model_choices = ModelFactory().model_names
 
     parser = argparse.ArgumentParser(description='Train a COICOP classifier')
     parser.add_argument("-i", "--input-filename", type=str,
