@@ -67,7 +67,7 @@ def train_model(dataframe: pd.DataFrame,
     train_df, test_df = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[coicop_column])
 
-    pipeline.fit(train_df[receipt_text_column], test_df[coicop_column])
+    pipeline.fit(train_df[receipt_text_column], train_df[coicop_column])
 
     y_true = test_df[coicop_column]
     y_pred = pipeline.predict(test_df[receipt_text_column])
