@@ -45,6 +45,12 @@ class SpacyFeatureExtractor:
         self.nlp = spacy.load(model_name)
 
     # To speed up: https://github.com/explosion/spaCy/discussions/8402
+    def fit(self, X, y, **fit_params):
+        pass
+
+    def transform(self, X, y, **fit_params):
+        return self.fit_transform(X)
+
     def fit_transform(self, data):
         # We only need spacy to tokenize the text and return the word vectors
         return [doc.vector
