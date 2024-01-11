@@ -10,6 +10,7 @@ import numpy as np
 import tqdm
 import joblib
 import os
+import json
 
 
 class ModelType(Enum):
@@ -105,8 +106,8 @@ def train_model_with_feature_extractors(input_filename: str,
             output_path, f"{model_type.value}_{feature_extractor}.evaluation.json")
         progress_bar.set_description(
             f"Saving evaluation {model_type.value} with {feature_extractor} to {evaluation_path}")
-        pd.DataFrame(evaluate_dict, index=[0]).to_json(
-            evaluation_path, orient="columns")
+        with open(evaluation_path, "w") as evaluation_file:
+            json.dump(evaluate_dict, evaluation_file)
 
 
 def train_models(input_filename: str,
