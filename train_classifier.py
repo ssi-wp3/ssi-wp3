@@ -14,6 +14,7 @@ def main(args):
                                         ModelType(args.model),
                                         args.test_size,
                                         args.output_filename,
+                                        args.number_of_jobs,
                                         args.verbose)
 
 
@@ -38,6 +39,8 @@ if __name__ == "__main__":
                         required=True, help="The output filename for the pipeline")
     parser.add_argument("-t", "--test-size", type=float, default=0.2,
                         help="The test size for the train/test split")
+    parser.add_argument("-n", "--number-of-jobs", type=int, default=-1,
+                        help="The number of jobs to use")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="Verbose output")
     args = parser.parse_args()
