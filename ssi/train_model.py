@@ -51,7 +51,8 @@ def train_model(dataframe: pd.DataFrame,
                 coicop_column: str,
                 feature_extractor: FeatureExtractorType,
                 model_type: ModelType,
-                test_size: float):
+                test_size: float,
+                verbose: bool = False):
     model_factory = ModelFactory()
     model = model_factory.create_model(model_type)
 
@@ -67,7 +68,8 @@ def train_model(dataframe: pd.DataFrame,
     train_df, test_df = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[coicop_column])
 
-    pipeline.fit(train_df[receipt_text_column], train_df[coicop_column])
+    pipeline.fit(train_df[receipt_text_column],
+                 train_df[coicop_column], verbose=verbose)
 
     y_true = test_df[coicop_column]
     y_pred = pipeline.predict(test_df[receipt_text_column])
@@ -82,7 +84,8 @@ def train_model_with_feature_extractors(input_filename: str,
                                         feature_extractors: List[FeatureExtractorType],
                                         model_type: ModelType,
                                         test_size: float,
-                                        output_path: str):
+                                        output_path: str,
+                                        verbose: bool = False):
     dataframe = pd.read_parquet(input_filename, engine="pyarrow")
 
     progress_bar = tqdm.tqdm(feature_extractors)
@@ -90,7 +93,7 @@ def train_model_with_feature_extractors(input_filename: str,
         progress_bar.set_description(
             f"Training model {model_type} with {feature_extractor}")
         trained_pipeline, evaluate_dict = train_model(dataframe, receipt_text_column,
-                                                      coicop_column, feature_extractor, model_type, test_size)
+                                                      coicop_column, feature_extractor, model_type, test_size, verbose)
 
         model_path = os.path.join(
             output_path, f"{model_type.value}_{feature_extractor}.pipeline")
@@ -112,7 +115,8 @@ def train_models(input_filename: str,
                  feature_extractors: List[FeatureExtractorType],
                  model_types: List[ModelType],
                  test_size: float,
-                 output_path: str):
+                 output_path: str,
+                 verbose: bool = False):
     progress_bar = tqdm.tqdm(model_types)
     for model_type in progress_bar:
         progress_bar.set_description(f"Training model {model_type}")
@@ -122,4 +126,5 @@ def train_models(input_filename: str,
                                             feature_extractors,
                                             model_type,
                                             test_size,
-                                            output_path)
+                                            output_path,
+                                            verbose)
