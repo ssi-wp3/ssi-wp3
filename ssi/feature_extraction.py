@@ -48,7 +48,7 @@ class SpacyFeatureExtractor:
     def fit(self, X, y, **fit_params):
         pass
 
-    def transform(self, X, y, **fit_params):
+    def transform(self, X):
         return self.fit_transform(X)
 
     def fit_transform(self, data):
