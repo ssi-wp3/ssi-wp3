@@ -25,7 +25,8 @@ class ModelFactory:
     def models(self) -> Dict[ModelType, Callable[[Dict[str, object]], object]]:
         if not self._models:
             self._models = {
-                ModelType.logistic_regression: lambda **kwargs: LogisticRegression(**kwargs)
+                ModelType.logistic_regression: lambda **kwargs: LogisticRegression(
+                    **kwargs)
             }
         return self._models
 
@@ -97,7 +98,7 @@ def train_model_with_feature_extractors(input_filename: str,
         progress_bar.set_description(
             f"Training model {model_type} with {feature_extractor}")
         trained_pipeline, evaluate_dict = train_model(dataframe, receipt_text_column,
-                                                      coicop_column, feature_extractor, model_type, test_size, number_of_jobs=number_of_jobs, verbose)
+                                                      coicop_column, feature_extractor, model_type, test_size, number_of_jobs, verbose)
 
         model_path = os.path.join(
             output_path, f"{model_type.value}_{feature_extractor}.pipeline")
