@@ -51,10 +51,10 @@ class SpacyFeatureExtractor:
     def transform(self, X):
         return self.fit_transform(X)
 
-    def fit_transform(self, data):
+    def fit_transform(self, X, y=None, **fit_params):
         # We only need spacy to tokenize the text and return the word vectors
         return [doc.vector
-                for doc in self.nlp.pipe(data, disable=["tagger", "parser", "ner"])]
+                for doc in self.nlp.pipe(X, disable=["tagger", "parser", "ner"])]
 
 
 class FeatureExtractorFactory:
