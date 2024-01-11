@@ -111,15 +111,15 @@ def train_model_with_feature_extractors(input_filename: str,
                                                       coicop_column, feature_extractor, model_type, test_size, number_of_jobs, verbose)
 
         model_path = os.path.join(
-            output_path, f"{model_type.value}_{feature_extractor}.pipeline")
+            output_path, f"{model_type.lower()}_{feature_extractor}.pipeline")
         progress_bar.set_description(
-            f"Saving model {model_type.value} with {feature_extractor} to {model_path}")
+            f"Saving model {model_type.lower()} with {feature_extractor} to {model_path}")
         joblib.dump(trained_pipeline, model_path)
 
         evaluation_path = os.path.join(
-            output_path, f"{model_type.value}_{feature_extractor}.evaluation.json")
+            output_path, f"{model_type.lower()}_{feature_extractor}.evaluation.json")
         progress_bar.set_description(
-            f"Saving evaluation {model_type.value} with {feature_extractor} to {evaluation_path}")
+            f"Saving evaluation {model_type.lower()} with {feature_extractor} to {evaluation_path}")
         with open(evaluation_path, "w") as evaluation_file:
             json.dump(evaluate_dict, evaluation_file)
 
