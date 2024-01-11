@@ -4,12 +4,13 @@ import argparse
 
 
 def main(args):
+    feature_extractors = [FeatureExtractorType(feature_extractor)
+                          for feature_extractor in args.feature_extractors] if args.feature_extractors else [FeatureExtractorType.spacy_nl_md]
+
     train_model_with_feature_extractors(args.input_filename,
                                         args.receipt_text_column,
                                         args.coicop_column,
-                                        [FeatureExtractorType(
-                                            feature_extractor)
-                                            for feature_extractor in args.feature_extractors],
+                                        feature_extractors,
                                         ModelType(args.model),
                                         args.test_size,
                                         args.output_filename)
