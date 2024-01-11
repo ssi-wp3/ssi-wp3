@@ -3,7 +3,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
-from typing import List, Dict
+from typing import List, Dict, Callable
 from enum import Enum
 import pandas as pd
 import numpy as np
@@ -22,16 +22,16 @@ class ModelFactory:
         self._models = None
 
     @property
-    def models(self) -> Dict[ModelType, object]:
+    def models(self) -> Dict[ModelType, Callable[[Dict[str, object]], object]]:
         if not self._models:
             self._models = {
-                ModelType.logistic_regression: LogisticRegression()
+                ModelType.logistic_regression: lambda **kwargs: LogisticRegression(**kwargs)
             }
         return self._models
 
-    def create_model(self, model_type: ModelType):
+    def create_model(self, model_type: ModelType, **model_kwargs):
         if model_type in self.models:
-            return self.models[model_type]
+            return self.models[model_type](**model_kwargs)
         else:
             raise ValueError("Invalid model type: {model_type}")
 
@@ -53,9 +53,10 @@ def train_model(dataframe: pd.DataFrame,
                 feature_extractor: FeatureExtractorType,
                 model_type: ModelType,
                 test_size: float,
+                number_of_jobs: int = -1,
                 verbose: bool = False):
     model_factory = ModelFactory()
-    model = model_factory.create_model(model_type)
+    model = model_factory.create_model(model_type, n_jobs=number_of_jobs)
 
     feature_extractor_factory = FeatureExtractorFactory()
     feature_extractor = feature_extractor_factory.create_feature_extractor(
@@ -86,7 +87,9 @@ def train_model_with_feature_extractors(input_filename: str,
                                         model_type: ModelType,
                                         test_size: float,
                                         output_path: str,
-                                        verbose: bool = False):
+                                        number_of_jobs: int = -1,
+                                        verbose: bool = False
+                                        ):
     dataframe = pd.read_parquet(input_filename, engine="pyarrow")
 
     progress_bar = tqdm.tqdm(feature_extractors)
@@ -94,7 +97,7 @@ def train_model_with_feature_extractors(input_filename: str,
         progress_bar.set_description(
             f"Training model {model_type} with {feature_extractor}")
         trained_pipeline, evaluate_dict = train_model(dataframe, receipt_text_column,
-                                                      coicop_column, feature_extractor, model_type, test_size, verbose)
+                                                      coicop_column, feature_extractor, model_type, test_size, number_of_jobs=number_of_jobs, verbose)
 
         model_path = os.path.join(
             output_path, f"{model_type.value}_{feature_extractor}.pipeline")
@@ -117,6 +120,7 @@ def train_models(input_filename: str,
                  model_types: List[ModelType],
                  test_size: float,
                  output_path: str,
+                 number_of_jobs: int = -1,
                  verbose: bool = False):
     progress_bar = tqdm.tqdm(model_types)
     for model_type in progress_bar:
@@ -128,4 +132,5 @@ def train_models(input_filename: str,
                                             model_type,
                                             test_size,
                                             output_path,
+                                            number_of_jobs,
                                             verbose)
