@@ -67,7 +67,7 @@ def train_model(dataframe: pd.DataFrame,
                 number_of_jobs: int = -1,
                 verbose: bool = False):
     model_factory = ModelFactory()
-    model = model_factory.create_model(model_type, n_jobs=number_of_jobs)
+    model = model_factory.create_model(model_type)  # , n_jobs=number_of_jobs)
 
     feature_extractor_factory = FeatureExtractorFactory()
     feature_extractor = feature_extractor_factory.create_feature_extractor(
