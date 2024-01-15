@@ -38,9 +38,13 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Predict COICOP')
-    parser.add_argument("-p", "--pipeline-path", type=str,
+    parser.add_argument("-pp", "--pipeline-path", type=str,
                         default="pipeline.joblib", help="Path to pipeline")
-    parser.add_argument("-i", "--inputs", type=str, nargs="+",
-                        default=[], help="Inputs to predict")
+    parser.add_argument("-i", "--input_data", type=str,
+                        required=True, help="Path to the input json file")
+    parser.add_argument("-o", "--output_data", type=str,
+                        required=True, help="Path to the output json file")
+    parser.add_argument("-p", "--params", type=str,
+                        required=True, help="Path to the params json file")
     args = parser.parse_args()
     main(args)
