@@ -1,6 +1,5 @@
 {
-    "coicop_classification_request": ["123abc", "456def", "789ghi", "012jkl", "345mno", "678pqr", "901stu", 
-    "234vwx", "567yza", "890bcd", "123efg", "456hij", "789klm", "012nop", "345qrs", "678tuv", "901wxy"],
+    "coicop_classification_request": ["123abc"],
     "receipt": {
         "store": "lidl",
         "date": "2024-05-01",
