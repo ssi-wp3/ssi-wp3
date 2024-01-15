@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from datetime import date
 from typing import List, Optional
 
@@ -16,6 +16,10 @@ class Receipt(BaseModel):
     store: Optional[str]
     date: Optional[date]
     items: List[ReceiptItem]
+
+    @field_serializer('date')
+    def serialize_date(self, date: date, _info):
+        return date.strftime('%Y-%m-%d')
 
 
 class CoicopClassification(BaseModel):
