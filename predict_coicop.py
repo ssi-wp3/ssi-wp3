@@ -1,9 +1,8 @@
+from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile, ProductClassificationResult, CoicopClassification
 from typing import Any, Dict, List
 import argparse
-import os
 import joblib
-import numpy as np
-
+import json
 # Adapted from https://huggingface.co/scikit-learn/sklearn-transformers/blob/main/pipeline.py
 
 
@@ -29,11 +28,41 @@ class CoicopPipeline():
             prediction_labels.append(label_predictions)
         return prediction_labels
 
+    def predict_receipt(self, receipt_input: CoicopInputFile) -> CoicopOutputFile:
+        classification_output = CoicopOutputFile(coicop_classification_request=receipt_input.coicop_classification_request,
+                                                 receipt=receipt_input.receipt
+                                                 )
+
+        receipt_ids = [item.id for item in receipt_input.receipt.items]
+        receipt_descriptions = [item.description
+                                for item in receipt_input.receipt.items]
+        predicted_probabilities = self.predict_proba(receipt_descriptions)
+
+        for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
+            coicop_codes = [
+                CoicopClassification(code=coicop_code, confidence=probability)
+                for coicop_code, probability in probabilities.items()
+            ]
+            classification_result = ProductClassificationResult(
+                id=receipt_id, coicop_codes=coicop_codes)
+            classification_output.coicop_classification_result.result.append(
+                classification_result)
+
+        return classification_output
+
 
 def main(args):
-    pipeline = CoicopPipeline(args.pipeline_path)
-    predictions = pipeline.predict_proba(args.inputs)
-    print(predictions)
+    try:
+        pipeline = CoicopPipeline(args.pipeline_path)
+        coicop_input_file = CoicopInputFile.model_validate_json(
+            args.input_data)
+        coicop_output_file = pipeline.predict_receipt(coicop_input_file)
+
+        with open(args.output_data, "w") as json_file:
+            output_json = coicop_output_file.model_dump()
+            json.dump(output_json, json_file, indent=4)
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
@@ -45,6 +74,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output_data", type=str,
                         required=True, help="Path to the output json file")
     parser.add_argument("-p", "--params", type=str,
-                        required=True, help="Path to the params json file")
+                        default=None, help="Path to the params json file (optional)")
     args = parser.parse_args()
     main(args)
