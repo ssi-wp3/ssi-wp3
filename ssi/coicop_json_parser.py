@@ -40,3 +40,8 @@ class CoicopInputFile(BaseModel):
     currency: Optional[str]
     language_hint: Optional[str]
     metadata: Optional[dict]
+
+
+class CoicopOutputFile(CoicopInputFile):
+    coicop_classification_result: ClassificationResult
+    metadata: Optional[dict]
