@@ -1,0 +1,91 @@
+{
+    "coicop_classification_request": ["123abc", "456def", "789ghi", "012jkl", "345mno", "678pqr", "901stu", 
+    "234vwx", "567yza", "890bcd", "123efg"],
+    "receipt": {
+        "store": "Jumbo",
+        "date": "2024-05-01",
+        "items": [
+            {   
+                "id": "123abc",
+                "description": "JUMBO LUSDRAAGTAS",
+                "quantity": 1,
+                "unit_price": 0.75,
+                "total_price": 0.75
+            },
+            {
+                "id": "456def",
+                "description": "MINI RB ROZIJNENBOL",
+                "quantity": 1,
+                "unit_price": 1.79,
+                "total_price": 1.79
+            },
+            {
+                "id": "789ghi",
+                "description": "NOTENM PISTACHE ONG",
+                "quantity": 1,
+                "unit_price": 4.49,
+                "total_price": 4.49
+            },
+            {
+                "id": "012jkl",
+                "description": "BANANEN",
+                "quantity": 1,
+                "unit_price": 2.32,
+                "total_price": 2.32
+            },
+            {
+                "id": "345mno",
+                "description": "OLD AMSTERDAM 48+ PLAK",
+                "quantity": 1,
+                "unit_price": 4.84,
+                "total_price": 4.84
+            },
+            {
+                "id": "678pqr",
+                "description": "OLD ADAM 35+ PLAKKEN",
+                "quantity": 1,
+                "unit_price": 3.46,
+                "total_price": 3.46
+            },
+            {
+                "id": "901stu",
+                "description": "JUMBO NOTENMEL ONGEZ",
+                "quantity": 1,
+                "unit_price": 3.89,
+                "total_price": 3.89
+            },
+            {
+                "id": "234vwx",
+                "description": "BOTERHAMWORST REUMK",
+                "quantity": 1,
+                "unit_price": 1.92,
+                "total_price": 1.92
+            },
+            {
+                "id": "567yza",
+                "description": "JUMBO BRAMEN",
+                "quantity": 1,
+                "unit_price": 2.99,
+                "total_price": 2.99
+            },
+            {
+                "id": "890bcd",
+                "description": "WALDKORN MEERGRANEN",
+                "quantity": 1,
+                "unit_price": 2.39,
+                "total_price": 2.39
+            },
+            {
+                "id": "123efg",
+                "description": "VTP ALOE VERA 70ST",
+                "quantity": 3,
+                "unit_price": 2.46,
+                "total_price": 7.38
+            }            
+        ],
+        "total": 28.98,
+        "currency": "EUR",
+        "language": "nl",
+        "metadata": null
+    }
+}

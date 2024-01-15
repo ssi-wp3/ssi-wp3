@@ -1,0 +1,133 @@
+{
+    "coicop_classification_request": ["123abc", "456def", "789ghi", "012jkl", "345mno", "678pqr", "901stu", 
+    "234vwx", "567yza", "890bcd", "123efg", "456hij", "789klm", "012nop", "345qrs", "678tuv", "901wxy"],
+    "receipt": {
+        "store": "lidl",
+        "date": "2024-05-01",
+        "items": [
+            {   
+                "id": "123abc",
+                "description": "Bananen",
+                "quantity": 1,
+                "unit_price": 1.73,
+                "total_price": 1.73
+            },
+            {
+                "id": "456def",
+                "description": "Kinder winterlaarzen 0393098",
+                "quantity": 1,
+                "unit_price": 15.00,
+                "total_price": 15.00
+            },
+            {
+                "id": "789ghi",
+                "description": "Draagtas Lidl recycling",
+                "quantity": 1,
+                "unit_price": 0.49,
+                "total_price": 0.49
+            },
+            {
+                "id": "012jkl",
+                "description": "Vegan appeltaart",
+                "quantity": 1,
+                "unit_price": 1.99,
+                "total_price": 1.99
+            },
+            {
+                "id": "345mno",
+                "description": "Croissant bake-off",
+                "quantity": 4,
+                "unit_price": 0.39,
+                "total_price": 1.56
+            },
+            {
+                "id": "678pqr",
+                "description": "Serrano hame",
+                "quantity": 1,
+                "unit_price": 4.99,
+                "total_price": 4.99
+            },
+            {
+                "id": "901stu",
+                "description": "Borrelschotel",
+                "quantity": 1,
+                "unit_price": 4.99,
+                "total_price": 4.99
+            },
+            {
+                "id": "234vwx",
+                "description": "Jamon Iberico",
+                "quantity": 1,
+                "unit_price": 4.99,
+                "total_price": 4.99
+            },
+            {
+                "id": "567yza",
+                "description": "Mandarijnen",
+                "quantity": 1,
+                "unit_price": 1.99,
+                "total_price": 1.99
+            },
+            {
+                "id": "890bcd",
+                "description": "Tapenade groene olijven",
+                "quantity": 1,
+                "unit_price": 1.49,
+                "total_price": 1.49
+            },
+            {
+                "id": "123efg",
+                "description": "Druiven rood pitloos",
+                "quantity": 1,
+                "unit_price": 2.69,
+                "total_price": 2.69
+            },
+            {
+                "id": "456hij",
+                "description": "Kip grillworst",
+                "quantity": 1,
+                "unit_price": 1.99,
+                "total_price": 1.99
+            },
+            {
+                "id": "789klm",
+                "description": "Prosciutto Cotto",
+                "quantity": 1,
+                "unit_price": 2.99,
+                "total_price": 2.99
+            },
+            {
+                "id": "012nop",
+                "description": "Antipasti spread",
+                "quantity": 1,
+                "unit_price": 1.99,
+                "total_price": 1.99
+            },
+            {
+                "id": "345qrs",
+                "description": "Humous Ras el Hanout",
+                "quantity": 1,
+                "unit_price": 1.39,
+                "total_price": 1.39
+            },
+            {
+                "id": "678tuv",
+                "description": "Strijkplankhoes 0437074",
+                "quantity": 1,
+                "unit_price": 4.99,
+                "total_price": 4.99
+            },
+            {
+                "id": "901wxy",
+                "description": "Walnotenbrood",
+                "quantity": 2,
+                "unit_price": 1.89,
+                "total_price": 3.78
+            }
+        ],
+        "total": 56.04,
+        "currency": "EUR",
+        "language": "nl",
+        "metadata": null
+    }
+}
