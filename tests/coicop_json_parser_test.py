@@ -99,3 +99,98 @@ class CoicopJsonParserTest(unittest.TestCase):
         }
         receipt = Receipt.model_validate(json)
         self.assertEqual(json, receipt.model_dump())
+
+    def test_coicop_input_file_serialized_to_json(self):
+        expected_json = {
+            "coicop_classification_request": ["1", "2"],
+            "receipt": {
+                "store": "supermarket1",
+                "date": "2021-01-01",
+                "items": [
+                    {
+                        "id": "1",
+                        "description": "item1",
+                        "quantity": 1,
+                        "unit_price": 1.0,
+                        "total_price": 1.0
+                    },
+                    {
+                        "id": "2",
+                        "description": "item2",
+                        "quantity": 2,
+                        "unit_price": 2.5,
+                        "total_price": 5.0
+                    }
+                ]
+            },
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "en",
+            "metadata": {
+                "key": "value"
+            }
+        }
+
+        coicop_input_file = CoicopInputFile(
+            coicop_classification_request=["1", "2"],
+            receipt=Receipt(
+                store="supermarket1",
+                date=date(2021, 1, 1),
+                items=[
+                    ReceiptItem(
+                        id="1",
+                        description="item1",
+                        quantity=1,
+                        unit_price=1.0,
+                        total_price=1.0
+                    ),
+                    ReceiptItem(
+                        id="2",
+                        description="item2",
+                        quantity=2,
+                        unit_price=2.5,
+                        total_price=5.0
+                    )
+                ]
+            ),
+            total=10.0,
+            currency="EUR",
+            language_hint="en",
+            metadata={
+                "key": "value"
+            }
+        )
+        self.assertEqual(expected_json, coicop_input_file.model_dump())
+
+    def test_coicop_input_file_read_from_json(self):
+        json = {
+            "coicop_classification_request": ["1", "2"],
+            "receipt": {
+                "store": "supermarket1",
+                "date": "2021-01-01",
+                "items": [
+                    {
+                        "id": "1",
+                        "description": "item1",
+                        "quantity": 1,
+                        "unit_price": 1.0,
+                        "total_price": 1.0
+                    },
+                    {
+                        "id": "2",
+                        "description": "item2",
+                        "quantity": 2,
+                        "unit_price": 2.5,
+                        "total_price": 5.0
+                    }
+                ]
+            },
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "en",
+            "metadata": {
+                "key": "value"
+            }
+        }
+        coicop_input_file = CoicopInputFile.model_validate(json)
+        self.assertEqual(json, coicop_input_file.model_dump())

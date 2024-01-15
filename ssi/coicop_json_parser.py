@@ -22,6 +22,15 @@ class Receipt(BaseModel):
         return date.strftime('%Y-%m-%d')
 
 
+class CoicopInputFile(BaseModel):
+    coicop_classification_request: List[str]
+    receipt: Receipt
+    total: Optional[float]
+    currency: Optional[str]
+    language_hint: Optional[str]
+    metadata: Optional[dict]
+
+
 class CoicopClassification(BaseModel):
     code: str
     description: Optional[str]
@@ -35,15 +44,6 @@ class ProductClassificationResult(BaseModel):
 
 class ClassificationResult(BaseModel):
     result: List[ProductClassificationResult]
-
-
-class CoicopInputFile(BaseModel):
-    coicop_classification_request: List[str]
-    receipt: Receipt
-    total: Optional[float]
-    currency: Optional[str]
-    language_hint: Optional[str]
-    metadata: Optional[dict]
 
 
 class CoicopOutputFile(CoicopInputFile):
