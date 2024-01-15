@@ -344,3 +344,133 @@ class CoicopJsonParserTest(unittest.TestCase):
             ]
         )
         self.assertEqual(expected_json, classification_result.model_dump())
+
+    def test_coicop_output_file_serialized_to_json(self):
+        expected_json = {
+            "coicop_classification_request": ["1", "2"],
+            "receipt": {
+                "store": "supermarket1",
+                "date": "2021-01-01",
+                "items": [
+                    {
+                        "id": "1",
+                        "description": "item1",
+                        "quantity": 1,
+                        "unit_price": 1.0,
+                        "total_price": 1.0
+                    },
+                    {
+                        "id": "2",
+                        "description": "item2",
+                        "quantity": 2,
+                        "unit_price": 2.5,
+                        "total_price": 5.0
+                    }
+                ]
+            },
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "en",
+            "metadata": {
+                "key": "value"
+            },
+            "coicop_classification_result": {
+                "result": [
+                    {
+                        "id": "1",
+                        "coicop_codes": [
+                            {
+                                "code": "1",
+                                "description": "coicop1",
+                                "confidence": 0.75
+                            },
+                            {
+                                "code": "2",
+                                "description": "coicop2",
+                                "confidence": 0.85
+                            }
+                        ]
+                    },
+                    {
+                        "id": "2",
+                        "coicop_codes": [
+                            {
+                                "code": "3",
+                                "description": "coicop3",
+                                "confidence": 0.65
+                            },
+                            {
+                                "code": "4",
+                                "description": "coicop4",
+                                "confidence": 0.95
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
+        coicop_output_file = CoicopOutputFile(
+            coicop_classification_request=["1", "2"],
+            receipt=Receipt(
+                store="supermarket1",
+                date=date(2021, 1, 1),
+                items=[
+                    ReceiptItem(
+                        id="1",
+                        description="item1",
+                        quantity=1,
+                        unit_price=1.0,
+                        total_price=1.0
+                    ),
+                    ReceiptItem(
+                        id="2",
+                        description="item2",
+                        quantity=2,
+                        unit_price=2.5,
+                        total_price=5.0
+                    )
+                ]
+            ),
+            total=10.0,
+            currency="EUR",
+            language_hint="en",
+            metadata={
+                "key": "value"
+            },
+            coicop_classification_result=ClassificationResult(
+                result=[
+                    ProductClassificationResult(
+                        id="1",
+                        coicop_codes=[
+                            CoicopClassification(
+                                code="1",
+                                description="coicop1",
+                                confidence=0.75
+                            ),
+                            CoicopClassification(
+                                code="2",
+                                description="coicop2",
+                                confidence=0.85
+                            )
+                        ]
+                    ),
+                    ProductClassificationResult(
+                        id="2",
+                        coicop_codes=[
+                            CoicopClassification(
+                                code="3",
+                                description="coicop3",
+                                confidence=0.65
+                            ),
+                            CoicopClassification(
+                                code="4",
+                                description="coicop4",
+                                confidence=0.95
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+        self.assertEqual(expected_json, coicop_output_file.model_dump())
