@@ -29,9 +29,9 @@ class CoicopPipeline():
         return prediction_labels
 
     def predict_receipt(self, receipt_input: CoicopInputFile) -> CoicopOutputFile:
-        classification_output = CoicopOutputFile(coicop_classification_request=receipt_input.coicop_classification_request,
-                                                 receipt=receipt_input.receipt
-                                                 )
+        classification_output = CoicopOutputFile()
+        classification_output.coicop_classification_request=receipt_input.coicop_classification_request,
+        classification_output.receipt=receipt_input.receipt
 
         receipt_ids = [item.id for item in receipt_input.receipt.items]
         receipt_descriptions = [item.description
