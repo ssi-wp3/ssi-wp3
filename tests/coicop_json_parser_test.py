@@ -550,13 +550,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                         "unit_price": 2.5,
                         "total_price": 5.0
                     }
-                ]
-            },
-            "total": 10.0,
-            "currency": "EUR",
-            "language_hint": "en",
-            "metadata": {
-                "key": "value"
+                ],
+                "total": 10.0,
+                "currency": "EUR",
+                "language_hint": "en",
+                "metadata": {
+                    "key": "value"
+                },
             },
             "coicop_classification_result": {
                 "result": [
@@ -591,7 +591,8 @@ class CoicopJsonParserTest(unittest.TestCase):
                         ]
                     }
                 ]
-            }
+            },
+            "metadata": None
         }
         coicop_output_file = CoicopOutputFile.model_validate(json)
         self.assertEqual(json, coicop_output_file.model_dump())
