@@ -1,4 +1,4 @@
-from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile, ProductClassificationResult, CoicopClassification
+from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile, ProductClassificationResult, CoicopClassification, load_input_file
 from typing import Any, Dict, List
 import argparse
 import joblib
@@ -54,8 +54,7 @@ class CoicopPipeline():
 def main(args):
     try:
         pipeline = CoicopPipeline(args.pipeline_path)
-        coicop_input_file = CoicopInputFile.model_validate_json(
-            args.input_data)
+        coicop_input_file = load_input_file(args.input_data)
         coicop_output_file = pipeline.predict_receipt(coicop_input_file)
 
         with open(args.output_data, "w") as json_file:
