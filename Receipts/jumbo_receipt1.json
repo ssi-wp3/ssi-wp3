@@ -86,6 +86,6 @@
     },
     "total": 28.98,
     "currency": "EUR",
-    "language": "nl",
+    "language_hint": "nl",
     "metadata": null
 }
