@@ -605,15 +605,25 @@ class CoicopJsonParserTest(unittest.TestCase):
     def test_create_coicop_output_file_creates_output_file_correclty(self):
         parsed_receipt = load_input_file("Receipts/lidl_receipt1.json") 
         receipt_ids = [item.id for item in parsed_receipt.receipt.items]
-        predicted_probabilities = [{ str(i): random.random()
-
-        } for i in range(len(parsed_receipt.receipt.items))]
+        predicted_probabilities = [
+            { 
+                str(coicop_label): random.random()
+                for coicop_label in range(10)
+            } 
+            for _ in range(len(parsed_receipt.receipt.items))
+        ]
         
         coicop_output_file = create_coicop_output_file(parsed_receipt, receipt_ids, predicted_probabilities)
         self.assertEqual(receipt_ids, [item.id for item in coicop_output_file.coicop_classification_result.result])
-        self.assertEqual(list(predicted_probabilities.keys()), [coicop_classification.code 
-                                                                for item in coicop_output_file.coicop_classification_result.result
-                                                                for coicop_classification in item.coicop_codes])
-        self.assertEqual(list(predicted_probabilities.values()), [coicop_classification.confidence 
-                                                                  for item in coicop_output_file.coicop_classification_result.result
+        self.assertEqual([label 
+                            for product_classification in predicted_probabilities
+                            for label in product_classification.keys()], 
+                          [coicop_classification.code 
+                                for item in coicop_output_file.coicop_classification_result.result
+                                for coicop_classification in item.coicop_codes])
+        self.assertEqual([probability 
+                          for product_classification in predicted_probabilities 
+                          for probability in product_classification.values()], 
+                          [coicop_classification.confidence 
+                               for item in coicop_output_file.coicop_classification_result.result
                                                                   for coicop_classification in item.coicop_codes])

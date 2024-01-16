@@ -59,7 +59,7 @@ def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[
     coicop_classification = [] 
     for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
         coicop_codes = [
-            CoicopClassification(code=coicop_code, confidence=probability)
+            CoicopClassification(code=coicop_code, description="", confidence=probability)
             for coicop_code, probability in probabilities.items()
         ]
         classification_result = ProductClassificationResult(
