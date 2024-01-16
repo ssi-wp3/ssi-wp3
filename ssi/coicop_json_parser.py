@@ -49,3 +49,7 @@ class ClassificationResult(BaseModel):
 class CoicopOutputFile(CoicopInputFile):
     coicop_classification_result: ClassificationResult
     metadata: Optional[dict]
+
+def load_input_file(filename: str) -> CoicopInputFile:
+    with open(filename, "r") as json_file:
+        return CoicopInputFile.model_validate_json(json_file.read())
