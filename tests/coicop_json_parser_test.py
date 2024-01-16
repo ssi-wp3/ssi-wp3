@@ -54,7 +54,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                     "unit_price": 2.5,
                     "total_price": 5.0
                 }
-            ]
+            ],
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "nl",
+            "metadata": {
+                "key": "value"
+            }
         }
 
         receipt = Receipt(
@@ -75,7 +81,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                     unit_price=2.5,
                     total_price=5.0
                 )
-            ]
+            ],
+            total=10.0,
+            currency="EUR",
+            language_hint="nl",
+            metadata={
+                "key": "value"
+            }
         )
         self.assertEqual(expected_json, receipt.model_dump())
 
