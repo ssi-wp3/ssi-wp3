@@ -110,7 +110,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                     "unit_price": 2.5,
                     "total_price": 5.0
                 }
-            ]
+            ],
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "nl",
+            "metadata": {
+                "key": "value"
+            }
         }
         receipt = Receipt.model_validate(json)
         self.assertEqual(json, receipt.model_dump())
@@ -135,7 +141,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                     "unit_price": 2.5,
                     "total_price": 5.0
                 }
-            ]
+            ],
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "nl",
+            "metadata": {
+                "key": "value"
+            }
         }
         with self.assertRaises(ValidationError):
             Receipt.model_validate(json)
@@ -161,14 +173,14 @@ class CoicopJsonParserTest(unittest.TestCase):
                         "unit_price": 2.5,
                         "total_price": 5.0
                     }
-                ]
+                ],
+                "total": 10.0,
+                "currency": "EUR",
+                "language_hint": "nl",
+                "metadata": {
+                    "key": "value"
+                }
             },
-            "total": 10.0,
-            "currency": "EUR",
-            "language_hint": "en",
-            "metadata": {
-                "key": "value"
-            }
         }
 
         coicop_input_file = CoicopInputFile(
@@ -191,14 +203,14 @@ class CoicopJsonParserTest(unittest.TestCase):
                         unit_price=2.5,
                         total_price=5.0
                     )
-                ]
-            ),
-            total=10.0,
-            currency="EUR",
-            language_hint="en",
-            metadata={
-                "key": "value"
-            }
+                ],
+                total=10.0,
+                currency="EUR",
+                language_hint="nl",
+                metadata={
+                    "key": "value"
+                }
+            )
         )
         self.assertEqual(expected_json, coicop_input_file.model_dump())
 
