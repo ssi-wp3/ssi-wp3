@@ -1,7 +1,8 @@
 
 from pydantic import BaseModel, field_serializer
 from datetime import date
-from typing import List, Optional
+from typing import List, Dict, Optional
+import numpy as np
 
 
 class ReceiptItem(BaseModel):
@@ -55,9 +56,9 @@ def load_input_file(filename: str) -> CoicopInputFile:
         return CoicopInputFile.model_validate_json(json_file.read())
 
 
-def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[str], predicted_probabilities: np.array) -> CoicopOutputFile:
+def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[str], predicted_probabilities: Dict[str, np.array]) -> CoicopOutputFile:
     classification_output = CoicopOutputFile()
-    classification_output.coicop_classification_request=receipt_input.coicop_classification_request,
+    classification_output.coicop_classification_request=receipt_input.coicop_classification_request
     classification_output.receipt=receipt_input.receipt
     for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
         coicop_codes = [

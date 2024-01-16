@@ -2,7 +2,8 @@ from ssi.coicop_json_parser import *
 from pydantic import ValidationError
 import unittest
 import json
-
+import numpy as np
+import random
 
 class CoicopJsonParserTest(unittest.TestCase):
     def test_receipt_item_serialized_to_json(self):
@@ -573,3 +574,19 @@ class CoicopJsonParserTest(unittest.TestCase):
         parsed_receipt = load_input_file("Receipts/lidl_receipt1.json") 
         self.assertEqual(["123abc", "456def", "789ghi", "012jkl", "345mno", "678pqr", "901stu", 
         "234vwx", "567yza", "890bcd", "123efg", "456hij", "789klm", "012nop", "345qrs", "678tuv", "901wxy"], parsed_receipt.coicop_classification_request)
+
+    def test_create_coicop_output_file_creates_output_file_correclty(self):
+        parsed_receipt = load_input_file("Receipts/lidl_receipt1.json") 
+        receipt_ids = [item.id for item in parsed_receipt.receipt.items]
+        predicted_probabilities = [{ str(i): random.random()
+
+        } for i in range(len(parsed_receipt.receipt.items))]
+        
+        coicop_output_file = create_coicop_output_file(parsed_receipt, receipt_ids, predicted_probabilities)
+        self.assertEqual(receipt_ids, [item.id for item in coicop_output_file.coicop_classification_result.result])
+        self.assertEqual(list(predicted_probabilities.keys()), [coicop_classification.code 
+                                                                for item in coicop_output_file.coicop_classification_result.result
+                                                                for coicop_classification in item.coicop_codes])
+        self.assertEqual(list(predicted_probabilities.values()), [coicop_classification.confidence 
+                                                                  for item in coicop_output_file.coicop_classification_result.result
+                                                                  for coicop_classification in item.coicop_codes])
