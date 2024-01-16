@@ -1,4 +1,4 @@
-from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile, ProductClassificationResult, CoicopClassification, load_input_file
+from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile, load_input_file, create_coicop_output_file
 from typing import Any, Dict, List
 import argparse
 import joblib
@@ -29,26 +29,13 @@ class CoicopPipeline():
         return prediction_labels
 
     def predict_receipt(self, receipt_input: CoicopInputFile) -> CoicopOutputFile:
-        classification_output = CoicopOutputFile()
-        classification_output.coicop_classification_request=receipt_input.coicop_classification_request,
-        classification_output.receipt=receipt_input.receipt
-
         receipt_ids = [item.id for item in receipt_input.receipt.items]
         receipt_descriptions = [item.description
                                 for item in receipt_input.receipt.items]
         predicted_probabilities = self.predict_proba(receipt_descriptions)
+        
+        return create_coicop_output_file(receipt_input, receipt_ids, predicted_probabilities)
 
-        for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
-            coicop_codes = [
-                CoicopClassification(code=coicop_code, confidence=probability)
-                for coicop_code, probability in probabilities.items()
-            ]
-            classification_result = ProductClassificationResult(
-                id=receipt_id, coicop_codes=coicop_codes)
-            classification_output.coicop_classification_result.result.append(
-                classification_result)
-
-        return classification_output
 
 
 def main(args):
