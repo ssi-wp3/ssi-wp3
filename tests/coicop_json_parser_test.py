@@ -235,13 +235,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                         "unit_price": 2.5,
                         "total_price": 5.0
                     }
-                ]
-            },
-            "total": 10.0,
-            "currency": "EUR",
-            "language_hint": "en",
-            "metadata": {
-                "key": "value"
+                ],
+                "total": 10.0,
+                "currency": "EUR",
+                "language_hint": "en",
+                "metadata": {
+                    "key": "value"
+            }
             }
         }
         coicop_input_file = CoicopInputFile.model_validate(json)
