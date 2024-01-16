@@ -1,6 +1,7 @@
 from ssi.coicop_json_parser import *
 from pydantic import ValidationError
 import unittest
+import json
 
 
 class CoicopJsonParserTest(unittest.TestCase):
@@ -567,3 +568,8 @@ class CoicopJsonParserTest(unittest.TestCase):
         }
         coicop_output_file = CoicopOutputFile.model_validate(json)
         self.assertEqual(json, coicop_output_file.model_dump())
+
+    def test_parses_test_receipt_json_correctly(self):
+        parsed_receipt = load_input_file("Receipts/lidl_receipt1.json") 
+        self.assertEqual(["123abc", "456def", "789ghi", "012jkl", "345mno", "678pqr", "901stu", 
+        "234vwx", "567yza", "890bcd", "123efg", "456hij", "789klm", "012nop", "345qrs", "678tuv", "901wxy"], parsed_receipt.coicop_classification_request)
