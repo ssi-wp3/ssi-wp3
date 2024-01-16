@@ -46,7 +46,6 @@ def main(args):
 
         with open(args.output_data, "w") as json_file:
             output_json = coicop_output_file.model_dump()
-            print(output_json)
             json.dump(output_json, json_file, indent=4)
     except Exception as e:
         print(e)
