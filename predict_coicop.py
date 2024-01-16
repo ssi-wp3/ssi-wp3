@@ -24,7 +24,7 @@ class CoicopPipeline():
             label_predictions = dict()
             for index, probability in enumerate(prediction):
                 label = self.model.classes_[index]
-                label_predictions[label] = probability,
+                label_predictions[label] = probability
             prediction_labels.append(label_predictions)
         return prediction_labels
 
