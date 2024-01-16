@@ -82,10 +82,10 @@
                 "unit_price": 2.46,
                 "total_price": 7.38
             }            
-        ]    
-    },
-    "total": 28.98,
-    "currency": "EUR",
-    "language_hint": "nl",
-    "metadata": null
+        ],    
+        "total": 28.98,
+        "currency": "EUR",
+        "language_hint": "nl",
+        "metadata": null
+    }
 }

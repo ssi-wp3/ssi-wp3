@@ -56,7 +56,7 @@ def load_input_file(filename: str) -> CoicopInputFile:
 
 
 def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[str], predicted_probabilities: Dict[str, np.array]) -> CoicopOutputFile:
-    
+    coicop_classification = [] 
     for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
         coicop_codes = [
             CoicopClassification(code=coicop_code, confidence=probability)
@@ -64,11 +64,12 @@ def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[
         ]
         classification_result = ProductClassificationResult(
             id=receipt_id, coicop_codes=coicop_codes)
-        classification_output.coicop_classification_result.result.append(
+        coicop_classification.append(
             classification_result)
 
+    classification_result = ClassificationResult(result=coicop_classification)
     classification_output = CoicopOutputFile(
-        coicop_classification_request=receipt_input.coicop_classification_request
+        coicop_classification_request=receipt_input.coicop_classification_request,
         receipt=receipt_input.receipt,
         coicop_classification_result=classification_result,
         metadata=dict() 
