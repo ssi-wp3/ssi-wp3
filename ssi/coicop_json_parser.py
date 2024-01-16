@@ -17,6 +17,10 @@ class Receipt(BaseModel):
     store: Optional[str]
     date: Optional[date]
     items: List[ReceiptItem]
+    total: Optional[float]
+    currency: Optional[str]
+    language_hint: Optional[str]
+    metadata: Optional[dict]
 
     @field_serializer('date')
     def serialize_date(self, date: date, _info):
@@ -26,11 +30,6 @@ class Receipt(BaseModel):
 class CoicopInputFile(BaseModel):
     coicop_classification_request: List[str]
     receipt: Receipt
-    total: Optional[float]
-    currency: Optional[str]
-    language_hint: Optional[str]
-    metadata: Optional[dict]
-
 
 class CoicopClassification(BaseModel):
     code: str
@@ -57,9 +56,7 @@ def load_input_file(filename: str) -> CoicopInputFile:
 
 
 def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[str], predicted_probabilities: Dict[str, np.array]) -> CoicopOutputFile:
-    classification_output = CoicopOutputFile()
-    classification_output.coicop_classification_request=receipt_input.coicop_classification_request
-    classification_output.receipt=receipt_input.receipt
+    
     for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
         coicop_codes = [
             CoicopClassification(code=coicop_code, confidence=probability)
@@ -69,5 +66,12 @@ def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[
             id=receipt_id, coicop_codes=coicop_codes)
         classification_output.coicop_classification_result.result.append(
             classification_result)
+
+    classification_output = CoicopOutputFile(
+        coicop_classification_request=receipt_input.coicop_classification_request
+        receipt=receipt_input.receipt,
+        coicop_classification_result=classification_result,
+        metadata=dict() 
+    )
 
     return classification_output
