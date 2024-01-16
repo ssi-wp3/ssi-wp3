@@ -53,3 +53,20 @@ class CoicopOutputFile(CoicopInputFile):
 def load_input_file(filename: str) -> CoicopInputFile:
     with open(filename, "r") as json_file:
         return CoicopInputFile.model_validate_json(json_file.read())
+
+
+def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[str], predicted_probabilities: np.array) -> CoicopOutputFile:
+    classification_output = CoicopOutputFile()
+    classification_output.coicop_classification_request=receipt_input.coicop_classification_request,
+    classification_output.receipt=receipt_input.receipt
+    for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
+        coicop_codes = [
+            CoicopClassification(code=coicop_code, confidence=probability)
+            for coicop_code, probability in probabilities.items()
+        ]
+        classification_result = ProductClassificationResult(
+            id=receipt_id, coicop_codes=coicop_codes)
+        classification_output.coicop_classification_result.result.append(
+            classification_result)
+
+    return classification_output
