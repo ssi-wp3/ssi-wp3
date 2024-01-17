@@ -1,7 +1,9 @@
 from ssi.coicop_json_parser import *
 from pydantic import ValidationError
 import unittest
-
+import json
+import numpy as np
+import random
 
 class CoicopJsonParserTest(unittest.TestCase):
     def test_receipt_item_serialized_to_json(self):
@@ -52,7 +54,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                     "unit_price": 2.5,
                     "total_price": 5.0
                 }
-            ]
+            ],
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "nl",
+            "metadata": {
+                "key": "value"
+            }
         }
 
         receipt = Receipt(
@@ -73,7 +81,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                     unit_price=2.5,
                     total_price=5.0
                 )
-            ]
+            ],
+            total=10.0,
+            currency="EUR",
+            language_hint="nl",
+            metadata={
+                "key": "value"
+            }
         )
         self.assertEqual(expected_json, receipt.model_dump())
 
@@ -96,7 +110,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                     "unit_price": 2.5,
                     "total_price": 5.0
                 }
-            ]
+            ],
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "nl",
+            "metadata": {
+                "key": "value"
+            }
         }
         receipt = Receipt.model_validate(json)
         self.assertEqual(json, receipt.model_dump())
@@ -121,7 +141,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                     "unit_price": 2.5,
                     "total_price": 5.0
                 }
-            ]
+            ],
+            "total": 10.0,
+            "currency": "EUR",
+            "language_hint": "nl",
+            "metadata": {
+                "key": "value"
+            }
         }
         with self.assertRaises(ValidationError):
             Receipt.model_validate(json)
@@ -147,14 +173,14 @@ class CoicopJsonParserTest(unittest.TestCase):
                         "unit_price": 2.5,
                         "total_price": 5.0
                     }
-                ]
+                ],
+                "total": 10.0,
+                "currency": "EUR",
+                "language_hint": "nl",
+                "metadata": {
+                    "key": "value"
+                }
             },
-            "total": 10.0,
-            "currency": "EUR",
-            "language_hint": "en",
-            "metadata": {
-                "key": "value"
-            }
         }
 
         coicop_input_file = CoicopInputFile(
@@ -177,14 +203,14 @@ class CoicopJsonParserTest(unittest.TestCase):
                         unit_price=2.5,
                         total_price=5.0
                     )
-                ]
-            ),
-            total=10.0,
-            currency="EUR",
-            language_hint="en",
-            metadata={
-                "key": "value"
-            }
+                ],
+                total=10.0,
+                currency="EUR",
+                language_hint="nl",
+                metadata={
+                    "key": "value"
+                }
+            )
         )
         self.assertEqual(expected_json, coicop_input_file.model_dump())
 
@@ -209,13 +235,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                         "unit_price": 2.5,
                         "total_price": 5.0
                     }
-                ]
-            },
-            "total": 10.0,
-            "currency": "EUR",
-            "language_hint": "en",
-            "metadata": {
-                "key": "value"
+                ],
+                "total": 10.0,
+                "currency": "EUR",
+                "language_hint": "en",
+                "metadata": {
+                    "key": "value"
+            }
             }
         }
         coicop_input_file = CoicopInputFile.model_validate(json)
@@ -392,13 +418,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                         "unit_price": 2.5,
                         "total_price": 5.0
                     }
-                ]
-            },
-            "total": 10.0,
-            "currency": "EUR",
-            "language_hint": "en",
-            "metadata": {
-                "key": "value"
+                ],
+                "total": 10.0,
+                "currency": "EUR",
+                "language_hint": "en",
+                "metadata": {
+                    "key": "value"
+                }
             },
             "coicop_classification_result": {
                 "result": [
@@ -432,8 +458,9 @@ class CoicopJsonParserTest(unittest.TestCase):
                             }
                         ]
                     }
-                ]
-            }
+                ],
+            },
+            "metadata": None
         }
 
         coicop_output_file = CoicopOutputFile(
@@ -456,14 +483,14 @@ class CoicopJsonParserTest(unittest.TestCase):
                         unit_price=2.5,
                         total_price=5.0
                     )
-                ]
+                ],
+                total=10.0,
+                currency="EUR",
+                language_hint="en",
+                metadata={
+                    "key": "value"
+                }
             ),
-            total=10.0,
-            currency="EUR",
-            language_hint="en",
-            metadata={
-                "key": "value"
-            },
             coicop_classification_result=ClassificationResult(
                 result=[
                     ProductClassificationResult(
@@ -497,7 +524,8 @@ class CoicopJsonParserTest(unittest.TestCase):
                         ]
                     )
                 ]
-            )
+            ),
+            metadata=None
         )
         self.assertEqual(expected_json, coicop_output_file.model_dump())
 
@@ -522,13 +550,13 @@ class CoicopJsonParserTest(unittest.TestCase):
                         "unit_price": 2.5,
                         "total_price": 5.0
                     }
-                ]
-            },
-            "total": 10.0,
-            "currency": "EUR",
-            "language_hint": "en",
-            "metadata": {
-                "key": "value"
+                ],
+                "total": 10.0,
+                "currency": "EUR",
+                "language_hint": "en",
+                "metadata": {
+                    "key": "value"
+                },
             },
             "coicop_classification_result": {
                 "result": [
@@ -563,7 +591,39 @@ class CoicopJsonParserTest(unittest.TestCase):
                         ]
                     }
                 ]
-            }
+            },
+            "metadata": None
         }
         coicop_output_file = CoicopOutputFile.model_validate(json)
         self.assertEqual(json, coicop_output_file.model_dump())
+
+    def test_parses_test_receipt_json_correctly(self):
+        parsed_receipt = load_input_file("Receipts/lidl_receipt1.json") 
+        self.assertEqual(["123abc", "456def", "789ghi", "012jkl", "345mno", "678pqr", "901stu", 
+        "234vwx", "567yza", "890bcd", "123efg", "456hij", "789klm", "012nop", "345qrs", "678tuv", "901wxy"], parsed_receipt.coicop_classification_request)
+
+    def test_create_coicop_output_file_creates_output_file_correclty(self):
+        parsed_receipt = load_input_file("Receipts/lidl_receipt1.json") 
+        receipt_ids = [item.id for item in parsed_receipt.receipt.items]
+        predicted_probabilities = [
+            { 
+                str(coicop_label): random.random()
+                for coicop_label in range(10)
+            } 
+            for _ in range(len(parsed_receipt.receipt.items))
+        ]
+        
+        coicop_output_file = create_coicop_output_file(parsed_receipt, receipt_ids, predicted_probabilities)
+        self.assertEqual(receipt_ids, [item.id for item in coicop_output_file.coicop_classification_result.result])
+        self.assertEqual([label 
+                            for product_classification in predicted_probabilities
+                            for label in product_classification.keys()], 
+                          [coicop_classification.code 
+                                for item in coicop_output_file.coicop_classification_result.result
+                                for coicop_classification in item.coicop_codes])
+        self.assertEqual([probability 
+                          for product_classification in predicted_probabilities 
+                          for probability in product_classification.values()], 
+                          [coicop_classification.confidence 
+                               for item in coicop_output_file.coicop_classification_result.result
+                                                                  for coicop_classification in item.coicop_codes])

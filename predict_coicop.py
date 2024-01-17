@@ -1,4 +1,4 @@
-from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile, ProductClassificationResult, CoicopClassification
+from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile, load_input_file, create_coicop_output_file
 from typing import Any, Dict, List
 import argparse
 import joblib
@@ -24,38 +24,24 @@ class CoicopPipeline():
             label_predictions = dict()
             for index, probability in enumerate(prediction):
                 label = self.model.classes_[index]
-                label_predictions[label] = probability,
+                label_predictions[label] = probability
             prediction_labels.append(label_predictions)
         return prediction_labels
 
     def predict_receipt(self, receipt_input: CoicopInputFile) -> CoicopOutputFile:
-        classification_output = CoicopOutputFile(coicop_classification_request=receipt_input.coicop_classification_request,
-                                                 receipt=receipt_input.receipt
-                                                 )
-
         receipt_ids = [item.id for item in receipt_input.receipt.items]
         receipt_descriptions = [item.description
                                 for item in receipt_input.receipt.items]
         predicted_probabilities = self.predict_proba(receipt_descriptions)
+        
+        return create_coicop_output_file(receipt_input, receipt_ids, predicted_probabilities)
 
-        for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
-            coicop_codes = [
-                CoicopClassification(code=coicop_code, confidence=probability)
-                for coicop_code, probability in probabilities.items()
-            ]
-            classification_result = ProductClassificationResult(
-                id=receipt_id, coicop_codes=coicop_codes)
-            classification_output.coicop_classification_result.result.append(
-                classification_result)
-
-        return classification_output
 
 
 def main(args):
     try:
         pipeline = CoicopPipeline(args.pipeline_path)
-        coicop_input_file = CoicopInputFile.model_validate_json(
-            args.input_data)
+        coicop_input_file = load_input_file(args.input_data)
         coicop_output_file = pipeline.predict_receipt(coicop_input_file)
 
         with open(args.output_data, "w") as json_file:

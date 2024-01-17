@@ -127,7 +127,7 @@
         ],
         "total": 56.04,
         "currency": "EUR",
-        "language": "nl",
+        "language_hint": "nl",
         "metadata": null
     }
 }
