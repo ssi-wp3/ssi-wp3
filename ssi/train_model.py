@@ -39,7 +39,7 @@ class ModelFactory:
                             for model_name, model in all_estimators(type_filter=self.model_type_filter)
                             if not issubclass(model, _BaseVoting) and not issubclass(model, _BaseStacking)
                             }
-            self.models = self._add_extra_models(self._models) 
+            self._models = self._add_extra_models(self._models) 
 
         return self._models
 
