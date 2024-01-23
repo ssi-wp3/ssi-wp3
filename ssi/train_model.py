@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 from sklearn.ensemble._voting import _BaseVoting
 from sklearn.ensemble._stacking import _BaseStacking
+from hiclass import LocalClassifierPerParentNode
 from typing import List, Dict, Callable
 from enum import Enum
 import pandas as pd
@@ -38,6 +39,7 @@ class ModelFactory:
                             for model_name, model in all_estimators(type_filter=self.model_type_filter)
                             if not issubclass(model, _BaseVoting) and not issubclass(model, _BaseStacking)
                             }
+            self.models = self._add_extra_models(self._models) 
 
         return self._models
 
@@ -46,6 +48,10 @@ class ModelFactory:
             return self.models[model_type](**model_kwargs)
         else:
             raise ValueError("Invalid model type: {model_type}")
+        
+    def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
+        models["hiclass"] = LocalClassifierPerParentNode(local_classifier=LogisticRegression(), verbose=1)       
+        return models
 
 
 def evaluate(y_true: np.array, y_pred: np.array) -> Dict[str, object]:
