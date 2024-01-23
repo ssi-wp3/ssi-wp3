@@ -1,5 +1,6 @@
 from .feature_extraction import FeatureExtractorType, FeatureExtractorFactory
 from .label_extractor import LabelExtractor
+from .constants import Constants
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.discovery import all_estimators
@@ -54,14 +55,14 @@ class ModelFactory:
         return models
 
 
-def evaluate(y_true: np.array, y_pred: np.array) -> Dict[str, object]:
+def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, object]:
     return {
-        "accuracy": accuracy_score(y_true, y_pred),
-        "precision": precision_score(y_true, y_pred, average="macro"),
-        "recall": recall_score(y_true, y_pred, average="macro"),
-        "f1": f1_score(y_true, y_pred, average="macro"),
-        "classification_report": classification_report(y_true, y_pred),
-        "confusion_matrix": confusion_matrix(y_true, y_pred).tolist()
+        f"accuracy{suffix}": accuracy_score(y_true, y_pred),
+        f"precision{suffix}": precision_score(y_true, y_pred, average="macro"),
+        f"recall{suffix}": recall_score(y_true, y_pred, average="macro"),
+        f"f1{suffix}": f1_score(y_true, y_pred, average="macro"),
+        f"classification_report{suffix}": classification_report(y_true, y_pred),
+        f"confusion_matrix{suffix}": confusion_matrix(y_true, y_pred).tolist()
     }
 
 
@@ -98,7 +99,14 @@ def train_model(dataframe: pd.DataFrame,
 
     y_true = label_extractor.get_labels(test_df)
     y_pred = pipeline.predict(test_df[receipt_text_column])
-    evaluation_dict = evaluate(y_true, y_pred)
+
+    if model_type == "hiclass":
+        for i, coicop_level in enumerate(Constants.COICOP_LEVELS_COLUMNS[::-1]):
+            y_true_level = [y[i] for y in y_true]
+            y_pred_level = [y[i] for y in y_pred]
+            evaluation_dict = evaluate(y_true_level, y_pred_level, f"_{coicop_level}")
+    else:
+        evaluation_dict = evaluate(y_true, y_pred)
 
     return pipeline, evaluation_dict
 
