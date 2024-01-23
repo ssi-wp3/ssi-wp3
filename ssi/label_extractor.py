@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+from .constants import Constants
 import pandas as pd
 
 class LabelExtractor:
@@ -27,3 +28,11 @@ class MultiColumnLabelExtractor(LabelExtractor):
 
     def get_labels(self, dataframe: pd.DataFrame):
         return dataframe[self.label_columns].values.tolist()
+
+class LabelExtractorFactory:
+    def get_label_extractor_for_model(self, model_name: str, coicop_column: Optional[str] = None):
+        if model_name == "hiclass":
+            return MultiColumnLabelExtractor(Constants.COICOP_LEVELS_COLUMNS[::-1])   
+        elif coicop_column is not None: 
+            return SingleColumnLabelExtractor(coicop_column)    
+        return SingleColumnLabelExtractor(Constants.COICOP_LEVELS_COLUMNS[-1])
