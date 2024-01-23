@@ -101,10 +101,11 @@ def train_model(dataframe: pd.DataFrame,
     y_pred = pipeline.predict(test_df[receipt_text_column])
 
     if model_type == "hiclass":
+        evaluation_dict = []
         for i, coicop_level in enumerate(Constants.COICOP_LEVELS_COLUMNS[::-1]):
             y_true_level = [y[i] for y in y_true]
             y_pred_level = [y[i] for y in y_pred]
-            evaluation_dict = evaluate(y_true_level, y_pred_level, f"_{coicop_level}")
+            evaluation_dict.append(evaluate(y_true_level, y_pred_level, f"_{coicop_level}"))
     else:
         evaluation_dict = evaluate(y_true, y_pred)
 
