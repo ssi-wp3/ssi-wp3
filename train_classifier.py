@@ -31,7 +31,7 @@ if __name__ == "__main__":
                         required=True, help="The input filename in parquet format")
     parser.add_argument("-r", "--receipt-text-column", type=str, default="receipt_text",
                         help="The column name containing the receipt text")
-    parser.add_argument("-c", "--coicop-column", type=str, default="coicop",
+    parser.add_argument("-c", "--coicop-column", type=str, default="coicop_number",
                         help="The column name containing the COICOP code")
     parser.add_argument("-f", "--feature-extractors", type=str, nargs="+", default=[],
                         choices=feature_extractor_choices,
