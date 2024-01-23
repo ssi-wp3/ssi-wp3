@@ -1,8 +1,7 @@
 import pandas as pd
 
-def predict(pipeline, dataframe: pd.DataFrame, label_column: str, column_prefix: str = "predict_") -> pd.DataFrame:
-    y_true = dataframe[label_column]
-    dataframe[f"{column_prefix}{label_column}"] = pipeline.predict(y_true)
+def predict(pipeline, dataframe: pd.DataFrame, receipt_text_column: str, label_column: str, column_prefix: str = "predict_") -> pd.DataFrame:
+    dataframe[f"{column_prefix}{label_column}"] = pipeline.predict(dataframe[receipt_text_column])
     return dataframe
 
 
