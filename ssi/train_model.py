@@ -50,7 +50,7 @@ class ModelFactory:
             raise ValueError("Invalid model type: {model_type}")
         
     def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
-        models["hiclass"] = LocalClassifierPerParentNode(local_classifier=LogisticRegression(), verbose=1)       
+        models["hiclass"] = LocalClassifierPerParentNode #(local_classifier=LogisticRegression(), verbose=1)       
         return models
 
 
@@ -75,7 +75,10 @@ def train_model(dataframe: pd.DataFrame,
                 number_of_jobs: int = -1,
                 verbose: bool = False):
     model_factory = ModelFactory()
-    model = model_factory.create_model(model_type)  # , n_jobs=number_of_jobs)
+    if model_type == "hiclass":
+        model = model_factory.create_model(model_type, local_classifier=LogisticRegression(), verbose=1)
+    else:
+        model = model_factory.create_model(model_type)  # , n_jobs=number_of_jobs)
 
     feature_extractor_factory = FeatureExtractorFactory()
     feature_extractor = feature_extractor_factory.create_feature_extractor(
