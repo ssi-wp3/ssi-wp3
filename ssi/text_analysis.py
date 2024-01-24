@@ -50,22 +50,22 @@ def wordcloud_from_set(set1, filename: str):
     return WordCloud().generate(' '.join(set1)).to_file(filename)
 
 
-def compare_receipt_texts(receipt_texts_left: pd.Series, receipt_texts_right: pd.Series):
+def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set):
     """Compares two receipt texts"""
-    receipt_texts_left_set = series_to_set(receipt_texts_left)
-    receipt_texts_right_set = series_to_set(receipt_texts_right)
-    intersection = receipt_texts_left_set.intersection(receipt_texts_right_set)
-    union = receipt_texts_left_set.union(receipt_texts_right_set)
-    left_difference = receipt_texts_left_set.difference(
-        receipt_texts_right_set)
-    right_difference = receipt_texts_right_set.difference(
-        receipt_texts_left_set)
+    # receipt_texts_left_set = series_to_set(receipt_texts_left)
+    # receipt_texts_right_set = series_to_set(receipt_texts_right)
+    intersection = receipt_texts_left.intersection(receipt_texts_right)
+    union = receipt_texts_left.union(receipt_texts_right)
+    left_difference = receipt_texts_left.difference(
+        receipt_texts_right)
+    right_difference = receipt_texts_right.difference(
+        receipt_texts_left)
     return {
-        "jaccard_index": jaccard_index(receipt_texts_left_set, receipt_texts_right_set),
-        "dice_coefficient": dice_coefficient(receipt_texts_left_set, receipt_texts_right_set),
-        "overlap_coefficient": overlap_coefficient(receipt_texts_left_set, receipt_texts_right_set),
-        "left_set_length": len(receipt_texts_left_set),
-        "right_set_length": len(receipt_texts_right_set),
+        "jaccard_index": jaccard_index(receipt_texts_left, receipt_texts_right),
+        "dice_coefficient": dice_coefficient(receipt_texts_left, receipt_texts_right),
+        "overlap_coefficient": overlap_coefficient(receipt_texts_left, receipt_texts_right),
+        "left_set_length": len(receipt_texts_left),
+        "right_set_length": len(receipt_texts_right),
         "intersection_length": len(intersection),
         "union_length": len(union),
         "left_difference_length": len(left_difference),
