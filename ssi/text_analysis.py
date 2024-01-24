@@ -4,7 +4,7 @@ import pandas as pd
 
 def series_to_set(series: pd.Series) -> set:
     """Converts a pandas series to a set"""
-    return set(series.unique.tolist())
+    return set(series.unique().tolist())
 
 
 def jaccard_index(set1, set2):
