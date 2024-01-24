@@ -55,7 +55,7 @@ def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int 
     """ Writes a set of texts to a file """
     with open(filename, "w") as text_file:
         for i in range(0, len(set1), chunk_size):
-            text_file.write(f'{delimiter}'.join(set1))
+            text_file.write(f'{delimiter}'.join(set1[i:i+chunk_size]))
             text_file.write("\n")
 
 
