@@ -76,7 +76,7 @@ def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, nam
     }
 
 
-def compare_groups(receipt_text_groups: pd.api.typing.DataFrameGroupBy) -> pd.DataFrame:
+def compare_groups(receipt_text_groups) -> pd.DataFrame:
     return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right, name_left, name_right)
                          for name_left, name_right, receipt_texts_left, receipt_texts_right in zip(receipt_text_groups.index, receipt_text_groups[1:].index, receipt_text_groups, receipt_text_groups[1:])
                          ])
