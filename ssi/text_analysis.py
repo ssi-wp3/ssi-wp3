@@ -5,7 +5,7 @@ import os
 
 def series_to_set(series: pd.Series) -> set:
     """Converts a pandas series to a set"""
-    return set(series.drop_duplicates().str.lower().tolist())
+    return set(series.drop_duplicates().str.lstrip().str.rstrip().str.lower().tolist())
 
 
 def jaccard_index(set1, set2):
@@ -60,22 +60,22 @@ def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int 
             text_file.write("\n")
 
 
-def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, output_directory: str, name_left: str = "left", name_right: str = "right"):
+def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, output_directory: str, supermarket_name: str, name_left: str = "left", name_right: str = "right"):
     """Compares two receipt texts"""
     intersection = receipt_texts_left.intersection(receipt_texts_right)
     write_set_texts_to_file(intersection, os.path.join(
-        output_directory, f"{name_left}_{name_right}_intersection.txt"))
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_intersection.txt"))
     union = receipt_texts_left.union(receipt_texts_right)
     write_set_texts_to_file(union, os.path.join(
-        output_directory, f"{name_left}_{name_right}_union.txt"))
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_union.txt"))
     left_difference = receipt_texts_left.difference(
         receipt_texts_right)
     write_set_texts_to_file(left_difference, os.path.join(
-        output_directory, f"{name_left}_{name_right}_left_difference.txt"))
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_left_difference.txt"))
     right_difference = receipt_texts_right.difference(
         receipt_texts_left)
     write_set_texts_to_file(right_difference, os.path.join(
-        output_directory, f"{name_left}_{name_right}_right_difference.txt"))
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_right_difference.txt"))
     return {
         "name_left": name_left,
         "name_right": name_right,
@@ -91,30 +91,32 @@ def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, out
     }
 
 
-def compare_groups(receipt_text_groups, output_directory: str) -> pd.DataFrame:
-    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right, output_directory, name_left, name_right)
+def compare_groups(receipt_text_groups, output_directory: str, supermarket_name: str,) -> pd.DataFrame:
+    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right, output_directory, supermarket_name, name_left, name_right)
                          for name_left, name_right, receipt_texts_left, receipt_texts_right in zip(receipt_text_groups.index, receipt_text_groups[1:].index, receipt_text_groups, receipt_text_groups[1:])
                          ])
 
 
 def compare_receipt_texts_per_year(dataframe: pd.DataFrame,
                                    output_directory: str,
+                                   supermarket_name: str,
                                    year_column: str = "year",
                                    receipt_text_column: str = "receipt_text") -> pd.DataFrame:
     """Compares receipt texts per year"""
     receipt_texts_per_year = dataframe.groupby(
         year_column)[receipt_text_column].apply(series_to_set)
-    return compare_groups(receipt_texts_per_year, output_directory)
+    return compare_groups(receipt_texts_per_year, output_directory, supermarket_name)
 
 
 def compare_receipt_texts_per_month(dataframe: pd.DataFrame,
                                     output_directory: str,
+                                    supermarket_name: str,
                                     month_column: str = "month",
                                     receipt_text_column: str = "receipt_text") -> pd.DataFrame:
     """Compares receipt texts per month"""
     receipt_texts_per_month = dataframe.groupby(
         month_column)[receipt_text_column].apply(series_to_set)
-    return compare_groups(receipt_texts_per_month, output_directory)
+    return compare_groups(receipt_texts_per_month, output_directory, supermarket_name)
 
 
 def analyze_supermarket_receipts(filename: str,
@@ -125,7 +127,7 @@ def analyze_supermarket_receipts(filename: str,
                                  receipt_text_column: str = "receipt_text"):
     supermarket_dataframe = pd.read_parquet(filename, engine="pyarrow")
     receipts_per_year = compare_receipt_texts_per_year(
-        supermarket_dataframe, output_directory, year_column, receipt_text_column)
+        supermarket_dataframe, output_directory, supermarket_name, year_column, receipt_text_column)
     receipts_per_year.to_csv(
         os.path.join(output_directory, f"{supermarket_name}_receipts_per_year.csv"))
 
@@ -133,7 +135,7 @@ def analyze_supermarket_receipts(filename: str,
         output_directory, f"{supermarket_name}_receipts_per_year.png"))
 
     receipts_per_month = compare_receipt_texts_per_month(
-        supermarket_dataframe, output_directory, month_column, receipt_text_column)
+        supermarket_dataframe, output_directory, supermarket_name, month_column, receipt_text_column)
     receipts_per_month.to_csv(
         os.path.join(output_directory, f"{supermarket_name}_receipts_per_month.csv"))
     receipts_per_month.plot.bar(subplots=True)[0].figure.savefig(os.path.join(
