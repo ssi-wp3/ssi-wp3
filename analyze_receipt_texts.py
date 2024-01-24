@@ -10,7 +10,7 @@ parser.add_argument("-o", "--output-directory", type=str,
                     required=True, help="The output directory")
 parser.add_argument("-y", "--year-column", type=str, default="year",
                     help="The column name containing the year")
-parser.add_argument("-m", "--month-column", type=str, default="month",
+parser.add_argument("-m", "--month-column", type=str, default="year_month",
                     help="The column name containing the month")
 parser.add_argument("-r", "--receipt-text-column", type=str, default="receipt_text",
                     help="The column name containing the receipt text")

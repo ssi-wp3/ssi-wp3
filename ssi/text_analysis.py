@@ -104,7 +104,7 @@ def analyze_supermarket_receipts(filename: str,
                                  supermarket_name: str,
                                  output_directory: str,
                                  year_column: str = "year",
-                                 month_column: str = "month",
+                                 month_column: str = "year_month",
                                  receipt_text_column: str = "receipt_text"):
     supermarket_dataframe = pd.read_parquet(filename, engine="pyarrow")
     receipts_per_year = compare_receipt_texts_per_year(
