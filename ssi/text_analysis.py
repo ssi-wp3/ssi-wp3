@@ -51,7 +51,7 @@ def wordcloud_from_set(set1, filename: str):
     return WordCloud().generate(' '.join(set1)).to_file(filename)
 
 
-def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set):
+def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, name_left: str = "left", name_right: str = "right"):
     """Compares two receipt texts"""
     # receipt_texts_left_set = series_to_set(receipt_texts_left)
     # receipt_texts_right_set = series_to_set(receipt_texts_right)
@@ -62,6 +62,8 @@ def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set):
     right_difference = receipt_texts_right.difference(
         receipt_texts_left)
     return {
+        "name_left": name_left,
+        "name_right": name_right,
         "jaccard_index": jaccard_index(receipt_texts_left, receipt_texts_right),
         "dice_coefficient": dice_coefficient(receipt_texts_left, receipt_texts_right),
         "overlap_coefficient": overlap_coefficient(receipt_texts_left, receipt_texts_right),
@@ -80,8 +82,8 @@ def compare_receipt_texts_per_year(dataframe: pd.DataFrame,
     """Compares receipt texts per year"""
     receipt_texts_per_year = dataframe.groupby(
         year_column)[receipt_text_column].apply(series_to_set)
-    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right)
-                         for receipt_texts_left, receipt_texts_right in zip(receipt_texts_per_year, receipt_texts_per_year[1:])
+    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right, name_left, name_right)
+                         for name_left, name_right, receipt_texts_left, receipt_texts_right in zip(receipt_texts_per_year.index, receipt_texts_per_year[1:].index, receipt_texts_per_year, receipt_texts_per_year[1:])
                          ])
 
 
