@@ -5,7 +5,7 @@ import os
 
 def series_to_set(series: pd.Series) -> set:
     """Converts a pandas series to a set"""
-    return set(series.drop_duplicates().str.replace('[^0-9a-zA-Z.,-/ ]', "").str.lstrip().str.rstrip().str.lower().tolist())
+    return set(series.drop_duplicates().str.replace('[^0-9a-zA-Z.,-/ ]', "", regex=True).str.lstrip().str.rstrip().str.lower().tolist())
 
 
 def jaccard_index(set1, set2):
