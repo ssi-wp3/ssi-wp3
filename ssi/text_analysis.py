@@ -76,15 +76,19 @@ def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, nam
     }
 
 
+def compare_groups(receipt_text_groups: pd.api.typing.DataFrameGroupBy) -> pd.DataFrame:
+    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right, name_left, name_right)
+                         for name_left, name_right, receipt_texts_left, receipt_texts_right in zip(receipt_text_groups.index, receipt_text_groups[1:].index, receipt_text_groups, receipt_text_groups[1:])
+                         ])
+
+
 def compare_receipt_texts_per_year(dataframe: pd.DataFrame,
                                    year_column: str = "year",
                                    receipt_text_column: str = "receipt_text") -> pd.DataFrame:
     """Compares receipt texts per year"""
     receipt_texts_per_year = dataframe.groupby(
         year_column)[receipt_text_column].apply(series_to_set)
-    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right, name_left, name_right)
-                         for name_left, name_right, receipt_texts_left, receipt_texts_right in zip(receipt_texts_per_year.index, receipt_texts_per_year[1:].index, receipt_texts_per_year, receipt_texts_per_year[1:])
-                         ])
+    return compare_groups(receipt_texts_per_year)
 
 
 def compare_receipt_texts_per_month(dataframe: pd.DataFrame,
@@ -93,9 +97,7 @@ def compare_receipt_texts_per_month(dataframe: pd.DataFrame,
     """Compares receipt texts per month"""
     receipt_texts_per_month = dataframe.groupby(
         month_column)[receipt_text_column].apply(series_to_set)
-    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right)
-                         for receipt_texts_left, receipt_texts_right in zip(receipt_texts_per_month, receipt_texts_per_month[1:])
-                         ])
+    return compare_groups(receipt_texts_per_month)
 
 
 def analyze_supermarket_receipts(filename: str,
