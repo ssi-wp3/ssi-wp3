@@ -112,14 +112,12 @@ def analyze_supermarket_receipts(filename: str,
     receipts_per_year.to_csv(
         os.path.join(output_directory, f"{supermarket_name}_receipts_per_year.csv"))
 
-    for i, plot in enumerate(receipts_per_year.plot.bar(subplots=True)):
-        plot.figure.savefig(os.path.join(
-            output_directory, f"{supermarket_name}_receipts_per_year_{i}.png"))
+    receipts_per_year.plot.bar(subplots=True)[0].figure.savefig(os.path.join(
+        output_directory, f"{supermarket_name}_receipts_per_year.png"))
 
     receipts_per_month = compare_receipt_texts_per_month(
         supermarket_dataframe, month_column, receipt_text_column)
     receipts_per_month.to_csv(
         os.path.join(output_directory, f"{supermarket_name}_receipts_per_month.csv"))
-    for i, plot in enumerate(receipts_per_month.plot.bar(subplots=True)):
-        plot.figure.savefig(os.path.join(
-            output_directory, f"{supermarket_name}_receipts_per_month_{i}.png"))
+    receipts_per_month.plot.bar(subplots=True)[0].figure.savefig(os.path.join(
+        output_directory, f"{supermarket_name}_receipts_per_month.png"))
