@@ -51,10 +51,16 @@ def wordcloud_from_set(set1, filename: str):
     return WordCloud().generate(' '.join(set1)).to_file(filename)
 
 
+def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int = 80):
+    """ Writes a set of texts to a file """
+    with open(filename, "w") as text_file:
+        for i in range(0, len(set1), chunk_size):
+            text_file.write(f'{delimiter}'.join(set1))
+            text_file.write("\n")
+
+
 def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, name_left: str = "left", name_right: str = "right"):
     """Compares two receipt texts"""
-    # receipt_texts_left_set = series_to_set(receipt_texts_left)
-    # receipt_texts_right_set = series_to_set(receipt_texts_right)
     intersection = receipt_texts_left.intersection(receipt_texts_right)
     union = receipt_texts_left.union(receipt_texts_right)
     left_difference = receipt_texts_left.difference(
