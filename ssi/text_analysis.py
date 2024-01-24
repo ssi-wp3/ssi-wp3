@@ -51,7 +51,7 @@ def wordcloud_from_set(set1, filename: str):
     return WordCloud().generate(' '.join(set1)).to_file(filename)
 
 
-def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set):
+def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, name_left: str = "left", name_right: str = "right"):
     """Compares two receipt texts"""
     # receipt_texts_left_set = series_to_set(receipt_texts_left)
     # receipt_texts_right_set = series_to_set(receipt_texts_right)
@@ -62,6 +62,8 @@ def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set):
     right_difference = receipt_texts_right.difference(
         receipt_texts_left)
     return {
+        "name_left": name_left,
+        "name_right": name_right,
         "jaccard_index": jaccard_index(receipt_texts_left, receipt_texts_right),
         "dice_coefficient": dice_coefficient(receipt_texts_left, receipt_texts_right),
         "overlap_coefficient": overlap_coefficient(receipt_texts_left, receipt_texts_right),
@@ -74,15 +76,19 @@ def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set):
     }
 
 
+def compare_groups(receipt_text_groups: pd.api.typing.DataFrameGroupBy) -> pd.DataFrame:
+    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right, name_left, name_right)
+                         for name_left, name_right, receipt_texts_left, receipt_texts_right in zip(receipt_text_groups.index, receipt_text_groups[1:].index, receipt_text_groups, receipt_text_groups[1:])
+                         ])
+
+
 def compare_receipt_texts_per_year(dataframe: pd.DataFrame,
                                    year_column: str = "year",
                                    receipt_text_column: str = "receipt_text") -> pd.DataFrame:
     """Compares receipt texts per year"""
     receipt_texts_per_year = dataframe.groupby(
         year_column)[receipt_text_column].apply(series_to_set)
-    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right)
-                         for receipt_texts_left, receipt_texts_right in zip(receipt_texts_per_year, receipt_texts_per_year[1:])
-                         ])
+    return compare_groups(receipt_texts_per_year)
 
 
 def compare_receipt_texts_per_month(dataframe: pd.DataFrame,
@@ -91,9 +97,7 @@ def compare_receipt_texts_per_month(dataframe: pd.DataFrame,
     """Compares receipt texts per month"""
     receipt_texts_per_month = dataframe.groupby(
         month_column)[receipt_text_column].apply(series_to_set)
-    return pd.DataFrame([compare_receipt_texts(receipt_texts_left, receipt_texts_right)
-                         for receipt_texts_left, receipt_texts_right in zip(receipt_texts_per_month, receipt_texts_per_month[1:])
-                         ])
+    return compare_groups(receipt_texts_per_month)
 
 
 def analyze_supermarket_receipts(filename: str,
@@ -107,12 +111,15 @@ def analyze_supermarket_receipts(filename: str,
         supermarket_dataframe, year_column, receipt_text_column)
     receipts_per_year.to_csv(
         os.path.join(output_directory, f"{supermarket_name}_receipts_per_year.csv"))
-    receipts_per_year.plot.bar(subplots=True).figure.savefig(os.path.join(
-        output_directory, f"{supermarket_name}_receipts_per_year.png"))
+
+    for i, plot in enumerate(receipts_per_year.plot.bar(subplots=True)):
+        plot.figure.savefig(os.path.join(
+            output_directory, f"{supermarket_name}_receipts_per_year_{i}.png"))
 
     receipts_per_month = compare_receipt_texts_per_month(
         supermarket_dataframe, month_column, receipt_text_column)
     receipts_per_month.to_csv(
         os.path.join(output_directory, f"{supermarket_name}_receipts_per_month.csv"))
-    receipts_per_month.plot.bar(subplots=True).figure.savefig(os.path.join(
-        output_directory, f"{supermarket_name}_receipts_per_month.png"))
+    for i, plot in enumerate(receipts_per_month.plot.bar(subplots=True)):
+        plot.figure.savefig(os.path.join(
+            output_directory, f"{supermarket_name}_receipts_per_month_{i}.png"))
