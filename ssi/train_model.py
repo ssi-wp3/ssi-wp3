@@ -1,4 +1,6 @@
 from .feature_extraction import FeatureExtractorType, FeatureExtractorFactory
+from .label_extractor import LabelExtractor
+from .constants import Constants
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.discovery import all_estimators
@@ -6,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 from sklearn.ensemble._voting import _BaseVoting
 from sklearn.ensemble._stacking import _BaseStacking
+from hiclass import LocalClassifierPerParentNode
 from typing import List, Dict, Callable
 from enum import Enum
 import pandas as pd
@@ -37,6 +40,7 @@ class ModelFactory:
                             for model_name, model in all_estimators(type_filter=self.model_type_filter)
                             if not issubclass(model, _BaseVoting) and not issubclass(model, _BaseStacking)
                             }
+            self._models = self._add_extra_models(self._models) 
 
         return self._models
 
@@ -45,29 +49,37 @@ class ModelFactory:
             return self.models[model_type](**model_kwargs)
         else:
             raise ValueError("Invalid model type: {model_type}")
+        
+    def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
+        models["hiclass"] = LocalClassifierPerParentNode #(local_classifier=LogisticRegression(), verbose=1)       
+        return models
 
 
-def evaluate(y_true: np.array, y_pred: np.array) -> Dict[str, object]:
+def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, object]:
     return {
-        "accuracy": accuracy_score(y_true, y_pred),
-        "precision": precision_score(y_true, y_pred, average="macro"),
-        "recall": recall_score(y_true, y_pred, average="macro"),
-        "f1": f1_score(y_true, y_pred, average="macro"),
-        "classification_report": classification_report(y_true, y_pred),
-        "confusion_matrix": confusion_matrix(y_true, y_pred).tolist()
+        f"accuracy{suffix}": accuracy_score(y_true, y_pred),
+        f"precision{suffix}": precision_score(y_true, y_pred, average="macro"),
+        f"recall{suffix}": recall_score(y_true, y_pred, average="macro"),
+        f"f1{suffix}": f1_score(y_true, y_pred, average="macro"),
+        f"classification_report{suffix}": classification_report(y_true, y_pred),
+        f"confusion_matrix{suffix}": confusion_matrix(y_true, y_pred).tolist()
     }
 
 
 def train_model(dataframe: pd.DataFrame,
                 receipt_text_column: str,
                 coicop_column: str,
+                label_extractor: LabelExtractor,
                 feature_extractor: FeatureExtractorType,
                 model_type: str,
                 test_size: float,
                 number_of_jobs: int = -1,
                 verbose: bool = False):
     model_factory = ModelFactory()
-    model = model_factory.create_model(model_type)  # , n_jobs=number_of_jobs)
+    if model_type == "hiclass":
+        model = model_factory.create_model(model_type, local_classifier=LogisticRegression(), verbose=1)
+    else:
+        model = model_factory.create_model(model_type)  # , n_jobs=number_of_jobs)
 
     feature_extractor_factory = FeatureExtractorFactory()
     feature_extractor = feature_extractor_factory.create_feature_extractor(
@@ -81,12 +93,21 @@ def train_model(dataframe: pd.DataFrame,
     train_df, test_df = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[coicop_column])
 
+    y_train = label_extractor.get_labels(train_df)
     pipeline.fit(train_df[receipt_text_column],
-                 train_df[coicop_column])
+                 y_train)
 
-    y_true = test_df[coicop_column]
+    y_true = label_extractor.get_labels(test_df)
     y_pred = pipeline.predict(test_df[receipt_text_column])
-    evaluation_dict = evaluate(y_true, y_pred)
+
+    if model_type == "hiclass":
+        evaluation_dict = []
+        for i, coicop_level in enumerate(Constants.COICOP_LEVELS_COLUMNS[::-1]):
+            y_true_level = [y[i] for y in y_true]
+            y_pred_level = [y[i] for y in y_pred]
+            evaluation_dict.append(evaluate(y_true_level, y_pred_level, f"_{coicop_level}"))
+    else:
+        evaluation_dict = evaluate(y_true, y_pred)
 
     return pipeline, evaluation_dict
 
@@ -94,6 +115,7 @@ def train_model(dataframe: pd.DataFrame,
 def train_model_with_feature_extractors(input_filename: str,
                                         receipt_text_column: str,
                                         coicop_column: str,
+                                        label_extractor: LabelExtractor,
                                         feature_extractors: List[FeatureExtractorType],
                                         model_type: str,
                                         test_size: float,
@@ -108,7 +130,7 @@ def train_model_with_feature_extractors(input_filename: str,
         progress_bar.set_description(
             f"Training model {model_type} with {feature_extractor}")
         trained_pipeline, evaluate_dict = train_model(dataframe, receipt_text_column,
-                                                      coicop_column, feature_extractor, model_type, test_size, number_of_jobs, verbose)
+                                                      coicop_column, label_extractor, feature_extractor, model_type, test_size, number_of_jobs, verbose)
 
         model_path = os.path.join(
             output_path, f"{model_type.lower()}_{feature_extractor}.pipeline")
@@ -127,6 +149,7 @@ def train_model_with_feature_extractors(input_filename: str,
 def train_models(input_filename: str,
                  receipt_text_column: str,
                  coicop_column: str,
+                 label_extractor: LabelExtractor,
                  feature_extractors: List[FeatureExtractorType],
                  model_types: List[str],
                  test_size: float,
@@ -139,6 +162,7 @@ def train_models(input_filename: str,
         train_model_with_feature_extractors(input_filename,
                                             receipt_text_column,
                                             coicop_column,
+                                            label_extractor,
                                             feature_extractors,
                                             model_type,
                                             test_size,
