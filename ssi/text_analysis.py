@@ -1,5 +1,6 @@
 from wordcloud import WordCloud
 import pandas as pd
+import os
 
 
 def series_to_set(series: pd.Series) -> set:
@@ -105,9 +106,13 @@ def analyze_supermarket_receipts(filename: str,
     receipts_per_year = compare_receipt_texts_per_year(
         supermarket_dataframe, year_column, receipt_text_column)
     receipts_per_year.to_csv(
-        f"{output_directory}/{supermarket_name}_receipts_per_year.csv")
+        os.path.join(output_directory, f"{supermarket_name}_receipts_per_year.csv"))
+    receipts_per_year.plot.bar(
+        x=receipts_per_year.index, y=receipts_per_year.columns).figure.savefig(os.path.join(output_directory, f"{supermarket_name}_receipts_per_year.png"))
 
     receipts_per_month = compare_receipt_texts_per_month(
         supermarket_dataframe, month_column, receipt_text_column)
     receipts_per_month.to_csv(
-        f"{output_directory}/{supermarket_name}_receipts_per_month.csv")
+        os.path.join(output_directory, f"{supermarket_name}_receipts_per_month.csv"))
+    receipts_per_month.plot.bar(
+        x=receipts_per_month.index, y=receipts_per_month.columns).figure.savefig(os.path.join(output_directory, f"{supermarket_name}_receipts_per_month.png"))
