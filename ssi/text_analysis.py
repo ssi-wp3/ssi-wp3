@@ -98,13 +98,14 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
     receipt_texts_per_period = dataframe.groupby(
         period_column)[receipt_text_column].apply(series_to_set)
 
+    combined_set = series_to_set(dataframe[receipt_texts_per_period])
     for period in receipt_texts_per_period.index:
         # Detect which products disappeared and which products are new
         # Add this as a column to the dataframe
         period_texts = receipt_texts_per_period[period]
 
         _, _, _, new_texts = detect_product_differences(
-            period_texts, receipt_texts_per_period)
+            period_texts, combined_set)
         new_texts_column = [True if text in new_texts else False
                             for text in receipt_texts_per_period]
 
