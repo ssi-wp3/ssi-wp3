@@ -4,9 +4,14 @@ import pandas as pd
 import os
 
 
+def clean_text(text: pd.Series) -> pd.Series:
+    """Cleans a text"""
+    return text.str.replace('[^0-9a-zA-Z.,-/ ]', "", regex=True).str.lstrip().str.rstrip().str.lower()
+
+
 def series_to_set(series: pd.Series) -> set:
     """Converts a pandas series to a set"""
-    return set(series.drop_duplicates().str.replace('[^0-9a-zA-Z.,-/ ]', "", regex=True).str.lstrip().str.rstrip().str.lower().tolist())
+    return set(clean_text(series.drop_duplicates()).tolist())
 
 
 def jaccard_index(set1, set2):
@@ -107,7 +112,7 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
         _, _, _, new_texts = detect_product_differences(
             period_texts, combined_set)
         new_texts_column = [True if text in new_texts else False
-                            for text in receipt_texts_per_period]
+                            for text in dataframe[receipt_text_column]]
 
         dataframe[f"new_text_{period}"] = new_texts_column
 
