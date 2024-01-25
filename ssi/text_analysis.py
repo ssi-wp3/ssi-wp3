@@ -1,3 +1,4 @@
+from typing import Tuple
 from wordcloud import WordCloud
 import pandas as pd
 import os
@@ -60,22 +61,77 @@ def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int 
             text_file.write("\n")
 
 
+def detect_product_differences(receipt_texts_before: set, receipt_texts_after: set) -> Tuple[set, set, set, set]:
+    """Detects differences between two sets of texts
+
+    Parameters
+    ----------
+    receipt_texts_before : set
+        Set of receipt texts before, this is for example the set of receipt texts in a previous
+        year or month
+
+    receipt_texts_after : set
+        Set of receipt texts after, this is for example the set of receipt texts in a current
+        year or month
+
+    Returns
+    -------
+    A tuple of four sets:
+    - texts_kept_the_same: texts that are present in both sets
+    - combined_texts: texts that are present in either set
+    - texts_disappeared: texts that are present in the first set but not in the second set
+    - new_texts: texts that are present in the second set but not in the first set
+    """
+    texts_kept_the_same = receipt_texts_before.intersection(
+        receipt_texts_after)
+    combined_texts = receipt_texts_before.union(receipt_texts_after)
+    texts_disappeared = receipt_texts_before.difference(
+        receipt_texts_after)
+    new_texts = receipt_texts_after.difference(
+        receipt_texts_before)
+
+    return texts_kept_the_same, combined_texts, texts_disappeared, new_texts
+
+
+def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str, receipt_text_column: str) -> pd.DataFrame:
+    """Compares receipt texts per period"""
+    receipt_texts_per_period = dataframe.groupby(
+        period_column)[receipt_text_column].apply(series_to_set)
+
+    # Detect which products disappeared and which products are new
+    # Add this as a column to the dataframe
+    comparison_dict = {
+        "period": [period for period in receipt_texts_per_period[0].index],
+        "receipt_text": [receipt_texts for receipt_texts in receipt_texts_per_period[0]],
+        "new_text": [False for _ in receipt_texts_per_period[0]],
+    }
+    for new_period, texts_previous, texts_current in zip(receipt_texts_per_period[1:].index, receipt_texts_per_period, receipt_texts_per_period[1:]):
+        _, _, _, new_texts = detect_product_differences(
+            texts_previous, texts_current)
+        comparison_dict["period"].append([new_period for _ in texts_current])
+        comparison_dict["receipt_text"].append(
+            [texts_current for _ in texts_current])
+        comparison_dict["new_text"].append(
+            [True if text in new_texts else False for text in texts_current])
+
+    comparison_df = pd.DataFrame(comparison_dict)
+    combined_df = dataframe.merge(comparison_df, on=["period", "receipt_text"]).drop(columns=[
+        "period_y", "receipt_text_y"]).rename(columns={"period_x": "period", "receipt_text_x": "receipt_text"})
+    return combined_df
+
+
 def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, output_directory: str, supermarket_name: str, name_left: str = "left", name_right: str = "right"):
     """Compares two receipt texts"""
-    intersection = receipt_texts_left.intersection(receipt_texts_right)
-    write_set_texts_to_file(intersection, os.path.join(
-        output_directory, f"{supermarket_name}_{name_left}_{name_right}_intersection.txt"))
-    union = receipt_texts_left.union(receipt_texts_right)
-    write_set_texts_to_file(union, os.path.join(
-        output_directory, f"{supermarket_name}_{name_left}_{name_right}_union.txt"))
-    left_difference = receipt_texts_left.difference(
-        receipt_texts_right)
-    write_set_texts_to_file(left_difference, os.path.join(
-        output_directory, f"{supermarket_name}_{name_left}_{name_right}_left_difference.txt"))
-    right_difference = receipt_texts_right.difference(
-        receipt_texts_left)
-    write_set_texts_to_file(right_difference, os.path.join(
-        output_directory, f"{supermarket_name}_{name_left}_{name_right}_right_difference.txt"))
+    texts_kept_the_same, combined_texts, text_disappeared, new_texts = detect_product_differences(
+        receipt_texts_left, receipt_texts_right)
+    write_set_texts_to_file(texts_kept_the_same, os.path.join(
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_kept_the_same.txt"))
+    write_set_texts_to_file(combined_texts, os.path.join(
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_all_texts.txt"))
+    write_set_texts_to_file(text_disappeared, os.path.join(
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_texts_disappeared.txt"))
+    write_set_texts_to_file(new_texts, os.path.join(
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_new_texts.txt"))
     return {
         "name_left": name_left,
         "name_right": name_right,
@@ -84,10 +140,10 @@ def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, out
         "overlap_coefficient": overlap_coefficient(receipt_texts_left, receipt_texts_right),
         "left_set_length": len(receipt_texts_left),
         "right_set_length": len(receipt_texts_right),
-        "intersection_length": len(intersection),
-        "union_length": len(union),
-        "left_difference_length": len(left_difference),
-        "right_difference_length": len(right_difference),
+        "intersection_length": len(texts_kept_the_same),
+        "union_length": len(combined_texts),
+        "left_difference_length": len(text_disappeared),
+        "right_difference_length": len(new_texts),
     }
 
 
