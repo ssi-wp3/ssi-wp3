@@ -98,27 +98,22 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
     receipt_texts_per_period = dataframe.groupby(
         period_column)[receipt_text_column].apply(series_to_set)
 
-    # Detect which products disappeared and which products are new
-    # Add this as a column to the dataframe
-    comparison_dict = {
-        period_column: [receipt_texts_per_period[:1].index.values[0] for _ in range(len(receipt_texts_per_period[0]))],
-        "receipt_text": [receipt_texts for receipt_texts in receipt_texts_per_period[0]],
-        "new_text": [False for _ in receipt_texts_per_period[0]],
-    }
-    for new_period, texts_previous, texts_current in zip(receipt_texts_per_period[1:].index, receipt_texts_per_period, receipt_texts_per_period[1:]):
-        _, _, _, new_texts = detect_product_differences(
-            texts_previous, texts_current)
-        comparison_dict[period_column].extend(
-            [new_period for _ in texts_current])
-        comparison_dict[receipt_text_column].extend(
-            [text for text in texts_current])
-        comparison_dict["new_text"].extend(
-            [True if text in new_texts else False for text in texts_current])
+    for period in receipt_texts_per_period.index:
+        # Detect which products disappeared and which products are new
+        # Add this as a column to the dataframe
+        period_texts = receipt_texts_per_period[period]
+        new_texts = [False for _ in period_texts]
 
-    comparison_df = pd.DataFrame(comparison_dict)
-    combined_df = dataframe.merge(
-        comparison_df, on=[period_column, receipt_text_column])
-    return combined_df
+        other_periods = receipt_texts_per_period.drop(period)
+        for other_period in other_periods.index:
+            _, _, _, new_texts = detect_product_differences(
+                period_texts, other_periods[other_period])
+            new_texts.extend(
+                [True if text in new_texts else False for text in other_periods[other_period]])
+
+        dataframe[f"new_text_{period}"] = new_texts
+
+    return dataframe
 
 
 def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, output_directory: str, supermarket_name: str, name_left: str = "left", name_right: str = "right"):
