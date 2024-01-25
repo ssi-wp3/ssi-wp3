@@ -111,7 +111,7 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
         comparison_dict[period_column].extend(
             [new_period for _ in texts_current])
         comparison_dict[receipt_text_column].extend(
-            [texts_current for _ in texts_current])
+            [text for text in texts_current])
         comparison_dict["new_text"].extend(
             [True if text in new_texts else False for text in texts_current])
 
