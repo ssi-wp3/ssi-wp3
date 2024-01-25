@@ -114,7 +114,10 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
         comparison_dict["new_text"].append(
             [True if text in new_texts else False for text in texts_current])
 
-    return
+    comparison_df = pd.DataFrame(comparison_dict)
+    combined_df = dataframe.merge(comparison_df, on=["period", "receipt_text"]).drop(columns=[
+        "period_y", "receipt_text_y"]).rename(columns={"period_x": "period", "receipt_text_x": "receipt_text"})
+    return combined_df
 
 
 def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, output_directory: str, supermarket_name: str, name_left: str = "left", name_right: str = "right"):
