@@ -102,14 +102,11 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
         # Detect which products disappeared and which products are new
         # Add this as a column to the dataframe
         period_texts = receipt_texts_per_period[period]
-        new_texts_column = [False for _ in period_texts]
 
-        other_periods = receipt_texts_per_period[receipt_texts_per_period.index != period]
-        for other_period in other_periods.index:
-            _, _, _, new_texts = detect_product_differences(
-                period_texts, other_periods[other_period])
-            new_texts_column.extend(
-                [True if text in new_texts else False for text in other_periods[other_period]])
+        _, _, _, new_texts = detect_product_differences(
+            period_texts, receipt_texts_per_period)
+        new_texts_column = [True if text in new_texts else False
+                            for text in receipt_texts_per_period]
 
         dataframe[f"new_text_{period}"] = new_texts_column
 
