@@ -60,22 +60,38 @@ def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int 
             text_file.write("\n")
 
 
+def detect_product_differences(receipt_texts_before, receipt_texts_after):
+    """Detects differences between two sets of texts
+
+    Returns a tuple of four sets:
+    - texts_kept_the_same: texts that are present in both sets
+    - combined_texts: texts that are present in either set
+    - texts_disappeared: texts that are present in the first set but not in the second set
+    - new_texts: texts that are present in the second set but not in the first set
+    """
+    texts_kept_the_same = receipt_texts_before.intersection(
+        receipt_texts_after)
+    combined_texts = receipt_texts_before.union(receipt_texts_after)
+    texts_disappeared = receipt_texts_before.difference(
+        receipt_texts_after)
+    new_texts = receipt_texts_after.difference(
+        receipt_texts_before)
+
+    return texts_kept_the_same, combined_texts, texts_disappeared, new_texts
+
+
 def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, output_directory: str, supermarket_name: str, name_left: str = "left", name_right: str = "right"):
     """Compares two receipt texts"""
-    intersection = receipt_texts_left.intersection(receipt_texts_right)
-    write_set_texts_to_file(intersection, os.path.join(
-        output_directory, f"{supermarket_name}_{name_left}_{name_right}_intersection.txt"))
-    union = receipt_texts_left.union(receipt_texts_right)
-    write_set_texts_to_file(union, os.path.join(
-        output_directory, f"{supermarket_name}_{name_left}_{name_right}_union.txt"))
-    left_difference = receipt_texts_left.difference(
-        receipt_texts_right)
-    write_set_texts_to_file(left_difference, os.path.join(
-        output_directory, f"{supermarket_name}_{name_left}_{name_right}_left_difference.txt"))
-    right_difference = receipt_texts_right.difference(
-        receipt_texts_left)
-    write_set_texts_to_file(right_difference, os.path.join(
-        output_directory, f"{supermarket_name}_{name_left}_{name_right}_right_difference.txt"))
+    texts_kept_the_same, combined_texts, text_disappeared, new_texts = detect_product_differences(
+        receipt_texts_left, receipt_texts_right)
+    write_set_texts_to_file(texts_kept_the_same, os.path.join(
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_kept_the_same.txt"))
+    write_set_texts_to_file(combined_texts, os.path.join(
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_all_texts.txt"))
+    write_set_texts_to_file(text_disappeared, os.path.join(
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_texts_disappeared.txt"))
+    write_set_texts_to_file(new_texts, os.path.join(
+        output_directory, f"{supermarket_name}_{name_left}_{name_right}_new_texts.txt"))
     return {
         "name_left": name_left,
         "name_right": name_right,
@@ -84,10 +100,10 @@ def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, out
         "overlap_coefficient": overlap_coefficient(receipt_texts_left, receipt_texts_right),
         "left_set_length": len(receipt_texts_left),
         "right_set_length": len(receipt_texts_right),
-        "intersection_length": len(intersection),
-        "union_length": len(union),
-        "left_difference_length": len(left_difference),
-        "right_difference_length": len(right_difference),
+        "intersection_length": len(texts_kept_the_same),
+        "union_length": len(combined_texts),
+        "left_difference_length": len(text_disappeared),
+        "right_difference_length": len(new_texts),
     }
 
 
