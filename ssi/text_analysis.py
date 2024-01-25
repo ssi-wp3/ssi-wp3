@@ -101,22 +101,23 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
     # Detect which products disappeared and which products are new
     # Add this as a column to the dataframe
     comparison_dict = {
-        "period": [receipt_texts_per_period[:1].index for _ in range(len(receipt_texts_per_period[0]))],
+        period_column: [receipt_texts_per_period[:1].index for _ in range(len(receipt_texts_per_period[0]))],
         "receipt_text": [receipt_texts for receipt_texts in receipt_texts_per_period[0]],
         "new_text": [False for _ in receipt_texts_per_period[0]],
     }
     for new_period, texts_previous, texts_current in zip(receipt_texts_per_period[1:].index, receipt_texts_per_period, receipt_texts_per_period[1:]):
         _, _, _, new_texts = detect_product_differences(
             texts_previous, texts_current)
-        comparison_dict["period"].append([new_period for _ in texts_current])
+        comparison_dict[period_column].append(
+            [new_period for _ in texts_current])
         comparison_dict["receipt_text"].append(
             [texts_current for _ in texts_current])
         comparison_dict["new_text"].append(
             [True if text in new_texts else False for text in texts_current])
 
     comparison_df = pd.DataFrame(comparison_dict)
-    combined_df = dataframe.merge(comparison_df, on=["period", "receipt_text"]).drop(columns=[
-        "period_y", "receipt_text_y"]).rename(columns={"period_x": "period", "receipt_text_x": "receipt_text"})
+    combined_df = dataframe.merge(comparison_df, on=[period_column, receipt_text_column]).drop(columns=[
+        f"{period_column}_y", f"{receipt_text_column}_y"]).rename(columns={f"{period_column}_x": period_column, f"{receipt_text_column}_x": receipt_text_column})
     return combined_df
 
 
