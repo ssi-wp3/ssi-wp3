@@ -117,8 +117,11 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
 
     comparison_df = pd.DataFrame(comparison_dict)
     print(comparison_df.head())
-    combined_df = dataframe.merge(comparison_df, on=[period_column, receipt_text_column]).drop(columns=[
-        f"{period_column}_y", f"{receipt_text_column}_y"]).rename(columns={f"{period_column}_x": period_column, f"{receipt_text_column}_x": receipt_text_column})
+    combined_df = dataframe.merge(
+        comparison_df, on=[period_column, receipt_text_column])
+    print(combined_df.head())
+    # .drop(columns=[
+    #    f"{period_column}_y", f"{receipt_text_column}_y"]).rename(columns={f"{period_column}_x": period_column, f"{receipt_text_column}_x": receipt_text_column})
     return combined_df
 
 
