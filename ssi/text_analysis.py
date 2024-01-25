@@ -109,7 +109,7 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
         _, _, _, new_texts = detect_product_differences(
             texts_previous, texts_current)
         comparison_dict[period_column].append(
-            [new_period.index.values[0] for _ in texts_current])
+            [new_period.values[0] for _ in texts_current])
         comparison_dict["receipt_text"].append(
             [texts_current for _ in texts_current])
         comparison_dict["new_text"].append(
