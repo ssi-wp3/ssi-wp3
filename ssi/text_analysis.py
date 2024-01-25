@@ -63,7 +63,19 @@ def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int 
 def detect_product_differences(receipt_texts_before, receipt_texts_after):
     """Detects differences between two sets of texts
 
-    Returns a tuple of four sets:
+    Parameters
+    ----------
+    receipt_texts_before : set
+        Set of receipt texts before, this is for example the set of receipt texts in a previous
+        year or month
+
+    receipt_texts_after : set
+        Set of receipt texts after, this is for example the set of receipt texts in a current
+        year or month
+
+    Returns
+    -------
+    A tuple of four sets:
     - texts_kept_the_same: texts that are present in both sets
     - combined_texts: texts that are present in either set
     - texts_disappeared: texts that are present in the first set but not in the second set
