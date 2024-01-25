@@ -1,3 +1,4 @@
+from typing import Tuple
 from wordcloud import WordCloud
 import pandas as pd
 import os
@@ -60,7 +61,7 @@ def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int 
             text_file.write("\n")
 
 
-def detect_product_differences(receipt_texts_before, receipt_texts_after):
+def detect_product_differences(receipt_texts_before: set, receipt_texts_after: set) -> Tuple[set, set, set, set]:
     """Detects differences between two sets of texts
 
     Parameters
@@ -90,6 +91,30 @@ def detect_product_differences(receipt_texts_before, receipt_texts_after):
         receipt_texts_before)
 
     return texts_kept_the_same, combined_texts, texts_disappeared, new_texts
+
+
+def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str, receipt_text_column: str) -> pd.DataFrame:
+    """Compares receipt texts per period"""
+    receipt_texts_per_period = dataframe.groupby(
+        period_column)[receipt_text_column].apply(series_to_set)
+
+    # Detect which products disappeared and which products are new
+    # Add this as a column to the dataframe
+    comparison_dict = {
+        "period": [period for period in receipt_texts_per_period[0].index],
+        "receipt_text": [receipt_texts for receipt_texts in receipt_texts_per_period[0]],
+        "new_text": [False for _ in receipt_texts_per_period[0]],
+    }
+    for new_period, texts_previous, texts_current in zip(receipt_texts_per_period[1:].index, receipt_texts_per_period, receipt_texts_per_period[1:]):
+        _, _, _, new_texts = detect_product_differences(
+            texts_previous, texts_current)
+        comparison_dict["period"].append([new_period for _ in texts_current])
+        comparison_dict["receipt_text"].append(
+            [texts_current for _ in texts_current])
+        comparison_dict["new_text"].append(
+            [True if text in new_texts else False for text in texts_current])
+
+    return
 
 
 def compare_receipt_texts(receipt_texts_left: set, receipt_texts_right: set, output_directory: str, supermarket_name: str, name_left: str = "left", name_right: str = "right"):
