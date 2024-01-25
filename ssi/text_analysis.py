@@ -104,7 +104,7 @@ def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str
         period_texts = receipt_texts_per_period[period]
         new_texts_column = [False for _ in period_texts]
 
-        other_periods = receipt_texts_per_period.drop(period)
+        other_periods = receipt_texts_per_period[other_period.index != period]
         for other_period in other_periods.index:
             _, _, _, new_texts = detect_product_differences(
                 period_texts, other_periods[other_period])
