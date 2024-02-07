@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 from wordcloud import WordCloud
 import pandas as pd
 import os
@@ -109,7 +109,7 @@ def get_unique_texts_and_eans_per_period(dataframe: pd.DataFrame, period_column:
         dataframe, period_column, receipt_column)
     grouped_eans_per_month = group_unique_values_per_period(
         dataframe, period_column, ean_column)
-    return grouped_texts_per_month.merge(grouped_eans_per_month, on="year_month")
+    return grouped_texts_per_month.merge(grouped_eans_per_month, on=period_column)
 
 
 def intersection(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
@@ -136,25 +136,28 @@ def number_of_products(column: Optional[set]) -> int:
     return len(column)
 
 
-def get_differences_per_period(dataframe: pd.DataFrame, period_column: str, receipt_column: str, ean_column: str) -> pd.DataFrame:
-    grouped_texts_eans_per_month = get_unique_texts_and_eans_per_period(
-        dataframe, period_column, receipt_column, ean_column)
+def get_differences_per_period(dataframe: pd.DataFrame, period_column: str, resample_period: str, selected_columns: List[str]) -> pd.DataFrame:
+    filtered_dataframe = dataframe[[period_column] + selected_columns]
+    filtered_dataframe = filtered_dataframe.set_index(period_column)
 
-    for column in ["receipt_text", "ean_number"]:
-        grouped_texts_eans_per_month[f"{column}_text_lagged"] = grouped_texts_eans_per_month[column].shift(
+    resampled_dataframe = filtered_dataframe.resample(
+        resample_period).apply(series_to_set)
+
+    for column in selected_columns:
+        resampled_dataframe[f"{column}_text_lagged"] = resampled_dataframe[column].shift(
             1)
-        grouped_texts_eans_per_month[f"{column}_intersection"] = grouped_texts_eans_per_month.apply(
+        resampled_dataframe[f"{column}_intersection"] = resampled_dataframe.apply(
             lambda row: intersection(row[column], row[f"{column}_lagged"]), axis=1)
-        grouped_texts_eans_per_month[f"{column}_introduced"] = grouped_texts_eans_per_month.apply(
+        resampled_dataframe[f"{column}_introduced"] = resampled_dataframe.apply(
             lambda row: introduced_products(row[column], row[f"{column}_lagged"]), axis=1)
-        grouped_texts_eans_per_month[f"number_{column}_introduced"] = grouped_texts_eans_per_month[f"{column}_introduced"].apply(
+        resampled_dataframe[f"number_{column}_introduced"] = resampled_dataframe[f"{column}_introduced"].apply(
             number_of_products)
-        grouped_texts_eans_per_month[f"{column}_removed"] = grouped_texts_eans_per_month.apply(
+        resampled_dataframe[f"{column}_removed"] = resampled_dataframe.apply(
             lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
-        grouped_texts_eans_per_month[f"number_{column}_removed"] = grouped_texts_eans_per_month[f"{column}_removed"].apply(
+        resampled_dataframe[f"number_{column}_removed"] = resampled_dataframe[f"{column}_removed"].apply(
             number_of_products)
 
-    return grouped_texts_eans_per_month
+    return resampled_dataframe
 
 
 def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str, receipt_text_column: str) -> pd.DataFrame:

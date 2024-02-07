@@ -21,3 +21,9 @@ def export_dataframe(dataframe: pd.DataFrame, path: str, filename: str, index: b
         dataframe = pd.DataFrame(dataframe)
 
     dataframe.to_html(os.path.join(html_directory, filename + ".html"))
+
+
+def year_month_to_date(dataframe: pd.DataFrame, year_month_column: str) -> pd.DataFrame:
+    dataframe[year_month_column] = pd.to_datetime(
+        dataframe[year_month_column], format="%Y-%m")
+    return dataframe
