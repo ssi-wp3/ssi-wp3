@@ -137,6 +137,23 @@ def number_of_products(column: Optional[set]) -> int:
 
 
 def get_differences_per_period(dataframe: pd.DataFrame, period_column: str, resample_period: str, selected_columns: List[str]) -> pd.DataFrame:
+    """Gets differences per period in a dataframe
+
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    period_column : str
+        The column that contains the period data
+
+    resample_period : str
+        The period to resample the data to, use for example "M" for month or "Y" for year
+
+    selected_columns : List[str]
+        The columns that should be analyzed for differences, for example ["receipt_text", "ean"]
+    """
     filtered_dataframe = dataframe[[period_column] + selected_columns]
     filtered_dataframe = filtered_dataframe.set_index(period_column)
 
