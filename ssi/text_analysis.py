@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 from wordcloud import WordCloud
 import pandas as pd
 import os
@@ -96,6 +96,65 @@ def detect_product_differences(receipt_texts_before: set, receipt_texts_after: s
         receipt_texts_before)
 
     return texts_kept_the_same, combined_texts, texts_disappeared, new_texts
+
+
+def group_unique_values_per_period(dataframe: pd.DataFrame, period_column: str, value_column: str) -> pd.DataFrame:
+    grouped_texts_per_month = dataframe.groupby(
+        by=period_column)[value_column].apply(series_to_set)
+    return grouped_texts_per_month.reset_index()
+
+
+def get_unique_texts_and_eans_per_period(dataframe: pd.DataFrame, period_column: str, receipt_column: str, ean_column: str) -> pd.DataFrame:
+    grouped_texts_per_month = group_unique_values_per_period(
+        dataframe, period_column, receipt_column)
+    grouped_eans_per_month = group_unique_values_per_period(
+        dataframe, period_column, ean_column)
+    return grouped_texts_per_month.merge(grouped_eans_per_month, on="year_month")
+
+
+def intersection(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return left_column.intersection(right_column)
+
+
+def introduced_products(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return left_column.difference(right_column)
+
+
+def removed_products(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return right_column.difference(left_column)
+
+
+def number_of_products(column: Optional[set]) -> int:
+    if not column:
+        return 0
+    return len(column)
+
+
+def get_differences_per_period(dataframe: pd.DataFrame, period_column: str, receipt_column: str, ean_column: str) -> pd.DataFrame:
+    grouped_texts_eans_per_month = get_unique_texts_and_eans_per_period(
+        dataframe, period_column, receipt_column, ean_column)
+
+    for column in ["receipt_text", "ean_number"]:
+        grouped_texts_eans_per_month[f"{column}_text_lagged"] = grouped_texts_eans_per_month[column].shift(
+            1)
+        grouped_texts_eans_per_month[f"{column}_intersection"] = grouped_texts_eans_per_month.apply(
+            lambda row: intersection(row[column], row[f"{column}_lagged"]), axis=1)
+        grouped_texts_eans_per_month[f"{column}_introduced"] = grouped_texts_eans_per_month.apply(
+            lambda row: introduced_products(row[column], row[f"{column}_lagged"]), axis=1)
+        grouped_texts_eans_per_month[f"number_{column}_introduced"] = grouped_texts_eans_per_month[f"{column}_introduced"].apply(
+            number_of_products)
+        grouped_texts_eans_per_month[f"{column}_removed"] = grouped_texts_eans_per_month.apply(
+            lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
+        grouped_texts_eans_per_month[f"number_{column}_removed"] = grouped_texts_eans_per_month[f"{column}_removed"].apply(
+            number_of_products)
+
+    return grouped_texts_eans_per_month
 
 
 def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str, receipt_text_column: str) -> pd.DataFrame:
