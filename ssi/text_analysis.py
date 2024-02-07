@@ -147,15 +147,18 @@ def get_differences_per_period(dataframe: pd.DataFrame, period_column: str, resa
         resampled_dataframe[f"{column}_text_lagged"] = resampled_dataframe[column].shift(
             1)
 
-        difference_functions = {
+        processing_functions = {
             f"{column}_intersection": intersection,
             f"{column}_introduced": introduced_products,
             f"number_{column}_introduced": number_of_products,
             f"{column}_removed": removed_products,
             f"number_{column}_removed": number_of_products,
+            f"jacard_index_{column}": jaccard_index,
+            f"dice_coefficient_{column}": dice_coefficient,
+            f"overlap_coefficient_{column}": overlap_coefficient,
         }
 
-        for new_column, function in difference_functions.items():
+        for new_column, function in processing_functions.items():
             resampled_dataframe[new_column] = resampled_dataframe.apply(
                 lambda row: function(row[column], row[f"{column}_text_lagged"]), axis=1)
 
