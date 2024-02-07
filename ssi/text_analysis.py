@@ -146,16 +146,18 @@ def get_differences_per_period(dataframe: pd.DataFrame, period_column: str, resa
     for column in selected_columns:
         resampled_dataframe[f"{column}_text_lagged"] = resampled_dataframe[column].shift(
             1)
-        resampled_dataframe[f"{column}_intersection"] = resampled_dataframe.apply(
-            lambda row: intersection(row[column], row[f"{column}_lagged"]), axis=1)
-        resampled_dataframe[f"{column}_introduced"] = resampled_dataframe.apply(
-            lambda row: introduced_products(row[column], row[f"{column}_lagged"]), axis=1)
-        resampled_dataframe[f"number_{column}_introduced"] = resampled_dataframe[f"{column}_introduced"].apply(
-            number_of_products)
-        resampled_dataframe[f"{column}_removed"] = resampled_dataframe.apply(
-            lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
-        resampled_dataframe[f"number_{column}_removed"] = resampled_dataframe[f"{column}_removed"].apply(
-            number_of_products)
+
+        difference_functions = {
+            f"{column}_intersection": intersection,
+            f"{column}_introduced": introduced_products,
+            f"number_{column}_introduced": number_of_products,
+            f"{column}_removed": removed_products,
+            f"number_{column}_removed": number_of_products,
+        }
+
+        for new_column, function in difference_functions.items():
+            resampled_dataframe[new_column] = resampled_dataframe.apply(
+                lambda row: function(row[column], row[f"{column}_text_lagged"]), axis=1)
 
     return resampled_dataframe
 
