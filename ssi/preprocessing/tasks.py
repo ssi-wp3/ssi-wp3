@@ -26,7 +26,7 @@ class CleanCPIFile(ExternalProgramTask):
     output_filename = luigi.PathParameter()
 
     def program_args(self):
-        return ['bash', './convert_cpi_file.sh', self.input_directory, self.output_directory]
+        return ['bash', './convert_cpi_file.sh', self.input_filename, self.output_filename]
 
     def output(self):
         """
