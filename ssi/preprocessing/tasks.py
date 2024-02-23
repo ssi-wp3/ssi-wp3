@@ -118,7 +118,7 @@ class CombineRevenueFiles(luigi.Task):
     def run(self):
         combined_dataframe = None
         for input in self.input():
-            with open(input, "r") as input_file:
+            with input.open("r") as input_file:
                 revenue_file = pd.read_parquet(
                     input_file, engine=self.parquet_engine)
                 if combined_dataframe is None:
