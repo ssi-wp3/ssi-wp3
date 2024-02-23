@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional, List
 from wordcloud import WordCloud
 import pandas as pd
 import os
@@ -96,6 +96,90 @@ def detect_product_differences(receipt_texts_before: set, receipt_texts_after: s
         receipt_texts_before)
 
     return texts_kept_the_same, combined_texts, texts_disappeared, new_texts
+
+
+def group_unique_values_per_period(dataframe: pd.DataFrame, period_column: str, value_column: str) -> pd.DataFrame:
+    grouped_texts_per_month = dataframe.groupby(
+        by=period_column)[value_column].apply(series_to_set)
+    return grouped_texts_per_month.reset_index()
+
+
+def get_unique_texts_and_eans_per_period(dataframe: pd.DataFrame, period_column: str, receipt_column: str, ean_column: str) -> pd.DataFrame:
+    grouped_texts_per_month = group_unique_values_per_period(
+        dataframe, period_column, receipt_column)
+    grouped_eans_per_month = group_unique_values_per_period(
+        dataframe, period_column, ean_column)
+    return grouped_texts_per_month.merge(grouped_eans_per_month, on=period_column)
+
+
+def intersection(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return left_column.intersection(right_column)
+
+
+def introduced_products(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return left_column.difference(right_column)
+
+
+def removed_products(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return right_column.difference(left_column)
+
+
+def number_of_products(column: Optional[set]) -> int:
+    if not column:
+        return 0
+    return len(column)
+
+
+def get_differences_per_period(dataframe: pd.DataFrame, period_column: str, resample_period: str, selected_columns: List[str]) -> pd.DataFrame:
+    """Gets differences per period in a dataframe
+
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    period_column : str
+        The column that contains the period data
+
+    resample_period : str
+        The period to resample the data to, use for example "M" for month or "Y" for year
+
+    selected_columns : List[str]
+        The columns that should be analyzed for differences, for example ["receipt_text", "ean"]
+    """
+    filtered_dataframe = dataframe[[period_column] + selected_columns]
+    filtered_dataframe = filtered_dataframe.set_index(period_column)
+
+    resampled_dataframe = filtered_dataframe.resample(
+        resample_period).apply(series_to_set)
+
+    for column in selected_columns:
+        resampled_dataframe[f"{column}_text_lagged"] = resampled_dataframe[column].shift(
+            1)
+
+        processing_functions = {
+            f"{column}_intersection": intersection,
+            f"{column}_introduced": introduced_products,
+            f"number_{column}_introduced": number_of_products,
+            f"{column}_removed": removed_products,
+            f"number_{column}_removed": number_of_products,
+            f"jacard_index_{column}": jaccard_index,
+            f"dice_coefficient_{column}": dice_coefficient,
+            f"overlap_coefficient_{column}": overlap_coefficient,
+        }
+
+        for new_column, function in processing_functions.items():
+            resampled_dataframe[new_column] = resampled_dataframe.apply(
+                lambda row: function(row[column], row[f"{column}_text_lagged"]), axis=1)
+
+    return resampled_dataframe
 
 
 def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str, receipt_text_column: str) -> pd.DataFrame:
