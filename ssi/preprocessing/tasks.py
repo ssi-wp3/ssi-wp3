@@ -67,7 +67,7 @@ class ConvertCSVToParquet(luigi.Task):
             self.input_filename).replace(self.extension, ".parquet"))
 
     def requires(self):
-        return CleanCPIFile(input_filename=self.input_filename, output_filename=get_parquet_filename())
+        return CleanCPIFile(input_filename=self.input_filename, output_filename=self.get_parquet_filename())
 
     def run(self):
         with self.input().open('r') as input_file:
@@ -104,15 +104,12 @@ class CombineRevenueFiles(luigi.Task):
     sort_order = luigi.DictParameter(
         default={"bg_number": True, "month": True, "coicop_number": True})
 
-    def parquet_filename_for(self, input_filename):
-        return input_filename.replace(".csv", ".parquet")
-
     def requires(self):
         revenue_files = get_revenue_files_in_folder(
             self.input_directory,
             self.store_name,
             self.filename_prefix)
-        return [ConvertCSVToParquet(input_filename, self.parquet_filename_for(input_filename))
+        return [ConvertCSVToParquet(input_filename)
                 for input_filename in revenue_files
                 ]
 
