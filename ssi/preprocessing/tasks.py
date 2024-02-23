@@ -1,6 +1,6 @@
 from luigi.contrib.external_program import ExternalProgramTask
-from parquet import convert_to_parquet
-from files import get_revenue_files_in_folder
+from .parquet import convert_to_parquet
+from .files import get_revenue_files_in_folder
 import pandas as pd
 import luigi
 
