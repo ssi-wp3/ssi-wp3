@@ -100,12 +100,15 @@ class CombineRevenueFiles(luigi.Task):
     sort_order = luigi.DictParameter(
         default={"bg_number": True, "month": True, "coicop_number": True})
 
+    def parquet_filename_for(self, input_filename):
+        return input_filename.replace(".csv", ".parquet")
+
     def requires(self):
         revenue_files = get_revenue_files_in_folder(
             self.input_directory,
             self.store_name,
             self.filename_prefix)
-        return [ConvertCSVToParquet(input_filename)
+        return [ConvertCSVToParquet(input_filename, self.parquet_filename_for(input_filename))
                 for input_filename in revenue_files
                 ]
 
