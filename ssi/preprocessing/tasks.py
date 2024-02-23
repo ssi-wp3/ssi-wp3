@@ -128,7 +128,7 @@ class CombineRevenueFiles(luigi.Task):
                         [combined_dataframe, revenue_file])
 
         combined_dataframe = combined_dataframe.sort_values(
-            by=self.sort_order.keys(), ascending=self.sort_order.values()).reset_index(drop=True)
+            by=list(self.sort_order.keys()), ascending=list(self.sort_order.values())).reset_index(drop=True)
 
         with self.output().open('w') as output_file:
             combined_dataframe.to_parquet(
