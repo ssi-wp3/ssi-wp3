@@ -1,5 +1,6 @@
 from luigi.contrib.external_program import ExternalProgramTask
 from parquet import convert_to_parquet
+from preprocess_data import get_revenue_files_in_folder, combine_revenue_files
 import pandas as pd
 import luigi
 
@@ -74,3 +75,42 @@ class ConvertCSVToParquet(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_filename)
+
+
+class CombineRevenueFiles(luigi.Task):
+    """ This task combines revenue files that were prepared by ConvertCSVToParquet into a single parquet file.
+
+    Parameters
+    ----------
+    input_directory : luigi.Parameter
+        The directory where the revenue files are stored.
+
+    output_filename : luigi.Parameter
+        The output filename for the combined revenue file.
+
+    """
+    input_directory = luigi.Parameter()
+    output_filename = luigi.Parameter()
+    store_name = luigi.Parameter()
+    filename_prefix = luigi.Parameter(default="Omzet")
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    def requires(self):
+        revenue_files = get_revenue_files_in_folder(
+            self.input_directory,
+            self.store_name,
+            self.filename_prefix)
+        return [ConvertCSVToParquet(input_filename)
+                for input_filename in revenue_files
+                ]
+
+    def output(self):
+        return luigi.LocalTarget(self.output_filename)
+
+    def run(self):
+        input_files = [input for input in self.input()]
+        combined_revenue = combine_revenue_files()
+
+        with self.output().open('w') as output_file:
+            combined_revenue.to_parquet(
+                output_file, engine=self.parquet_engine)

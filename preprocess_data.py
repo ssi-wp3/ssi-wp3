@@ -1,4 +1,4 @@
-from ssi.preprocess_data import save_combined_revenue_files
+from ssi.preprocessing.preprocess_data import save_combined_revenue_files
 from ssi.files import get_combined_revenue_filename
 from ssi.constants import Constants
 from pathlib import Path

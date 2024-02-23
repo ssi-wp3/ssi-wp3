@@ -1,7 +1,7 @@
 from typing import List, Tuple, Dict, Optional
-from .data_logging import DataLogger
-from .files import get_revenue_files_in_folder
-from .constants import Constants
+from ..data_logging import DataLogger
+from ..files import get_revenue_files_in_folder
+from ..constants import Constants
 import pandas as pd
 import os
 import tqdm
@@ -80,7 +80,9 @@ def preprocess_data(dataframe: pd.DataFrame,
     return dataframe
 
 
-def combine_revenue_files(revenue_files: List[str], sort_columns: List[str], sort_order: List[bool], engine: str = "pyarrow") -> pd.DataFrame:
+def combine_revenue_files(revenue_files: List[str],
+                          sort_columns: List[str],
+                          sort_order: List[bool], engine: str = "pyarrow") -> pd.DataFrame:
     combined_dataframe = pd.concat([pd.read_parquet(revenue_file, engine=engine)
                                     for revenue_file in tqdm.tqdm(revenue_files)])
     combined_dataframe = combined_dataframe.sort_values(

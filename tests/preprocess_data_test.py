@@ -1,4 +1,4 @@
-from ssi.preprocess_data import *
+from ssi.preprocessing.preprocess_data import *
 from ssi.synthetic_data import generate_fake_revenue_data
 import unittest
 import pandas as pd

@@ -1,6 +1,6 @@
 from typing import List, Optional
 from faker import Faker
-from .preprocess_data import preprocess_data
+from .preprocessing.preprocess_data import preprocess_data
 import pandas as pd
 import numpy as np
 import random
