@@ -29,7 +29,6 @@ class CleanCPIFile(ExternalProgramTask):
 
     def program_args(self):
         current_file_path = pathlib.Path(__file__).parent.resolve()
-        self.output().open('w').close()
         return ['bash', os.path.join(current_file_path,  'convert_cpi_file.sh'), self.input_filename, self.output_filename]
 
     def output(self):

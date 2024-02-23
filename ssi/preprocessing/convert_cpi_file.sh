@@ -5,4 +5,5 @@
 input_filename=$1
 output_filename=$2
 
+mkdir -p $(dirname $output_filename)
 tail -c +4 $input_filename | iconv -f cp1252 -t utf-8 | tr -d '\r' > $output_filename
