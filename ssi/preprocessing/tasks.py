@@ -108,7 +108,8 @@ class CombineRevenueFiles(luigi.Task):
         revenue_files = get_revenue_files_in_folder(
             self.input_directory,
             self.store_name,
-            self.filename_prefix)
+            self.filename_prefix,
+            ".csv")
         return [ConvertCSVToParquet(input_filename)
                 for input_filename in revenue_files
                 ]
