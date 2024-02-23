@@ -94,6 +94,8 @@ class CombineRevenueFiles(luigi.Task):
     store_name = luigi.Parameter()
     filename_prefix = luigi.Parameter(default="Omzet")
     parquet_engine = luigi.Parameter(default="pyarrow")
+    sort_order = luigi.DictParameter(
+        default={"bg_number": True, "month": True, "coicop_number": True})
 
     def requires(self):
         revenue_files = get_revenue_files_in_folder(
@@ -108,9 +110,20 @@ class CombineRevenueFiles(luigi.Task):
         return luigi.LocalTarget(self.output_filename)
 
     def run(self):
-        input_files = [input for input in self.input()]
-        combined_revenue = combine_revenue_files()
+        combined_dataframe = None
+        for input in self.input():
+            with open(input, "r") as input_file:
+                revenue_file = pd.read_parquet(
+                    input_file, engine=self.parquet_engine)
+                if combined_dataframe is None:
+                    combined_dataframe = revenue_file
+                else:
+                    combined_dataframe = pd.concat(
+                        [combined_dataframe, revenue_file])
+
+        combined_dataframe = combined_dataframe.sort_values(
+            by=self.sort_order.keys(), ascending=self.sort_order.values()).reset_index(drop=True)
 
         with self.output().open('w') as output_file:
-            combined_revenue.to_parquet(
+            combined_dataframe.to_parquet(
                 output_file, engine=self.parquet_engine)
