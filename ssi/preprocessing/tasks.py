@@ -77,7 +77,7 @@ class ConvertCSVToParquet(luigi.Task):
                                    decimal=',')
 
     def output(self):
-        return luigi.LocalTarget(self.output_filename)
+        return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
 
 class CombineRevenueFiles(luigi.Task):
