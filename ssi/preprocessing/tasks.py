@@ -2,7 +2,9 @@ from luigi.contrib.external_program import ExternalProgramTask
 from .parquet import convert_to_parquet
 from .files import get_revenue_files_in_folder
 import pandas as pd
+import pathlib
 import luigi
+import os
 
 
 class CleanCPIFile(ExternalProgramTask):
@@ -26,7 +28,8 @@ class CleanCPIFile(ExternalProgramTask):
     output_filename = luigi.PathParameter()
 
     def program_args(self):
-        return ['bash', './convert_cpi_file.sh', self.input_filename, self.output_filename]
+        current_file_path = pathlib.Path(__file__).parent.resolve()
+        return ['bash', os.path.join(current_file_path,  'convert_cpi_file.sh'), self.input_filename, self.output_filename]
 
     def output(self):
         """
