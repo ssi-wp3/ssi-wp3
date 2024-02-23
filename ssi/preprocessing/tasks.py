@@ -180,6 +180,7 @@ class PreprocessCombinedFile(luigi.Task):
 
     def requires(self):
         # TODO: check input_directory is derived wrongly, unless the combined file is in the same directory as the separate revenue files
+        # TODO: what about output_filename?
         return CombineRevenueFiles(input_directory=os.path.dirname(self.input_filename),
                                    output_filename=self.input_filename.replace(
                                        ".parquet", "_preprocessed.parquet"),
