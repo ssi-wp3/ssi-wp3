@@ -1,6 +1,6 @@
 from typing import List, Tuple, Dict, Optional
 from ..data_logging import DataLogger
-from ..files import get_revenue_files_in_folder
+from .files import get_revenue_files_in_folder
 from ..constants import Constants
 import pandas as pd
 import os
