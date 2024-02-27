@@ -1,4 +1,5 @@
 from luigi.contrib.external_program import ExternalProgramTask
+
 from .parquet import convert_to_parquet
 from .files import get_revenue_files_in_folder
 from .preprocess_data import preprocess_data
@@ -6,6 +7,23 @@ import pandas as pd
 import pathlib
 import luigi
 import os
+
+
+class ConvertAHReceipts(luigi.Task):
+    """ Convert an AH receipts file in Excel format to a parquet file.
+
+    """
+
+    input_filename = luigi.PathParameter()
+    output_filename = luigi.PathParameter()
+
+    def run(self):
+        with self.input().open('r') as input_file:
+            with self.output().open('w') as output_file:
+                convert_ah_receipts(input_file, output_file)
+
+    def output(self):
+        return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
 
 class CleanCPIFile(ExternalProgramTask):

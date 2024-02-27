@@ -1,10 +1,32 @@
 from typing import List, Tuple, Dict, Optional
+from openpyxl import load_workbook
 from ..data_logging import DataLogger
 from .files import get_revenue_files_in_folder
 from ..constants import Constants
 import pandas as pd
 import os
 import tqdm
+
+
+def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.DataFrame:
+    ah_workbook = load_workbook(filename=input_file)
+    ah_sheet_names = ah_workbook.sheetnames
+    coicop_sheets = [sheet for sheet in ah_sheet_names if sheet.lower(
+    ).startswith(coicop_sheet_prefix)]
+
+    all_receipts_df = pd.DataFrame()
+    for sheet_name in coicop_sheets:
+        ah_receipts_df = pd.read_excel(input_file, sheet_name=sheet_name)
+        ah_receipts_df = ah_receipts_df.rename(columns={'Kassabonomschrijving': 'receipt_text',
+                                                        'ArtikelEAN': "ean_number",
+                                                        'IsbaOmschrijving': 'isba_description',
+                                                        'BG': 'store_id',
+                                                        'Coicop': 'coicop_number'})
+        ah_receipts_df = ah_receipts_df.rename(
+            columns={column_name: column_name.lower() for column_name in ah_receipts_df.columns})
+        all_receipts_df = pd.concat([all_receipts_df, ah_receipts_df])
+
+    return all_receipts_df
 
 
 def split_coicop(coicop_column: pd.Series) -> pd.DataFrame:
