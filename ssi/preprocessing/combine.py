@@ -61,15 +61,26 @@ class CombineRevenueFiles(luigi.Task):
 
 
 class CombineAllRevenueFiles(luigi.WrapperTask):
+    """ This task combines all revenue files in a directory.
+
+    Parameters
+    ----------
+    input_directory : luigi.Parameter
+        The directory where the revenue files are stored.
+
+    output_directory : luigi.Parameter
+        The output directory for the combined revenue files.    
+    """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
-    filename_prefix = luigi.Parameter()
+    input_filename_prefix = luigi.Parameter()
+    output_filename_prefix = luigi.Parameter()
     parquet_engine = luigi.Parameter()
 
     def requires(self):
         return [CombineRevenueFiles(input_directory=self.input_directory,
                                     output_filename=os.path.join(
-                                        self.output_directory, f"{store_name}_revenue.parquet"),
+                                        self.output_directory, f"{self.output_filename_prefix}_{store_name}_revenue.parquet"),
                                     store_name=store_name,
                                     filename_prefix=self.filename_prefix,
                                     parquet_engine=self.parquet_engine)
