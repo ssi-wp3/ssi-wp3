@@ -2,7 +2,7 @@ from typing import List
 import os
 
 
-class AnalysisDirectories:
+class FeatureDirectories:
     def __init__(self, base_directory: str):
         self.__base_directory = base_directory
 
@@ -13,7 +13,4 @@ class AnalysisDirectories:
     @property
     def directories(self) -> List[str]:
         return [
-            os.path.join(self.base_directory, "plots"),
-            os.path.join(self.base_directory, "wordclouds"),
-            os.path.join(self.base_directory, "data")
         ]

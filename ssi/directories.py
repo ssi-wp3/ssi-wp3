@@ -1,5 +1,7 @@
 from .preprocessing.files import PreprocessingDirectories
 from .analysis.files import AnalysisDirectories
+from .feature_extraction.files import FeatureDirectories
+from .machine_learning.files import MLDirectories
 from typing import List
 import os
 
@@ -17,7 +19,11 @@ class DirectoryStructure:
         return [
             PreprocessingDirectories(os.path.join(
                 self.base_directory, "preprocessing")),
-            AnalysisDirectories(os.path.join(self.base_directory, "analysis"))
+            AnalysisDirectories(os.path.join(self.base_directory, "analysis")),
+            FeatureDirectories(os.path.join(
+                self.base_directory, "feature_extraction")),
+            MLDirectories(os.path.join(
+                self.base_directory, "machine_learning"))
         ]
 
     @property
