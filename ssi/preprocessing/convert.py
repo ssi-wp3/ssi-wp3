@@ -21,7 +21,7 @@ class ConvertAHReceipts(luigi.Task):
     coicop_sheets_prefix = luigi.Parameter(default="coi")
 
     def run(self):
-        with self.input().open('r') as input_file:
+        with self.input()[0].open('r') as input_file:
             with self.output().open('w') as output_file:
                 ah_receipts_df = convert_ah_receipts(
                     input_file, self.coicop_sheets_prefix)
