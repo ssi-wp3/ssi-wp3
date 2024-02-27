@@ -1,15 +1,9 @@
+from .utils import ParquetFile
 from .combine import CombineRevenueFiles
 from .preprocess_data import preprocess_data
 import pandas as pd
 import luigi
 import os
-
-
-class ParquetFile(luigi.ExternalTask):
-    input_filename = luigi.Parameter()
-
-    def output(self):
-        return luigi.LocalTarget(self.input_filename)
 
 
 class PreprocessFile(luigi.Task):

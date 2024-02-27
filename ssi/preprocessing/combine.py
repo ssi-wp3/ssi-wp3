@@ -1,5 +1,5 @@
 
-
+from .utils import ParquetFile
 from .files import get_revenue_files_in_folder
 from .convert import ConvertCSVToParquet
 import pandas as pd
@@ -57,3 +57,44 @@ class CombineRevenueFiles(luigi.Task):
         with self.output().open('w') as output_file:
             combined_dataframe.to_parquet(
                 output_file, engine=self.parquet_engine)
+
+
+class AddReceiptTexts(luigi.Task):
+    """ This task adds the receipt texts to the combined revenue file.
+
+    Parameters
+    ----------
+    input_filename : luigi.Parameter
+        The input filename of the combined revenue file.
+
+    output_filename : luigi.Parameter
+        The output filename for the combined revenue file with receipt texts.
+
+    receipt_texts_filename : luigi.Parameter
+        The filename of the receipt texts file.
+
+    """
+    input_filename = luigi.Parameter()
+    output_filename = luigi.Parameter()
+    receipt_texts_filename = luigi.Parameter()
+    parquet_engine = luigi.Parameter()
+
+    def requires(self):
+        return [ParquetFile(input_filename=self.input_filename),
+                ParquetFile(input_filename=self.receipt_texts_filename)]
+
+    def output(self):
+        return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
+
+    def run(self):
+        with self.input().open("r") as input_file:
+            combined_df = pd.read_parquet(input_file)
+
+            with open(self.receipt_texts_filename, "r") as receipt_texts_file:
+                receipt_texts = json.load(receipt_texts_file)
+
+            combined_df["receipt_text"] = combined_df["receipt_id"].map(
+                receipt_texts)
+
+            with self.output().open("w") as output_file:
+                combined_df.to_parquet(output_file, engine=self.parquet_engine)
