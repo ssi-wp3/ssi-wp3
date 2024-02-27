@@ -15,15 +15,28 @@ class DirectoryStructure:
         return self.__base_directory
 
     @property
+    def preprocessing_directories(self) -> PreprocessingDirectories:
+        return PreprocessingDirectories(os.path.join(self.base_directory, "preprocessing"))
+
+    @property
+    def analysis_directories(self) -> AnalysisDirectories:
+        return AnalysisDirectories(os.path.join(self.base_directory, "analysis"))
+
+    @property
+    def feature_directories(self) -> FeatureDirectories:
+        return FeatureDirectories(os.path.join(self.base_directory, "feature_extraction"))
+
+    @property
+    def machine_learning_directories(self) -> MLDirectories:
+        return MLDirectories(os.path.join(self.base_directory, "machine_learning"))
+
+    @property
     def stages(self):
         return [
-            PreprocessingDirectories(os.path.join(
-                self.base_directory, "preprocessing")),
-            AnalysisDirectories(os.path.join(self.base_directory, "analysis")),
-            FeatureDirectories(os.path.join(
-                self.base_directory, "feature_extraction")),
-            MLDirectories(os.path.join(
-                self.base_directory, "machine_learning"))
+            self.preprocessing_directories,
+            self.analysis_directories,
+            self.feature_directories,
+            self.machine_learning_directories
         ]
 
     @property
