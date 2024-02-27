@@ -52,7 +52,7 @@ class ConvertCSVToParquet(luigi.Task):
     encoding = luigi.Parameter(default='utf-8')
     extension = luigi.Parameter(default='.csv')
     decimal = luigi.Parameter(default=',')
-    clean_cpi = luigi.Parameter(default=False)
+    clean_cpi = luigi.BoolParameter(default=False)
 
     def get_parquet_filename(self):
         return os.path.join(self.output_directory, os.path.basename(
