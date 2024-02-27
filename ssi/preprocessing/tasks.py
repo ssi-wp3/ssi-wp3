@@ -100,8 +100,8 @@ class CombineRevenueFiles(luigi.Task):
     input_directory = luigi.Parameter()
     output_filename = luigi.Parameter()
     store_name = luigi.Parameter()
-    filename_prefix = luigi.Parameter(default="Omzet")
-    parquet_engine = luigi.Parameter(default="pyarrow")
+    filename_prefix = luigi.Parameter()
+    parquet_engine = luigi.Parameter()
     sort_order = luigi.DictParameter(
         default={"bg_number": True, "month": True, "coicop_number": True})
 
@@ -178,16 +178,13 @@ class PreprocessCombinedFile(luigi.Task):
     column_mapping = luigi.DictParameter(default={})
     parquet_engine = luigi.Parameter(default="pyarrow")
 
+    store_name = luigi.Parameter()
+
     def requires(self):
-        # TODO: check input_directory is derived wrongly, unless the combined file is in the same directory as the separate revenue files
-        # TODO: what about output_filename?
-        return CombineRevenueFiles(input_directory=os.path.dirname(self.input_filename),
-                                   output_filename=self.input_filename.replace(
-                                       ".parquet", "_preprocessed.parquet"),
+        return CombineRevenueFiles(output_filename=self.input_filename,
                                    store_name=self.store_name,
-                                   filename_prefix=self.filename_prefix,
-                                   parquet_engine=self.parquet_engine,
-                                   sort_order=self.sort_order)
+                                   parquet_engine=self.parquet_engine
+                                   )
 
     def run(self):
         with self.input().open("r") as input_file:
@@ -208,3 +205,17 @@ class PreprocessCombinedFile(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
+
+
+class PreprocessAllFiles(luigi.WrapperTask):
+    output_directory = luigi.PathParameter()
+    stores = luigi.ListParameter()
+
+    def requires(self):
+        return [PreprocessCombinedFile(
+                input_filename=f"combined_{store}.parquet",
+                output_filename=os.path.join(
+                    self.output_directory, f"preprocessed_{store}.parquet"),
+                store_name=store
+                )
+                for store in self.stores]
