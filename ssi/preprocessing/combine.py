@@ -4,6 +4,7 @@ from .files import get_revenue_files_in_folder
 from .convert import ConvertCSVToParquet
 import pandas as pd
 import luigi
+import os
 
 
 class CombineRevenueFiles(luigi.Task):
@@ -57,6 +58,22 @@ class CombineRevenueFiles(luigi.Task):
         with self.output().open('w') as output_file:
             combined_dataframe.to_parquet(
                 output_file, engine=self.parquet_engine)
+
+
+class CombineAllRevenueFiles(luigi.Task):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    parquet_engine = luigi.Parameter()
+    filename_prefix = luigi.Parameter()
+
+    def requires(self):
+        return [CombineRevenueFiles(input_directory=self.input_directory,
+                                    output_filename=os.path.join(
+                                        self.output_directory, f"{store_name}_revenue.parquet"),
+                                    store_name=store_name,
+                                    filename_prefix=self.filename_prefix,
+                                    parquet_engine=self.parquet_engine)
+                for store_name in os.listdir(self.input_directory)]
 
 
 class AddReceiptTexts(luigi.Task):
