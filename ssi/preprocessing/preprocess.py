@@ -79,14 +79,15 @@ class PreprocessFile(luigi.Task):
 
 
 class PreprocessAllFiles(luigi.WrapperTask):
+    input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
-    stores = luigi.ListParameter()
+    extension = luigi.Parameter(default=".parquet")
 
     def requires(self):
         return [PreprocessFile(
-                input_filename=f"combined_{store}.parquet",
+                input_filename=input_filename,
                 output_filename=os.path.join(
-                    self.output_directory, f"preprocessed_{store}.parquet"),
-                store_name=store
+                    self.output_directory, os.path.basename(input_filename)),
                 )
-                for store in self.stores]
+                for input_filename in os.listdir(self.input_directory)
+                if input_filename.endswith(self.extension)]

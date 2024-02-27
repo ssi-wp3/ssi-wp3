@@ -21,8 +21,12 @@ class PreprocessingDirectories:
         return os.path.join(self.base_directory, "raw")
 
     @property
-    def preprocessed_directory(self) -> str:
-        return os.path.join(self.base_directory, "preprocessed")
+    def cleaned_directory(self) -> str:
+        return os.path.join(self.base_directory, "cleaned")
+
+    @property
+    def parquet_directory(self) -> str:
+        return os.path.join(self.base_directory, "parquet")
 
     @property
     def combined_directory(self) -> str:
@@ -36,7 +40,8 @@ class PreprocessingDirectories:
     def directories(self) -> List[str]:
         return [
             self.raw_directory,
-            self.preprocessed_directory,
+            self.cleaned_directory,
+            self.parquet_directory,
             self.combined_directory,
             self.final_directory
         ]

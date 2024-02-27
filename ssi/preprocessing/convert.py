@@ -86,3 +86,25 @@ class ConvertCSVToParquet(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.get_parquet_filename(), format=luigi.format.Nop)
+
+
+class ConvertAllCSVToParquet(luigi.WrapperTask):
+    input_directory = luigi.Parameter()
+    output_directory = luigi.Parameter()
+    delimiter = luigi.Parameter(default=';')
+    encoding = luigi.Parameter(default='utf-8')
+    extension = luigi.Parameter(default='.csv')
+    decimal = luigi.Parameter(default=',')
+    clean_cpi = luigi.BoolParameter(default=False)
+
+    def requires(self):
+        return [ConvertCSVToParquet(input_filename=os.path.join(self.input_directory, input_filename),
+                                    output_directory=self.output_directory,
+                                    delimiter=self.delimiter,
+                                    encoding=self.encoding,
+                                    extension=self.extension,
+                                    decimal=self.decimal,
+                                    clean_cpi=self.clean_cpi)
+                for input_filename in os.listdir(self.input_directory)
+                if input_filename.endswith(self.extension)
+                ]
