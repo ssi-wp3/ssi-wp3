@@ -1,4 +1,5 @@
 from .parquet import convert_to_parquet
+from .preprocess_data import convert_ah_receipts
 from .clean import CleanCPIFile
 import luigi
 import os
@@ -9,6 +10,26 @@ class CsvFile(luigi.ExternalTask):
 
     def output(self):
         return luigi.LocalTarget(self.input_filename)
+
+
+class ConvertAHReceipts(luigi.Task):
+    """ Convert an AH receipts file in Excel format to a parquet file.
+
+    """
+
+    input_filename = luigi.PathParameter()
+    output_filename = luigi.PathParameter()
+    coicop_sheets_prefix = luigi.Parameter(default="coi")
+
+    def run(self):
+        with self.input().open('r') as input_file:
+            with self.output().open('w') as output_file:
+                ah_receipts_df = convert_ah_receipts(
+                    input_file, self.coicop_sheet_prefix)
+                ah_receipts_df.to_parquet(output_file, engine="pyarrow")
+
+    def output(self):
+        return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
 
 class ConvertCSVToParquet(luigi.Task):
