@@ -60,7 +60,7 @@ class CombineRevenueFiles(luigi.Task):
                 output_file, engine=self.parquet_engine)
 
 
-class CombineAllRevenueFiles(luigi.Task):
+class CombineAllRevenueFiles(luigi.WrapperTask):
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     filename_prefix = luigi.Parameter()
