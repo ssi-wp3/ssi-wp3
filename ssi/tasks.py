@@ -42,9 +42,9 @@ class CreateProject(luigi.Task):
     def run(self):
         self.project.create_directories()
 
-        for input in self.input():
+        for input, output in zip(self.input(), self.output()):
             with input.open("r") as input_file:
-                with self.output().open("w") as output_file:
+                with output.open("w") as output_file:
                     output_file.write(input_file.read())
 
     def output(self):
