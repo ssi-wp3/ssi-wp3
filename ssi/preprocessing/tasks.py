@@ -21,7 +21,9 @@ class ConvertAHReceipts(luigi.Task):
     def run(self):
         with self.input().open('r') as input_file:
             with self.output().open('w') as output_file:
-                convert_ah_receipts(input_file, self.coicop_sheet_prefix)
+                ah_receipts_df = convert_ah_receipts(
+                    input_file, self.coicop_sheet_prefix)
+                ah_receipts_df.to_parquet(output_file, engine="pyarrow")
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
