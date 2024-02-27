@@ -47,7 +47,7 @@ class ConvertCSVToParquet(luigi.Task):
 
     """
     input_filename = luigi.PathParameter()
-    output_directory = luigi.PathParameter(default="parquet_files")
+    output_directory = luigi.PathParameter()
     delimiter = luigi.Parameter(default=';')
     encoding = luigi.Parameter(default='utf-8')
     extension = luigi.Parameter(default='.csv')
