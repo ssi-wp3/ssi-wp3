@@ -35,3 +35,25 @@ class CleanCPIFile(ExternalProgramTask):
         https://luigi.readthedocs.io/en/latest/luigi_patterns.html#atomic-writes-problem
         """
         return luigi.LocalTarget(self.output_filename)
+
+
+class CleanAllCPIFiles(luigi.WrapperTask):
+    """ This task cleans all CBS CPI files in a directory.
+
+    Parameters
+    ----------
+    input_directory : luigi.Parameter
+        The directory where the CBS CPI files are stored.
+
+    output_directory : luigi.Parameter
+        The directory where the cleaned CBS CPI files are stored.
+
+    """
+    input_directory = luigi.Parameter()
+    output_directory = luigi.Parameter()
+
+    def requires(self):
+        return [CleanCPIFile(input_filename=os.path.join(self.input_directory, filename),
+                             output_filename=os.path.join(self.output_directory, filename))
+                for filename in os.listdir(self.input_directory)
+                if filename.endswith(".csv")]
