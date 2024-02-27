@@ -77,6 +77,7 @@ class AddReceiptTexts(luigi.Task):
     input_filename = luigi.Parameter()
     output_filename = luigi.Parameter()
     receipt_texts_filename = luigi.Parameter()
+
     parquet_engine = luigi.Parameter()
 
     def requires(self):
@@ -87,14 +88,14 @@ class AddReceiptTexts(luigi.Task):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
-        with self.input().open("r") as input_file:
+        with self.input()[0].open("r") as input_file:
             combined_df = pd.read_parquet(input_file)
+            with self.input()[1].open("r") as receipt_texts_file:
+                receipt_texts = pd.read_parquet(receipt_texts_file)
 
-            with open(self.receipt_texts_filename, "r") as receipt_texts_file:
-                receipt_texts = json.load(receipt_texts_file)
+                combined_df["receipt_text"] = combined_df["receipt_id"].map(
+                    receipt_texts)
 
-            combined_df["receipt_text"] = combined_df["receipt_id"].map(
-                receipt_texts)
-
-            with self.output().open("w") as output_file:
-                combined_df.to_parquet(output_file, engine=self.parquet_engine)
+                with self.output().open("w") as output_file:
+                    combined_df.to_parquet(
+                        output_file, engine=self.parquet_engine)
