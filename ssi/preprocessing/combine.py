@@ -77,6 +77,12 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
     output_filename_prefix = luigi.Parameter()
     parquet_engine = luigi.Parameter()
 
+    @property
+    def store_names(self):
+        # TODO parse filenames to get store names
+        return [filename
+                for filename in os.listdir(self.input_directory)]
+
     def requires(self):
         return [CombineRevenueFiles(input_directory=self.input_directory,
                                     output_filename=os.path.join(
@@ -84,7 +90,7 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
                                     store_name=store_name,
                                     filename_prefix=self.filename_prefix,
                                     parquet_engine=self.parquet_engine)
-                for store_name in os.listdir(self.input_directory)]
+                for store_name in self.store_names]
 
 
 class AddReceiptTexts(luigi.Task):
