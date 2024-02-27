@@ -20,8 +20,11 @@ class ConvertAHReceipts(luigi.Task):
     output_filename = luigi.PathParameter()
     coicop_sheets_prefix = luigi.Parameter(default="coi")
 
+    def requires(self):
+        return CsvFile(input_filename=self.input_filename)
+
     def run(self):
-        with self.input()[0].open('r') as input_file:
+        with self.input().open('r') as input_file:
             with self.output().open('w') as output_file:
                 ah_receipts_df = convert_ah_receipts(
                     input_file, self.coicop_sheets_prefix)
