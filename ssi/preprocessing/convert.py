@@ -12,6 +12,13 @@ class CsvFile(luigi.ExternalTask):
         return luigi.LocalTarget(self.input_filename)
 
 
+class ExcelFile(luigi.ExternalTask):
+    input_filename = luigi.PathParameter()
+
+    def output(self):
+        return luigi.LocalTarget(self.input_filename, format=luigi.format.Nop)
+
+
 class ConvertAHReceipts(luigi.Task):
     """ Convert an AH receipts file in Excel format to a parquet file.
 
@@ -21,7 +28,7 @@ class ConvertAHReceipts(luigi.Task):
     coicop_sheets_prefix = luigi.Parameter(default="coi")
 
     def requires(self):
-        return CsvFile(input_filename=self.input_filename)
+        return ExcelFile(input_filename=self.input_filename)
 
     def run(self):
         with self.input().open('r') as input_file:
