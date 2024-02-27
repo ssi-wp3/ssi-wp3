@@ -2,7 +2,7 @@ from luigi.contrib.external_program import ExternalProgramTask
 
 from .parquet import convert_to_parquet
 from .files import get_revenue_files_in_folder
-from .preprocess_data import preprocess_data
+from .preprocess_data import preprocess_data, convert_ah_receipts
 import pandas as pd
 import pathlib
 import luigi
@@ -16,11 +16,12 @@ class ConvertAHReceipts(luigi.Task):
 
     input_filename = luigi.PathParameter()
     output_filename = luigi.PathParameter()
+    coicop_sheets_prefix = luigi.Parameter(default="coi")
 
     def run(self):
         with self.input().open('r') as input_file:
             with self.output().open('w') as output_file:
-                convert_ah_receipts(input_file, output_file)
+                convert_ah_receipts(input_file, self.coicop_sheet_prefix)
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
