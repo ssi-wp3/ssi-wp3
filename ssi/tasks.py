@@ -49,5 +49,6 @@ class CreateProject(luigi.Task):
 
     def output(self):
         return [luigi.LocalTarget(os.path.join(
-            self.project.preprocessing_directories.raw_directory, os.path.basename(input_filename)))
+            self.project.preprocessing_directories.raw_directory, os.path.basename(input_filename))
+            format=luigi.format.Nop)
             for input_filename in self.csv_files]
