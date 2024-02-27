@@ -1,7 +1,7 @@
-from preprocessing.files import PreprocessingDirectories
-from analysis.files import AnalysisDirectories
-from feature_extraction.files import FeatureDirectories
-from machine_learning.files import MLDirectories
+from .preprocessing.files import PreprocessingDirectories
+from .analysis.files import AnalysisDirectories
+from .feature_extraction.files import FeatureDirectories
+from .machine_learning.files import MLDirectories
 from typing import List
 import os
 
