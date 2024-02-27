@@ -63,8 +63,8 @@ class CombineRevenueFiles(luigi.Task):
 class CombineAllRevenueFiles(luigi.Task):
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
-    parquet_engine = luigi.Parameter()
     filename_prefix = luigi.Parameter()
+    parquet_engine = luigi.Parameter()
 
     def requires(self):
         return [CombineRevenueFiles(input_directory=self.input_directory,
