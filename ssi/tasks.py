@@ -44,7 +44,7 @@ class CreateProject(luigi.Task):
 
         for input in self.input():
             with input.open("r") as input_file:
-                with self.output.open("w") as output_file:
+                with self.output().open("w") as output_file:
                     output_file.write(input_file.read())
 
     def output(self):
