@@ -2,6 +2,7 @@
 
 from .files import get_revenue_files_in_folder
 from .preprocess_data import preprocess_data, convert_ah_receipts
+from .convert import ConvertCSVToParquet
 import pandas as pd
 import luigi
 import os
