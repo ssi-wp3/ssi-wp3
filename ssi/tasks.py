@@ -31,7 +31,7 @@ class CreateProject(luigi.Task):
                 ]
 
     @property
-    def project_directory(self):
+    def project(self):
         return DirectoryStructure(self.project_directory)
 
     def requires(self):
@@ -40,7 +40,7 @@ class CreateProject(luigi.Task):
                 ]
 
     def run(self):
-        self.project_directory.create_directories()
+        self.project.create_directories()
 
         for input in self.input():
             with input.open("r") as input_file:
@@ -49,5 +49,5 @@ class CreateProject(luigi.Task):
 
     def output(self):
         return [luigi.LocalTarget(os.path.join(
-            self.project_directory.preprocessing_directories.raw_directory, os.path.basename(input_filename)))
+            self.project.preprocessing_directories.raw_directory, os.path.basename(input_filename)))
             for input_filename in self.csv_files]
