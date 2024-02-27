@@ -10,7 +10,7 @@ class CsvFile(luigi.ExternalTask):
         return luigi.LocalTarget(self.input_filename, format=luigi.format.Nop)
 
 
-class CreateProject(luigi.WrapperTask):
+class CreateProject(luigi.Task):
     """ This task creates a new project directory.
 
     Parameters
@@ -23,20 +23,31 @@ class CreateProject(luigi.WrapperTask):
     project_directory = luigi.PathParameter()
     csv_extension = luigi.Parameter(default=".csv")
 
-    def requires(self):
-        return [CsvFile(input_filename=os.path.join(self.input_directory, input_filename))
+    @property
+    def csv_files(self):
+        return [os.path.join(self.input_directory, input_filename)
                 for input_filename in os.listdir(self.input_directory)
                 if input_filename.endswith(self.csv_extension)
                 ]
 
+    @property
+    def project_directory(self):
+        return DirectoryStructure(self.project_directory)
+
+    def requires(self):
+        return [CsvFile(input_filename=input_filename)
+                for input_filename in self.csv_files
+                ]
+
     def run(self):
-        project_directory = DirectoryStructure(self.project_directory)
-        project_directory.create_directories()
+        self.project_directory.create_directories()
 
         for input in self.input():
             with input.open("r") as input_file:
-                input_filename = os.path.basename(input.path)
-                output_filename = os.path.join(
-                    project_directory.preprocessing_directories.raw_directory, input_filename)
-                with open(output_filename, "w") as output_file:
+                with self.output.open("w") as output_file:
                     output_file.write(input_file.read())
+
+    def output(self):
+        return [luigi.LocalTarget(os.path.join(
+            self.project_directory.preprocessing_directories.raw_directory, os.path.basename(input_filename)))
+            for input_filename in self.csv_files]
