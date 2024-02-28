@@ -1,3 +1,4 @@
+from text_analysis import series_to_set
 import pandas as pd
 import numpy as np
 
@@ -160,3 +161,16 @@ def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
     texts_per_ean_histogram = texts_per_ean_histogram(
         dataframe, receipt_text_column, product_id_column)
     return np.log(texts_per_ean_histogram)
+
+
+def texts_per_period(dataframe: pd.DataFrame,
+                     period_column: str = "year_month",
+                     receipt_text_column: str = "receipt_text",
+                     product_id_column: str = "ean_number"
+                     ) -> pd.DataFrame:
+    grouped_texts_per_month = dataframe.groupby(
+        by=period_column)[receipt_text_column].apply(series_to_set)
+    grouped_texts_per_month = grouped_texts_per_month.reset_index()
+
+    # TODO: finish!
+    return grouped_texts_per_month
