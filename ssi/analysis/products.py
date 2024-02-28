@@ -89,11 +89,15 @@ def unique_texts_and_eans_per_coicop(dataframe: pd.DataFrame,
         by=[coicop_column])[[receipt_text_column, product_id_column]].nunique()
 
 
-def unique_texts_per_ean(dataframe: pd.DataFrame,
-                         receipt_text_column: str = "receipt_text",
-                         product_id_column: str = "ean_number"
-                         ) -> pd.DataFrame:
-    """ This function calculates the number of unique receipt texts per EAN.
+def texts_per_ean_histogram(dataframe: pd.DataFrame,
+                            receipt_text_column: str = "receipt_text",
+                            product_id_column: str = "ean_number"
+                            ) -> pd.DataFrame:
+    """ This function calculates the histogram of the receipt texts per EAN. 
+    First the number of unique texts per EAN is calculated. Then these counts 
+    are binned a histogram of the counts is created. The histogram shows how
+    often a certain number of texts per EAN occurs.
+
     This can be used to create a histogram of the number of texts per EAN.
 
     Parameters
@@ -111,6 +115,11 @@ def unique_texts_per_ean(dataframe: pd.DataFrame,
     -------
 
     pd.DataFrame
-        A dataframe containing the number of unique texts per EAN.
+        A dataframe containing the histogram of receipt text counts per of EAN.
     """
-    return dataframe.groupby(by=product_id_column)[receipt_text_column].nunique()
+    texts_per_ean = dataframe.groupby(by=product_id_column)[
+        receipt_text_column].nunique()
+    texts_per_ean = texts_per_ean.reset_index()
+    receipt_text_counts = texts_per_ean.receipt_text.value_counts()
+    receipt_text_counts = receipt_text_counts.sort_index()
+    return receipt_text_counts
