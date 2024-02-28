@@ -1,6 +1,6 @@
 from typing import List
 from .preprocessing.preprocess_data import split_month_year_column
-from .plots import sunburst_coicop_levels
+from .machine_learning.plots import sunburst_coicop_levels
 from .data_utils import export_dataframe
 from wordcloud import WordCloud
 import pandas as pd
