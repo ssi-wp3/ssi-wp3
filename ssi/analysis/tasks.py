@@ -29,11 +29,21 @@ class StoreProductAnalysis(luigi.Task):
     #    return luigi.LocalTarget(os.path.join(self.output_directory, "product_analysis_results.csv"), format=luigi.format.Nop)
 
 
-class AllStoresAnalysis(luigi.Task):
+class AllStoresAnalysis(luigi.WrapperTask):
     """ This task analyses the product inventory and dynamics for all stores in a certain
     directory.
 
+    Parameters
+    ----------
 
+    input_directory : luigi.PathParameter
+        The directory containing the store product inventory files.
+
+    output_directory : luigi.PathParameter
+        The directory to store the analysis results.
+
+    project_prefix : luigi.Parameter
+        The project prefix used in the revenue file names.
     """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
