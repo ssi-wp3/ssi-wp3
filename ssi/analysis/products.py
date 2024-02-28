@@ -74,6 +74,12 @@ def unique_texts_and_eans_per_coicop(dataframe: pd.DataFrame,
         The column containing the COICOP information. By default, it is "coicop_level_1".
         Pass a different column name to group by other (deeper) COICOP levels.
 
+    receipt_text_column : str
+        The column containing the receipt text. By default, it is "receipt_text".
+
+    product_id_column : str
+        The column containing the product ID. By default, it is "ean_number".
+
     Returns
     -------
     pd.DataFrame
@@ -81,3 +87,30 @@ def unique_texts_and_eans_per_coicop(dataframe: pd.DataFrame,
     """
     return dataframe.groupby(
         by=[coicop_column])[[receipt_text_column, product_id_column]].nunique()
+
+
+def unique_texts_per_ean(dataframe: pd.DataFrame,
+                         receipt_text_column: str = "receipt_text",
+                         product_id_column: str = "ean_number"
+                         ) -> pd.DataFrame:
+    """ This function calculates the number of unique receipt texts per EAN.
+    This can be used to create a histogram of the number of texts per EAN.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    receipt_text_column : str
+        The column containing the receipt text. By default, it is "receipt_text".
+
+    product_id_column : str
+        The column containing the product ID. By default, it is "ean_number".
+
+    Returns
+    -------
+
+    pd.DataFrame
+        A dataframe containing the number of unique texts per EAN.
+    """
+    return dataframe.groupby(by=product_id_column)[receipt_text_column].nunique()
