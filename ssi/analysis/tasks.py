@@ -1,3 +1,4 @@
+from .files import get_combined_revenue_files_in_directory
 import pandas as pd
 import pathlib
 import luigi
@@ -16,14 +17,28 @@ class StoreProductAnalysis(luigi.Task):
 
     """
     input_filename = luigi.PathParameter()
-    output_directory = luigi.PathParameter(default="product_analysis_results")
-    store_name = luigi.Parameter()
+    output_directory = luigi.PathParameter()
 
     def requires(self):
-        return
+        return StoreFile(self.input_filename)
 
     def run(self):
         pass
 
     # def output(self):
     #    return luigi.LocalTarget(os.path.join(self.output_directory, "product_analysis_results.csv"), format=luigi.format.Nop)
+
+
+class AllStoresAnalysis(luigi.Task):
+    """ This task analyses the product inventory and dynamics for all stores in a certain
+    directory.
+
+
+    """
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    project_prefix = luigi.Parameter(default="ssi")
+
+    def requires(self):
+        return [StoreProductAnalysis(filename, self.output_directory)
+                for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)]
