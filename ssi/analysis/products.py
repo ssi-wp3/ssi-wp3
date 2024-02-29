@@ -218,24 +218,90 @@ def products_per_period(dataframe: pd.DataFrame,
 
 
 def intersection(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    """This function calculates the intersection of two sets. The sets are columns in a dataframe.
+    This function serves as a helper function that can be passed to the apply method of a dataframe.
+
+    Parameters
+    ----------
+
+    left_column : Optional[set]
+        The left column containing a set of elements.
+
+    right_column : Optional[set]
+        The right column containing a set of elements.
+
+    Returns
+    -------
+    Optional[set]
+        The intersection of the two sets.
+    """
     if not left_column or not right_column:
         return None
     return left_column.intersection(right_column)
 
 
 def introduced_products(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    """ This function calculates the introduced products. The sets are columns in a dataframe.
+    This function serves as a helper function that can be passed to the apply method of a dataframe.
+
+    Parameters
+    ----------
+
+    left_column : Optional[set]
+        The left column containing a set of elements.
+
+    right_column : Optional[set]
+        The right column containing a set of elements.
+
+    Returns
+    -------
+    Optional[set]
+        The introduced products.
+    """
     if not left_column or not right_column:
         return None
     return left_column.difference(right_column)
 
 
 def removed_products(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    """ This function calculates the removed products. The sets are columns in a dataframe.
+    This function serves as a helper function that can be passed to the apply method of a dataframe.
+
+    Parameters
+    ----------
+    left_column : Optional[set]
+        The left column containing a set of elements.
+
+    right_column : Optional[set]
+        The right column containing a set of elements.
+
+    Returns
+    -------
+
+    Optional[set]
+        The removed products.
+    """
     if not left_column or not right_column:
         return None
     return right_column.difference(left_column)
 
 
 def number_of_products(column: Optional[set]) -> int:
+    """ This function calculates the number of products in a set. The set is a column in a dataframe.
+    This function serves as a helper function that can be passed to the apply method of a dataframe.
+
+    Parameters
+    ----------
+
+    column : Optional[set]
+        The column containing a set of elements.
+
+    Returns
+    -------
+    int
+        The number of products in the set.
+
+    """
     if not column:
         return 0
     return len(column)
