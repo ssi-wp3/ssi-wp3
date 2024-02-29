@@ -429,6 +429,7 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
     grouped_texts_eans_per_month_coicop = grouped_texts_per_month_coicop.merge(
         grouped_eans_per_month_coicop, on=[period_column, coicop_level_column])
 
+    # TODO: this doesn't work, needs to be per group
     grouped_eans_per_month_coicop = add_lagged_columns(grouped_eans_per_month_coicop,
                                                        receipt_text_column, product_id_column)
     return grouped_texts_eans_per_month_coicop
