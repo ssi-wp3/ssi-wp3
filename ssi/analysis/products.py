@@ -168,9 +168,49 @@ def texts_per_period(dataframe: pd.DataFrame,
                      receipt_text_column: str = "receipt_text",
                      product_id_column: str = "ean_number"
                      ) -> pd.DataFrame:
+    """ This function creates a dataframe that contains the unique receipt texts and
+    product identifiers per period in "period column". The dataframe contains a column
+    with a set of unique receipt texts and a column with a set of unique product identifiers.
+    In addition, the dataframe contains a lagged version, i.e. a column containing the values
+    of the previous period of these columns.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    period_column : str
+        The column containing the period information. By default, it is "year_month".
+        Pass a different column name for other periods, for example "year". It's also
+        possible to pass a list of columns to period_column to group by multiple columns.
+
+    receipt_text_column : str
+        The column containing the receipt text. By default, it is "receipt_text".
+
+    product_id_column : str
+        The column containing the product ID. By default, it is "ean_number".
+
+    Returns
+    -------
+
+    pd.DataFrame
+        A dataframe containing the unique receipt texts and product identifiers per period.
+        The dataframe also contains a lagged version of these columns.
+    """
     grouped_texts_per_month = dataframe.groupby(
         by=period_column)[receipt_text_column].apply(series_to_set)
     grouped_texts_per_month = grouped_texts_per_month.reset_index()
 
-    # TODO: finish!
-    return grouped_texts_per_month
+    grouped_eans_per_month = dataframe.groupby(
+        by=period_column)[product_id_column].apply(series_to_set)
+    grouped_eans_per_month = grouped_eans_per_month.reset_index()
+
+    grouped_texts_eans_per_month = grouped_texts_per_month.merge(
+        grouped_eans_per_month, on=period_column)
+
+    grouped_texts_eans_per_month[f"{receipt_text_column}_lagged"] = grouped_texts_eans_per_month[receipt_text_column].shift(
+        1)
+    grouped_texts_eans_per_month[f"{product_id_column}_lagged"] = grouped_texts_eans_per_month[product_id_column].shift(
+        1)
+
+    return grouped_texts_eans_per_month
