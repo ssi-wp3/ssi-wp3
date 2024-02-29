@@ -164,6 +164,35 @@ def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
     return np.log(texts_per_ean_histogram)
 
 
+def add_lagged_columns(grouped_texts_eans_per_month: pd.DataFrame,
+                       receipt_text_column: str,
+                       product_id_column: str) -> pd.DataFrame:
+    """ This function adds lagged columns to the dataframe. The lagged columns contain the values
+    of the previous period for the receipt texts and the EANs.
+
+    Parameters
+    ----------
+    grouped_texts_eans_per_month : pd.DataFrame
+        The input dataframe.
+
+    receipt_text_column : str
+        The column containing the receipt text.
+
+    product_id_column : str
+        The column containing the product ID.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe containing the lagged columns for the receipt texts and the EANs.
+    """
+    grouped_texts_eans_per_month[f"{receipt_text_column}_lagged"] = grouped_texts_eans_per_month[receipt_text_column].shift(
+        1)
+    grouped_texts_eans_per_month[f"{product_id_column}_lagged"] = grouped_texts_eans_per_month[product_id_column].shift(
+        1)
+    return grouped_texts_eans_per_month
+
+
 def products_per_period(dataframe: pd.DataFrame,
                         period_column: str = "year_month",
                         receipt_text_column: str = "receipt_text",
@@ -209,10 +238,8 @@ def products_per_period(dataframe: pd.DataFrame,
     grouped_texts_eans_per_month = grouped_texts_per_month.merge(
         grouped_eans_per_month, on=period_column)
 
-    grouped_texts_eans_per_month[f"{receipt_text_column}_lagged"] = grouped_texts_eans_per_month[receipt_text_column].shift(
-        1)
-    grouped_texts_eans_per_month[f"{product_id_column}_lagged"] = grouped_texts_eans_per_month[product_id_column].shift(
-        1)
+    grouped_texts_eans_per_month = add_lagged_columns(grouped_texts_eans_per_month,
+                                                      receipt_text_column, product_id_column)
 
     return grouped_texts_eans_per_month
 
@@ -355,3 +382,34 @@ def compare_products_per_period(dataframe: pd.DataFrame,
             number_of_products)
         texts_per_period_df[f"number_{column}_removed"] = texts_per_period_df[f"{column}_removed"].apply(
             number_of_products)
+
+
+def products_per_period_coicop_level(dataframe: pd.DataFrame,
+                                     period_column: str = "year_month",
+                                     coicop_level_column: str = "coicop_level_1",
+                                     receipt_text_column: str = "receipt_text",
+                                     product_id_column: str = "ean_number"
+                                     ) -> pd.DataFrame:
+    grouped_texts_per_month_coicop = dataframe.groupby(
+        by=[period_column, coicop_level_column])[receipt_text_column].apply(series_to_set)
+    grouped_texts_per_month_coicop = grouped_texts_per_month_coicop.reset_index()
+    grouped_eans_per_month_coicop = dataframe.groupby(
+        by=[period_column, coicop_level_column])[product_id_column].apply(series_to_set)
+    grouped_eans_per_month_coicop = grouped_eans_per_month_coicop.reset_index()
+
+    grouped_texts_eans_per_month_coicop = grouped_texts_per_month_coicop.merge(
+        grouped_eans_per_month_coicop, on=[period_column, coicop_level_column])
+
+    grouped_eans_per_month_coicop = add_lagged_columns(grouped_eans_per_month_coicop,
+                                                       receipt_text_column, product_id_column)
+    return grouped_texts_eans_per_month_coicop
+
+
+def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
+                                             period_column: str = "year_month",
+                                             coicop_level_column: str = "coicop_level_1",
+                                             receipt_text_column: str = "receipt_text",
+                                             product_id_column: str = "ean_number"
+                                             ) -> pd.DataFrame:
+    texts_per_period_coicop_df = products_per_period_coicop_level(
+        dataframe, period_column, coicop_level_column, receipt_text_column, product_id_column)
