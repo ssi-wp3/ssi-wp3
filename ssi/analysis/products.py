@@ -241,12 +241,36 @@ def number_of_products(column: Optional[set]) -> int:
     return len(column)
 
 
-def changed_texts_per_period(dataframe: pd.DataFrame,
+def compare_texts_per_period(dataframe: pd.DataFrame,
                              period_column: str = "year_month",
                              receipt_text_column: str = "receipt_text",
                              product_id_column: str = "ean_number"
                              ) -> pd.DataFrame:
-    """
+    """This functions compares the receipt texts and product identifiers per period with those of
+    the last period. It returns the texts and product identifiers that are the same, introduced, or 
+    removed, as well as, the number of texts and product identifiers for all of those changes.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    period_column : str
+        The column containing the period information. By default, it is "year_month".
+        Pass a different column name for other periods, for example "year". It's also
+        possible to pass a list of columns to period_column to group by multiple columns.
+
+    receipt_text_column : str
+        The column containing the receipt text. By default, it is "receipt_text".
+
+    product_id_column : str
+        The column containing the product ID. By default, it is "ean_number".
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe containing the comparison of the receipt texts and product identifiers per period. 
+
     """
     texts_per_period_df = texts_per_period(
         dataframe, period_column, receipt_text_column, product_id_column)
