@@ -164,11 +164,11 @@ def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
     return np.log(texts_per_ean_histogram)
 
 
-def texts_per_period(dataframe: pd.DataFrame,
-                     period_column: str = "year_month",
-                     receipt_text_column: str = "receipt_text",
-                     product_id_column: str = "ean_number"
-                     ) -> pd.DataFrame:
+def products_per_period(dataframe: pd.DataFrame,
+                        period_column: str = "year_month",
+                        receipt_text_column: str = "receipt_text",
+                        product_id_column: str = "ean_number"
+                        ) -> pd.DataFrame:
     """ This function creates a dataframe that contains the unique receipt texts and
     product identifiers per period in "period column". The dataframe contains a column
     with a set of unique receipt texts and a column with a set of unique product identifiers.
@@ -241,11 +241,11 @@ def number_of_products(column: Optional[set]) -> int:
     return len(column)
 
 
-def compare_texts_per_period(dataframe: pd.DataFrame,
-                             period_column: str = "year_month",
-                             receipt_text_column: str = "receipt_text",
-                             product_id_column: str = "ean_number"
-                             ) -> pd.DataFrame:
+def compare_products_per_period(dataframe: pd.DataFrame,
+                                period_column: str = "year_month",
+                                receipt_text_column: str = "receipt_text",
+                                product_id_column: str = "ean_number"
+                                ) -> pd.DataFrame:
     """This functions compares the receipt texts and product identifiers per period with those of
     the last period. It returns the texts and product identifiers that are the same, introduced, or 
     removed, as well as, the number of texts and product identifiers for all of those changes.
@@ -272,7 +272,7 @@ def compare_texts_per_period(dataframe: pd.DataFrame,
         A dataframe containing the comparison of the receipt texts and product identifiers per period. 
 
     """
-    texts_per_period_df = texts_per_period(
+    texts_per_period_df = products_per_period(
         dataframe, period_column, receipt_text_column, product_id_column)
 
     for column in [receipt_text_column, product_id_column]:
