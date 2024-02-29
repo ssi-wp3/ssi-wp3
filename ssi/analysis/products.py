@@ -390,6 +390,35 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
                                      receipt_text_column: str = "receipt_text",
                                      product_id_column: str = "ean_number"
                                      ) -> pd.DataFrame:
+    """ This function creates a dataframe that contains the unique receipt texts and
+    product identifiers per period and COICOP level. The dataframe contains a column
+    with a set of unique receipt texts and a column with a set of unique product identifiers.
+    In addition, the dataframe contains a lagged version, i.e. a column containing the values
+    of the previous period for these columns.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    period_column : str
+        The column containing the period information. By default, it is "year_month".
+
+    coicop_level_column : str
+        The column containing the COICOP level information. By default, it is "coicop_level_1".
+
+    receipt_text_column : str
+        The column containing the receipt text. By default, it is "receipt_text".
+
+    product_id_column : str
+        The column containing the product ID. By default, it is "ean_number".
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe containing the unique receipt texts and product identifiers per period and COICOP level.
+        The dataframe also contains a lagged version of these columns.
+    """
     grouped_texts_per_month_coicop = dataframe.groupby(
         by=[period_column, coicop_level_column])[receipt_text_column].apply(series_to_set)
     grouped_texts_per_month_coicop = grouped_texts_per_month_coicop.reset_index()
