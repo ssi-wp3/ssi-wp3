@@ -1,3 +1,4 @@
+from typing import Optional
 from text_analysis import series_to_set
 import pandas as pd
 import numpy as np
@@ -214,3 +215,53 @@ def texts_per_period(dataframe: pd.DataFrame,
         1)
 
     return grouped_texts_eans_per_month
+
+
+def intersection(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return left_column.intersection(right_column)
+
+
+def introduced_products(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return left_column.difference(right_column)
+
+
+def removed_products(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
+    if not left_column or not right_column:
+        return None
+    return right_column.difference(left_column)
+
+
+def number_of_products(column: Optional[set]) -> int:
+    if not column:
+        return 0
+    return len(column)
+
+
+def changed_texts_per_period(dataframe: pd.DataFrame,
+                             period_column: str = "year_month",
+                             receipt_text_column: str = "receipt_text",
+                             product_id_column: str = "ean_number"
+                             ) -> pd.DataFrame:
+    """
+    """
+    texts_per_period_df = texts_per_period(
+        dataframe, period_column, receipt_text_column, product_id_column)
+
+    for column in [receipt_text_column, product_id_column]:
+        texts_per_period_df[f"{column}_same"] = texts_per_period_df.apply(
+            lambda row: intersection(row[column], row[f"{column}_lagged"]), axis=1)
+        texts_per_period_df[f"{column}_introduced"] = texts_per_period_df.apply(
+            lambda row: introduced_products(row[column], row[f"{column}_lagged"]), axis=1)
+        texts_per_period_df[f"{column}_removed"] = texts_per_period_df.apply(
+            lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
+
+        texts_per_period_df[f"number_{column}_same"] = texts_per_period_df[f"{column}_same"].apply(
+            number_of_products)
+        texts_per_period_df[f"number_{column}_introduced"] = texts_per_period_df[f"{column}_introduced"].apply(
+            number_of_products)
+        texts_per_period_df[f"number_{column}_removed"] = texts_per_period_df[f"{column}_removed"].apply(
+            number_of_products)
