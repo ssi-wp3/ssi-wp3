@@ -156,7 +156,7 @@ class AddReceiptTexts(luigi.Task):
                         create table {self.store_name}_receipts as select * from receipt_texts
                         """)
 
-                receipt_revenue_df = con.sql(f"""select pr.*, pc.kassabon from {self.store_name}_revenue as pr 
+                receipt_revenue_df = con.sql(f"""select pr.*, pc.{receipt_text_column} from {self.store_name}_revenue as pr 
                         inner join {self.store_name}_receipts as pc on pr.ean_number = pc.ean_number 
                         where pc.Datum_vanaf >= pr.start_date and pc.Datum_vanaf <= pr.end_date
                         """).df()
