@@ -87,7 +87,7 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
                                     output_filename=os.path.join(
                                         self.output_directory, f"{self.output_filename_prefix}_{store_name}_revenue.parquet"),
                                     store_name=store_name,
-                                    filename_prefix=self.filename_prefix,
+                                    filename_prefix=self.input_filename_prefix,
                                     parquet_engine=self.parquet_engine)
                 for store_name in self.store_names]
 
