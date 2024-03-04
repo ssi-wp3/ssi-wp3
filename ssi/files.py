@@ -10,7 +10,3 @@ def get_features_files_in_directory(directory: str, extension: str = ".parquet")
     return [filename
             for filename in os.listdir(directory)
             if filename.startswith("ssi_") and "_features" in filename and filename.endswith(extension)]
-
-
-def get_supermarket_name(filename: str) -> str:
-    return os.path.basename(filename).split("_")[1]

@@ -1,6 +1,6 @@
 
 from .utils import ParquetFile
-from .files import get_revenue_files_in_folder
+from .files import get_revenue_files_in_folder, get_store_name
 from .convert import ConvertCSVToParquet
 import pandas as pd
 import luigi
@@ -79,9 +79,8 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
 
     @property
     def store_names(self):
-        # TODO parse filenames to get store names
-        return [filename
-                for filename in os.listdir(self.input_directory)]
+        return set([get_store_name(filename)
+                    for filename in os.listdir(self.input_directory)])
 
     def requires(self):
         return [CombineRevenueFiles(input_directory=self.input_directory,
