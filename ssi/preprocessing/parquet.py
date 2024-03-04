@@ -71,10 +71,7 @@ def convert_to_parquet(input_filename: str,
     header_names = None if not header_types else [
         name for name in header_types.keys()]
 
-    print(f"Header types: {header_types}")
-    print(f"Header names: {header_names}")
-
-    header = 0 if has_header else "infer"
+    skipheader = 1 if has_header else 0
     df = pd.read_csv(input_file,
                      sep=delimiter,
                      engine="pyarrow",
@@ -82,7 +79,7 @@ def convert_to_parquet(input_filename: str,
                      decimal=decimal,
                      names=header_names,
                      dtype=header_types,
-                     header=header,
+                     skiprows=skipheader,
                      parse_dates=True)
 
     columns_to_rename = get_columns_to_rename(filename)
