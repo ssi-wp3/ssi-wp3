@@ -47,7 +47,10 @@ def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
 
 def check_header(input_file, delimiter: str) -> bool:
     first_line = pd.read_csv(input_file, sep=delimiter, nrows=1)
-    return ["bgnr", "maand", "coicopnr", "coicopnaam", "isbanr", "isbanaam", "esbanr", "esbanaam", "repid", "eannr", "eannaam", "omzet", "aantal"] == [column.lower() for column in first_line.columns.tolist()]
+    standard_header = ["bgnr", "maand", "coicopnr", "coicopnaam", "isbanr",
+                       "isbanaam", "esbanr", "esbanaam", "repid", "eannr",
+                       "eannaam", "omzet", "aantal"]
+    return standard_header == [column.lower() for column in first_line.columns.tolist()]
 
 
 def convert_to_parquet(input_filename: str,
@@ -67,6 +70,9 @@ def convert_to_parquet(input_filename: str,
     header_types = get_column_types(filename)
     header_names = None if not header_types else [
         name for name in header_types.keys()]
+
+    print(f"Header types: {header_types}")
+    print(f"Header names: {header_names}")
 
     header = 0 if has_header else "infer"
     df = pd.read_csv(input_file,
