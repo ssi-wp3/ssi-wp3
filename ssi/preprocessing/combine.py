@@ -73,8 +73,8 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
     """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
-    input_filename_prefix = luigi.Parameter(default="Omzet")
-    output_filename_prefix = luigi.Parameter(default="ssi")
+    input_filename_prefix = luigi.Parameter()
+    output_filename_prefix = luigi.Parameter()
     parquet_engine = luigi.Parameter()
 
     @property
