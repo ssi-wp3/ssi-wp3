@@ -86,7 +86,8 @@ class PreprocessAllFiles(luigi.WrapperTask):
 
     def requires(self):
         return [PreprocessFile(
-                input_filename=input_filename,
+                input_filename=os.path.join(
+                    self.input_directory, input_filename),
                 output_filename=os.path.join(
                     self.output_directory, os.path.basename(input_filename)),
                 store_name=get_store_name_from_combined_filename(
