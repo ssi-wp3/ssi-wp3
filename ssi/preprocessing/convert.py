@@ -26,6 +26,7 @@ class ConvertAHReceipts(luigi.Task):
     input_filename = luigi.PathParameter()
     output_filename = luigi.PathParameter()
     coicop_sheets_prefix = luigi.Parameter(default="coi")
+    add_start_date = luigi.BoolParameter(default=True)
 
     def requires(self):
         return ExcelFile(input_filename=self.input_filename)
@@ -35,6 +36,13 @@ class ConvertAHReceipts(luigi.Task):
             with self.output().open('w') as output_file:
                 ah_receipts_df = convert_ah_receipts(
                     input_file, self.coicop_sheets_prefix)
+                # The Plus receipt texts we got in February 2024.
+                # When couple to the revenue files we saw that the first month that the EANs were available
+                # was in January 2023. Since, we do not have a date column as with Plus, we add this column
+                # artificially here.
+                if self.add_start_date:
+                    ah_receipts_df['start_date'] = "2023-01-01"
+
                 ah_receipts_df.to_parquet(output_file, engine="pyarrow")
 
     def output(self):
