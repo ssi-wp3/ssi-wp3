@@ -3,7 +3,7 @@ import os
 
 
 def get_store_name(filename: str, fileprefix: str = "omzeteanscoicops") -> str:
-    return os.path.basename(filename).split("_")[1].lower().replace(fileprefix, "")
+    return os.path.basename(filename).split("_")[0].lower().replace(fileprefix, "")
 
 
 def get_revenue_files_in_folder(data_directory: str, supermarket_name: str, filename_prefix: str = "Omzet", file_type: Optional[str] = None) -> List[str]:
