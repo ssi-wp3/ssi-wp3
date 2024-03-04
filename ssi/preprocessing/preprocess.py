@@ -1,6 +1,7 @@
 from .utils import ParquetFile
 from .combine import CombineRevenueFiles
 from .preprocess_data import preprocess_data
+from .files import get_store_name_from_combined_filename
 import pandas as pd
 import luigi
 import os
@@ -88,6 +89,8 @@ class PreprocessAllFiles(luigi.WrapperTask):
                 input_filename=input_filename,
                 output_filename=os.path.join(
                     self.output_directory, os.path.basename(input_filename)),
+                store_name=get_store_name_from_combined_filename(
+                    input_filename),
                 )
                 for input_filename in os.listdir(self.input_directory)
                 if input_filename.endswith(self.extension)]

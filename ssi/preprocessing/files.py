@@ -6,6 +6,10 @@ def get_store_name(filename: str, fileprefix: str = "omzeteanscoicops") -> str:
     return os.path.basename(filename).split("_")[0].lower().replace(fileprefix, "")
 
 
+def get_store_name_from_combined_filename(filename: str) -> str:
+    return os.path.basename(filename).split("_")[1]
+
+
 def get_revenue_files_in_folder(data_directory: str, supermarket_name: str, filename_prefix: str = "Omzet", file_type: Optional[str] = None) -> List[str]:
     return [os.path.join(data_directory, filename)
             for filename in os.listdir(data_directory)
