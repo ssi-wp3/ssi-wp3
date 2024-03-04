@@ -4,6 +4,8 @@ from .files import get_revenue_files_in_folder, get_store_name
 from .convert import ConvertCSVToParquet
 import pandas as pd
 import luigi
+import tempfile
+import duckdb
 import os
 
 
@@ -112,7 +114,9 @@ class AddReceiptTexts(luigi.Task):
     input_filename = luigi.Parameter()
     output_filename = luigi.Parameter()
     receipt_texts_filename = luigi.Parameter()
-
+    store_name = luigi.Parameter()
+    receipt_text_column = luigi.Parameter(default="receipt_text")
+    ean_name_column = luigi.Parameter(default="ean_name")
     parquet_engine = luigi.Parameter()
 
     def requires(self):
@@ -125,12 +129,64 @@ class AddReceiptTexts(luigi.Task):
     def run(self):
         with self.input()[0].open("r") as input_file:
             combined_df = pd.read_parquet(input_file)
-            with self.input()[1].open("r") as receipt_texts_file:
-                receipt_texts = pd.read_parquet(receipt_texts_file)
 
-                combined_df["receipt_text"] = combined_df["receipt_id"].map(
-                    receipt_texts)
+            if self.store_name.lower() == "lidl":
+                self.add_receipt_text_from_revenue_file(
+                    combined_df, self.receipt_text_column, self.ean_name_column)
+            else:
+                self.couple_receipt_file(
+                    combined_df, self.receipt_text_column, self.parquet_engine)
 
-                with self.output().open("w") as output_file:
-                    combined_df.to_parquet(
-                        output_file, engine=self.parquet_engine)
+    def couple_receipt_file(self, combined_df: pd.DataFrame,
+                            receipt_text_column: str,
+                            parquet_engine: str
+                            ):
+        with self.input()[1].open("r") as receipt_texts_file:
+            receipt_texts = pd.read_parquet(
+                receipt_texts_file, engine=parquet_engine)
+            with tempfile.TemporaryDirectory() as duck_db_temp_dir:
+                con = duckdb.connect(f"ssi_{self.store_name}.db",
+                                     config={
+                                         "temp_directory": duck_db_temp_dir
+                                     })
+                con.sql(f"""drop table if exists {self.store_name}_revenue;
+                        create table {self.store_name}_revenue as select * from combined_df')
+                        """)
+                con.sql(f"""drop table if exists {self.store_name}_receipts;
+                        create table {self.store_name}_receipts as select * from receipt_texts
+                        """)
+
+                receipt_revenue_df = con.sql(f"""select pr.*, pc.kassabon from {self.store_name}_revenue as pr 
+                        inner join {self.store_name}_receipts as pc on pr.ean_number = pc.ean_number 
+                        where pc.Datum_vanaf >= pr.start_date and pc.Datum_vanaf <= pr.end_date
+                        """).df()
+
+            with self.output().open("w") as output_file:
+                receipt_revenue_df.to_parquet(
+                    output_file, engine=parquet_engine)
+
+    def add_receipt_text_from_revenue_file(self,
+                                           combined_df: pd.DataFrame,
+                                           receipt_text_column: str,
+                                           ean_name_column: str
+                                           ):
+        """ Lidl uses the EAN name as the receipt text. The EAN name is already
+        present in the combined revenue file. This method adds an extra receipt text column
+        to the dataframe derived from the ean name column. After that, it writes the dataframe
+        to the output file.
+
+        Parameters
+        ----------
+        combined_df : pd.DataFrame
+            The combined revenue dataframe.
+
+        receipt_text_column : str
+            The name of the receipt text column.
+
+        ean_name_column : str
+            The name of the EAN name column.
+        """
+        combined_df[receipt_text_column] = combined_df[ean_name_column]
+        with self.output().open("w") as output_file:
+            combined_df.to_parquet(
+                output_file, engine=self.parquet_engine)
