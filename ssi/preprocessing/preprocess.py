@@ -44,7 +44,8 @@ class PreprocessFile(luigi.Task):
     product_description_column = luigi.Parameter(default="ean_name")
     selected_columns = luigi.ListParameter(default=[])
     coicop_level_columns = luigi.ListParameter(default=[])
-    column_mapping = luigi.DictParameter(default={})
+    column_mapping = luigi.DictParameter(
+        default={"bg_number": "store_id", "month": "year_month"})
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     store_name = luigi.Parameter()
