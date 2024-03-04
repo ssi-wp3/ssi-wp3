@@ -141,6 +141,22 @@ class AddReceiptTexts(luigi.Task):
                             receipt_text_column: str,
                             parquet_engine: str
                             ):
+        """ This method couples the receipt texts with the combined revenue file.
+        Both parquet files are stored in a temporary duckdb database. The receipt texts
+        are then joined with the combined revenue file on the EAN number and the start date.
+        The resulting table is then written to the output file.
+
+        Parameters
+        ----------
+        combined_df : pd.DataFrame
+            The combined revenue dataframe.
+
+        receipt_text_column : str
+            The name of the receipt text column.
+
+        parquet_engine : str
+            The parquet engine to use.
+        """
         with self.input()[1].open("r") as receipt_texts_file:
             receipt_texts = pd.read_parquet(
                 receipt_texts_file, engine=parquet_engine)
