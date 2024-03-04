@@ -45,6 +45,11 @@ def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
     return None
 
 
+def check_header(input_file, delimiter: str) -> bool:
+    first_line = pd.read_csv(input_file, sep=delimiter, nrows=1)
+    return ["bgnr", "maand", "coicopnr", "coicopnaam", "isbanr", "isbanaam", "esbanr", "esbanaam", "repid", "eannr", "eannaam", "omzet", "aantal"] == [column.lower() for column in first_line.columns.tolist()]
+
+
 def convert_to_parquet(input_filename: str,
                        input_file,
                        output_file,
@@ -55,13 +60,24 @@ def convert_to_parquet(input_filename: str,
 
     filename = os.path.basename(input_filename).replace(extension, "")
 
+    has_header = check_header(input_file,
+                              delimiter)
+    print(f"Has header: {has_header}")
     # Add header names and types to all but kassa files
     header_types = get_column_types(filename)
     header_names = None if not header_types else [
         name for name in header_types.keys()]
-    df = pd.read_csv(input_file, sep=delimiter, engine="pyarrow",
-                     encoding=encoding, decimal=decimal,
-                     names=header_names, dtype=header_types, parse_dates=True)
+
+    header = 0 if has_header else "infer"
+    df = pd.read_csv(input_file,
+                     sep=delimiter,
+                     engine="pyarrow",
+                     encoding=encoding,
+                     decimal=decimal,
+                     names=header_names,
+                     dtype=header_types,
+                     header=header,
+                     parse_dates=True)
 
     columns_to_rename = get_columns_to_rename(filename)
     if columns_to_rename:
