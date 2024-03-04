@@ -81,7 +81,7 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
     def store_names(self):
         return set([get_store_name(filename)
                     for filename in os.listdir(self.input_directory)
-                    if self.input_filename_prefix in filename.lower()]
+                    if self.input_filename_prefix.lower() in filename.lower()]
                    )
 
     def requires(self):
