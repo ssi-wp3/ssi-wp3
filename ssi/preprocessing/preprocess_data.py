@@ -20,8 +20,8 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
         ah_receipts_df = ah_receipts_df.rename(columns={'Kassabonomschrijving': 'receipt_text',
                                                         'ArtikelEAN': "ean_number",
                                                         'IsbaOmschrijving': 'isba_description',
-                                                        'isba': 'isba_number',
-                                                        'esba': 'esba_number',
+                                                        'Isba': 'isba_number',
+                                                        'Esba': 'esba_number',
                                                         'BG': 'store_id',
                                                         'Coicop': 'coicop_number'})
         ah_receipts_df = ah_receipts_df.rename(
