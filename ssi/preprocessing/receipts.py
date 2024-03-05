@@ -45,8 +45,6 @@ class AddReceiptTexts(luigi.Task):
             combined_df = pd.read_parquet(
                 input_file, engine=self.parquet_engine)
 
-            print(f"Combined df: {combined_df.head()}")
-
             if self.store_name.lower() == "lidl":
                 self.add_receipt_text_from_revenue_file(
                     combined_df, self.receipt_text_column, self.ean_name_column)
@@ -147,6 +145,7 @@ class AddReceiptTexts(luigi.Task):
         ean_name_column : str
             The name of the EAN name column.
         """
+        print(f"Combined df: {combined_df.head()}")
         combined_df[receipt_text_column] = combined_df[ean_name_column]
         with self.output().open("w") as output_file:
             combined_df.to_parquet(
