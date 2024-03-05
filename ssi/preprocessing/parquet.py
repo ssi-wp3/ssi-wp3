@@ -35,7 +35,7 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
 
 
 def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
-    if filename.lower().startswith("kassabon"):
+    if filename.lower().startswith("kassabon") or filename.lower().startswith("receipts"):
         return {
             'Datum_vanaf': 'start_date',
             'Ean': 'ean_number',
