@@ -31,6 +31,9 @@ class AddReceiptTexts(luigi.Task):
     parquet_engine = luigi.Parameter()
 
     def requires(self):
+        if not self.receipt_texts_filename:
+            return [ParquetFile(input_filename=self.input_filename)]
+
         return [ParquetFile(input_filename=self.input_filename),
                 ParquetFile(input_filename=self.receipt_texts_filename)]
 
