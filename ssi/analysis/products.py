@@ -331,12 +331,12 @@ def number_of_products(column: Optional[set]) -> int:
 
 def compare_products_per_period(dataframe: pd.DataFrame,
                                 period_column: str = "year_month",
-                                receipt_text_column: str = "receipt_text",
-                                product_id_column: str = "ean_number"
+                                product_columns: List[str] = [
+                                    "receipt_text", "ean_number"]
                                 ) -> pd.DataFrame:
-    """This functions compares the receipt texts and product identifiers per period with those of
-    the last period. It returns the texts and product identifiers that are the same, introduced, or 
-    removed, as well as, the number of texts and product identifiers for all of those changes.
+    """This functions compares the unique column values of the selected columns per period with those of
+    the last period. It returns the column values that are the same, introduced, or 
+    removed, as well as, the number of column values for all of those changes.
 
     Parameters
     ----------
@@ -348,11 +348,11 @@ def compare_products_per_period(dataframe: pd.DataFrame,
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
-    receipt_text_column : str
-        The column containing the receipt text. By default, it is "receipt_text".
 
-    product_id_column : str
-        The column containing the product ID. By default, it is "ean_number".
+    product_columns : List[str]
+        The columns to compare the values for. By default, it is ["receipt_text", "ean_number"].
+        -   "receipt_text" is the column containing the receipt text.
+        -   "ean_number" is the column containing the product ID.
 
     Returns
     -------
@@ -361,9 +361,9 @@ def compare_products_per_period(dataframe: pd.DataFrame,
 
     """
     texts_per_period_df = products_per_period(
-        dataframe, period_column, receipt_text_column, product_id_column)
+        dataframe, period_column, product_columns)
 
-    for column in [receipt_text_column, product_id_column]:
+    for column in product_columns:
         texts_per_period_df[f"{column}_same"] = texts_per_period_df.apply(
             lambda row: intersection(row[column], row[f"{column}_lagged"]), axis=1)
         texts_per_period_df[f"{column}_introduced"] = texts_per_period_df.apply(
