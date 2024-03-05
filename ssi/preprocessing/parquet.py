@@ -84,6 +84,7 @@ def convert_to_parquet(input_filename: str,
                      parse_dates=True)
 
     columns_to_rename = get_columns_to_rename(filename)
+    print(f"Columns to rename: {columns_to_rename}")
     if columns_to_rename:
         df = df.rename(columns=columns_to_rename)
     df.to_parquet(output_file, engine="pyarrow")
