@@ -146,7 +146,7 @@ class AddReceiptTexts(luigi.Task):
             The name of the EAN name column.
         """
         print(f"Combined df: {combined_df.head()}")
-        combined_df[receipt_text_column] = combined_df[ean_name_column]
+        combined_df[receipt_text_column] = combined_df[[ean_name_column]]
         with self.output().open("w") as output_file:
             combined_df.to_parquet(
                 output_file, engine=self.parquet_engine)
