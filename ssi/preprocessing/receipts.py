@@ -145,7 +145,6 @@ class AddReceiptTexts(luigi.Task):
         ean_name_column : str
             The name of the EAN name column.
         """
-        print(f"Combined df: {combined_df.columns}")
         combined_df[receipt_text_column] = combined_df[ean_name_column]
         with self.output().open("w") as output_file:
             combined_df.to_parquet(
