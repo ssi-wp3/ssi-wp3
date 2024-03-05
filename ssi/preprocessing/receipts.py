@@ -113,9 +113,13 @@ class AddReceiptTexts(luigi.Task):
                             last_day(strptime(year_month, '%Y%m')) as end_date, * 
                         from combined_df;
                         """)
+                con.sql(
+                    f"create index {self.store_name}_revenue_ean_idx on {self.store_name}_revenue (ean_number)")
                 con.sql(f"""drop table if exists {self.store_name}_receipts;
                         create table {self.store_name}_receipts as select * from receipt_texts
                         """)
+                con.sql(
+                    f"create index {self.store_name}_receipts_ean_idx on {self.store_name}_receipts (ean_number)")
 
                 # TODO rename Dutch column name Datum_vanaf to start_date -> test whether this has been done!
                 receipt_revenue_df = con.sql(f"""select pr.*, pc.{receipt_text_column} from {self.store_name}_revenue as pr 
@@ -192,8 +196,6 @@ class AddAllReceiptTexts(luigi.WrapperTask):
 
             receipt_text_filename = receipt_text_filenames[0] if len(
                 receipt_text_filenames) > 0 else None
-            print(f"Adding receipt texts for {store_name} from {input_file}")
-            print(f"Receipt text filename: {receipt_text_filename}")
 
             output_filename = os.path.join(
                 self.output_directory, os.path.basename(input_file))
