@@ -184,6 +184,7 @@ class AddAllReceiptTexts(luigi.WrapperTask):
 
             receipt_text_filename = receipt_text_filenames[0] if len(
                 receipt_text_filenames) > 0 else None
+            print(f"Adding receipt texts for {store_name} from {input_file}")
             yield AddReceiptTexts(input_filename=input_file,
                                   output_filename=self.output_directory,
                                   receipt_texts_filename=receipt_text_filename,
