@@ -165,31 +165,30 @@ def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
 
 
 def add_lagged_columns(grouped_texts_eans_per_month: pd.DataFrame,
-                       receipt_text_column: str,
-                       product_id_column: str) -> pd.DataFrame:
+                       lagged_columns: List[str] = [
+                           "receipt_text", "ean_number"]
+                       ) -> pd.DataFrame:
     """ This function adds lagged columns to the dataframe. The lagged columns contain the values
-    of the previous period for the receipt texts and the EANs.
+    of the previous period for the selected columns.
 
     Parameters
     ----------
     grouped_texts_eans_per_month : pd.DataFrame
         The input dataframe.
 
-    receipt_text_column : str
-        The column containing the receipt text.
-
-    product_id_column : str
-        The column containing the product ID.
+    lagged_columns : List[str]
+        The columns to add lagged columns for. By default, it is ["receipt_text", "ean_number"].
+        -   "receipt_text" is the column containing the receipt text.
+        -   "ean_number" is the column containing the product ID.
 
     Returns
     -------
     pd.DataFrame
-        A dataframe containing the lagged columns for the receipt texts and the EANs.
+        A dataframe containing the lagged columns for the selected columns.
     """
-    grouped_texts_eans_per_month[f"{receipt_text_column}_lagged"] = grouped_texts_eans_per_month[receipt_text_column].shift(
-        1)
-    grouped_texts_eans_per_month[f"{product_id_column}_lagged"] = grouped_texts_eans_per_month[product_id_column].shift(
-        1)
+    for column in lagged_columns:
+        grouped_texts_eans_per_month[f"{column}_lagged"] = grouped_texts_eans_per_month[column].shift(
+            1)
     return grouped_texts_eans_per_month
 
 
