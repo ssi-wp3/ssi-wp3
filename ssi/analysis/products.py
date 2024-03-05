@@ -123,7 +123,7 @@ def texts_per_ean_histogram(dataframe: pd.DataFrame,
     texts_per_ean = dataframe.groupby(by=product_id_column)[
         receipt_text_column].nunique()
     texts_per_ean = texts_per_ean.reset_index()
-    receipt_text_counts = texts_per_ean.receipt_text.value_counts()
+    receipt_text_counts = texts_per_ean[receipt_text_column].value_counts()
     receipt_text_counts = receipt_text_counts.sort_index()
     return receipt_text_counts
 
