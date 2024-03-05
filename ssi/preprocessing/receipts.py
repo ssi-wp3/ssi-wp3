@@ -4,6 +4,7 @@ import pandas as pd
 import luigi
 import tempfile
 import duckdb
+import os
 
 
 class AddReceiptTexts(luigi.Task):
@@ -185,8 +186,11 @@ class AddAllReceiptTexts(luigi.WrapperTask):
             receipt_text_filename = receipt_text_filenames[0] if len(
                 receipt_text_filenames) > 0 else None
             print(f"Adding receipt texts for {store_name} from {input_file}")
+
+            output_filename = os.path.join(
+                self.output_directory, os.path.basename(input_file))
             yield AddReceiptTexts(input_filename=input_file,
-                                  output_filename=self.output_directory,
+                                  output_filename=output_filename,
                                   receipt_texts_filename=receipt_text_filename,
                                   store_name=store_name,
                                   receipt_text_column=self.receipt_text_column,
