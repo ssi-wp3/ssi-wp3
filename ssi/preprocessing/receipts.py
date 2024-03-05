@@ -108,7 +108,10 @@ class AddReceiptTexts(luigi.Task):
                                          "temp_directory": duck_db_temp_dir
                                      })
                 con.sql(f"""drop table if exists {self.store_name}_revenue;
-                        create table {self.store_name}_revenue as select * from combined_df;
+                        create table {self.store_name}_revenue as select 
+                            date_trunc('day', strptime(year_month, '%Y%m')) as start_date, 
+                            last_day(strptime(year_month, '%Y%m')) as end_date, * 
+                        from combined_df;
                         """)
                 con.sql(f"""drop table if exists {self.store_name}_receipts;
                         create table {self.store_name}_receipts as select * from receipt_texts
