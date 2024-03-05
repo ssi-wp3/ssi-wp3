@@ -24,6 +24,11 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
                                                         'Esba': 'esba_number',
                                                         'BG': 'store_id',
                                                         'Coicop': 'coicop_number'})
+        ah_receipts_df.ean_number = ah_receipts_df.ean_number.astype(str)
+        ah_receipts_df.isba_number = ah_receipts_df.isba_number.astype(str)
+        ah_receipts_df.esba_number = ah_receipts_df.esba_number.astype(str)
+        ah_receipts_df.store_id = ah_receipts_df.store_id.astype(str)
+
         ah_receipts_df = ah_receipts_df.rename(
             columns={column_name: column_name.lower() for column_name in ah_receipts_df.columns})
         all_receipts_df = pd.concat([all_receipts_df, ah_receipts_df])
