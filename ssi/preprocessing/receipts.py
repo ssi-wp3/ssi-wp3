@@ -42,7 +42,10 @@ class AddReceiptTexts(luigi.Task):
 
     def run(self):
         with self.input()[0].open("r") as input_file:
-            combined_df = pd.read_parquet(input_file)
+            combined_df = pd.read_parquet(
+                input_file, engine=self.parquet_engine)
+
+            print(f"Combined df: {combined_df.head()}")
 
             if self.store_name.lower() == "lidl":
                 self.add_receipt_text_from_revenue_file(
