@@ -107,7 +107,7 @@ class AddReceiptTexts(luigi.Task):
                                          "temp_directory": duck_db_temp_dir
                                      })
                 con.sql(f"""drop table if exists {self.store_name}_revenue;
-                        create table {self.store_name}_revenue as select * from combined_df')
+                        create table {self.store_name}_revenue as select * from combined_df;
                         """)
                 con.sql(f"""drop table if exists {self.store_name}_receipts;
                         create table {self.store_name}_receipts as select * from receipt_texts
