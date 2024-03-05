@@ -1,15 +1,15 @@
-from typing import Optional
+from typing import Optional, List
 from text_analysis import series_to_set
 import pandas as pd
 import numpy as np
 
 
-def unique_texts_and_eans(dataframe: pd.DataFrame,
-                          receipt_text_column: str = "receipt_text",
-                          product_id_column: str = "ean_number"
-                          ) -> pd.DataFrame:
-    """ This function calculates the number of unique texts and EANs for the
-    complete file.
+def unique_column_values(dataframe: pd.DataFrame,
+                         value_columns: List[str] = [
+                             "receipt_text", "ean_number"]
+                         ) -> pd.DataFrame:
+    """ This function calculates the number of unique column values for the selected columns
+    over the complete dataframe.
 
     Parameters
     ----------
@@ -17,27 +17,26 @@ def unique_texts_and_eans(dataframe: pd.DataFrame,
     dataframe : pd.DataFrame
         The input dataframe.
 
-    receipt_text_column : str
-        The column containing the receipt text. By default, it is "receipt_text".
-
-    product_id_column : str
-        The column containing the product ID. By default, it is "ean_number".
+    value_columns : List[str]
+        The columns to calculate the unique counts for. By default, it is ["receipt_text", "ean_number"].
+        -   "receipt_text" is the column containing the receipt text. 
+        -   "ean_number" is the column containing the product ID.
 
     Returns
     -------
 
     pd.DataFrame
-        A dataframe containing the number of unique texts and EANs.
+        A dataframe containing the number of unique column values for the selected columns.
     """
-    return dataframe[[receipt_text_column, product_id_column]].nunique()
+    return dataframe[value_columns].nunique()
 
 
-def unique_texts_and_eans_per_coicop(dataframe: pd.DataFrame,
+def unique_columns_values_per_coicop(dataframe: pd.DataFrame,
                                      coicop_column: str = "coicop_level_1",
-                                     receipt_text_column: str = "receipt_text",
-                                     product_id_column: str = "ean_number"
+                                     value_columns: List[str] = [
+                                         "receipt_text", "ean_number"]
                                      ) -> pd.DataFrame:
-    """ This function calculates the number of unique texts and EANs per COICOP.
+    """ This function calculates the number of unique column values for selected columns per COICOP.
 
     Parameters
     ----------
@@ -48,27 +47,26 @@ def unique_texts_and_eans_per_coicop(dataframe: pd.DataFrame,
         The column containing the COICOP information. By default, it is "coicop_level_1".
         Pass a different column name to group by other (deeper) COICOP levels.
 
-    receipt_text_column : str
-        The column containing the receipt text. By default, it is "receipt_text".
-
-    product_id_column : str
-        The column containing the product ID. By default, it is "ean_number".
+    value_columns : List[str]
+        The columns to calculate the unique counts for. By default, it is ["receipt_text", "ean_number"].
+        -   "receipt_text" is the column containing the receipt text.
+        -   "ean_number" is the column containing the product ID.    
 
     Returns
     -------
     pd.DataFrame
-        A dataframe containing the number of unique texts and EANs per COICOP.    
+        A dataframe containing the number of unique values for the selected columns.    
     """
     return dataframe.groupby(
-        by=[coicop_column])[[receipt_text_column, product_id_column]].nunique()
+        by=[coicop_column])[value_columns].nunique()
 
 
-def unique_texts_and_eans_per_period(dataframe: pd.DataFrame,
-                                     period_column: str = "year_month",
-                                     receipt_text_column: str = "receipt_text",
-                                     product_id_column: str = "ean_number"
-                                     ) -> pd.DataFrame:
-    """ This function calculates the number of unique texts and EANs per period.
+def unique_column_values_per_period(dataframe: pd.DataFrame,
+                                    period_column: str = "year_month",
+                                    value_columns: List[str] = [
+                                        "receipt_text",  "ean_number"]
+                                    ) -> pd.DataFrame:
+    """ This function calculates the number of unique column values per period.
 
     Parameters
     ----------
@@ -80,16 +78,18 @@ def unique_texts_and_eans_per_period(dataframe: pd.DataFrame,
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
-    receipt_text_column : str
-        The column containing the receipt text. By default, it is "receipt_text".
+    value_columns : List[str]
+        The columns to calculate the unique counts for. By default, it is ["receipt_text", "ean_number"].
+        -  "receipt_text" is the column containing the receipt text.
+        -  "ean_number" is the column containing the product ID.
 
     Returns
     -------
     pd.DataFrame
-        A dataframe containing the number of unique texts and EANs per period.
+        A dataframe containing the number of unique column values per period.
     """
 
-    return dataframe.groupby(by=[period_column])[[receipt_text_column, product_id_column]].nunique()
+    return dataframe.groupby(by=[period_column])[value_columns].nunique()
 
 
 def texts_per_ean_histogram(dataframe: pd.DataFrame,
