@@ -20,14 +20,15 @@ class FeatureExtractionTask(luigi.Task):
 
     source_column = luigi.Parameter(default="receipt_text")
     destination_column = luigi.Parameter(default="features")
-    filename_prefix = luigi.Parameter(default="ssi")
 
     def requires(self):
         return ParquetFile(self.input_filename)
 
     def output(self):
+        input_filename = os.path.splitext(
+            os.path.basename(self.input_filename))[0]
         return luigi.LocalTarget(
-            os.path.join(self.output_directory, f"{self.filename_prefix}_features_{self.feature_extraction_method.value}.parquet"), format=luigi.format.Nop)
+            os.path.join(self.output_directory, f"{input_filename}_features_{self.feature_extraction_method.value}.parquet"), format=luigi.format.Nop)
 
     def run(self):
         feature_extractor_factory = FeatureExtractorFactory()
