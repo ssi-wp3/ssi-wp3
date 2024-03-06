@@ -3,6 +3,7 @@ from .files import get_combined_revenue_files_in_directory
 import luigi
 import pandas as pd
 import os
+import tqdm
 
 
 class ParquetFile(luigi.ExternalTask):
@@ -35,15 +36,17 @@ class FeatureExtractionTask(luigi.Task):
 
         with self.input().open('r') as input_file:
             dataframe = pd.read_parquet(input_file)
-            with self.output().open('w') as output_file:
-                feature_extractor_factory.extract_features_and_save(
-                    dataframe,
-                    self.source_column,
-                    self.destination_column,
-                    output_file,
-                    feature_extractor_type=self.feature_extraction_method,
-                    batch_size=self.batch_size
-                )
+            with tqdm.tqdm(total=len(dataframe), desc=f"Extracting {self.feature_extraction_method.value} features", unit="rows") as progress_bar:
+                with self.output().open('w') as output_file:
+                    feature_extractor_factory.extract_features_and_save(
+                        dataframe,
+                        self.source_column,
+                        self.destination_column,
+                        output_file,
+                        feature_extractor_type=self.feature_extraction_method,
+                        batch_size=self.batch_size,
+                        progress_bar=progress_bar
+                    )
 
 
 class ExtractFeaturesForAllFiles(luigi.WrapperTask):
