@@ -65,3 +65,24 @@ class ExtractFeaturesForAllFiles(luigi.WrapperTask):
                 source_column=self.source_column,
                 destination_column=self.destination_column
             )
+
+
+class ExtractAllFeatures(luigi.WrapperTask):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    batch_size = luigi.IntParameter(default=1000)
+    source_column = luigi.Parameter(default="receipt_text")
+    destination_column = luigi.Parameter(default="features")
+    filename_prefix = luigi.Parameter(default="ssi")
+
+    def requires(self):
+        for feature_extraction_method in FeatureExtractorType:
+            yield ExtractFeaturesForAllFiles(
+                input_directory=self.input_directory,
+                output_directory=self.output_directory,
+                feature_extraction_method=feature_extraction_method,
+                batch_size=self.batch_size,
+                source_column=self.source_column,
+                destination_column=self.destination_column,
+                filename_prefix=self.filename_prefix
+            )
