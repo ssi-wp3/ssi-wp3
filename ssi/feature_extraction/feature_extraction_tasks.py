@@ -63,6 +63,5 @@ class ExtractFeaturesForAllFiles(luigi.WrapperTask):
                 feature_extraction_method=self.feature_extraction_method,
                 batch_size=self.batch_size,
                 source_column=self.source_column,
-                destination_column=self.destination_column,
-                filename_prefix=self.filename_prefix
+                destination_column=self.destination_column
             )
