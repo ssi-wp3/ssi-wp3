@@ -5,6 +5,8 @@ import pandas as pd
 import os
 import tqdm
 
+# TODO duplicate code
+
 
 class ParquetFile(luigi.ExternalTask):
     input_filename = luigi.Parameter()
@@ -14,6 +16,33 @@ class ParquetFile(luigi.ExternalTask):
 
 
 class FeatureExtractionTask(luigi.Task):
+    """This task extracts features from a text column in a parquet file, normally the receipt_text column
+    in a combined revenue file. The features are added to a new column in the dataframe and the new dataframe
+    is written to the output_directory as a parquet file. The feature extraction method is specified by the
+    feature_extraction_method parameter. The file is processed in batches of batch_size rows at a time.
+
+    Parameters
+    ----------
+    input_filename : luigi.PathParameter
+        The path to the input parquet file. Normally a combined revenue file in the preprocessing directory.
+
+    output_directory : luigi.PathParameter
+        The directory where the output parquet file will be written.
+
+    feature_extraction_method : luigi.EnumParameter
+        The feature extraction method to use. This is an instance of the FeatureExtractorType enum. Only values
+        from that enum are allowed as parameter.
+
+    batch_size : luigi.IntParameter
+        The number of rows to process at a time. The default value is 1000.
+
+    source_column : luigi.Parameter
+        The name of the column containing the text to extract features from. The default value is "receipt_text".
+
+    destination_column : luigi.Parameter
+        The name of the column to write the features to. The default value is "features".
+
+    """
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     feature_extraction_method = luigi.EnumParameter(enum=FeatureExtractorType)
@@ -50,6 +79,32 @@ class FeatureExtractionTask(luigi.Task):
 
 
 class ExtractFeaturesForAllFiles(luigi.WrapperTask):
+    """This task extracts features from all combined revenue files in the input_directory using the specified
+    feature_extraction_method. It searches for all the files in the input directory that start with the filename_prefix (normally ssi) and contain the string "revenue". The output parquet files are written to the output_directory.
+    This task is a wrapper task that runs a FeatureExtractionTask for each combined revenue file in the input_directory.
+
+    Parameters
+    ----------
+    input_directory : luigi.PathParameter
+        The directory containing the combined revenue files.
+
+    output_directory : luigi.PathParameter
+        The directory where the output parquet files will be written.
+
+    feature_extraction_method : luigi.EnumParameter
+        The feature extraction method to use. This is an instance of the FeatureExtractorType enum. Only values
+        from that enum are allowed as parameter.
+
+    batch_size : luigi.IntParameter
+        The number of rows to process at a time. The default value is 1000.
+
+    source_column : luigi.Parameter
+        The name of the column containing the text to extract features from. The default value is "receipt_text".
+
+    destination_column : luigi.Parameter
+        The name of the column to write the features to. The default value is "features".
+
+    """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     feature_extraction_method = luigi.EnumParameter(enum=FeatureExtractorType)
