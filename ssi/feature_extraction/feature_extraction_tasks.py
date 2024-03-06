@@ -1,4 +1,5 @@
 from .feature_extraction import FeatureExtractorFactory, FeatureExtractorType
+from .files import get_combined_revenue_files_in_directory
 import luigi
 import pandas as pd
 import os
@@ -19,23 +20,47 @@ class FeatureExtractionTask(luigi.Task):
 
     source_column = luigi.Parameter(default="receipt_text")
     destination_column = luigi.Parameter(default="features")
+    filename_prefix = luigi.Parameter(default="ssi")
 
     def requires(self):
         return ParquetFile(self.input_filename)
 
     def output(self):
         return luigi.LocalTarget(
-            os.path.join(self.output_directory, f"features_{self.feature_extraction_method}.parquet"), format=luigi.format.Nop)
+            os.path.join(self.output_directory, f"{self.filename_prefix}_features_{self.feature_extraction_method}.parquet"), format=luigi.format.Nop)
 
     def run(self):
         feature_extractor_factory = FeatureExtractorFactory()
 
         with self.input().open('r') as input_file:
             dataframe = pd.read_parquet(input_file)
-            feature_extractor_factory.extract_features_and_save(
-                dataframe,
-                self.source_column,
-                self.destination_column,
-                self.output().path,
-                batch_size=self.batch_size
+            with self.output().open('w') as output_file:
+                feature_extractor_factory.extract_features_and_save(
+                    dataframe,
+                    self.source_column,
+                    self.destination_column,
+                    output_file,
+                    batch_size=self.batch_size
+                )
+
+
+class ExtractFeaturesForAllFiles(luigi.WrapperTask):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    feature_extraction_method = luigi.EnumParameter(enum=FeatureExtractorType)
+    batch_size = luigi.IntParameter(default=1000)
+    source_column = luigi.Parameter(default="receipt_text")
+    destination_column = luigi.Parameter(default="features")
+    filename_prefix = luigi.Parameter(default="ssi")
+
+    def requires(self):
+        for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.filename_prefix):
+            yield FeatureExtractionTask(
+                input_filename=os.path.join(self.input_directory, filename),
+                output_directory=self.output_directory,
+                feature_extraction_method=self.feature_extraction_method,
+                batch_size=self.batch_size,
+                source_column=self.source_column,
+                destination_column=self.destination_column,
+                filename_prefix=self.filename_prefix
             )

@@ -105,7 +105,8 @@ class FeatureExtractorFactory:
         pq_writer = None
 
         # Create directory if it does not exist
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        if isinstance(filename, str):
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
         for i in range(0, len(dataframe), batch_size):
             if progress_bar:
                 progress_bar.set_description(
