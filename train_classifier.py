@@ -1,11 +1,12 @@
-from ssi.feature_extraction import FeatureExtractorType
+from ssi.feature_extraction.feature_extraction import FeatureExtractorType
 from ssi.train_model import ModelFactory, train_model_with_feature_extractors
 from ssi.label_extractor import LabelExtractorFactory
 import argparse
 
 
 def main(args):
-    label_extractor = LabelExtractorFactory().get_label_extractor_for_model(args.model, args.coicop_column)
+    label_extractor = LabelExtractorFactory().get_label_extractor_for_model(
+        args.model, args.coicop_column)
     feature_extractors = [FeatureExtractorType(feature_extractor)
                           for feature_extractor in args.feature_extractors] if args.feature_extractors else [FeatureExtractorType.spacy_nl_md]
 

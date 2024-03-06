@@ -1,4 +1,4 @@
-from .feature_extraction import FeatureExtractorType, FeatureExtractorFactory
+from .feature_extraction.feature_extraction import FeatureExtractorType, FeatureExtractorFactory
 from .label_extractor import LabelExtractor
 from .constants import Constants
 from sklearn.pipeline import Pipeline
@@ -40,7 +40,7 @@ class ModelFactory:
                             for model_name, model in all_estimators(type_filter=self.model_type_filter)
                             if not issubclass(model, _BaseVoting) and not issubclass(model, _BaseStacking)
                             }
-            self._models = self._add_extra_models(self._models) 
+            self._models = self._add_extra_models(self._models)
 
         return self._models
 
@@ -49,9 +49,10 @@ class ModelFactory:
             return self.models[model_type](**model_kwargs)
         else:
             raise ValueError("Invalid model type: {model_type}")
-        
+
     def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
-        models["hiclass"] = LocalClassifierPerParentNode #(local_classifier=LogisticRegression(), verbose=1)       
+        # (local_classifier=LogisticRegression(), verbose=1)
+        models["hiclass"] = LocalClassifierPerParentNode
         return models
 
 
@@ -77,9 +78,11 @@ def train_model(dataframe: pd.DataFrame,
                 verbose: bool = False):
     model_factory = ModelFactory()
     if model_type == "hiclass":
-        model = model_factory.create_model(model_type, local_classifier=LogisticRegression(), verbose=1)
+        model = model_factory.create_model(
+            model_type, local_classifier=LogisticRegression(), verbose=1)
     else:
-        model = model_factory.create_model(model_type)  # , n_jobs=number_of_jobs)
+        model = model_factory.create_model(
+            model_type)  # , n_jobs=number_of_jobs)
 
     feature_extractor_factory = FeatureExtractorFactory()
     feature_extractor = feature_extractor_factory.create_feature_extractor(
@@ -105,7 +108,8 @@ def train_model(dataframe: pd.DataFrame,
         for i, coicop_level in enumerate(Constants.COICOP_LEVELS_COLUMNS[::-1]):
             y_true_level = [y[i] for y in y_true]
             y_pred_level = [y[i] for y in y_pred]
-            evaluation_dict.append(evaluate(y_true_level, y_pred_level, f"_{coicop_level}"))
+            evaluation_dict.append(
+                evaluate(y_true_level, y_pred_level, f"_{coicop_level}"))
     else:
         evaluation_dict = evaluate(y_true, y_pred)
 

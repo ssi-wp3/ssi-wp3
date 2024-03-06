@@ -1,4 +1,4 @@
-from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor
+from ssi.feature_extraction.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor
 from ssi.synthetic_data import generate_fake_revenue_data
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from test_utils import get_test_path

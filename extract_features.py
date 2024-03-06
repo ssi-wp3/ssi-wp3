@@ -1,4 +1,4 @@
-from ssi.feature_extraction import FeatureExtractorFactory, FeatureExtractorType
+from ssi.feature_extraction.feature_extraction import FeatureExtractorFactory, FeatureExtractorType
 from ssi.files import get_combined_revenue_files_in_directory, get_supermarket_name
 from pathlib import Path
 from dotenv import load_dotenv
