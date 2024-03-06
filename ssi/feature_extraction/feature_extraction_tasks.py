@@ -126,6 +126,34 @@ class ExtractFeaturesForAllFiles(luigi.WrapperTask):
 
 
 class ExtractAllFeatures(luigi.WrapperTask):
+    """This task extracts features from all combined revenue files in the input_directory using all feature extraction
+    methods in the FeatureExtractorType enum. It searches for all the files in the input directory that start with the 
+    filename_prefix (normally ssi) and contain the string "revenue". For each of these files and each of the feature
+    extraction methods it creates a separate ExtractFeatureForAllFiles task. The output parquet files are written to 
+    the output_directory.
+
+    Parameters
+    ----------
+
+    input_directory : luigi.PathParameter
+        The directory containing the combined revenue files.
+
+    output_directory : luigi.PathParameter
+        The directory where the output parquet files will be written.
+
+    batch_size : luigi.IntParameter
+        The number of rows to process at a time. The default value is 1000.
+
+    source_column : luigi.Parameter
+        The name of the column containing the text to extract features from. The default value is "receipt_text".
+
+    destination_column : luigi.Parameter
+        The name of the column to write the features to. The default value is "features".
+
+    filename_prefix : luigi.Parameter
+        The prefix of the combined revenue files. The default value is "ssi".
+
+    """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     batch_size = luigi.IntParameter(default=1000)
