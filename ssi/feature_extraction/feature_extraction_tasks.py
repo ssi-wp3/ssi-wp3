@@ -27,7 +27,7 @@ class FeatureExtractionTask(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(
-            os.path.join(self.output_directory, f"{self.filename_prefix}_features_{self.feature_extraction_method}.parquet"), format=luigi.format.Nop)
+            os.path.join(self.output_directory, f"{self.filename_prefix}_features_{self.feature_extraction_method.value}.parquet"), format=luigi.format.Nop)
 
     def run(self):
         feature_extractor_factory = FeatureExtractorFactory()
