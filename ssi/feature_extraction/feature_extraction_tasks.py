@@ -40,6 +40,7 @@ class FeatureExtractionTask(luigi.Task):
                     self.source_column,
                     self.destination_column,
                     output_file,
+                    feature_extractor_type=self.feature_extraction_method,
                     batch_size=self.batch_size
                 )
 
