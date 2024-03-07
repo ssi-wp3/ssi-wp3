@@ -31,11 +31,11 @@ def unique_column_values(dataframe: pd.DataFrame,
     return dataframe[value_columns].nunique()
 
 
-def unique_columns_values_per_coicop(dataframe: pd.DataFrame,
-                                     coicop_column: str = "coicop_level_1",
-                                     value_columns: List[str] = [
-                                         "receipt_text", "ean_number"]
-                                     ) -> pd.DataFrame:
+def unique_column_values_per_coicop(dataframe: pd.DataFrame,
+                                    coicop_column: str = "coicop_level_1",
+                                    value_columns: List[str] = [
+                                        "receipt_text", "ean_number"]
+                                    ) -> pd.DataFrame:
     """ This function calculates the number of unique column values for selected columns per COICOP.
 
     Parameters
