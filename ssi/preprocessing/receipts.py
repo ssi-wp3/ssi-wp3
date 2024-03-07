@@ -29,17 +29,6 @@ class AddReceiptTextsWithDate(luigi.Task):
         Both parquet files are stored in a temporary duckdb database. The receipt texts
         are then joined with the combined revenue file on the EAN number and the start date.
         The resulting table is then written to the output file.
-
-        Parameters
-        ----------
-        combined_df : pd.DataFrame
-            The combined revenue dataframe.
-
-        receipt_text_column : str
-            The name of the receipt text column.
-
-        parquet_engine : str
-            The parquet engine to use.
         """
         with tempfile.TemporaryDirectory() as duck_db_temp_dir:
             con = duckdb.connect(f"ssi_{self.store_name}.db",
