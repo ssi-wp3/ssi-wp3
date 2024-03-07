@@ -228,6 +228,7 @@ class AddAllReceiptTexts(luigi.WrapperTask):
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     revenue_file_prefix = luigi.Parameter()
+    receipt_file_prefix = luigi.Parameter()
     receipt_text_column = luigi.Parameter(default="receipt_text")
     ean_name_column = luigi.Parameter(default="ean_name")
     parquet_engine = luigi.Parameter()
@@ -236,7 +237,7 @@ class AddAllReceiptTexts(luigi.WrapperTask):
         for input_file in get_combined_revenue_files_in_folder(self.input_directory, self.revenue_file_prefix):
             store_name = get_store_name_from_combined_filename(input_file)
             receipt_text_filenames = get_receipt_texts_for_store(
-                self.input_directory, store_name)
+                self.input_directory, store_name, self.receipt_file_prefix)
 
             receipt_text_filename = receipt_text_filenames[0] if len(
                 receipt_text_filenames) > 0 else None
