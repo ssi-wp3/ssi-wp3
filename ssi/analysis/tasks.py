@@ -50,12 +50,14 @@ class StoreProductAnalysis(luigi.Task):
                 for function_name in self.product_analysis_functions.keys()]
 
     def run(self):
-        dataframe = pd.read_parquet(
-            self.input(), engine=self.parquet_engine)
-        for function_name, function in self.product_analysis_functions.items():
-            result_df = function(dataframe)
-            result_df.to_parquet(
-                self.output()[function_name], engine=self.parquet_engine)
+        with self.input().open("r") as input_file:
+            dataframe = pd.read_parquet(
+                input_file, engine=self.parquet_engine)
+            for function_name, function in self.product_analysis_functions.items():
+                result_df = function(dataframe)
+                with open(self.output()[function_name].path, "w") as output_file:
+                    result_df.to_parquet(
+                        output_file, engine=self.parquet_engine)
 
 
 class AllStoresAnalysis(luigi.WrapperTask):
