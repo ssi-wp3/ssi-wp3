@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.ensemble._voting import _BaseVoting
 from sklearn.ensemble._stacking import _BaseStacking
 from hiclass import LocalClassifierPerParentNode
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Any
 from enum import Enum
 import pandas as pd
 import numpy as np
