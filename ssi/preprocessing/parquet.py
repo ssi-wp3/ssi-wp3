@@ -66,7 +66,6 @@ def convert_to_parquet(input_filename: str,
 
     has_header = check_header(input_file,
                               delimiter)
-    print(f"Has header: {has_header}")
     # Add header names and types to all but kassa files
     header_types = get_column_types(filename)
     header_names = None if not header_types else [
@@ -74,9 +73,6 @@ def convert_to_parquet(input_filename: str,
 
     skipheader = 1 if has_header else 0
 
-    print(f"Header names: {header_names}")
-    print(f"Header types: {header_types}")
-    print(f"Skip header: {skipheader}")
     df = pd.read_csv(input_filename,
                      sep=delimiter,
                      engine="pyarrow",
@@ -88,7 +84,6 @@ def convert_to_parquet(input_filename: str,
                      parse_dates=True)
 
     columns_to_rename = get_columns_to_rename(filename)
-    print(f"Columns to rename: {columns_to_rename}")
     if columns_to_rename:
         df = df.rename(columns=columns_to_rename)
     df.to_parquet(output_file, engine="pyarrow")
