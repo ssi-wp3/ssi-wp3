@@ -21,7 +21,7 @@ class AddReceiptTextsWithDate(luigi.Task):
                 ParquetFile(input_filename=self.receipt_texts_filename)]
 
     def output(self):
-        return luigi.target.FileSystemTarget(self.output_filename)
+        return luigi.LocalTarget(self.output_filename)
 
     def couple_receipt_file(self):
         """ This method couples the receipt texts with the combined revenue file.
