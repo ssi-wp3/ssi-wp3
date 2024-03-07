@@ -86,7 +86,7 @@ class TrainAdversarialModelTask(luigi.Task):
 class TrainAllAdversarialModels(luigi.Task):
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
-    feature_extractor = luigi.EnumParameter(FeatureExtractorType)
+    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     model_type = luigi.Parameter()
     store_id_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
