@@ -57,7 +57,7 @@ class StoreProductAnalysis(luigi.Task):
                 input_file, engine=self.parquet_engine)
             for function_name, function in self.product_analysis_functions.items():
                 result_df = function(dataframe)
-                with open(self.output()[function_name].path, "w") as output_file:
+                with self.output()[function_name].open("w") as output_file:
                     result_df.to_parquet(
                         output_file, engine=self.parquet_engine)
 
