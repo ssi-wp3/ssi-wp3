@@ -2,6 +2,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
 from typing import Dict, Any
 from .train_model import train_and_evaluate_model
+from ..feature_extraction.feature_extraction import FeatureExtractorType
 import pandas as pd
 import numpy as np
 
@@ -59,6 +60,7 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
                             store2_dataframe: pd.DataFrame,
                             store_id_column: str,
                             receipt_text_column: str,
+                            feature_extractor: FeatureExtractorType,
                             model_type: str,
                             test_size: float = 0.2,
                             number_of_jobs: int = -1,
@@ -105,6 +107,7 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
     pipeline, evaluation_dict = train_and_evaluate_model(unique_dataframe,
                                                          receipt_text_column,
                                                          store_id_column,
+                                                         feature_extractor,
                                                          model_type,
                                                          test_size,
                                                          evaluate_adversarial_pipeline,
