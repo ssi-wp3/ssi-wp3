@@ -12,14 +12,14 @@ class AddReceiptTextsWithDate(luigi.Task):
     revenue file on the EAN number and the start date. The resulting dataframe is written to the output file.
     """
     input_filename = luigi.PathParameter()
-    receipt_texts_filename = luigi.PathParameter()
+    receipt_text_filename = luigi.PathParameter()
     output_filename = luigi.PathParameter()
     store_name = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
 
     def requires(self):
         return [ParquetFile(input_filename=self.input_filename),
-                ParquetFile(input_filename=self.receipt_texts_filename)]
+                ParquetFile(input_filename=self.receipt_text_filename)]
 
     def output(self):
         return luigi.LocalTarget(self.output_filename)
