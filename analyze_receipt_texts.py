@@ -1,4 +1,4 @@
-from ssi.text_analysis import analyze_supermarket_receipts
+from ssi.analysis.text_analysis import analyze_supermarket_receipts
 import argparse
 
 parser = argparse.ArgumentParser(description='Analyze supermarket receipts')

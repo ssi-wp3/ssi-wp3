@@ -1,5 +1,5 @@
 from typing import Optional, List
-from ..text_analysis import series_to_set
+from .text_analysis import series_to_set
 import pandas as pd
 import numpy as np
 
