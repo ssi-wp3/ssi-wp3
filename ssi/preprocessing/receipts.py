@@ -15,6 +15,7 @@ class AddReceiptTextsWithDate(luigi.Task):
     receipt_texts_filename = luigi.PathParameter()
     output_filename = luigi.PathParameter()
     store_name = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
 
     def requires(self):
         return [ParquetFile(input_filename=self.input_filename),
@@ -262,5 +263,6 @@ class AddAllReceiptTexts(luigi.WrapperTask):
                 yield AddReceiptTextsWithDate(input_filename=input_filename,
                                               receipt_text_filename=receipt_text_filename,
                                               output_filename=output_filename,
-                                              store_name=store_name
+                                              store_name=store_name,
+                                              receipt_text_column=self.receipt_text_column
                                               )
