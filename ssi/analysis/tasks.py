@@ -56,9 +56,6 @@ class StoreProductAnalysis(luigi.Task):
             result_df.to_parquet(
                 self.output()[function_name], engine=self.parquet_engine)
 
-    # def output(self):
-    #    return luigi.LocalTarget(os.path.join(self.output_directory, "product_analysis_results.csv"), format=luigi.format.Nop)
-
 
 class AllStoresAnalysis(luigi.WrapperTask):
     """ This task analyses the product inventory and dynamics for all stores in a certain
