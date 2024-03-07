@@ -15,8 +15,10 @@ class AddReceiptTextsWithDate(luigi.Task):
     receipt_filename = luigi.PathParameter()
     output_filename = luigi.PathParameter()
     store_name = luigi.Parameter()
-    receipt_text_column = luigi.Parameter(default="receipt_text")
-    parquet_engine = luigi.Parameter()
+
+    def requires(self):
+        return [ParquetFile(input_filename=self.input_filename),
+                ParquetFile(input_filename=self.receipt_texts_filename)]
 
     def output(self):
         return luigi.target.FileSystemTarget(self.output_filename)
@@ -73,77 +75,37 @@ class AddReceiptTextsWithDate(luigi.Task):
         self.couple_receipt_file()
 
 
-class AddReceiptTexts(luigi.Task):
-    """ This task adds the receipt texts to the combined revenue file.
+class AddReceiptTextFromColumn(luigi.Task):
+    """This tasks adds the receipt texts from a column that is already part of the dataframe but is called
+    differently. This is the case for the Lidl combined revenue files. The EAN name is used as the receipt text.
+
 
     Parameters
     ----------
-    input_filename : luigi.Parameter
+    input_filename : luigi.PathParameter
         The input filename of the combined revenue file.
 
-    output_filename : luigi.Parameter
+    output_filename : luigi.PathParameter
         The output filename for the combined revenue file with receipt texts.
 
-    receipt_texts_filename : luigi.Parameter
-        The filename of the receipt texts file.
+    source_column : luigi.Parameter
+        The name of the source column, i.e the EAN name column for Lidl files.
+
+    destination_column : luigi.Parameter
+        The name of the destination column, i.e. the receipt text column.
 
     """
     input_filename = luigi.Parameter()
     output_filename = luigi.Parameter()
-    receipt_texts_filename = luigi.Parameter()
-    store_name = luigi.Parameter()
-    receipt_text_column = luigi.Parameter(default="receipt_text")
-    ean_name_column = luigi.Parameter(default="ean_name")
+    source_column = luigi.Parameter(default="ean_name")
+    destination_column = luigi.Parameter(default="receipt_text")
     parquet_engine = luigi.Parameter()
 
     def requires(self):
-        if not self.receipt_texts_filename:
-            return [ParquetFile(input_filename=self.input_filename)]
-
-        return [ParquetFile(input_filename=self.input_filename),
-                ParquetFile(input_filename=self.receipt_texts_filename)]
+        return [ParquetFile(input_filename=self.input_filename)]
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
-
-    def run(self):
-        with self.input()[0].open("r") as input_file:
-            combined_df = pd.read_parquet(
-                input_file, engine=self.parquet_engine)
-
-            if self.store_name.lower() == "lidl":
-                self.add_receipt_text_from_revenue_file(
-                    combined_df, self.receipt_text_column, self.ean_name_column)
-            elif self.store_name.lower() == "ah":
-                self.couple_ah_receipt_file(
-                    combined_df, self.parquet_engine)
-            else:
-                self.couple_receipt_file(
-                    combined_df, self.receipt_text_column, self.parquet_engine)
-
-    def couple_ah_receipt_file(self,
-                               combined_df: pd.DataFrame,
-                               parquet_engine: str):
-        """ This method couples the receipt texts with the combined revenue file for AH.
-
-        Parameters
-        ----------
-        combined_df : pd.DataFrame
-            The combined revenue dataframe.
-
-        parquet_engine : str
-            The parquet engine to use to write the data to disk.
-        """
-        with self.input()[1].open("r") as receipt_texts_file:
-            receipt_texts = pd.read_parquet(
-                receipt_texts_file, engine=parquet_engine)
-
-            receipt_revenue_df = combined_df.merge(
-                receipt_texts, on=["store_id", "esba_number", "isba_number", "ean_number"])
-
-            with self.output().open("w") as output_file:
-                receipt_revenue_df.to_parquet(
-                    output_file, engine=parquet_engine)
 
     def add_receipt_text_from_revenue_file(self,
                                            combined_df: pd.DataFrame,
@@ -170,6 +132,74 @@ class AddReceiptTexts(luigi.Task):
         with self.output().open("w") as output_file:
             combined_df.to_parquet(
                 output_file, engine=self.parquet_engine)
+
+    def run(self):
+        with self.input()[0].open("r") as input_file:
+            combined_df = pd.read_parquet(
+                input_file, engine=self.parquet_engine)
+
+            self.add_receipt_text_from_revenue_file(
+                combined_df, self.destination_column, self.source_column)
+
+
+class AddReceiptTexts(luigi.Task):
+    """ This task adds the receipt texts to the combined revenue file.
+
+    Parameters
+    ----------
+    input_filename : luigi.Parameter
+        The input filename of the combined revenue file.
+
+    output_filename : luigi.Parameter
+        The output filename for the combined revenue file with receipt texts.
+
+    receipt_texts_filename : luigi.Parameter
+        The filename of the receipt texts file.
+
+    """
+    input_filename = luigi.Parameter()
+    output_filename = luigi.Parameter()
+    receipt_texts_filename = luigi.Parameter()
+    parquet_engine = luigi.Parameter()
+
+    def requires(self):
+        return [ParquetFile(input_filename=self.input_filename),
+                ParquetFile(input_filename=self.receipt_texts_filename)]
+
+    def output(self):
+        return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
+
+    def run(self):
+        with self.input()[0].open("r") as input_file:
+            combined_df = pd.read_parquet(
+                input_file, engine=self.parquet_engine)
+
+            self.couple_ah_receipt_file(
+                combined_df, self.parquet_engine)
+
+    def couple_ah_receipt_file(self,
+                               combined_df: pd.DataFrame,
+                               parquet_engine: str):
+        """ This method couples the receipt texts with the combined revenue file for AH.
+
+        Parameters
+        ----------
+        combined_df : pd.DataFrame
+            The combined revenue dataframe.
+
+        parquet_engine : str
+            The parquet engine to use to write the data to disk.
+        """
+        with self.input()[1].open("r") as receipt_texts_file:
+            receipt_texts = pd.read_parquet(
+                receipt_texts_file, engine=parquet_engine)
+
+            receipt_revenue_df = combined_df.merge(
+                receipt_texts, on=["store_id", "esba_number", "isba_number", "ean_number"])
+
+            with self.output().open("w") as output_file:
+                receipt_revenue_df.to_parquet(
+                    output_file, engine=parquet_engine)
 
 
 class AddAllReceiptTexts(luigi.WrapperTask):
@@ -213,11 +243,23 @@ class AddAllReceiptTexts(luigi.WrapperTask):
 
             output_filename = os.path.join(
                 self.output_directory, os.path.basename(input_file))
-            yield AddReceiptTexts(input_filename=input_file,
-                                  output_filename=output_filename,
-                                  receipt_texts_filename=receipt_text_filename,
-                                  store_name=store_name,
-                                  receipt_text_column=self.receipt_text_column,
-                                  ean_name_column=self.ean_name_column,
-                                  parquet_engine=self.parquet_engine
-                                  )
+
+            if store_name.lower() == "lidl":
+                yield AddReceiptTextFromColumn(input_filename=input_file,
+                                               output_filename=output_filename,
+                                               source_column=self.ean_name_column,
+                                               destination_column=self.receipt_text_column,
+                                               parquet_engine=self.parquet_engine
+                                               )
+            elif store_name.lower() == "ah":
+                yield AddReceiptTexts(input_filename=input_file,
+                                      output_filename=output_filename,
+                                      receipt_texts_filename=receipt_text_filename,
+                                      parquet_engine=self.parquet_engine
+                                      )
+            else:
+                yield AddReceiptTextsWithDate(input_filename=input_file,
+                                              receipt_filename=receipt_text_filename,
+                                              output_filename=output_filename,
+                                              store_name=store_name
+                                              )
