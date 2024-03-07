@@ -60,15 +60,15 @@ class AddReceiptTextsWithDate(luigi.Task):
                     from read_parquet('{self.input_filename}');
                     """)
             con.sql(
-                f"create index {revenue_table}_ean_idx on {revenue_table}(ean_number)")
+                f"create index {revenue_table}_rep_idx on {revenue_table}(rep_id)")
             con.sql(
-                f"create index {receipt_text_table}_ean_idx on {receipt_text_table}(ean_number)")
+                f"create index {receipt_text_table}_rep_idx on {receipt_text_table}(rep_id)")
 
             with self.output().temporary_path() as output_path:
                 receipt_revenue_table = f"{self.store_name}_revenue_receipts"
                 con.sql(f"""create table {receipt_revenue_table} as
                         select pr.*, pc.{self.receipt_text_column} from {revenue_table} as pr 
-                        inner join {receipt_text_table} as pc on pr.ean_number = pc.ean_number 
+                        inner join {receipt_text_table} as pc on pr.rep_id = pc.rep_id 
                         where pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
                     """)
                 con.sql(
