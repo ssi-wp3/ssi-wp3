@@ -1,6 +1,7 @@
 from typing import Dict, Callable
 from .files import get_combined_revenue_files_in_directory
 from .products import *
+from ..preprocessing.files import get_store_name_from_combined_filename
 import pandas as pd
 import pathlib
 import luigi
@@ -77,6 +78,21 @@ class AllStoresAnalysis(luigi.WrapperTask):
     output_directory = luigi.PathParameter()
     project_prefix = luigi.Parameter(default="ssi")
 
+    parquet_engine = luigi.Parameter(default="pyarrow")
+    period_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    product_id_column = luigi.Parameter()
+    coicop_column = luigi.Parameter()
+
     def requires(self):
-        return [StoreProductAnalysis(filename, self.output_directory)
-                for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)]
+        return [StoreProductAnalysis(
+            input_filename=filename,
+            output_directory=self.output_directory,
+            parquet_engine=self.parquet_engine,
+            store_name=get_store_name_from_combined_filename(filename),
+            period_column=self.period_column,
+            receipt_text_column=self.receipt_text_column,
+            product_id_column=self.product_id_column,
+            coicop_column=self.coicop_column
+        )
+            for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)]
