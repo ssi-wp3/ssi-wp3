@@ -28,7 +28,7 @@ def unique_column_values(dataframe: pd.DataFrame,
     pd.DataFrame
         A dataframe containing the number of unique column values for the selected columns.
     """
-    return dataframe[value_columns].nunique()
+    return dataframe[value_columns].nunique().to_frame().T
 
 
 def unique_column_values_per_coicop(dataframe: pd.DataFrame,
