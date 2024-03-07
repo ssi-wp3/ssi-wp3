@@ -33,7 +33,7 @@ class TrainAdversarialModelTask(luigi.Task):
     store1_filename = luigi.PathParameter()
     store2_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
-    feature_extractor = luigi.EnumParameter(FeatureExtractorType)
+    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     model_type = luigi.Parameter()
 
     store_id_column = luigi.Parameter()
