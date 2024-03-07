@@ -1,5 +1,5 @@
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
 from typing import Dict, Any
 from .train_model import train_and_evaluate_model
 import pandas as pd
@@ -120,4 +120,8 @@ def evaluate_adversarial_pipeline(y_true: np.array,
     """
     return {
         "roc_auc": roc_auc_score(y_true, y_pred),
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred),
+        "recall": recall_score(y_true, y_pred),
+        "f1": f1_score(y_true, y_pred)
     }
