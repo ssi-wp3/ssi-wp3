@@ -47,7 +47,7 @@ class AddReceiptTextsWithDate(luigi.Task):
                                      "temp_directory": duck_db_temp_dir
                                  })
             con.sql(
-                f"create table {self.store_name}_receipts as select * from read_parquet('{self.receipt_filename}')")
+                f"create table {self.store_name}_receipts as select * from read_parquet('{self.receipt_text_filename}')")
             con.sql(f"""drop table if exists {self.store_name}_revenue;
                     create table {self.store_name}_revenue as select 
                         date_trunc('day', strptime(year_month, '%Y%m')) as start_date, 
