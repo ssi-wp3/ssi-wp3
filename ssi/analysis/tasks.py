@@ -12,7 +12,7 @@ class StoreFile(luigi.ExternalTask):
     input_filename = luigi.PathParameter()
 
     def output(self):
-        return luigi.LocalTarget(self.input_filename)
+        return luigi.LocalTarget(self.input_filename, format=luigi.format.Nop)
 
 
 class StoreProductAnalysis(luigi.Task):
