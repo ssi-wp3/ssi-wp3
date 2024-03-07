@@ -100,6 +100,7 @@ def preprocess_data(dataframe: pd.DataFrame,
         dataframe, month_year_column="year_month")
     dataframe = add_coicop_levels(dataframe, coicop_column=coicop_column)
 
+    # TODO are the counts used anywhere?
     split_coicop_df = get_category_counts(
         dataframe, coicop_column=coicop_column, product_id_column=product_id_column)
     dataframe = dataframe.merge(
