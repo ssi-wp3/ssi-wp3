@@ -103,6 +103,8 @@ def train_and_evaluate_model(dataframe: pd.DataFrame,
                              feature_extractor: FeatureExtractorType,
                              model_type: str,
                              test_size: float,
+                             evaluation_function: Callable[[
+                                 np.array, np.array], Dict[str, object]] = evaluate,
                              number_of_jobs: int = -1,
                              verbose: bool = False):
     train_df, test_df = train_test_split(
@@ -118,18 +120,19 @@ def train_and_evaluate_model(dataframe: pd.DataFrame,
     y_true = test_df[label_column]
     y_pred = pipeline.predict(test_df[receipt_text_column])
 
-    if model_type == "hiclass":
-        # TODO not sure whether this is still working after changes to how we handle labels
-        evaluation_dict = []
-        for i, coicop_level in enumerate(Constants.COICOP_LEVELS_COLUMNS[::-1]):
-            y_true_level = [y[i] for y in y_true]
-            y_pred_level = [y[i] for y in y_pred]
-            evaluation_dict.append(
-                evaluate(y_true_level, y_pred_level, f"_{coicop_level}"))
-    else:
-        evaluation_dict = evaluate(y_true, y_pred)
+    evaluation_dict = evaluation_function(y_true, y_pred)
 
     return pipeline, evaluation_dict
+
+
+def evaluate_hiclass(y_true: np.array, y_pred: np.array) -> Dict[str, Any]:
+    evaluation_dict = []
+    for i, coicop_level in enumerate(Constants.COICOP_LEVELS_COLUMNS[::-1]):
+        y_true_level = [y[i] for y in y_true]
+        y_pred_level = [y[i] for y in y_pred]
+        evaluation_dict.append(
+            evaluate(y_true_level, y_pred_level, f"_{coicop_level}"))
+    return evaluation_dict
 
 
 def train_model_with_feature_extractors(input_filename: str,
@@ -149,11 +152,13 @@ def train_model_with_feature_extractors(input_filename: str,
         dataframe[coicop_column])
 
     progress_bar = tqdm.tqdm(feature_extractors)
+
+    evaluation_function = evaluate_hiclass if model_type == "hiclass" else evaluate
     for feature_extractor in progress_bar:
         progress_bar.set_description(
             f"Training model {model_type} with {feature_extractor}")
         trained_pipeline, evaluate_dict = train_and_evaluate_model(dataframe, receipt_text_column,
-                                                                   extracted_label_column, feature_extractor, model_type, test_size, number_of_jobs, verbose)
+                                                                   extracted_label_column, feature_extractor, model_type, test_size, evaluation_function, number_of_jobs, verbose)
 
         model_path = os.path.join(
             output_path, f"{model_type.lower()}_{feature_extractor}.pipeline")

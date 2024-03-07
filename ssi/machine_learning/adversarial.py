@@ -1,5 +1,9 @@
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import roc_auc_score
+from typing import Dict, Any
+from .train_model import train_model
 import pandas as pd
-from .train_model import train_and_evaluate_model
+import numpy as np
 
 
 def create_combined_dataframe(store1_dataframe: pd.DataFrame,
@@ -55,11 +59,11 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
                             store2_dataframe: pd.DataFrame,
                             store_id_column: str,
                             receipt_text_column: str,
-                            model,
+                            model_type: str,
                             test_size: float = 0.2,
                             number_of_jobs: int = -1,
                             verbose: bool = False
-                            ):
+                            ) -> Pipeline:
     """Train an adversarial model to predict the store id based on the receipt text column.
 
     Parameters
@@ -76,7 +80,7 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
     receipt_text_column : str
         The column name containing the receipt text
 
-    model : object
+    model_type : str
         The model to use
 
     test_size : float, optional
@@ -97,6 +101,21 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
         store1_dataframe, store2_dataframe, store_id_column, receipt_text_column)
     unique_dataframe = filter_unique_combinations(
         combined_dataframe, store_id_column, receipt_text_column)
-    pipeline, evaluation = train_and_evaluate_model(unique_dataframe, receipt_text_column,
-                                                    store_id_column, model, test_size, number_of_jobs, verbose)
-    return pipeline, evaluation
+
+    pipeline = train_model(unique_dataframe,
+                           model_type,
+                           receipt_text_column,
+                           store_id_column,
+                           verbose)
+    return pipeline
+
+
+def evaluate_adversarial_pipeline(y_true: np.array,
+                                  y_pred: np.array,
+                                  ) -> Dict[str, Any]:
+    """
+    Evaluate the adversarial pipeline.
+    """
+    return {
+        "roc_auc": roc_auc_score(y_true, y_pred),
+    }
