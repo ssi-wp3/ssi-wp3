@@ -1,6 +1,6 @@
-from .feature_extraction.feature_extraction import FeatureExtractorType, FeatureExtractorFactory
-from .label_extractor import LabelExtractor
-from .constants import Constants
+from ..feature_extraction.feature_extraction import FeatureExtractorType, FeatureExtractorFactory
+from ..label_extractor import LabelExtractor
+from ..constants import Constants
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.discovery import all_estimators
@@ -67,15 +67,13 @@ def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, 
     }
 
 
-def train_model(dataframe: pd.DataFrame,
+def train_model(train_dataframe: pd.DataFrame,
+                model_type: str,
                 receipt_text_column: str,
-                coicop_column: str,
                 label_extractor: LabelExtractor,
                 feature_extractor: FeatureExtractorType,
-                model_type: str,
-                test_size: float,
-                number_of_jobs: int = -1,
-                verbose: bool = False):
+                verbose: bool = False
+                ) -> Pipeline:
     model_factory = ModelFactory()
     if model_type == "hiclass":
         model = model_factory.create_model(
@@ -93,12 +91,27 @@ def train_model(dataframe: pd.DataFrame,
         ('classifier', model)
     ], verbose=verbose)
 
+    y_train = label_extractor.get_labels(train_dataframe)
+    pipeline.fit(train_dataframe[receipt_text_column],
+                 y_train)
+
+    return pipeline
+
+
+def train_and_evaluate_model(dataframe: pd.DataFrame,
+                             receipt_text_column: str,
+                             coicop_column: str,
+                             label_extractor: LabelExtractor,
+                             feature_extractor: FeatureExtractorType,
+                             model_type: str,
+                             test_size: float,
+                             number_of_jobs: int = -1,
+                             verbose: bool = False):
     train_df, test_df = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[coicop_column])
 
-    y_train = label_extractor.get_labels(train_df)
-    pipeline.fit(train_df[receipt_text_column],
-                 y_train)
+    pipeline = train_model(train_df, model_type, receipt_text_column,
+                           label_extractor, feature_extractor, verbose)
 
     y_true = label_extractor.get_labels(test_df)
     y_pred = pipeline.predict(test_df[receipt_text_column])
@@ -133,8 +146,8 @@ def train_model_with_feature_extractors(input_filename: str,
     for feature_extractor in progress_bar:
         progress_bar.set_description(
             f"Training model {model_type} with {feature_extractor}")
-        trained_pipeline, evaluate_dict = train_model(dataframe, receipt_text_column,
-                                                      coicop_column, label_extractor, feature_extractor, model_type, test_size, number_of_jobs, verbose)
+        trained_pipeline, evaluate_dict = train_and_evaluate_model(dataframe, receipt_text_column,
+                                                                   coicop_column, label_extractor, feature_extractor, model_type, test_size, number_of_jobs, verbose)
 
         model_path = os.path.join(
             output_path, f"{model_type.lower()}_{feature_extractor}.pipeline")

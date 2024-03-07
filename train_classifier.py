@@ -1,5 +1,5 @@
 from ssi.feature_extraction.feature_extraction import FeatureExtractorType
-from ssi.train_model import ModelFactory, train_model_with_feature_extractors
+from ssi.machine_learning.train_model import ModelFactory, train_model_with_feature_extractors
 from ssi.label_extractor import LabelExtractorFactory
 import argparse
 
