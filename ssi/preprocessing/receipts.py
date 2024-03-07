@@ -12,7 +12,7 @@ class AddReceiptTextsWithDate(luigi.Task):
     revenue file on the EAN number and the start date. The resulting dataframe is written to the output file.
     """
     input_filename = luigi.PathParameter()
-    receipt_filename = luigi.PathParameter()
+    receipt_texts_filename = luigi.PathParameter()
     output_filename = luigi.PathParameter()
     store_name = luigi.Parameter()
 
@@ -260,7 +260,7 @@ class AddAllReceiptTexts(luigi.WrapperTask):
                                       )
             elif receipt_text_filename is not None:
                 yield AddReceiptTextsWithDate(input_filename=input_filename,
-                                              receipt_filename=receipt_text_filename,
+                                              receipt_text_filename=receipt_text_filename,
                                               output_filename=output_filename,
                                               store_name=store_name
                                               )
