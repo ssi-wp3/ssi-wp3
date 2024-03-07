@@ -98,8 +98,6 @@ def preprocess_data(dataframe: pd.DataFrame,
     dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
     dataframe = split_month_year_column(
         dataframe, month_year_column="year_month")
-    dataframe = add_unique_product_id(
-        dataframe, column_name=product_id_column, product_description_column=product_description_column)
     dataframe = add_coicop_levels(dataframe, coicop_column=coicop_column)
 
     split_coicop_df = get_category_counts(
