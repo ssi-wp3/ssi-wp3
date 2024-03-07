@@ -46,31 +46,33 @@ class AddReceiptTextsWithDate(luigi.Task):
                                  config={
                                      "temp_directory": duck_db_temp_dir
                                  })
+
+            receipt_text_table = f"{self.store_name}_receipts"
+            revenue_table = f"{self.store_name}_revenue"
             con.sql(
-                f"create table {self.store_name}_receipts as select * from read_parquet('{self.receipt_text_filename}')")
-            con.sql(f"""drop table if exists {self.store_name}_revenue;
-                    create table {self.store_name}_revenue as select 
+                f"""drop table if exists {receipt_text_table};
+                    create table {receipt_text_table} as select * from read_parquet('{self.receipt_text_filename}')
+                    """)
+            con.sql(f"""drop table if exists {revenue_table};
+                    create table {revenue_table} as select 
                         date_trunc('day', strptime(year_month, '%Y%m')) as start_date, 
                         last_day(strptime(year_month, '%Y%m')) as end_date, * 
                     from read_parquet('{self.input_filename}');
                     """)
             con.sql(
-                f"create index {self.store_name}_revenue_ean_idx on {self.store_name}_revenue (ean_number)")
-            con.sql(f"""drop table if exists {self.store_name}_receipts;
-                    create table {self.store_name}_receipts as select * from receipt_texts
-                    """)
+                f"create index {revenue_table}_ean_idx on {revenue_table}(ean_number)")
             con.sql(
-                f"create index {self.store_name}_receipts_ean_idx on {self.store_name}_receipts (ean_number)")
+                f"create index {receipt_text_table}_ean_idx on {receipt_text_table}(ean_number)")
 
             with self.output().temporary_path() as output_path:
                 receipt_revenue_table = f"{self.store_name}_revenue_receipts"
                 con.sql(f"""create table {receipt_revenue_table} as
-                        select pr.*, pc.{self.receipt_text_column} from {self.store_name}_revenue as pr 
-                        inner join {self.store_name}_receipts as pc on pr.ean_number = pc.ean_number 
+                        select pr.*, pc.{self.receipt_text_column} from {revenue_table} as pr 
+                        inner join {receipt_text_table} as pc on pr.ean_number = pc.ean_number 
                         where pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
                     """)
                 con.sql(
-                    f"copy {receipt_revenue_table} to '{self.output_filename}' with (format 'parquet')")
+                    f"copy {receipt_revenue_table} to '{output_path}' with (format 'parquet')")
 
     def run(self):
         self.couple_receipt_file()
