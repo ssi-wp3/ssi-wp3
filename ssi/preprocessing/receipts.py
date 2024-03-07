@@ -7,6 +7,72 @@ import duckdb
 import os
 
 
+class AddReceiptTextsWithDate(luigi.Task):
+    """ This task adds the receipt texts to the combined revenue file. The receipt texts are coupled with the combined
+    revenue file on the EAN number and the start date. The resulting dataframe is written to the output file.
+    """
+    input_filename = luigi.PathParameter()
+    receipt_filename = luigi.PathParameter()
+    output_filename = luigi.PathParameter()
+    store_name = luigi.Parameter()
+    receipt_text_column = luigi.Parameter(default="receipt_text")
+    parquet_engine = luigi.Parameter()
+
+    def output(self):
+        return luigi.target.FileSystemTarget(self.output_filename)
+
+    def couple_receipt_file(self):
+        """ This method couples the receipt texts with the combined revenue file.
+        Both parquet files are stored in a temporary duckdb database. The receipt texts
+        are then joined with the combined revenue file on the EAN number and the start date.
+        The resulting table is then written to the output file.
+
+        Parameters
+        ----------
+        combined_df : pd.DataFrame
+            The combined revenue dataframe.
+
+        receipt_text_column : str
+            The name of the receipt text column.
+
+        parquet_engine : str
+            The parquet engine to use.
+        """
+        with tempfile.TemporaryDirectory() as duck_db_temp_dir:
+            con = duckdb.connect(f"ssi_{self.store_name}.db",
+                                 config={
+                                     "temp_directory": duck_db_temp_dir
+                                 })
+            con.sql(
+                f"create table {self.store_name}_receipts as select * from read_parquet('{self.receipt_filename}')")
+            con.sql(f"""drop table if exists {self.store_name}_revenue;
+                    create table {self.store_name}_revenue as select 
+                        date_trunc('day', strptime(year_month, '%Y%m')) as start_date, 
+                        last_day(strptime(year_month, '%Y%m')) as end_date, * 
+                    from read_parquet('{self.input_filename}');
+                    """)
+            con.sql(
+                f"create index {self.store_name}_revenue_ean_idx on {self.store_name}_revenue (ean_number)")
+            con.sql(f"""drop table if exists {self.store_name}_receipts;
+                    create table {self.store_name}_receipts as select * from receipt_texts
+                    """)
+            con.sql(
+                f"create index {self.store_name}_receipts_ean_idx on {self.store_name}_receipts (ean_number)")
+
+            with self.output().temporary_path() as output_path:
+                receipt_revenue_table = f"{self.store_name}_revenue_receipts"
+                con.sql(f"""create table {receipt_revenue_table} as
+                        select pr.*, pc.{self.receipt_text_column} from {self.store_name}_revenue as pr 
+                        inner join {self.store_name}_receipts as pc on pr.ean_number = pc.ean_number 
+                        where pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
+                    """)
+                con.sql(
+                    f"copy {receipt_revenue_table} to '{self.output_filename}' with (format 'parquet')")
+
+    def run(self):
+        self.couple_receipt_file()
+
+
 class AddReceiptTexts(luigi.Task):
     """ This task adds the receipt texts to the combined revenue file.
 
@@ -74,58 +140,6 @@ class AddReceiptTexts(luigi.Task):
 
             receipt_revenue_df = combined_df.merge(
                 receipt_texts, on=["store_id", "esba_number", "isba_number", "ean_number"])
-
-            with self.output().open("w") as output_file:
-                receipt_revenue_df.to_parquet(
-                    output_file, engine=parquet_engine)
-
-    def couple_receipt_file(self, combined_df: pd.DataFrame,
-                            receipt_text_column: str,
-                            parquet_engine: str
-                            ):
-        """ This method couples the receipt texts with the combined revenue file.
-        Both parquet files are stored in a temporary duckdb database. The receipt texts
-        are then joined with the combined revenue file on the EAN number and the start date.
-        The resulting table is then written to the output file.
-
-        Parameters
-        ----------
-        combined_df : pd.DataFrame
-            The combined revenue dataframe.
-
-        receipt_text_column : str
-            The name of the receipt text column.
-
-        parquet_engine : str
-            The parquet engine to use.
-        """
-        with self.input()[1].open("r") as receipt_texts_file:
-            receipt_texts = pd.read_parquet(
-                receipt_texts_file, engine=parquet_engine)
-            with tempfile.TemporaryDirectory() as duck_db_temp_dir:
-                con = duckdb.connect(f"ssi_{self.store_name}.db",
-                                     config={
-                                         "temp_directory": duck_db_temp_dir
-                                     })
-                con.sql(f"""drop table if exists {self.store_name}_revenue;
-                        create table {self.store_name}_revenue as select 
-                            date_trunc('day', strptime(year_month, '%Y%m')) as start_date, 
-                            last_day(strptime(year_month, '%Y%m')) as end_date, * 
-                        from combined_df;
-                        """)
-                con.sql(
-                    f"create index {self.store_name}_revenue_ean_idx on {self.store_name}_revenue (ean_number)")
-                con.sql(f"""drop table if exists {self.store_name}_receipts;
-                        create table {self.store_name}_receipts as select * from receipt_texts
-                        """)
-                con.sql(
-                    f"create index {self.store_name}_receipts_ean_idx on {self.store_name}_receipts (ean_number)")
-
-                # TODO rename Dutch column name Datum_vanaf to start_date -> test whether this has been done!
-                receipt_revenue_df = con.sql(f"""select pr.*, pc.{receipt_text_column} from {self.store_name}_revenue as pr 
-                        inner join {self.store_name}_receipts as pc on pr.ean_number = pc.ean_number 
-                        where pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
-                        """).df()
 
             with self.output().open("w") as output_file:
                 receipt_revenue_df.to_parquet(
