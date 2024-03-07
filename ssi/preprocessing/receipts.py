@@ -234,8 +234,8 @@ class AddAllReceiptTexts(luigi.WrapperTask):
     parquet_engine = luigi.Parameter()
 
     def requires(self):
-        for input_file in get_combined_revenue_files_in_folder(self.input_directory, self.revenue_file_prefix):
-            store_name = get_store_name_from_combined_filename(input_file)
+        for input_filename in get_combined_revenue_files_in_folder(self.input_directory, self.revenue_file_prefix):
+            store_name = get_store_name_from_combined_filename(input_filename)
             receipt_text_filenames = get_receipt_texts_for_store(
                 self.input_directory, store_name, self.receipt_file_prefix)
 
@@ -243,23 +243,23 @@ class AddAllReceiptTexts(luigi.WrapperTask):
                 receipt_text_filenames) > 0 else None
 
             output_filename = os.path.join(
-                self.output_directory, os.path.basename(input_file))
+                self.output_directory, os.path.basename(input_filename))
 
             if store_name.lower() == "lidl":
-                yield AddReceiptTextFromColumn(input_filename=input_file,
+                yield AddReceiptTextFromColumn(input_filename=input_filename,
                                                output_filename=output_filename,
                                                source_column=self.ean_name_column,
                                                destination_column=self.receipt_text_column,
                                                parquet_engine=self.parquet_engine
                                                )
             elif store_name.lower() == "ah":
-                yield AddReceiptTexts(input_filename=input_file,
+                yield AddReceiptTexts(input_filename=input_filename,
                                       output_filename=output_filename,
                                       receipt_texts_filename=receipt_text_filename,
                                       parquet_engine=self.parquet_engine
                                       )
-            else:
-                yield AddReceiptTextsWithDate(input_filename=input_file,
+            elif receipt_text_filename is not None:
+                yield AddReceiptTextsWithDate(input_filename=input_filename,
                                               receipt_filename=receipt_text_filename,
                                               output_filename=output_filename,
                                               store_name=store_name
