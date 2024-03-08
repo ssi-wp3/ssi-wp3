@@ -380,6 +380,8 @@ def compare_products_per_period(dataframe: pd.DataFrame,
         texts_per_period_df[f"number_{column}_removed"] = texts_per_period_df[f"{column}_removed"].apply(
             number_of_products)
 
+    return texts_per_period_df
+
 
 def products_per_period_coicop_level(dataframe: pd.DataFrame,
                                      period_column: str = "year_month",
