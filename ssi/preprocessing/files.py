@@ -38,27 +38,27 @@ class PreprocessingDirectories:
 
     @property
     def raw_directory(self) -> str:
-        return os.path.join(self.base_directory, "00 - raw")
+        return os.path.join(self.base_directory, "00-raw")
 
     @property
     def cleaned_directory(self) -> str:
-        return os.path.join(self.base_directory, "01 - cleaned")
+        return os.path.join(self.base_directory, "01-cleaned")
 
     @property
     def parquet_directory(self) -> str:
-        return os.path.join(self.base_directory, "02 - parquet")
+        return os.path.join(self.base_directory, "02-parquet")
 
     @property
     def combined_directory(self) -> str:
-        return os.path.join(self.base_directory, "03 - combined")
+        return os.path.join(self.base_directory, "03-combined")
 
     @property
     def preprocessed_directory(self) -> str:
-        return os.path.join(self.base_directory, "04 - preprocessed")
+        return os.path.join(self.base_directory, "04-preprocessed")
 
     @property
     def final_directory(self) -> str:
-        return os.path.join(self.base_directory, "05 - final")
+        return os.path.join(self.base_directory, "05-final")
 
     @property
     def directories(self) -> List[str]:
