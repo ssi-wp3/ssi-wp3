@@ -91,6 +91,7 @@ def preprocess_data(dataframe: pd.DataFrame,
                     product_description_column: str,
                     column_mapping: Dict[str, str],
                     ) -> pd.DataFrame:
+    # TODO Lidl file is losing records!
     dataframe = filter_columns(dataframe, columns)
     dataframe = rename_columns(
         dataframe, column_mapping)
