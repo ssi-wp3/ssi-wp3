@@ -88,7 +88,6 @@ def rename_columns(dataframe: pd.DataFrame, column_mapping: dict) -> pd.DataFram
 def preprocess_data(dataframe: pd.DataFrame,
                     columns: List[str],
                     coicop_column: str,
-                    product_id_column: str,
                     product_description_column: str,
                     column_mapping: Dict[str, str],
                     ) -> pd.DataFrame:
@@ -102,7 +101,7 @@ def preprocess_data(dataframe: pd.DataFrame,
 
     # TODO are the counts used anywhere?
     split_coicop_df = get_category_counts(
-        dataframe, coicop_column=coicop_column, product_id_column=product_id_column)
+        dataframe, coicop_column=coicop_column, product_id_column=product_description_column)
     dataframe = dataframe.merge(
         split_coicop_df, on=coicop_column, suffixes=['', '_y'])
     return dataframe
@@ -133,7 +132,6 @@ def save_combined_revenue_files(data_directory: str,
                                 coicop_level_columns: List[str],
                                 column_mapping: Dict[str, str],
                                 coicop_column: str = "coicop_number",
-                                product_id_column: str = "product_id",
                                 product_description_column: str = "ean_name",
                                 filename_prefix: str = "Omzet",
                                 engine: str = "pyarrow"):
