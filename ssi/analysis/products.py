@@ -161,7 +161,7 @@ def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
     """
     texts_per_ean_histogram = texts_per_ean_histogram(
         dataframe, receipt_text_column, product_id_column)
-    return np.log(texts_per_ean_histogram)
+    return np.log(texts_per_ean_histogram).to_frame().T
 
 
 def add_lagged_columns(grouped_texts_eans_per_month: pd.DataFrame,
