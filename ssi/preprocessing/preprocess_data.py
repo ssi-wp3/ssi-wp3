@@ -147,13 +147,12 @@ def save_combined_revenue_files(data_directory: str,
         combined_df,
         columns=selected_columns,
         coicop_column=coicop_column,
-        product_id_column=product_id_column,
         product_description_column=product_description_column,
         column_mapping=column_mapping
     )
 
     data_logger.log_after_preprocessing(
-        combined_df, coicop_column, coicop_level_columns, product_id_column)
+        combined_df, coicop_column, coicop_level_columns, product_description_column)
 
     combined_df.to_parquet(os.path.join(
         data_directory, output_filename), engine=engine)
