@@ -237,10 +237,8 @@ def products_per_period(dataframe: pd.DataFrame,
         grouped_eans_per_month = grouped_eans_per_month.merge(
             grouped_products_per_month, on=period_column)
 
-    grouped_texts_eans_per_month = add_lagged_columns(grouped_texts_eans_per_month,
-                                                      product_columns)
-
-    return grouped_texts_eans_per_month
+    return add_lagged_columns(grouped_eans_per_month,
+                              product_columns)
 
 
 def intersection(left_column: Optional[set], right_column: Optional[set]) -> Optional[set]:
