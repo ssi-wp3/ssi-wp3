@@ -231,6 +231,8 @@ def products_per_period(dataframe: pd.DataFrame,
             by=period_column)[columns].apply(series_to_set)
         print("grouped_products_per_month", grouped_products_per_month.head())
         grouped_products_per_month = grouped_products_per_month.reset_index()
+        print("grouped_products_per_month reset_index",
+              grouped_products_per_month.head())
         grouped_eans_per_month = grouped_eans_per_month.merge(
             grouped_products_per_month, on=period_column)
 
