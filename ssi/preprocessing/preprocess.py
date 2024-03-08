@@ -40,7 +40,6 @@ class PreprocessFile(luigi.Task):
     input_filename = luigi.Parameter()
     output_filename = luigi.Parameter()
     coicop_column = luigi.Parameter(default="coicop_number")
-    product_id_column = luigi.Parameter(default="product_id")
     product_description_column = luigi.Parameter(default="ean_name")
     selected_columns = luigi.ListParameter(default=[])
     coicop_level_columns = luigi.ListParameter(default=[])
@@ -68,7 +67,6 @@ class PreprocessFile(luigi.Task):
             combined_df,
             columns=self.selected_columns,
             coicop_column=self.coicop_column,
-            product_id_column=self.product_id_column,
             product_description_column=self.product_description_column,
             column_mapping=self.column_mapping
         )
