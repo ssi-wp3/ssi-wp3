@@ -125,7 +125,7 @@ def texts_per_ean_histogram(dataframe: pd.DataFrame,
     texts_per_ean = texts_per_ean.reset_index()
     receipt_text_counts = texts_per_ean[receipt_text_column].value_counts()
     receipt_text_counts = receipt_text_counts.sort_index()
-    return receipt_text_counts.to_frame().T
+    return receipt_text_counts.to_frame()
 
 
 def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
