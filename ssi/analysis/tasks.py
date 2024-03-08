@@ -31,7 +31,7 @@ class StoreProductAnalysis(luigi.Task):
 
     @property
     def product_analysis_functions(self) -> Dict[str, Callable]:
-        value_columns = [self.period_column, self.receipt_text_column]
+        value_columns = [self.product_id_column, self.receipt_text_column]
         return {
             "unique_column_values": lambda dataframe: unique_column_values(dataframe, value_columns),
             "unique_coicop_values_per_coicop": lambda dataframe: unique_column_values_per_coicop(dataframe, self.coicop_column, value_columns),
