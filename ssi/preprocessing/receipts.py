@@ -190,6 +190,11 @@ class AddReceiptTexts(luigi.Task):
             receipt_revenue_df = combined_df.merge(
                 receipt_texts, on=["store_id", "esba_number", "isba_number", "ean_number"])
 
+            receipt_revenue_df = receipt_revenue_df.rename(
+                columns={"coicop_number_x": "coicop_number"})
+            receipt_revenue_df = receipt_revenue_df.drop(
+                columns=["coicop_number_y"])
+
             with self.output().open("w") as output_file:
                 receipt_revenue_df.to_parquet(
                     output_file, engine=parquet_engine)
