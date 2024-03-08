@@ -56,6 +56,7 @@ class StoreProductAnalysis(luigi.Task):
             dataframe = pd.read_parquet(
                 input_file, engine=self.parquet_engine)
             for function_name, function in self.product_analysis_functions.items():
+                print(f"Running {function_name} for {self.store_name}")
                 result_df = function(dataframe)
                 with self.output()[function_name].open("w") as output_file:
                     result_df.to_parquet(
