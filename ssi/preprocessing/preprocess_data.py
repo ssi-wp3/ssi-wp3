@@ -100,10 +100,10 @@ def preprocess_data(dataframe: pd.DataFrame,
     dataframe = add_coicop_levels(dataframe, coicop_column=coicop_column)
 
     # TODO are the counts used anywhere?
-    split_coicop_df = get_category_counts(
-        dataframe, coicop_column=coicop_column, product_id_column=product_description_column)
-    dataframe = dataframe.merge(
-        split_coicop_df, on=coicop_column, suffixes=['', '_y'])
+    # split_coicop_df = get_category_counts(
+    #    dataframe, coicop_column=coicop_column, product_id_column=product_description_column)
+    # dataframe = dataframe.merge(
+    #    split_coicop_df, on=coicop_column, suffixes=['', '_y'])
     return dataframe
 
 
