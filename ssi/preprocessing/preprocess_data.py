@@ -91,6 +91,8 @@ def preprocess_data(dataframe: pd.DataFrame,
                     product_description_column: str,
                     column_mapping: Dict[str, str],
                     ) -> pd.DataFrame:
+    # Lidl file is losing records here
+    # 1367 records have COICOP < 5 (length 1) and are filtered out
     dataframe = filter_columns(dataframe, columns)
     dataframe = rename_columns(
         dataframe, column_mapping)
@@ -99,11 +101,6 @@ def preprocess_data(dataframe: pd.DataFrame,
         dataframe, month_year_column="year_month")
     dataframe = add_coicop_levels(dataframe, coicop_column=coicop_column)
 
-    # TODO are the counts used anywhere?
-    # split_coicop_df = get_category_counts(
-    #    dataframe, coicop_column=coicop_column, product_id_column=product_description_column)
-    # dataframe = dataframe.merge(
-    #    split_coicop_df, on=coicop_column, suffixes=['', '_y'])
     return dataframe
 
 
