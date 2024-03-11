@@ -3,7 +3,6 @@ from .files import get_combined_revenue_files_in_directory
 from .products import *
 from ..preprocessing.files import get_store_name_from_combined_filename
 import pandas as pd
-import pathlib
 import luigi
 import os
 
