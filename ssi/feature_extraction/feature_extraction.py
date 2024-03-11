@@ -66,16 +66,18 @@ class HuggingFaceFeatureExtractor:
     All sentence transformers on HuggingFace can be used as feature extractors using this class.
     """
 
-    def __init__(self, model_name):
+    def __init__(self, model_name: str, device: str = "cuda:0"):
         """ Constructor for the HuggingFaceFeatureExtractor class.
 
         Parameters
         ----------
         model_name : str
             The name of the model to use for feature extraction.
+
+        device : str
+            The device to use for feature extraction. Default is "cuda:0", or the first CUDA GPU.
         """
         self.__model = model_name
-        self.__feature_extractor = None
 
     @property
     def model(self):
@@ -101,6 +103,7 @@ class HuggingFaceFeatureExtractor:
             A list of lists containing the feature vectors for each input string.
         """
         embedding_model = SentenceTransformer(self.model)
+        embedding_model.to(self.device)
         return embedding_model.encode(X)
 
 
