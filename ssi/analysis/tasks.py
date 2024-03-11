@@ -38,6 +38,7 @@ class StoreProductAnalysis(luigi.Task):
             "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
+            "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
         }
 
     def requires(self):
