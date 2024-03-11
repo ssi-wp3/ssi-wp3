@@ -62,6 +62,25 @@ class PlotBackend(ABC):
         pass
 
     @abstractmethod
+    def histogram(self,
+                  dataframe: pd.DataFrame,
+                  x_column: str,
+                  number_of_bins: Optional[int] = None,
+                  title: Optional[str] = None,
+                  category_orders: Optional[str] = None
+                  ) -> FigureWrapper:
+        pass
+
+    @abstractmethod
+    def box_plot(self,
+                 dataframe: pd.DataFrame,
+                 y_column: str,
+                 x_column: Optional[str] = None,
+                 title: Optional[str] = None
+                 ) -> FigureWrapper:
+        pass
+
+    @abstractmethod
     def sunburst_chart(dataframe: pd.DataFrame,
                        sunburst_columns: List[str],
                        amount_column: str,
@@ -87,25 +106,6 @@ class PlotBackend(ABC):
                                   color_continuous_scale: str = px.colors.diverging.Tealrose,
                                   color_continuous_midpoint: float = 2
                                   ) -> FigureWrapper:
-        pass
-
-    @abstractmethod
-    def histogram(self,
-                  dataframe: pd.DataFrame,
-                  x_column: str,
-                  number_of_bins: Optional[int] = None,
-                  title: Optional[str] = None,
-                  category_orders: Optional[str] = None
-                  ) -> FigureWrapper:
-        pass
-
-    @abstractmethod
-    def box_plot(self,
-                 dataframe: pd.DataFrame,
-                 y_column: str,
-                 x_column: Optional[str] = None,
-                 title: Optional[str] = None
-                 ) -> FigureWrapper:
         pass
 
 
@@ -163,6 +163,28 @@ class PlotlyBackend(PlotBackend):
                        color=group_column, size=size_column, title=title)
         )
 
+    def histogram(self,
+                  dataframe: pd.DataFrame,
+                  x_column: str,
+                  number_of_bins: Optional[int] = None,
+                  title: Optional[str] = None,
+                  category_orders: Optional[str] = None
+                  ) -> PlotBackend.FigureWrapper:
+        return self.__figure_wrapper_for(
+            px.histogram(dataframe, x=x_column, nbins=number_of_bins,
+                         title=title, category_orders=category_orders)
+        )
+
+    def box_plot(self,
+                 dataframe: pd.DataFrame,
+                 y_column: str,
+                 x_column: Optional[str] = None,
+                 title: Optional[str] = None
+                 ) -> PlotBackend.FigureWrapper:
+        return self.__figure_wrapper_for(
+            px.box(dataframe, x=x_column, y=y_column, title=title)
+        )
+
     def sunburst_chart(self,
                        dataframe: pd.DataFrame,
                        sunburst_columns: List[str],
@@ -210,28 +232,6 @@ class PlotlyBackend(PlotBackend):
                                              color_continuous_midpoint=color_continuous_midpoint,
                                              )
         return self.__figure_wrapper_for(figure)
-
-    def histogram(self,
-                  dataframe: pd.DataFrame,
-                  x_column: str,
-                  number_of_bins: Optional[int] = None,
-                  title: Optional[str] = None,
-                  category_orders: Optional[str] = None
-                  ) -> PlotBackend.FigureWrapper:
-        return self.__figure_wrapper_for(
-            px.histogram(dataframe, x=x_column, nbins=number_of_bins,
-                         title=title, category_orders=category_orders)
-        )
-
-    def box_plot(self,
-                 dataframe: pd.DataFrame,
-                 y_column: str,
-                 x_column: Optional[str] = None,
-                 title: Optional[str] = None
-                 ) -> PlotBackend.FigureWrapper:
-        return self.__figure_wrapper_for(
-            px.box(dataframe, x=x_column, y=y_column, title=title)
-        )
 
     def __figure_wrapper_for(self, figure):
         return PlotlyBackend.PlotlyFigureWrapper(figure)
