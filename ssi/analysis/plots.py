@@ -114,6 +114,31 @@ def scatter_plot(dataframe: pd.DataFrame,
 
 def sunburst_chart(dataframe: pd.DataFrame,
                    sunburst_columns: List[str],
-                   amount_column: str
+                   amount_column: str,
+                   title: str = None
                    ) -> go.Figure:
-    return px.sunburst(dataframe, path=sunburst_columns, values=amount_column)
+    """ Create a sunburst chart with the given dataframe and sunburst columns.
+    The sunburst chart can be used to visualize hierarchical data, the sunburst columns
+    list are the column names that indicated the levels of the hierarchy, and the amount
+    column is the column that contains the size of the sunburst section to be visualized.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe containing the data to plot.
+
+    sunburst_columns : List[str]
+        The list of columns that indicate the levels of the hierarchy.
+
+    amount_column : str
+        The column that contains the size of the sunburst section to be visualized.
+
+    title : str, optional
+        The title of the plot.
+
+    Returns
+    -------
+    go.Figure
+        The sunburst chart figure.
+    """
+    return px.sunburst(dataframe, path=sunburst_columns, values=amount_column, title=title)
