@@ -81,6 +81,17 @@ class PlotBackend(ABC):
         pass
 
     @abstractmethod
+    def violin_plot(self,
+                    dataframe: pd.DataFrame,
+                    y_column: str,
+                    x_column: Optional[str] = None,
+                    group_column: Optional[str] = None,
+                    title: Optional[str] = None,
+                    draw_box: bool = False
+                    ) -> FigureWrapper:
+        pass
+
+    @abstractmethod
     def sunburst_chart(dataframe: pd.DataFrame,
                        sunburst_columns: List[str],
                        amount_column: str,
@@ -183,6 +194,19 @@ class PlotlyBackend(PlotBackend):
                  ) -> PlotBackend.FigureWrapper:
         return self.__figure_wrapper_for(
             px.box(dataframe, x=x_column, y=y_column, title=title)
+        )
+
+    def violin_plot(self,
+                    dataframe: pd.DataFrame,
+                    y_column: str,
+                    x_column: Optional[str] = None,
+                    group_column: Optional[str] = None,
+                    title: Optional[str] = None,
+                    draw_box: bool = False
+                    ) -> PlotBackend.FigureWrapper:
+        return self.__figure_wrapper_for(
+            px.violin(dataframe, x=x_column, y=y_column,
+                      color=group_column, title=title, box=draw_box)
         )
 
     def sunburst_chart(self,
@@ -441,7 +465,47 @@ class PlotEngine(PlotBackend):
         """
         return self.plot_backend.box_plot(dataframe, y_column, x_column, title)
 
-    @abstractmethod
+    def violin_plot(self,
+                    dataframe: pd.DataFrame,
+                    y_column: str,
+                    x_column: Optional[str] = None,
+                    group_column: Optional[str] = None,
+                    title: Optional[str] = None,
+                    draw_box: bool = False
+                    ) -> PlotBackend.FigureWrapper:
+        """ Create a violin plot with the given dataframe and y column.
+        The violin plot can be used to visualize the distribution of a variable.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The dataframe containing the data to plot.
+
+        y_column : str
+            The column to use as the y axis, i.e. the column containing the values.
+
+        x_column : str
+            The column to use as the x axis, can be used to group the values and
+            draw several violins.
+
+        group_column : str, optional
+            The column to use to group the data on another level into separate groups
+            of violins. The color of the violin will be used to indicate the group.
+
+        title : str, optional
+            The title of the plot.
+
+        draw_box : bool, optional
+            Whether to draw a box plot inside the violin plot.
+
+        Returns
+        -------
+        PlotBackend.FigureWrapper
+            The violin plot figure.
+        """
+        return self.plot_backend.violin_plot(dataframe, y_column, x_column,
+                                             group_column, title, draw_box)
+
     def sunburst_chart(self,
                        dataframe: pd.DataFrame,
                        sunburst_columns: List[str],
