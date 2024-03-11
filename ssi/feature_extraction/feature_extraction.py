@@ -100,10 +100,15 @@ class HuggingFaceFeatureExtractor:
             The device to use for feature extraction. Default is "cuda:0", or the first CUDA GPU.
         """
         self.__model = model_name
+        self.__device = device
 
     @property
     def model(self):
         return self.__model
+
+    @property
+    def device(self):
+        return self.__device
 
     def fit(self, X, y, **fit_params):
         pass
