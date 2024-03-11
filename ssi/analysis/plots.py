@@ -10,6 +10,32 @@ def line_chart(dataframe: pd.DataFrame,
                group_column: str = None,
                title: str = None
                ) -> go.Figure:
+    """ Create a line chart with the given dataframe and x and y columns.
+    Using the group column, data can be grouped into separate lines in the plot.
+    Each separate line/group has a different line color.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe containing the data to plot.
+
+    x_column : str
+        The column to use as the x axis.
+
+    y_column : str
+        The column to use as the y axis.
+
+    group_column : str, optional
+        The column to group the data into separate lines.
+
+    title : str, optional
+        The title of the plot.
+
+    Returns
+    -------
+    go.Figure
+        The line chart figure.
+    """
     return px.line(dataframe, x=x_column, y=y_column, color=group_column, title=title)
 
 
