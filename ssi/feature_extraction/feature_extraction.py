@@ -62,9 +62,6 @@ class SpacyFeatureExtractor:
         pass
 
     def transform(self, X):
-        return self.fit_transform(X)
-
-    def fit_transform(self, X, y=None, **fit_params):
         """ This method uses the feature extractor to extract embeddings from the data.
 
         Parameters
@@ -80,6 +77,23 @@ class SpacyFeatureExtractor:
         # We only need spacy to tokenize the text and return the word vectors
         return [doc.vector
                 for doc in self.nlp.pipe(X, disable=["tagger", "parser", "ner"])]
+
+    def fit_transform(self, X, y=None, **fit_params):
+        """ This method uses the feature extractor to extract embeddings from the data.
+        As Spacy models are already pretrained, this method is equivalent to transform
+        and just calls this method instead.
+
+        Parameters
+        ----------
+        X : List[str]
+            The list of strings to extract features from.
+
+        Returns
+        -------
+        List[np.array[float]]
+            A list of lists containing the feature vectors for each input string.
+        """
+        return self.transform(X)
 
 
 class HuggingFaceFeatureExtractor:
@@ -114,9 +128,6 @@ class HuggingFaceFeatureExtractor:
         pass
 
     def transform(self, X):
-        return self.fit_transform(X)
-
-    def fit_transform(self, X, y=None, **fit_params):
         """ This method uses the feature extractor to extract embeddings from the data.
 
         Parameters
@@ -132,6 +143,23 @@ class HuggingFaceFeatureExtractor:
         embedding_model = SentenceTransformer(self.model)
         embedding_model.to(self.device)
         return embedding_model.encode(X)
+
+    def fit_transform(self, X, y=None, **fit_params):
+        """ This method uses the feature extractor to extract embeddings from the data.
+        As HuggingFace models are already pretrained, this method is equivalent to transform
+        and just calls this method instead.
+
+        Parameters
+        ----------
+        X : List[str]
+            The list of strings to extract features from.
+
+        Returns
+        -------
+        List[np.array[float]]
+            A list of lists containing the feature vectors for each input string.
+        """
+        return self.transform(X)
 
 
 class FeatureExtractorFactory:
