@@ -1,4 +1,5 @@
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from sentence_transformers import SentenceTransformer
 from scipy.sparse import issparse
 from enum import Enum
 from typing import Dict, Optional, List
@@ -55,6 +56,50 @@ class SpacyFeatureExtractor:
         # We only need spacy to tokenize the text and return the word vectors
         return [doc.vector
                 for doc in self.nlp.pipe(X, disable=["tagger", "parser", "ner"])]
+
+
+class HuggingFaceFeatureExtractor:
+    """ This class is a wrapper around the HuggingFace SentenceTransformer library.
+    It uses the SentenceTransformer to encode the text data into feature vectors.
+    All sentence transformers on HuggingFace can be used as feature extractors using this class.
+    """
+
+    def __init__(self, model_name):
+        """ Constructor for the HuggingFaceFeatureExtractor class.
+
+        Parameters
+        ----------
+        model_name : str
+            The name of the model to use for feature extraction.
+        """
+        self.__model = model_name
+        self.__feature_extractor = None
+
+    @property
+    def model(self):
+        return self.__model
+
+    def fit(self, X, y, **fit_params):
+        pass
+
+    def transform(self, X):
+        return self.fit_transform(X)
+
+    def fit_transform(self, X, y=None, **fit_params):
+        """ This method uses the feature extractor to extract embeddings from the data.
+
+        Parameters
+        ----------
+        X : List[str]
+            The list of strings to extract features from.
+
+        Returns
+        -------
+        List[List[float]]
+            A list of lists containing the feature vectors for each input string.
+        """
+        embedding_model = SentenceTransformer(self.model)
+        return embedding_model.encode(X)
 
 
 class FeatureExtractorFactory:
