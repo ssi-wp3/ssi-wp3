@@ -169,3 +169,64 @@ def heatmap(dataframe: pd.DataFrame,
         The heatmap chart for the dataframe.
     """
     return px.imshow(dataframe, text_auto=show_text, title=title)
+
+
+def parallel_coordinates_plot(dataframe: pd.DataFrame,
+                              dimensions: List[str],
+                              color_column: str,
+                              dimension_titles: List[str] = None,
+                              title: str = None,
+                              color_continuous_scale: str = px.colors.diverging.Tealrose,
+                              color_continuous_midpoint: float = 2
+                              ) -> go.Figure:
+    """ Create a parallel coordinates plot with the given dataframe and dimensions.
+    The parallel coordinates plot can be used to visualize the relationship between multiple variables,
+    and the color column can be used to group the data into separate lines.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe containing the data to plot.
+
+    dimensions : List[str]
+        The list of columns to use as the dimensions of the parallel coordinates plot.
+
+    color_column : str
+        The value column to plot in the parallel coordinate plot. This column often contains
+        an evaluate metric (i.e accuracy, F1, etc.) that is plotted against a number of dimensions
+        that may influence the metric (i.e. hyperparameters). The color of the line will indicate
+        the height of the metric.
+
+    dimension_titles : List[str], optional
+        The titles to use for the names of the dimensions (instead of the column names).
+        If not provided, the column names will be used.
+
+    color_continuous_scale : str, optional
+        The color scale to use for the color column.
+
+    color_continuous_midpoint : float, optional
+        The midpoint of the color scale.
+
+    title : str, optional
+        The title of the plot.
+
+    Returns
+    -------
+    go.Figure
+        The parallel coordinates plot figure.
+    """
+    if not dimension_titles:
+        return px.parallel_coordinates(dataframe,
+                                       dimensions=dimensions,
+                                       color=color_column,
+                                       title=title,
+                                       color_continuous_scale=color_continuous_scale,
+                                       color_continuous_midpoint=color_continuous_midpoint)
+    labels = {dim: title for dim, title in zip(dimensions, dimension_titles)}
+    return px.parallel_coordinates(dataframe,
+                                   color=color_column,
+                                   labels=labels,
+                                   title=title,
+                                   color_continuous_scale=color_continuous_scale,
+                                   color_continuous_midpoint=color_continuous_midpoint,
+                                   )
