@@ -297,7 +297,6 @@ class PlotEngine(PlotBackend):
         return self.plot_backend.line_chart(dataframe, x_column, y_column,
                                             group_column, title)
 
-    @abstractmethod
     def bar_chart(self,
                   dataframe: pd.DataFrame,
                   x_column: str,
@@ -333,7 +332,6 @@ class PlotEngine(PlotBackend):
         return self.plot_backend.bar_chart(dataframe, x_column, y_column,
                                            group_column, title)
 
-    @abstractmethod
     def scatter_plot(self,
                      dataframe: pd.DataFrame,
                      x_column: str,
