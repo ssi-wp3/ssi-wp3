@@ -142,3 +142,30 @@ def sunburst_chart(dataframe: pd.DataFrame,
         The sunburst chart figure.
     """
     return px.sunburst(dataframe, path=sunburst_columns, values=amount_column, title=title)
+
+
+def heatmap(dataframe: pd.DataFrame,
+            show_text: bool = False,
+            title: str = None
+            ) -> go.Figure:
+    """ Create a heatmap with the given dataframe and x, y and z columns.
+    The heatmap can be used to visualize the relationship between two variables, and the
+    intensity of the relationship is indicated by the color of the cells.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe containing the data to plot. The dataframe should be in 2D matrix form.
+
+    show_text : bool, optional
+        Whether to show the cell values in the heatmap.
+
+    title : str, optional
+        The title of the plot.
+
+    Returns
+    -------
+    go.Figure
+        The heatmap chart for the dataframe.
+    """
+    return px.imshow(dataframe, text_auto=show_text, title=title)
