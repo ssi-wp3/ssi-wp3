@@ -1,6 +1,7 @@
 from typing import Optional, List
 from .text_analysis import series_to_set
 import pandas as pd
+from pandas.core.groupby.generic import DataFrameGroupBy
 import numpy as np
 
 
@@ -388,7 +389,7 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
                                      coicop_level_column: str = "coicop_level_1",
                                      product_columns: List[str] = [
                                          "receipt_text", "ean_number"]
-                                     ) -> pd.DataFrame:
+                                     ) -> DataFrameGroupBy:
     """ This function creates a dataframe that contains the product column values per period 
     and COICOP level. The dataframe contains a column with a set of unique receipt texts and 
     a column with a set of unique product identifiers. In addition, the dataframe contains a 
@@ -413,9 +414,9 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
 
     Returns
     -------
-    pd.DataFrame
-        A dataframe containing the unique product column values per period and COICOP level.
-        The dataframe also contains a lagged version of these columns.
+    pd.DataFrameGroupBy
+        A DataFrameGroupBy object containing the unique product column values per period and COICOP level.
+        The DataFrameGroupBy also contains a lagged version of these columns.
     """
     grouped_texts_per_month_coicop = dataframe.groupby(
         by=[period_column, coicop_level_column])[product_columns].apply(series_to_set)
@@ -429,8 +430,26 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
 def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
                                              period_column: str = "year_month",
                                              coicop_level_column: str = "coicop_level_1",
-                                             receipt_text_column: str = "receipt_text",
-                                             product_id_column: str = "ean_number"
+                                             product_columns: List[str] = [
+                                                 "receipt_text", "ean_number"]
                                              ) -> pd.DataFrame:
+
     texts_per_period_coicop_df = products_per_period_coicop_level(
-        dataframe, period_column, coicop_level_column, receipt_text_column, product_id_column)
+        dataframe, period_column, coicop_level_column, product_columns)
+
+    for column in product_columns:
+        texts_per_period_coicop_df[f"{column}_same"] = texts_per_period_coicop_df.apply(
+            lambda row: intersection(row[column], row[f"{column}_lagged"]), axis=1)
+        texts_per_period_coicop_df[f"{column}_introduced"] = texts_per_period_coicop_df.apply(
+            lambda row: introduced_products(row[column], row[f"{column}_lagged"]), axis=1)
+        texts_per_period_coicop_df[f"{column}_removed"] = texts_per_period_coicop_df.apply(
+            lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
+
+        texts_per_period_coicop_df[f"number_{column}_same"] = texts_per_period_coicop_df[f"{column}_same"].apply(
+            number_of_products)
+        texts_per_period_coicop_df[f"number_{column}_introduced"] = texts_per_period_coicop_df[f"{column}_introduced"].apply(
+            number_of_products)
+        texts_per_period_coicop_df[f"number_{column}_removed"] = texts_per_period_coicop_df[f"{column}_removed"].apply(
+            number_of_products)
+
+    return texts_per_period_coicop_df
