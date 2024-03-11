@@ -44,7 +44,17 @@ class TestFeatureExtractor:
 
 
 class SpacyFeatureExtractor:
+    """ This class is a wrapper around the Spacy library.
+    It can uses spacy to tokenize the text data and return the word vectors.
+    """
+
     def __init__(self, model_name):
+        """ Constructor for the SpacyFeatureExtractor class.
+        Parameters
+        ----------
+        model_name : str
+            The name of the spacy model to use for feature extraction.
+        """
         self.nlp = spacy.load(model_name)
 
     # To speed up: https://github.com/explosion/spaCy/discussions/8402
@@ -55,6 +65,18 @@ class SpacyFeatureExtractor:
         return self.fit_transform(X)
 
     def fit_transform(self, X, y=None, **fit_params):
+        """ This method uses the feature extractor to extract embeddings from the data.
+
+        Parameters
+        ----------
+        X : List[str]
+            The list of strings to extract features from.
+
+        Returns
+        -------
+        List[np.array[float]]
+            A list of lists containing the feature vectors for each input string.
+        """
         # We only need spacy to tokenize the text and return the word vectors
         return [doc.vector
                 for doc in self.nlp.pipe(X, disable=["tagger", "parser", "ner"])]
@@ -99,7 +121,7 @@ class HuggingFaceFeatureExtractor:
 
         Returns
         -------
-        List[List[float]]
+        List[np.array[float]]
             A list of lists containing the feature vectors for each input string.
         """
         embedding_model = SentenceTransformer(self.model)
