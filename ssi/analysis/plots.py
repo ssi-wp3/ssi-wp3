@@ -99,6 +99,15 @@ class PlotBackend(ABC):
                   ) -> FigureWrapper:
         pass
 
+    @abstractmethod
+    def box_plot(self,
+                 dataframe: pd.DataFrame,
+                 y_column: str,
+                 x_column: Optional[str] = None,
+                 title: Optional[str] = None
+                 ) -> FigureWrapper:
+        pass
+
 
 class PlotlyBackend(PlotBackend):
     """Plot backend that uses Plotly to create different types of plots.
@@ -201,6 +210,28 @@ class PlotlyBackend(PlotBackend):
                                              color_continuous_midpoint=color_continuous_midpoint,
                                              )
         return self.__figure_wrapper_for(figure)
+
+    def histogram(self,
+                  dataframe: pd.DataFrame,
+                  x_column: str,
+                  number_of_bins: Optional[int] = None,
+                  title: Optional[str] = None,
+                  category_orders: Optional[str] = None
+                  ) -> PlotBackend.FigureWrapper:
+        return self.__figure_wrapper_for(
+            px.histogram(dataframe, x=x_column, nbins=number_of_bins,
+                         title=title, category_orders=category_orders)
+        )
+
+    def box_plot(self,
+                 dataframe: pd.DataFrame,
+                 y_column: str,
+                 x_column: Optional[str] = None,
+                 title: Optional[str] = None
+                 ) -> PlotBackend.FigureWrapper:
+        return self.__figure_wrapper_for(
+            px.box(dataframe, x=x_column, y=y_column, title=title)
+        )
 
     def __figure_wrapper_for(self, figure):
         return PlotlyBackend.PlotlyFigureWrapper(figure)
@@ -380,6 +411,37 @@ class PlotEngine(PlotBackend):
                                            number_of_bins=number_of_bins,
                                            title=title,
                                            category_orders=category_orders)
+
+    def box_plot(self,
+                 dataframe: pd.DataFrame,
+                 y_column: str,
+                 x_column: Optional[str] = None,
+                 title: Optional[str] = None
+                 ) -> PlotBackend.FigureWrapper:
+        """ Create a box plot with the given dataframe and y column.
+        The box plot can be used to visualize the distribution of a variable.
+        Optionally, an x column can be provided to group the data into separate boxes.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The dataframe containing the data to plot.
+
+        y_column : str
+            The column to use as the y axis, i.e. the column containing the values.
+
+        x_column : str
+            The column to use as the x axis.
+
+        title : str, optional
+            The title of the plot.
+
+        Returns
+        -------
+        PlotBackend.FigureWrapper
+            The box plot figure.
+        """
+        return self.plot_backend.box_plot(dataframe, y_column, x_column, title)
 
     @abstractmethod
     def sunburst_chart(self,
