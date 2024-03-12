@@ -16,6 +16,14 @@ def series_to_set(series: pd.Series, clean_text: bool = False) -> set:
     return set(series.drop_duplicates().tolist())
 
 
+def dataframe_to_set(dataframe: pd.DataFrame, clean_text: bool = False) -> pd.DataFrame:
+    """Converts a dataframe to a set"""
+    return pd.DataFrame({
+        column: series_to_set(dataframe[column], clean_text=clean_text)
+        for column in dataframe.columns
+    })
+
+
 def string_length_histogram(dataframe: pd.DataFrame, column: str) -> pd.DataFrame:
     """Returns a dataframe with a histogram of the string lengths of a column in a dataframe,
     sorted by string length. The index of the dataframe will be the string length and the column

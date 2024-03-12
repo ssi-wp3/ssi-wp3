@@ -1,5 +1,5 @@
 from typing import Optional, List
-from .text_analysis import series_to_set
+from .text_analysis import series_to_set, dataframe_to_set
 from .overlap import jaccard_index, dice_coefficient, overlap_coefficient
 import pandas as pd
 from pandas.core.groupby.generic import DataFrameGroupBy
@@ -429,10 +429,7 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
         The DataFrameGroupBy also contains a lagged version of these columns.
     """
     grouped_texts_per_month_coicop = dataframe.groupby(
-        by=[period_column, coicop_level_column])[product_columns]
-    for product_column in product_columns:
-        grouped_texts_per_month_coicop[product_column] = grouped_texts_per_month_coicop[product_column].apply(
-            series_to_set)
+        by=[period_column, coicop_level_column])[product_columns].apply(dataframe_to_set)
     grouped_eans_per_month_coicop = add_lagged_columns(
         grouped_texts_per_month_coicop, product_columns)
 
