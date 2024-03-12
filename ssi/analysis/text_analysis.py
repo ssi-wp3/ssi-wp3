@@ -46,7 +46,7 @@ def string_length_histogram(dataframe: pd.DataFrame, column: str) -> pd.DataFram
     pd.DataFrame
         A dataframe with a histogram of the string lengths of a column in a dataframe,
     """
-    return dataframe[column].str.len().value_counts().sort_index().reset_index().rename(columns={"index": "string_length", column: "count"})
+    return dataframe[column].str.len().value_counts().sort_index().reset_index().rename(columns={"index": "string_length"})
 
 
 def wordcloud_from_words(words: List[str], filename: str, **kwargs):
