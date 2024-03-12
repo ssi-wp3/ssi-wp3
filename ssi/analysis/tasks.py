@@ -52,8 +52,11 @@ class StoreProductAnalysis(luigi.Task):
         products_directory = os.path.join(self.output_directory, "products")
         return {function_name:
                 luigi.LocalTarget(os.path.join(
-                    products_directory, f"{self.store_name}_analysis_{function_name}.parquet"), format=luigi.format.Nop)
+                    products_directory, self._get_store_analysis_filename(function_name)), format=luigi.format.Nop)
                 for function_name in self.product_analysis_functions.keys()}
+
+    def _get_store_analysis_filename(self, function_name: str):
+        return f"{self.store_name}_analysis_{function_name}.parquet"
 
     def run(self):
         with self.input().open("r") as input_file:
