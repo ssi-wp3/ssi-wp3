@@ -9,9 +9,11 @@ def clean_text(text: pd.Series) -> pd.Series:
     return text.str.replace('[^0-9a-zA-Z.,-/ ]', "", regex=True).str.lstrip().str.rstrip().str.lower()
 
 
-def series_to_set(series: pd.Series) -> set:
+def series_to_set(series: pd.Series, clean_text: bool = False) -> set:
     """Converts a pandas series to a set"""
-    return set(clean_text(series.drop_duplicates()).tolist())
+    if clean_text:
+        return set(clean_text(series.drop_duplicates()).tolist())
+    return set(series.drop_duplicates().tolist())
 
 
 def string_length_histogram(dataframe: pd.DataFrame, column: str) -> pd.DataFrame:
