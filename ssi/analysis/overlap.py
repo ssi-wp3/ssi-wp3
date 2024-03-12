@@ -1,4 +1,7 @@
 
+from typing import Tuple
+
+
 def handle_missing_sets(left_set: set, right_set: set) -> Tuple[set, set]:
     """Handle missing sets
 
