@@ -433,7 +433,35 @@ def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
                                              product_columns: List[str] = [
                                                  "receipt_text", "ean_number"]
                                              ) -> pd.DataFrame:
+    """ This function compares the unique column values of the selected columns per period and COICOP level with those 
+    of the last period. It returns the column values that are the same, introduced, or removed, as well as, the number 
+    of column values for all of those changes.
 
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    period_column : str
+        The column containing the period information. By default, it is "year_month".
+        Pass a different column name for other periods, for example "year". It's also
+        possible to pass a list of columns to period_column to group by multiple columns.
+
+    coicop_level_column : str
+        The column containing the COICOP level information. By default, it is "coicop_level_1".
+        Pass a different column name to group by other (deeper) COICOP levels.
+
+    product_columns : List[str]
+        The columns to compare the values for. By default, it is ["receipt_text", "ean_number"].
+        -   "receipt_text" is the column containing the receipt text.
+        -   "ean_number" is the column containing the product ID.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe containing the comparison of the receipt texts and product identifiers per period and COICOP level.
+    """
     texts_per_period_coicop_df = products_per_period_coicop_level(
         dataframe, period_column, coicop_level_column, product_columns)
 
