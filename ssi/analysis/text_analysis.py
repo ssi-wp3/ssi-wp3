@@ -37,9 +37,91 @@ def string_length_histogram(dataframe: pd.DataFrame, column: str) -> pd.DataFram
     return dataframe[column].str.len().value_counts().sort_index()
 
 
-def wordcloud_from_set(set1, filename: str):
-    """ Creates a wordcloud from a set of words """
-    return WordCloud().generate(' '.join(set1)).to_file(filename)
+def wordcloud_from_words(words: List[str], filename: str, **kwargs):
+    """ Creates a wordcloud from a list of words 
+
+    Parameters
+    ----------
+
+    words : List[str]
+        The words to create the wordcloud from
+
+    filename : str
+        The filename to save the wordcloud to
+
+    **kwargs
+        Additional arguments to pass to the WordCloud constructor
+    """
+    return WordCloud(**kwargs).generate(' '.join(words)).to_file(filename)
+
+
+def wordcloud_from_words_and_frequencies(words: List[str], frequencies: List[int], filename: str, **kwargs):
+    """ Creates a wordcloud from a list of words and their frequencies
+
+    Parameters
+    ----------
+
+    words : List[str]
+        The words to create the wordcloud from
+
+    frequencies : List[int]
+        The frequencies of the words
+
+    filename : str
+        The filename to save the wordcloud to
+
+    **kwargs
+        Additional arguments to pass to the WordCloud constructor
+
+    """
+    frequencies_dict = dict(zip(words, frequencies))
+    return WordCloud(**kwargs).generate_from_frequencies(frequencies_dict).to_file(filename)
+
+
+def split_words(dataframe: pd.DataFrame, text_column: str, delimiter: str = " ") -> pd.Series:
+    """Splits the words in a text column and returns a series with the separate words for each text.
+
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    text_column : str
+        The column to split
+
+    delimiter : str
+        The delimiter to split the text column on
+
+    Returns
+    -------
+    pd.Series
+        A series with the separate words for each text.
+    """
+    return dataframe[text_column].str.split(delimiter, expand=False)
+
+
+def unique_split_words(dataframe: pd.DataFrame, text_column: str, delimiter: str = " ") -> set:
+    """Splits the words in a text column and returns a set with the unique words
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    text_column : str
+        The column to split
+
+    delimiter : str
+        The delimiter to split the text column on
+
+    Returns
+    -------
+
+    set
+        A set with the unique words
+    """
+    return set(split_words(dataframe, text_column, delimiter).values.flatten().tolist())
 
 
 def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int = 80):
