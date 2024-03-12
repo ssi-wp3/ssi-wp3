@@ -429,7 +429,7 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
         The DataFrameGroupBy also contains a lagged version of these columns.
     """
     grouped_texts_per_month_coicop = dataframe.groupby(
-        by=[period_column, coicop_level_column])[product_columns].apply(series_to_set, axis=0)
+        by=[period_column, coicop_level_column])[product_columns].apply(lambda column: series_to_set(column), axis=0)
     grouped_eans_per_month_coicop = add_lagged_columns(
         grouped_texts_per_month_coicop, product_columns)
 
