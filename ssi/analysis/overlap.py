@@ -112,7 +112,6 @@ def jaccard_index(left_set: set, right_set: set) -> float:
         union = len(left_set) + len(right_set) - intersection
         return intersection / union
     return __handle_zero_length_sets(left_set, right_set,
-                                     default_value=1.0,
                                      overlap_function=overlap_function)
 
 
