@@ -156,7 +156,8 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
     """
     def overlap_function(left_set: set, right_set: set):
         intersection = len(left_set.intersection(right_set))
-        return intersection / min(len(left_set), len(right_set))
+        min_length = min(len(left_set), len(right_set))
+        return intersection / min_length
     return __handle_zero_length_sets(left_set, right_set,
                                      default_value=1.0,
                                      overlap_function=overlap_function)
