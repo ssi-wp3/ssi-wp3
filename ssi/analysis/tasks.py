@@ -56,7 +56,7 @@ class StoreProductAnalysis(luigi.Task):
                 for function_name in self.product_analysis_functions.keys()}
 
     def _get_store_analysis_filename(self, function_name: str):
-        return f"{self.store_name}_{self.period_column}_analysis_{function_name}.parquet"
+        return f"{self.store_name}_{self.period_column}_{self.coicop_column}_analysis_{function_name}.parquet"
 
     def run(self):
         with self.input().open("r") as input_file:
