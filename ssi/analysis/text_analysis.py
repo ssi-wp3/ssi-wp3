@@ -15,11 +15,13 @@ def series_to_set(series: pd.Series, clean_text: bool = False) -> set:
         return set(clean_text(series.drop_duplicates()).tolist())
     return set(series.drop_duplicates().tolist())
 
+# TODO does not work!
+
 
 def dataframe_to_set(dataframe: pd.DataFrame, clean_text: bool = False) -> pd.DataFrame:
     """Converts a dataframe to a set"""
     return pd.DataFrame({
-        column: series_to_set(dataframe[column], clean_text=clean_text)
+        column: [series_to_set(dataframe[column], clean_text=clean_text)]
         for column in dataframe.columns
     })
 
