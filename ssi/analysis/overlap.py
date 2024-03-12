@@ -23,8 +23,12 @@ def handle_missing_sets(left_set: set, right_set: set) -> Tuple[set, set]:
     return left_set, right_set
 
 
-def __handle_zero_length_sets(left_set: set, right_set: set, default_value: float,
-                              overlap_function: Callable[[set, set], float]) -> Tuple[set, set]:
+def __handle_zero_length_sets(left_set: set,
+                              right_set: set,
+                              overlap_function: Callable[[set, set], float],
+                              default_exact_match: float = 1.0,
+                              default_empty_match: float = 0.0,
+                              ) -> Tuple[set, set]:
     """Handle zero length sets
 
     Parameters
@@ -48,7 +52,13 @@ def __handle_zero_length_sets(left_set: set, right_set: set, default_value: floa
     """
     left_set, right_set = handle_missing_sets(left_set, right_set)
     if len(left_set) == 0 and len(right_set) == 0:
-        return default_value
+        return default_exact_match
+
+    if left_set == right_set:
+        return default_exact_match
+
+    if len(left_set) == 0 or len(right_set) == 0:
+        return default_empty_match
     return overlap_function(left_set, right_set)
 
 
@@ -73,8 +83,8 @@ def jaccard_similarity(left_set: set, right_set: set) -> float:
     def overlap_function(left_set: set, right_set: set): return len(
         left_set.intersection(right_set)) / len(left_set.union(right_set))
     return __handle_zero_length_sets(left_set, right_set,
-                                     default_value=1.0,
-                                     overlap_function=overlap_function)
+                                     overlap_function=overlap_function
+                                     )
 
 
 def jaccard_index(left_set: set, right_set: set) -> float:
@@ -131,7 +141,6 @@ def dice_coefficient(left_set: set, right_set: set) -> float:
         intersection = len(left_set.intersection(right_set))
         return 2. * intersection / (len(left_set) + len(right_set))
     return __handle_zero_length_sets(left_set, right_set,
-                                     default_value=1.0,
                                      overlap_function=overlap_function)
 
 
@@ -159,5 +168,4 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
         min_length = min(len(left_set), len(right_set))
         return intersection / min_length
     return __handle_zero_length_sets(left_set, right_set,
-                                     default_value=1.0,
                                      overlap_function=overlap_function)
