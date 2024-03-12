@@ -94,7 +94,7 @@ class AllStoresAnalysis(luigi.WrapperTask):
     period_columns = luigi.ListParameter()
     receipt_text_column = luigi.Parameter()
     product_id_column = luigi.Parameter()
-    coicop_column = luigi.Parameter()
+    coicop_columns = luigi.ListParameter()
 
     def requires(self):
         return [StoreProductAnalysis(
@@ -105,8 +105,9 @@ class AllStoresAnalysis(luigi.WrapperTask):
             period_column=period_column,
             receipt_text_column=self.receipt_text_column,
             product_id_column=self.product_id_column,
-            coicop_column=self.coicop_column
+            coicop_column=coicop_column
         )
             for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)
             for period_column in self.period_columns
+            for coicop_column in self.coicop_columns
         ]
