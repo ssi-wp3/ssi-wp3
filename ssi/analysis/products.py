@@ -1,5 +1,6 @@
 from typing import Optional, List
 from .text_analysis import series_to_set
+from .overlap import jaccard_index, dice_coefficient, overlap_coefficient
 import pandas as pd
 from pandas.core.groupby.generic import DataFrameGroupBy
 import numpy as np
