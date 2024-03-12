@@ -56,7 +56,7 @@ class StoreProductAnalysis(luigi.Task):
                 for function_name in self.product_analysis_functions.keys()}
 
     def _get_store_analysis_filename(self, function_name: str):
-        return f"{self.store_name}_analysis_{function_name}.parquet"
+        return f"{self.store_name}_{self.period_column}_analysis_{function_name}.parquet"
 
     def run(self):
         with self.input().open("r") as input_file:
@@ -91,7 +91,7 @@ class AllStoresAnalysis(luigi.WrapperTask):
     project_prefix = luigi.Parameter(default="ssi")
 
     parquet_engine = luigi.Parameter(default="pyarrow")
-    period_column = luigi.Parameter()
+    period_columns = luigi.ListParameter()
     receipt_text_column = luigi.Parameter()
     product_id_column = luigi.Parameter()
     coicop_column = luigi.Parameter()
@@ -102,9 +102,11 @@ class AllStoresAnalysis(luigi.WrapperTask):
             output_directory=self.output_directory,
             parquet_engine=self.parquet_engine,
             store_name=get_store_name_from_combined_filename(filename),
-            period_column=self.period_column,
+            period_column=period_column,
             receipt_text_column=self.receipt_text_column,
             product_id_column=self.product_id_column,
             coicop_column=self.coicop_column
         )
-            for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)]
+            for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)
+            for period_column in self.period_columns
+        ]
