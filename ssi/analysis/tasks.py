@@ -1,6 +1,7 @@
 from typing import Dict, Callable
 from .files import get_combined_revenue_files_in_directory
 from .products import *
+from .text_analysis import string_length_histogram
 from ..preprocessing.files import get_store_name_from_combined_filename
 import pandas as pd
 import luigi
@@ -39,6 +40,9 @@ class StoreProductAnalysis(luigi.Task):
             "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
             "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
+
+            "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
+            "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
         }
 
     def requires(self):

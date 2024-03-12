@@ -52,6 +52,29 @@ def overlap_coefficient(set1, set2):
     return intersection / min(len(set1), len(set2))
 
 
+def string_length_histogram(dataframe: pd.DataFrame, column: str) -> pd.DataFrame:
+    """Returns a dataframe with a histogram of the string lengths of a column in a dataframe,
+    sorted by string length. The index of the dataframe will be the string length and the column
+    will be the count of strings with that length.
+
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    column : str
+        The column to return the string length histogram for.
+
+    Returns
+    -------
+
+    pd.DataFrame
+        A dataframe with a histogram of the string lengths of a column in a dataframe,
+    """
+    return dataframe[column].str.len().value_counts().sort_index()
+
+
 def wordcloud_from_set(set1, filename: str):
     """ Creates a wordcloud from a set of words """
     return WordCloud().generate(' '.join(set1)).to_file(filename)
