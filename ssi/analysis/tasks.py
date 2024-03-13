@@ -105,6 +105,7 @@ class PlotResults(luigi.Task):
             # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
             "unique_coicop_values_per_coicop": {
                 "pivot": True,
+                "value_columns": [self.product_id_column, self.receipt_text_column],
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_coicop.png",
                 "plot_settings": {
                     "plot_type": "bar_chart",
@@ -116,6 +117,7 @@ class PlotResults(luigi.Task):
             },
             "unique_column_values_per_period": {
                 "pivot": True,
+                "value_columns": [self.product_id_column, self.receipt_text_column],
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_{self.period_column}.png",
                 "plot_settings": {
                     "plot_type": "line_chart",
@@ -145,7 +147,24 @@ class PlotResults(luigi.Task):
                     "title": f"Unique receipt texts per EAN for {self.store_name} (Log scale)"
                 },
             },
-            # "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
+            "compare_products_per_period": {
+                "pivot": True,
+                "value_columns": [
+                    "number_{self.receipt_text_column}_introduced",
+                    "number_{self.receipt_text_column}_removed",
+                    "number_{self.product_id_column}_introduced",
+                    "number_{self.product_id_column}_removed",
+                ],
+                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_compare_products_per_period.png",
+                "plot_settings": {
+                    "plot_type": "line_chart",
+                    "x_column": self.period_column,
+                    "y_column": "value",
+                    "group_column": "group",
+                    "title": f"Number of products introduced/removed per {self.period_column} for {self.store_name}"
+                },
+            },
+            # "compare_products_per_period_coicop_level":{
 
             # "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
             # "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
@@ -167,7 +186,6 @@ class PlotResults(luigi.Task):
         return output_dict
 
     def run(self):
-        value_columns = [self.product_id_column, self.receipt_text_column]
         for function_name, input in self.input().items():
             if function_name not in self.plot_settings:
                 continue
@@ -182,13 +200,14 @@ class PlotResults(luigi.Task):
                 if isinstance(plot_settings, list):
                     for settings in plot_settings:
                         self.plot_with_settings(
-                            function_name, dataframe, settings, value_columns)
+                            function_name, dataframe, settings)
                 else:
                     self.plot_with_settings(
-                        function_name, dataframe, plot_settings, value_columns)
+                        function_name, dataframe, plot_settings)
 
     def plot_with_settings(self, function_name: str, dataframe: pd.DataFrame, plot_settings: Dict[str, Any], value_columns: List[str] = None):
         if "pivot" in plot_settings and plot_settings["pivot"]:
+            value_columns = plot_settings["value_columns"]
             dataframe = unpivot(dataframe, value_columns)
 
         with self.output()[function_name].open("w") as output_file:
