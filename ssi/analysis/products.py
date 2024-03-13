@@ -60,7 +60,7 @@ def unique_column_values_per_coicop(dataframe: pd.DataFrame,
         A dataframe containing the number of unique values for the selected columns.    
     """
     return dataframe.groupby(
-        by=[coicop_column])[value_columns].nunique()
+        by=[coicop_column])[value_columns].nunique().reset_index()
 
 
 def unique_column_values_per_period(dataframe: pd.DataFrame,
