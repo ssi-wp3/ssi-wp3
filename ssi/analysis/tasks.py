@@ -137,8 +137,14 @@ class PlotResults(luigi.Task):
                 "y_column": "count",
                 "title": f"Unique receipt texts per EAN for {self.store_name}",
             },
-            # "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
-            # "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
+            "log_texts_per_ean_histogram": {
+                "pivot": False,
+                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_log_texts_per_ean_histogram.png",
+                "plot_type": "bar_chart",
+                "x_column": "receipt_text",
+                "y_column": "count",
+                "title": f"Unique receipt texts per EAN for {self.store_name}",
+            },
             # "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
 
             # "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
