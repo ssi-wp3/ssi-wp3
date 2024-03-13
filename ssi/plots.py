@@ -145,7 +145,7 @@ class PlotBackend(ABC):
                                   ) -> FigureWrapper:
         pass
 
-    def plot(self, dataframe: pd.DataFrame, plot_type: PlotType, **kwargs) -> FigureWrapper:
+    def plot(self, dataframe: pd.DataFrame, type: PlotType, **kwargs) -> FigureWrapper:
         """ Create a plot of the given type with the given dataframe and arguments.
 
         Parameters
@@ -159,10 +159,10 @@ class PlotBackend(ABC):
         **kwargs
             Additional arguments to pass to the plot
         """
-        print(f"plot_type: {plot_type}")
-        if plot_type not in self.plot_types:
-            raise ValueError(f"Plot type {plot_type} not supported")
-        return self.plot_types[plot_type](dataframe, **kwargs)
+        print(f"plot_type: {type}")
+        if type not in self.plot_types:
+            raise ValueError(f"Plot type {type} not supported")
+        return self.plot_types[type](dataframe, **kwargs)
 
 
 class PlotlyBackend(PlotBackend):
@@ -678,9 +678,9 @@ class PlotEngine(PlotBackend):
         PlotBackend.FigureWrapper
             The plot figure.
         """
-        plot_type = PlotBackend.PlotType[plot_settings.get("plot_type")]
+        type = PlotBackend.PlotType[plot_settings.get("plot_type")]
         plot_settings.pop('plot_type', None)
-        if plot_type:
-            return self.plot_backend.plot(dataframe, plot_type, **plot_settings)
+        if type:
+            return self.plot_backend.plot(dataframe, type, **plot_settings)
         else:
             raise ValueError("Plot type not provided in plot settings")
