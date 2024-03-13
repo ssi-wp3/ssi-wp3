@@ -142,7 +142,9 @@ class HuggingFaceFeatureExtractor:
         """
         embedding_model = SentenceTransformer(self.model)
         embedding_model.to(self.device)
-        return embedding_model.encode(X.values.tolist(), convert_to_tensor=True).cpu()
+        embedding = embedding_model.encode(
+            X.values.tolist(), convert_to_tensor=True)
+        return embedding.cpu().detach().numpy()
 
     def fit_transform(self, X, y=None, **fit_params):
         """ This method uses the feature extractor to extract embeddings from the data.
