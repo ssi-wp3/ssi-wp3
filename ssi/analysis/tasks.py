@@ -98,17 +98,23 @@ class AllStoresAnalysis(luigi.WrapperTask):
     coicop_columns = luigi.ListParameter()
 
     def requires(self):
-        return [StoreProductAnalysis(
-            input_filename=filename,
-            output_directory=self.output_directory,
-            parquet_engine=self.parquet_engine,
-            store_name=get_store_name_from_combined_filename(filename),
-            period_column=period_column,
-            receipt_text_column=self.receipt_text_column,
-            product_id_column=self.product_id_column,
-            coicop_column=coicop_column
-        )
-            for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)
-            for period_column in self.period_columns
-            for coicop_column in self.coicop_columns
-        ]
+        for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix):
+            for period_column in self.period_columns:
+                for coicop_column in self.coicop_columns:
+                    store_name = get_store_name_from_combined_filename(
+                        filename)
+                    output_directory = os.path.join(
+                        self.output_directory, store_name)
+                    output_directory = os.path.join(
+                        output_directory, coicop_column)
+
+                    yield StoreProductAnalysis(
+                        input_filename=filename,
+                        output_directory=output_directory,
+                        parquet_engine=self.parquet_engine,
+                        store_name=store_name,
+                        period_column=period_column,
+                        receipt_text_column=self.receipt_text_column,
+                        product_id_column=self.product_id_column,
+                        coicop_column=coicop_column
+                    )
