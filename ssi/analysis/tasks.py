@@ -144,14 +144,12 @@ class PlotResults(luigi.Task):
                     continue
                 plot_settings = self.plot_functions[function_name]
                 if isinstance(plot_settings, list):
-                    print("List settings")
                     for plot_setting in plot_settings:
                         with self.output()[function_name].open("w") as output_file:
                             figure = self.plot_engine.plot(
                                 dataframe, plot_setting)
                             figure.save(output_file)
                 else:
-                    print("Single settings")
                     with self.output()[function_name].open("w") as output_file:
                         figure = self.plot_engine.plot(
                             dataframe, plot_settings)
