@@ -159,6 +159,7 @@ class PlotBackend(ABC):
         **kwargs
             Additional arguments to pass to the plot
         """
+        print(f"plot_type: {plot_type}")
         if plot_type not in self.plot_types:
             raise ValueError(f"Plot type {plot_type} not supported")
         return self.plot_types[plot_type](dataframe, **kwargs)
@@ -677,7 +678,6 @@ class PlotEngine(PlotBackend):
         PlotBackend.FigureWrapper
             The plot figure.
         """
-        print(f"plot_type: {plot_settings.get('plot_type')}")
         plot_type = PlotBackend.PlotType[plot_settings.get("plot_type")]
         if plot_type:
             return self.plot_backend.plot(dataframe, plot_type, **plot_settings)
