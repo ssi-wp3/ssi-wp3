@@ -160,6 +160,7 @@ class PlotResults(luigi.Task):
                 "plot_settings": {
                     "plot_type": "bar_chart",
                     "x_column": "receipt_text_length",
+                    "y_column": "count",
                     "title": f"Receipt text length histogram for {self.store_name}"
                 },
             },
@@ -169,6 +170,7 @@ class PlotResults(luigi.Task):
                 "plot_settings": {
                     "plot_type": "bar_chart",
                     "x_column": "product_id_length",
+                    "y_column": "count",
                     "title": f"EAN length histogram for {self.store_name}"
                 },
             },
