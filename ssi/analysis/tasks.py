@@ -35,16 +35,20 @@ class StoreProductAnalysis(luigi.Task):
     def product_analysis_functions(self) -> Dict[str, Callable]:
         value_columns = [self.product_id_column, self.receipt_text_column]
         return {
+            # Whole table
             "unique_column_values": lambda dataframe: unique_column_values(dataframe, value_columns),
-            "unique_coicop_values_per_coicop": lambda dataframe: unique_column_values_per_coicop(dataframe, self.coicop_column, value_columns),
-            "unique_column_values_per_period": lambda dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
             "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
-            "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
-            "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
-
             "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
             "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
+
+            # Grouped per coicop
+            "unique_coicop_values_per_coicop": lambda dataframe: unique_column_values_per_coicop(dataframe, self.coicop_column, value_columns),
+
+            # Per period
+            "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
+            "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
+            "unique_column_values_per_period": lambda dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
         }
 
     def requires(self):
@@ -102,6 +106,8 @@ class PlotResults(luigi.Task):
     @property
     def plot_settings(self) -> Dict[str, Any]:
         # TODO Plus plots start at 202203 instead of 202107, what happened?
+        # TODO Add sunburst with number of products (EAN/Receipt texts) per coicop
+        # TODO Add sunburst with total products sold/revenue?
         return {
             # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
             "unique_coicop_values_per_coicop": {
