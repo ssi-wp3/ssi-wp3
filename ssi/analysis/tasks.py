@@ -130,8 +130,8 @@ class PlotResults(luigi.Task):
     def output(self):
         return {function_name:
                 luigi.LocalTarget(os.path.join(
-                    self.output_directory, self._get_store_analysis_filename(function_name)), format=luigi.format.Nop)
-                for function_name in self.plot_functions.keys()
+                    self.output_directory, f"{function_name}.png"), format=luigi.format.Nop)
+                for function_name in self.input.keys()
                 }
 
     def run(self):
