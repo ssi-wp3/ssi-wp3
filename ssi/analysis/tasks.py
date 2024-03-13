@@ -151,6 +151,9 @@ class PlotResults(luigi.Task):
                 for settings in self.plot_settings[function_name]
                 }
 
+    def extract_plot_specific_settings(self, settings: Dict[str, str]) -> Dict[str, str]:
+        return {key: value for key, value in settings.items() if key not in ["filename"]}
+
     def run(self):
         for function_name, input in self.input().items():
             with input.open("r") as input_file:
@@ -162,14 +165,16 @@ class PlotResults(luigi.Task):
                 plot_settings = self.plot_settings[function_name]
                 if isinstance(plot_settings, list):
                     for plot_setting in plot_settings:
-                        plot_settings.pop("filename")
+                        plot_setting = self.extract_plot_specific_settings(
+                            plot_setting)
                         with self.output()[function_name].open("w") as output_file:
                             figure = self.plot_engine.plot_settings(
                                 dataframe, plot_setting)
                             figure.save(output_file)
                 else:
                     with self.output()[function_name].open("w") as output_file:
-                        plot_settings.pop("filename")
+                        plot_settings = self.extract_plot_specific_settings(
+                            plot_settings)
                         figure = self.plot_engine.plot_settings(
                             dataframe, plot_settings)
                         figure.save(output_file)
