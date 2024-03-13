@@ -181,8 +181,8 @@ class PlotlyBackend(PlotBackend):
         def show(self):
             self.figure.show()
 
-        def save(self, filename: str):
-            if filename.endswith(".html"):
+        def save(self, filename: str, write_html: bool = False):
+            if write_html:
                 self.figure.write_html(filename)
             else:
                 self.figure.write_image(filename)
