@@ -206,9 +206,20 @@ class PlotlyBackend(PlotBackend):
                   group_column: Optional[str] = None,
                   title: str = None
                   ) -> PlotBackend.FigureWrapper:
+        def plotly_bar_chart(dataframe: pd.DataFrame,
+                             x_column: str,
+                             y_column: str,
+                             group_column: Optional[str] = None,
+                             title: str = None
+                             ) -> go.Figure:
+            figure = px.bar(dataframe, x=x_column, y=y_column,
+                            color=group_column, title=title)
+            figure.update_xaxes(type='category')
+            return figure
+
         return self.__figure_wrapper_for(
-            px.bar(dataframe, x=x_column, y=y_column,
-                   color=group_column, title=title)
+            plotly_bar_chart(dataframe, x_column,
+                             y_column, group_column, title)
         )
 
     def scatter_plot(self, dataframe: pd.DataFrame,
