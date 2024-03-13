@@ -102,16 +102,29 @@ class PlotResults(luigi.Task):
     def plot_functions(self) -> Dict[str, Callable]:
         value_columns = [self.product_id_column, self.receipt_text_column]
         return {
-            "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
-            "unique_coicop_values_per_coicop": lambda file, dataframe: self.plot_engine.bar_chart(dataframe, file),
-            "unique_column_values_per_period": lambda file, dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
-            "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
-            "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
-            "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
-            "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
+            # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
+            "unique_coicop_values_per_coicop": [{
+                "plot_type": "bar_chart",
+                "x_column": self.coicop_column,
+                "y_column": self.receipt_text_column,
+                "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}",
+            },
+                {
+                "plot_type": "bar_chart",
+                "x_column": self.coicop_column,
+                "y_column": self.product_id_column,
+                "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}",
+            },
+            ],
 
-            "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
-            "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
+            # "unique_column_values_per_period": lambda file, dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
+            # "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
+            # "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
+            # "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
+            # "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
+
+            # "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
+            # "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
         }
 
     def output(self):
@@ -122,12 +135,20 @@ class PlotResults(luigi.Task):
                 }
 
     def run(self):
-        with self.input().open("r") as input_file:
-            dataframe = pd.read_parquet(
-                input_file, engine=self.parquet_engine)
-            for function_name, plot_function in self.product_analysis_functions.items():
-                with self.output()[function_name].open("w") as output_file:
-                    plot_function(dataframe, output_file)
+        for function_name, input in self.input().items():
+            with input.open("r") as input_file:
+                dataframe = pd.read_parquet(
+                    input_file, engine=self.parquet_engine)
+                plot_settings = self.plot_functions[function_name]
+                if isinstance(plot_settings, list):
+                    for plot_setting in plot_settings:
+                        with self.output()[function_name].open("w") as output_file:
+                            self.plot_engine.plot(
+                                dataframe, plot_setting, output_file)
+                else:
+                    with self.output()[function_name].open("w") as output_file:
+                        self.plot_engine.plot(
+                            dataframe, plot_settings, output_file)
 
 
 class AllStoresAnalysis(luigi.WrapperTask):
@@ -170,7 +191,7 @@ class AllStoresAnalysis(luigi.WrapperTask):
                         output_directory, coicop_column)
                     os.makedirs(output_directory, exist_ok=True)
 
-                    yield StoreProductAnalysis(
+                    yield PlotResults(
                         input_filename=filename,
                         output_directory=output_directory,
                         parquet_engine=self.parquet_engine,
