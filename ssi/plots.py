@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Callable, Any
+from abc import ABC, abstractmethod
+from enum import Enum
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from abc import ABC, abstractmethod
 
 
 class PlotBackend(ABC):
@@ -31,6 +32,31 @@ class PlotBackend(ABC):
         @abstractmethod
         def save(self, filename: str):
             pass
+
+    class PlotType(Enum):
+        line_chart = "line_chart"
+        bar_chart = "bar_chart"
+        scatter_plot = "scatter_plot"
+        histogram = "histogram"
+        box_plot = "box_plot"
+        violin_plot = "violin_plot"
+        sunburst_chart = "sunburst_chart"
+        heatmap = "heatmap"
+        parallel_coordinates_plot = "parallel_coordinates_plot"
+
+    @property
+    def plot_types(self) -> Dict[PlotType, Callable]:
+        return {
+            PlotBackend.PlotType.line_chart: self.line_chart,
+            PlotBackend.PlotType.bar_chart: self.bar_chart,
+            PlotBackend.PlotType.scatter_plot: self.scatter_plot,
+            PlotBackend.PlotType.histogram: self.histogram,
+            PlotBackend.PlotType.box_plot: self.box_plot,
+            PlotBackend.PlotType.violin_plot: self.violin_plot,
+            PlotBackend.PlotType.sunburst_chart: self.sunburst_chart,
+            PlotBackend.PlotType.heatmap: self.heatmap,
+            PlotBackend.PlotType.parallel_coordinates_plot: self.parallel_coordinates_plot
+        }
 
     @abstractmethod
     def line_chart(self, dataframe: pd.DataFrame,
@@ -118,6 +144,24 @@ class PlotBackend(ABC):
                                   color_continuous_midpoint: float = 2
                                   ) -> FigureWrapper:
         pass
+
+    def plot(self, dataframe: pd.DataFrame, plot_type: PlotType, **kwargs) -> FigureWrapper:
+        """ Create a plot of the given type with the given dataframe and arguments.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The dataframe containing the data to plot.
+
+        plot_type : str
+            The type of the plot to create.
+
+        **kwargs
+            Additional arguments to pass to the plot
+        """
+        if plot_type not in PlotBackend.PlotType:
+            raise ValueError(f"Plot type {plot_type} not supported")
+        return self.plot_types[plot_type](dataframe, **kwargs)
 
 
 class PlotlyBackend(PlotBackend):
@@ -613,3 +657,25 @@ class PlotEngine(PlotBackend):
         return self.plot_backend.parallel_coordinates_plot(dataframe, dimensions, color_column,
                                                            dimension_titles, title, color_continuous_scale,
                                                            color_continuous_midpoint)
+
+    def plot_settings(self, dataframe: pd.DataFrame, plot_settings: Dict[str, Any]) -> PlotBackend.FigureWrapper:
+        """ Create a plot with the given dataframe and plot settings.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The dataframe containing the data to plot.
+
+        plot_settings : Dict[str, Any]
+            The plot settings to use to create the plot.
+
+        Returns
+        -------
+        PlotBackend.FigureWrapper
+            The plot figure.
+        """
+        plot_type = plot_settings.get("plot_type")
+        if plot_type:
+            return self.plot_backend.plot(dataframe, plot_type, **plot_settings)
+        else:
+            raise ValueError("Plot type not provided in plot settings")

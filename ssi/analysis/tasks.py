@@ -3,6 +3,7 @@ from .files import get_combined_revenue_files_in_directory
 from .products import *
 from .text_analysis import string_length_histogram
 from ..preprocessing.files import get_store_name_from_combined_filename
+from ..plots import PlotEngine
 import pandas as pd
 import luigi
 import os
@@ -68,6 +69,65 @@ class StoreProductAnalysis(luigi.Task):
                 with self.output()[function_name].open("w") as output_file:
                     result_df.to_parquet(
                         output_file, engine=self.parquet_engine)
+
+
+class PlotResults(luigi.Task):
+    input_filename = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    store_name = luigi.Parameter()
+    period_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    product_id_column = luigi.Parameter()
+    coicop_column = luigi.Parameter()
+
+    def requires(self):
+        return StoreProductAnalysis(
+            input_filename=self.input_filename,
+            output_directory=self.output_directory,
+            parquet_engine=self.parquet_engine,
+            store_name=self.store_name,
+            period_column=self.period_column,
+            receipt_text_column=self.receipt_text_column,
+            product_id_column=self.product_id_column,
+            coicop_column=self.coicop_column
+        )
+
+    @property
+    def plot_engine(self) -> PlotEngine:
+        return PlotEngine()
+
+    @property
+    def plot_functions(self) -> Dict[str, Callable]:
+        value_columns = [self.product_id_column, self.receipt_text_column]
+        return {
+            "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
+            "unique_coicop_values_per_coicop": lambda file, dataframe: self.plot_engine.bar_chart(dataframe, file),
+            "unique_column_values_per_period": lambda file, dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
+            "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
+            "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
+            "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
+            "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
+
+            "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
+            "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
+        }
+
+    def output(self):
+        return {function_name:
+                luigi.LocalTarget(os.path.join(
+                    self.output_directory, self._get_store_analysis_filename(function_name)), format=luigi.format.Nop)
+                for function_name in self.plot_functions.keys()
+                }
+
+    def run(self):
+        with self.input().open("r") as input_file:
+            dataframe = pd.read_parquet(
+                input_file, engine=self.parquet_engine)
+            for function_name, plot_function in self.product_analysis_functions.items():
+                with self.output()[function_name].open("w") as output_file:
+                    plot_function(dataframe, output_file)
 
 
 class AllStoresAnalysis(luigi.WrapperTask):
