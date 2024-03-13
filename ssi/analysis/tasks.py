@@ -153,6 +153,7 @@ class PlotResults(luigi.Task):
             with input.open("r") as input_file:
                 dataframe = pd.read_parquet(
                     input_file, engine=self.parquet_engine)
+                print(dataframe.head())
                 dataframe = unpivot(dataframe, value_columns)
                 if function_name not in self.plot_settings:
                     continue
