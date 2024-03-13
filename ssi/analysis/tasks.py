@@ -150,10 +150,10 @@ class PlotResults(luigi.Task):
             "compare_products_per_period": {
                 "pivot": True,
                 "value_columns": [
-                    "number_{self.receipt_text_column}_introduced",
-                    "number_{self.receipt_text_column}_removed",
-                    "number_{self.product_id_column}_introduced",
-                    "number_{self.product_id_column}_removed",
+                    f"number_{self.receipt_text_column}_introduced",
+                    f"number_{self.receipt_text_column}_removed",
+                    f"number_{self.product_id_column}_introduced",
+                    f"number_{self.product_id_column}_removed",
                 ],
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_compare_products_per_period.png",
                 "plot_settings": {
