@@ -99,17 +99,18 @@ class PlotResults(luigi.Task):
         return PlotEngine()
 
     @property
-    def plot_functions(self) -> Dict[str, Callable]:
-        value_columns = [self.product_id_column, self.receipt_text_column]
+    def plot_settings(self) -> Dict[str, Callable]:
         return {
             # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
             "unique_coicop_values_per_coicop": [{
+                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_coicop.png",
                 "plot_type": "bar_chart",
                 "x_column": self.coicop_column,
                 "y_column": self.receipt_text_column,
                 "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}",
             },
                 {
+                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_product_values_per_coicop.png",
                 "plot_type": "bar_chart",
                 "x_column": self.coicop_column,
                 "y_column": self.product_id_column,
@@ -117,6 +118,7 @@ class PlotResults(luigi.Task):
             },
             ],
             "unique_column_values_per_period": [{
+                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_{self.period_column}.png",
                 "plot_type": "line_chart",
                 "x_column": self.period_column,
                 "y_column": self.receipt_text_column,
@@ -124,6 +126,7 @@ class PlotResults(luigi.Task):
             },
                 {
                 "plot_type": "line_chart",
+                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_product_values_per_{self.period_column}.png",
                 "x_column": self.period_column,
                 "y_column": self.product_id_column,
                 "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
@@ -142,10 +145,10 @@ class PlotResults(luigi.Task):
     def output(self):
         return {function_name:
                 luigi.LocalTarget(os.path.join(
-                    self.output_directory, f"{function_name}_{i}.png"), format=luigi.format.Nop)
+                    self.output_directory, settings["filename"]), format=luigi.format.Nop)
                 for function_name in self.input().keys()
-                if function_name in self.plot_functions.keys()
-                for i in range(len(self.plot_functions[function_name]))
+                if function_name in self.plot_settings.keys()
+                for settings in self.plot_settings[function_name]
                 }
 
     def run(self):
@@ -154,17 +157,19 @@ class PlotResults(luigi.Task):
                 dataframe = pd.read_parquet(
                     input_file, engine=self.parquet_engine)
 
-                if function_name not in self.plot_functions:
+                if function_name not in self.plot_settings:
                     continue
-                plot_settings = self.plot_functions[function_name]
+                plot_settings = self.plot_settings[function_name]
                 if isinstance(plot_settings, list):
                     for plot_setting in plot_settings:
+                        plot_settings.pop("filename")
                         with self.output()[function_name].open("w") as output_file:
                             figure = self.plot_engine.plot_settings(
                                 dataframe, plot_setting)
                             figure.save(output_file)
                 else:
                     with self.output()[function_name].open("w") as output_file:
+                        plot_settings.pop("filename")
                         figure = self.plot_engine.plot_settings(
                             dataframe, plot_settings)
                         figure.save(output_file)
