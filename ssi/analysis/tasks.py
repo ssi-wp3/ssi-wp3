@@ -107,6 +107,7 @@ class AllStoresAnalysis(luigi.WrapperTask):
                         self.output_directory, store_name)
                     output_directory = os.path.join(
                         output_directory, coicop_column)
+                    os.makedirs(output_directory, exist_ok=True)
 
                     yield StoreProductAnalysis(
                         input_filename=filename,
