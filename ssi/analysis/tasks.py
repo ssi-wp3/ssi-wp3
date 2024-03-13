@@ -150,6 +150,9 @@ class PlotResults(luigi.Task):
     def run(self):
         value_columns = [self.product_id_column, self.receipt_text_column]
         for function_name, input in self.input().items():
+            if function_name not in self.plot_settings:
+                continue
+
             with input.open("r") as input_file:
                 dataframe = pd.read_parquet(
                     input_file, engine=self.parquet_engine)
