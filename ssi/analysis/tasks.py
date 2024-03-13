@@ -126,16 +126,6 @@ class PlotResults(luigi.Task):
                 },
             },
             "texts_per_ean_histogram": {
-                "pivot": True,
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_texts_per_ean_histogram.png",
-                "plot_settings": {
-                    "plot_type": "bar_chart",
-                    "x_column": "receipt_text",
-                    "y_column": "count",
-                    "title": f"Unique receipt texts per EAN for {self.store_name}",
-                },
-            },
-            "texts_per_ean_histogram": {
                 "pivot": False,
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_texts_per_ean_histogram.png",
                 "plot_settings": {
