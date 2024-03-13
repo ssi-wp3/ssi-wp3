@@ -183,6 +183,9 @@ class AddReceiptTexts(luigi.Task):
         parquet_engine : str
             The parquet engine to use to write the data to disk.
         """
+        # TODO merge uses inner join by default; however there are more EANs that receipt texts, that can not
+        # be the case when using inner join. Check which files are used for analysis. And check if there are EANs
+        # with missing receipt texts.
         with self.input()[1].open("r") as receipt_texts_file:
             receipt_texts = pd.read_parquet(
                 receipt_texts_file, engine=parquet_engine)
