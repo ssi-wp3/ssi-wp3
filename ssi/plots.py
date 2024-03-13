@@ -34,7 +34,7 @@ class PlotBackend(ABC):
             pass
 
         @abstractmethod
-        def save(self, filename: str):
+        def save(self, filename: str, format: str):
             pass
 
     class PlotType(Enum):
@@ -181,8 +181,8 @@ class PlotlyBackend(PlotBackend):
         def show(self):
             self.figure.show()
 
-        def save(self, filename: str, write_html: bool = False):
-            if write_html:
+        def save(self, filename: str, format: str = "png"):
+            if format == "html":
                 self.figure.write_html(filename)
             else:
                 self.figure.write_image(filename)
