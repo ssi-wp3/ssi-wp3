@@ -101,6 +101,7 @@ class PlotResults(luigi.Task):
 
     @property
     def plot_settings(self) -> Dict[str, Any]:
+        # TODO Plus plots start at 202203 instead of 202107, what happened?
         return {
             # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
             "unique_coicop_values_per_coicop": {
