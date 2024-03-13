@@ -161,7 +161,8 @@ class PlotResults(luigi.Task):
         return output_dict
 
     def extract_plot_specific_settings(self, settings: Dict[str, str]) -> Dict[str, str]:
-        return {key: value for key, value in settings.items() if key not in ["filename"]}
+        filter_columns = ["filename", "pivot"]
+        return {key: value for key, value in settings.items() if key not in filter_columns}
 
     def run(self):
         value_columns = [self.product_id_column, self.receipt_text_column]
