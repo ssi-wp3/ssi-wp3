@@ -154,6 +154,24 @@ class PlotResults(luigi.Task):
                     "title": f"Unique receipt texts per EAN for {self.store_name} (Log scale)"
                 },
             },
+            "receipt_length_histogram": {
+                "pivot": False,
+                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_receipt_length_histogram.png",
+                "plot_settings": {
+                    "plot_type": "bar_chart",
+                    "x_column": "receipt_text_length",
+                    "title": f"Receipt text length histogram for {self.store_name}"
+                },
+            },
+            "ean_length_histogram": {
+                "pivot": False,
+                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_ean_length_histogram.png",
+                "plot_settings": {
+                    "plot_type": "bar_chart",
+                    "x_column": "product_id_length",
+                    "title": f"EAN length histogram for {self.store_name}"
+                },
+            },
             "compare_products_per_period": {
                 "pivot": True,
                 "value_columns": [
@@ -173,8 +191,7 @@ class PlotResults(luigi.Task):
             },
             # "compare_products_per_period_coicop_level":{
 
-            # "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
-            # "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
+
         }
 
     def output(self):
