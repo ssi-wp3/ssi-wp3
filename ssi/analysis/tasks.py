@@ -155,6 +155,8 @@ class PlotResults(luigi.Task):
                     output_dict[function_name] = luigi.LocalTarget(os.path.join(
                         self.output_directory, plot_settings["filename"]), format=luigi.format.Nop)
 
+        return output_dict
+
     def extract_plot_specific_settings(self, settings: Dict[str, str]) -> Dict[str, str]:
         return {key: value for key, value in settings.items() if key not in ["filename"]}
 
