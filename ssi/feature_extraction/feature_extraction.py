@@ -188,7 +188,7 @@ class FeatureExtractorFactory:
                 # HuggingFace feature extractors
                 FeatureExtractorType.hf_all_mini_lm: HuggingFaceFeatureExtractor(
                     'sentence-transformers/all-MiniLM-L6-v2'),
-                FeatureExtractorFactory.hf_labse: HuggingFaceFeatureExtractor(
+                FeatureExtractorType.hf_labse: HuggingFaceFeatureExtractor(
                     'sentence-transformers/LaBSE')
             }
         return self._feature_extractors
