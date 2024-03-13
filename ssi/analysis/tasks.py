@@ -107,6 +107,8 @@ class PlotResults(luigi.Task):
     def plot_settings(self) -> Dict[str, Any]:
         # Plus plots start at 202203 instead of 202107 at calculator, what happened? --> Checks out, Plus receipts
         # start at 202203 earlier plots must have been wrong.
+        # TODO split up in plots that need to be run once for the whole dataset, plots that needt to be run for each
+        # COICOP level, and plots that need to be run for each period.
         # TODO Add sunburst with number of products (EAN/Receipt texts) per coicop
         # TODO Add sunburst with total products sold/revenue?
         return {
