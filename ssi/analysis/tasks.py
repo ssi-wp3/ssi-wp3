@@ -106,44 +106,54 @@ class PlotResults(luigi.Task):
             "unique_coicop_values_per_coicop": {
                 "pivot": True,
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_coicop.png",
-                "plot_type": "bar_chart",
-                "x_column": self.coicop_column,
-                "y_column": "value",
-                "group_column": "group",
-                "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}",
+                "plot_settings": {
+                    "plot_type": "bar_chart",
+                    "x_column": self.coicop_column,
+                    "y_column": "value",
+                    "group_column": "group",
+                    "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}"
+                },
             },
             "unique_column_values_per_period": {
                 "pivot": True,
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_{self.period_column}.png",
-                "plot_type": "line_chart",
-                "x_column": self.period_column,
-                "y_column": "value",
-                "group_column": "group",
-                "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
+                "plot_settings": {
+                    "plot_type": "line_chart",
+                    "x_column": self.period_column,
+                    "y_column": "value",
+                    "group_column": "group",
+                    "title": f"Unique receipt texts per {self.period_column} for {self.store_name}"
+                },
             },
             "texts_per_ean_histogram": {
                 "pivot": True,
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_texts_per_ean_histogram.png",
-                "plot_type": "bar_chart",
-                "x_column": "receipt_text",
-                "y_column": "count",
-                "title": f"Unique receipt texts per EAN for {self.store_name}",
+                "plot_settings": {
+                    "plot_type": "bar_chart",
+                    "x_column": "receipt_text",
+                    "y_column": "count",
+                    "title": f"Unique receipt texts per EAN for {self.store_name}",
+                },
             },
             "texts_per_ean_histogram": {
                 "pivot": False,
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_texts_per_ean_histogram.png",
-                "plot_type": "bar_chart",
-                "x_column": "receipt_text",
-                "y_column": "count",
-                "title": f"Unique receipt texts per EAN for {self.store_name}",
+                "plot_settings": {
+                    "plot_type": "bar_chart",
+                    "x_column": "receipt_text",
+                    "y_column": "count",
+                    "title": f"Unique receipt texts per EAN for {self.store_name}"
+                },
             },
             "log_texts_per_ean_histogram": {
                 "pivot": False,
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_log_texts_per_ean_histogram.png",
-                "plot_type": "bar_chart",
-                "x_column": "receipt_text",
-                "y_column": "count",
-                "title": f"Unique receipt texts per EAN for {self.store_name}",
+                "plot_settings": {
+                    "plot_type": "bar_chart",
+                    "x_column": "receipt_text",
+                    "y_column": "count",
+                    "title": f"Unique receipt texts per EAN for {self.store_name}"
+                },
             },
             # "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
 
@@ -166,10 +176,6 @@ class PlotResults(luigi.Task):
 
         return output_dict
 
-    def extract_plot_specific_settings(self, settings: Dict[str, str]) -> Dict[str, str]:
-        filter_columns = ["filename", "pivot"]
-        return {key: value for key, value in settings.items() if key not in filter_columns}
-
     def run(self):
         value_columns = [self.product_id_column, self.receipt_text_column]
         for function_name, input in self.input().items():
@@ -184,9 +190,9 @@ class PlotResults(luigi.Task):
                     continue
                 plot_settings = self.plot_settings[function_name]
                 if isinstance(plot_settings, list):
-                    for plot_setting in plot_settings:
+                    for settings in plot_settings:
                         self.plot_with_settings(
-                            function_name, dataframe, plot_setting, value_columns)
+                            function_name, dataframe, settings, value_columns)
                 else:
                     self.plot_with_settings(
                         function_name, dataframe, plot_settings, value_columns)
@@ -196,10 +202,8 @@ class PlotResults(luigi.Task):
             dataframe = unpivot(dataframe, value_columns)
 
         with self.output()[function_name].open("w") as output_file:
-            plot_settings = self.extract_plot_specific_settings(
-                plot_settings)
             figure = self.plot_engine.plot_settings(
-                dataframe, plot_settings)
+                dataframe, plot_settings["plot_settings"])
             figure.save(output_file)
 
 
