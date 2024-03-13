@@ -679,8 +679,8 @@ class PlotEngine(PlotBackend):
             The plot figure.
         """
         type = PlotBackend.PlotType[plot_settings.get("plot_type")]
-        plot_settings.pop('plot_type', None)
+        print("here", type)
         if type:
-            return self.plot_backend.plot(dataframe=dataframe, type=type, **plot_settings)
+            return self.plot_backend.plot(dataframe, type, **plot_settings)
         else:
             raise ValueError("Plot type not provided in plot settings")
