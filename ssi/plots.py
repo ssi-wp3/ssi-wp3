@@ -19,11 +19,15 @@ class PlotBackend(ABC):
         """
 
         def __init__(self, figure):
-            self.figure = figure
+            self._figure = figure
 
         @property
         def figure(self):
             return self._figure
+
+        @figure.setter
+        def figure(self, figure):
+            self._figure = figure
 
         @abstractmethod
         def show(self):
