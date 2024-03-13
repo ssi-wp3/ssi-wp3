@@ -118,14 +118,14 @@ class PlotResults(luigi.Task):
             ],
             "unique_column_values_per_period": [{
                 "plot_type": "line_chart",
-                "x_column": "$index",
+                "x_column": self.period_column,
                 "y_column": self.receipt_text_column,
                 "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
             },
                 {
                 "plot_type": "line_chart",
                 "x_column": "$index",
-                "y_column": self.product_id_column,
+                "y_column": self.period_column,
                 "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
             },
 
