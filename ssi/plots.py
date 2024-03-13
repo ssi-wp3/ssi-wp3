@@ -669,6 +669,9 @@ class PlotEngine(PlotBackend):
         plot_settings : Dict[str, Any]
             The plot settings to use to create the plot.
 
+        output_file : Any
+
+
         Returns
         -------
         PlotBackend.FigureWrapper

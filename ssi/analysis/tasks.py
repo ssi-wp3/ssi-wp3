@@ -146,12 +146,14 @@ class PlotResults(luigi.Task):
                 if isinstance(plot_settings, list):
                     for plot_setting in plot_settings:
                         with self.output()[function_name].open("w") as output_file:
-                            self.plot_engine.plot(
-                                dataframe, plot_setting, output_file)
+                            figure = self.plot_engine.plot(
+                                dataframe, plot_setting)
+                            figure.save(output_file)
                 else:
                     with self.output()[function_name].open("w") as output_file:
-                        self.plot_engine.plot(
-                            dataframe, plot_settings, output_file)
+                        figure = self.plot_engine.plot(
+                            dataframe, plot_settings)
+                        figure.save(output_file)
 
 
 class AllStoresAnalysis(luigi.WrapperTask):
