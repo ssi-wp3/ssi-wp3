@@ -142,7 +142,7 @@ class PlotResults(luigi.Task):
                     "plot_type": "bar_chart",
                     "x_column": "receipt_text",
                     "y_column": "count",
-                    "title": f"Unique receipt texts per EAN for {self.store_name}"
+                    "title": f"Unique receipt texts per EAN for {self.store_name} (Log scale)"
                 },
             },
             # "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
