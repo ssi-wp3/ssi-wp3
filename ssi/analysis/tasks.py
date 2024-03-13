@@ -116,8 +116,20 @@ class PlotResults(luigi.Task):
                 "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}",
             },
             ],
+            "unique_column_values_per_period": [{
+                "plot_type": "line_chart",
+                "x_column": self.period_column,
+                "y_column": self.receipt_text_column,
+                "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
+            },
+                {
+                "plot_type": "line_chart",
+                "x_column": self.period_column,
+                "y_column": self.product_id_column,
+                "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
+            },
 
-            # "unique_column_values_per_period": lambda file, dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
+            ]
             # "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             # "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             # "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),

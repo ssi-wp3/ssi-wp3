@@ -1,0 +1,5 @@
+plots:
+  unique_coicop_values_per_coicop:
+    plot_type: bar_chart
+    x_column:
+    title: Unique COICOP values per COICOP
