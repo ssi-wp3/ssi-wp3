@@ -124,8 +124,8 @@ class PlotResults(luigi.Task):
             },
                 {
                 "plot_type": "line_chart",
-                "x_column": "$index",
-                "y_column": self.period_column,
+                "x_column": self.period_column,
+                "y_column": self.product_id_column,
                 "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
             },
 
