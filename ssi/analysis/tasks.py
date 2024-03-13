@@ -114,7 +114,7 @@ class PlotResults(luigi.Task):
                 "plot_type": "bar_chart",
                 "x_column": self.coicop_column,
                 "y_column": self.product_id_column,
-                "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}",
+                "title": f"Unique EANs per {self.coicop_column} for {self.store_name}",
             },
             ],
             "unique_column_values_per_period": [{
@@ -129,7 +129,7 @@ class PlotResults(luigi.Task):
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_product_values_per_{self.period_column}.png",
                 "x_column": self.period_column,
                 "y_column": self.product_id_column,
-                "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
+                "title": f"Unique EANs per {self.period_column} for {self.store_name}",
             },
 
             ]
