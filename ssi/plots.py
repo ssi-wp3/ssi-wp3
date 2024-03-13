@@ -199,7 +199,7 @@ class PlotlyBackend(PlotBackend):
                   dataframe: pd.DataFrame,
                   x_column: str,
                   y_column: str,
-                  group_column: str,
+                  group_column: Optional[str] = None,
                   title: str = None
                   ) -> PlotBackend.FigureWrapper:
         return self.__figure_wrapper_for(
@@ -370,7 +370,7 @@ class PlotEngine(PlotBackend):
                   dataframe: pd.DataFrame,
                   x_column: str,
                   y_column: str,
-                  group_column: str,
+                  group_column: Optional[str] = None,
                   title: str = None
                   ) -> PlotBackend.FigureWrapper:
         """ Create a bar chart with the given dataframe and x and y columns.
