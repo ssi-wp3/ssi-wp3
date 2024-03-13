@@ -159,7 +159,7 @@ class PlotResults(luigi.Task):
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_receipt_length_histogram.png",
                 "plot_settings": {
                     "plot_type": "bar_chart",
-                    "x_column": "receipt_text_length",
+                    "x_column": self.receipt_text_column,
                     "y_column": "count",
                     "title": f"Receipt text length histogram for {self.store_name}"
                 },
@@ -169,7 +169,7 @@ class PlotResults(luigi.Task):
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_ean_length_histogram.png",
                 "plot_settings": {
                     "plot_type": "bar_chart",
-                    "x_column": "product_id_length",
+                    "x_column": self.product_id_column,
                     "y_column": "count",
                     "title": f"EAN length histogram for {self.store_name}"
                 },
