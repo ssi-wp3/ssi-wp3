@@ -49,10 +49,9 @@ class StoreProductAnalysis(luigi.Task):
         return StoreFile(self.input_filename)
 
     def output(self):
-        products_directory = os.path.join(self.output_directory, "products")
         return {function_name:
                 luigi.LocalTarget(os.path.join(
-                    products_directory, self._get_store_analysis_filename(function_name)), format=luigi.format.Nop)
+                    self.output_directory, self._get_store_analysis_filename(function_name)), format=luigi.format.Nop)
                 for function_name in self.product_analysis_functions.keys()}
 
     def _get_store_analysis_filename(self, function_name: str):
@@ -104,7 +103,9 @@ class AllStoresAnalysis(luigi.WrapperTask):
                     store_name = get_store_name_from_combined_filename(
                         filename)
                     output_directory = os.path.join(
-                        self.output_directory, store_name)
+                        self.output_directory, "products")
+                    output_directory = os.path.join(
+                        output_directory, store_name)
                     output_directory = os.path.join(
                         output_directory, coicop_column)
                     os.makedirs(output_directory, exist_ok=True)
