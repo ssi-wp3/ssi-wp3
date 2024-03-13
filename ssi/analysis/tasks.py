@@ -139,6 +139,9 @@ class PlotResults(luigi.Task):
             with input.open("r") as input_file:
                 dataframe = pd.read_parquet(
                     input_file, engine=self.parquet_engine)
+
+                if function_name not in self.plot_functions:
+                    continue
                 plot_settings = self.plot_functions[function_name]
                 if isinstance(plot_settings, list):
                     for plot_setting in plot_settings:
