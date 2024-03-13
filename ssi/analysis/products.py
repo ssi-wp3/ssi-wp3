@@ -91,7 +91,7 @@ def unique_column_values_per_period(dataframe: pd.DataFrame,
         A dataframe containing the number of unique column values per period.
     """
 
-    return dataframe.groupby(by=[period_column])[value_columns].nunique()
+    return dataframe.groupby(by=[period_column])[value_columns].nunique().reset_index()
 
 
 def texts_per_ean_histogram(dataframe: pd.DataFrame,
