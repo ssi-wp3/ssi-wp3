@@ -102,7 +102,7 @@ class HuggingFaceFeatureExtractor:
     All sentence transformers on HuggingFace can be used as feature extractors using this class.
     """
 
-    def __init__(self, model_name: str, device: str = "cuda:0"):
+    def __init__(self, model_name: str, device: str = "cuda:0", batch_size: int = 1000):
         """ Constructor for the HuggingFaceFeatureExtractor class.
 
         Parameters
@@ -115,6 +115,7 @@ class HuggingFaceFeatureExtractor:
         """
         self.__model = model_name
         self.__device = device
+        self.__batch_size = batch_size
 
     @property
     def model(self):
@@ -123,6 +124,10 @@ class HuggingFaceFeatureExtractor:
     @property
     def device(self):
         return self.__device
+
+    @property
+    def batch_size(self):
+        return self.__batch_size
 
     def fit(self, X, y, **fit_params):
         pass
@@ -143,7 +148,7 @@ class HuggingFaceFeatureExtractor:
         embedding_model = SentenceTransformer(self.model)
         embedding_model.to(self.device)
         embedding = embedding_model.encode(
-            X.values.tolist(), convert_to_tensor=True)
+            X.values.tolist(), convert_to_tensor=True, batch_size=self.batch_size)
         return embedding.cpu().detach().numpy()
 
     def fit_transform(self, X, y=None, **fit_params):
