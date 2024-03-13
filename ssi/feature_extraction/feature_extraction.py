@@ -239,6 +239,7 @@ class FeatureExtractorFactory:
             if i == 0:
                 pq_writer = pq.ParquetWriter(filename, table.schema)
             pq_writer.write_table(table)
+            progress_bar.update(batch_size)
 
         if pq_writer:
             pq_writer.close()
