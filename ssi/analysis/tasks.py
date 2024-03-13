@@ -1,4 +1,5 @@
 from typing import Dict, Callable
+from .utils import unpivot
 from .files import get_combined_revenue_files_in_directory
 from .products import *
 from .text_analysis import string_length_histogram
@@ -102,37 +103,23 @@ class PlotResults(luigi.Task):
     def plot_settings(self) -> Dict[str, Callable]:
         return {
             # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
-            "unique_coicop_values_per_coicop": [{
+            "unique_coicop_values_per_coicop": {
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_coicop.png",
                 "plot_type": "bar_chart",
                 "x_column": self.coicop_column,
-                "y_column": self.receipt_text_column,
+                "y_column": "value",
+                "group_column": "group",
                 "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}",
             },
-                {
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_product_values_per_coicop.png",
-                "plot_type": "bar_chart",
-                "x_column": self.coicop_column,
-                "y_column": self.product_id_column,
-                "title": f"Unique EANs per {self.coicop_column} for {self.store_name}",
-            },
-            ],
-            "unique_column_values_per_period": [{
+            "unique_column_values_per_period": {
                 "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_{self.period_column}.png",
                 "plot_type": "line_chart",
                 "x_column": self.period_column,
-                "y_column": self.receipt_text_column,
+                "y_column": "value",
+                "group_column": "group",
                 "title": f"Unique receipt texts per {self.period_column} for {self.store_name}",
-            },
-                {
-                "plot_type": "line_chart",
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_product_values_per_{self.period_column}.png",
-                "x_column": self.period_column,
-                "y_column": self.product_id_column,
-                "title": f"Unique EANs per {self.period_column} for {self.store_name}",
-            },
+            }
 
-            ]
             # "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             # "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             # "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
@@ -161,11 +148,12 @@ class PlotResults(luigi.Task):
         return {key: value for key, value in settings.items() if key not in ["filename"]}
 
     def run(self):
+        value_columns = [self.product_id_column, self.receipt_text_column]
         for function_name, input in self.input().items():
             with input.open("r") as input_file:
                 dataframe = pd.read_parquet(
                     input_file, engine=self.parquet_engine)
-
+                dataframe = unpivot(dataframe, value_columns)
                 if function_name not in self.plot_settings:
                     continue
                 plot_settings = self.plot_settings[function_name]
