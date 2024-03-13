@@ -130,8 +130,10 @@ class PlotResults(luigi.Task):
     def output(self):
         return {function_name:
                 luigi.LocalTarget(os.path.join(
-                    self.output_directory, f"{function_name}.png"), format=luigi.format.Nop)
+                    self.output_directory, f"{function_name}_{i}.png"), format=luigi.format.Nop)
                 for function_name in self.input().keys()
+                for i in range(len(self.plot_functions[function_name]))
+                if function_name in self.plot_functions.keys()
                 }
 
     def run(self):
