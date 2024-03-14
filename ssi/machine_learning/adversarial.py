@@ -99,11 +99,13 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
     object
         The trained model
     """
+    print("Creating combined dataframe")
     combined_dataframe = create_combined_dataframe(
         store1_dataframe, store2_dataframe, store_id_column, receipt_text_column)
+    print("Filtering unique combinations")
     unique_dataframe = filter_unique_combinations(
         combined_dataframe, store_id_column, receipt_text_column)
-
+    print("Training and evaluating model")
     pipeline, evaluation_dict = train_and_evaluate_model(unique_dataframe,
                                                          receipt_text_column,
                                                          store_id_column,
