@@ -201,6 +201,55 @@ class StoreProductAnalysis(luigi.Task):
             "period_coicop": os.path.join(store_directory, "period_coicops")
         }
 
+    def requires(self):
+        return {
+            "table": TableAnalysis(
+                input_filename=self.input_filename,
+                output_directory=self.directories["table"],
+                parquet_engine=self.parquet_engine,
+                store_name=self.store_name,
+                receipt_text_column=self.receipt_text_column,
+                product_id_column=self.product_id_column,
+                amount_column=self.amount_column,
+                revenue_column=self.revenue_column,
+                coicop_columns=self.coicop_column
+            ),
+            "period": PeriodAnalysis(
+                input_filename=self.input_filename,
+                output_directory=self.directories["period"],
+                parquet_engine=self.parquet_engine,
+                store_name=self.store_name,
+                period_column=self.period_column,
+                receipt_text_column=self.receipt_text_column,
+                product_id_column=self.product_id_column,
+                amount_column=self.amount_column,
+                revenue_column=self.revenue_column
+            ),
+            "coicop": CoicopAnalysis(
+                input_filename=self.input_filename,
+                output_directory=self.directories["coicop"],
+                parquet_engine=self.parquet_engine,
+                store_name=self.store_name,
+                coicop_column=self.coicop_column,
+                product_id_column=self.product_id_column,
+                receipt_text_column=self.receipt_text_column,
+                amount_column=self.amount_column,
+                revenue_column=self.revenue_column
+            ),
+            "period_coicop": CoicopPeriodAnalysis(
+                input_filename=self.input_filename,
+                output_directory=self.directories["period_coicop"],
+                parquet_engine=self.parquet_engine,
+                store_name=self.store_name,
+                period_column=self.period_column,
+                coicop_column=self.coicop_column,
+                product_id_column=self.product_id_column,
+                receipt_text_column=self.receipt_text_column,
+                amount_column=self.amount_column,
+                revenue_column=self.revenue_column
+            )
+        }
+
 
 class PlotResults(luigi.Task):
     input_filename = luigi.PathParameter()
