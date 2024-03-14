@@ -3,6 +3,7 @@ from typing import Dict, Callable, Any
 from .utils import unpivot
 from .files import get_combined_revenue_files_in_directory
 from .products import *
+from .revenue import *
 from .text_analysis import string_length_histogram
 from ..preprocessing.files import get_store_name_from_combined_filename
 from ..plots import PlotEngine
@@ -57,19 +58,12 @@ class BaseStoreAnalysisTask(luigi.Task, metaclass=ABCMeta):
                         output_file, engine=self.parquet_engine)
 
 
-class StoreProductAnalysis(BaseStoreAnalysisTask):
+class TableAnalysis(BaseStoreAnalysisTask):
     """ This task analyzes the store product inventory and dynamics.
 
     """
-    input_filename = luigi.PathParameter()
-    output_directory = luigi.PathParameter()
-    parquet_engine = luigi.Parameter(default="pyarrow")
-
-    store_name = luigi.Parameter()
-    period_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
     product_id_column = luigi.Parameter()
-    coicop_column = luigi.Parameter()
 
     @property
     def analysis_functions(self) -> Dict[str, Callable]:
@@ -81,14 +75,85 @@ class StoreProductAnalysis(BaseStoreAnalysisTask):
             "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
             "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
+        }
 
-            # Grouped per coicop
-            "unique_coicop_values_per_coicop": lambda dataframe: unique_column_values_per_coicop(dataframe, self.coicop_column, value_columns),
+    def get_store_analysis_filename(self, function_name: str) -> str:
+        return f"{self.store_name}_analysis_{function_name}.parquet"
 
+    def log_analysis_status(self, function_name):
+        print(
+            f"Running {function_name} for {self.store_name}")
+
+
+class PeriodAnalysis(BaseStoreAnalysisTask):
+    """ This task analyzes the revenue data for a certain supermarket.
+    """
+    period_column = luigi.Parameter()
+    product_id_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    revenue_column = luigi.Parameter()
+    amount_column = luigi.Parameter()
+
+    @property
+    def analysis_functions(self) -> Dict[str, Callable]:
+        value_columns = [self.product_id_column, self.receipt_text_column]
+        return {
             # Per period
             "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
-            "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
+            "total_revenue_per_period": lambda dataframe: total_revenue_per_period(dataframe, self.period_column, self.amount_column, self.revenue_column),
             "unique_column_values_per_period": lambda dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
+        }
+
+    def get_store_analysis_filename(self, function_name: str) -> str:
+        return f"{self.store_name}_{self.period_column}_analysis_{function_name}.parquet"
+
+    def log_analysis_status(self, function_name):
+        print(
+            f"Running {function_name} for {self.store_name}, period column: {self.period_column}")
+
+
+class CoicopAnalysis(BaseStoreAnalysisTask):
+    coicop_column = luigi.Parameter()
+    product_id_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    amount_column = luigi.Parameter()
+    revenue_column = luigi.Parameter()
+
+    @property
+    def analysis_functions(self) -> Dict[str, Callable]:
+        value_columns = [self.product_id_column, self.receipt_text_column]
+        return {
+            # Grouped per coicop
+            "unique_coicop_values_per_coicop": lambda dataframe: unique_column_values_per_coicop(dataframe, self.coicop_column, value_columns),
+            "revenue_for_coicop_hierarchy": lambda dataframe: revenue_for_coicop_hierarchy(dataframe, self.coicop_column, self.amount_column, self.revenue_column),
+
+        }
+
+    def get_store_analysis_filename(self, function_name: str) -> str:
+        return f"{self.store_name}_{self.coicop_column}_analysis_{function_name}.parquet"
+
+    def log_analysis_status(self, function_name):
+        print(
+            f"Running {function_name} for {self.store_name}, coicop column: {self.coicop_column}")
+
+
+class CoicopPeriodAnalysis(BaseStoreAnalysisTask):
+    """ This task analyzes the revenue data for a certain supermarket.
+    """
+    period_column = luigi.Parameter()
+    coicop_column = luigi.Parameter()
+    product_id_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    revenue_column = luigi.Parameter()
+    amount_column = luigi.Parameter()
+
+    @property
+    def analysis_functions(self) -> Dict[str, Callable]:
+        value_columns = [self.product_id_column, self.receipt_text_column]
+        return {
+            "total_revenue_per_coicop_and_period": lambda dataframe: total_revenue_per_coicop_and_period(dataframe, self.period_column, self.coicop_column, self.amount_column, self.revenue_column),
+            "revenue_for_coicop_hierarchy": lambda dataframe: revenue_for_coicop_hierarchy(dataframe, self.coicop_column, self.amount_column, self.revenue_column),
+            "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
         }
 
     def get_store_analysis_filename(self, function_name: str) -> str:
@@ -99,27 +164,8 @@ class StoreProductAnalysis(BaseStoreAnalysisTask):
             f"Running {function_name} for {self.store_name}, period column: {self.period_column}, coicop column: {self.coicop_column}")
 
 
-class RevenueAnalysis(luigi.Task):
-    """ This task analyzes the revenue data for a certain supermarket.
-    """
-    input_filename = luigi.PathParameter()
-    output_directory = luigi.PathParameter()
-    parquet_engine = luigi.Parameter(default="pyarrow")
-
-    store_name = luigi.Parameter()
-    period_column = luigi.Parameter()
-    revenue_column = luigi.Parameter()
-    amount_column = luigi.Parameter()
-    coicop_column = luigi.Parameter()
-
-    def requires(self):
-        return super().requires()
-
-    def output(self):
-        pass
-
-    def run(self):
-        pass
+class StoreProductAnalysis(BaseStoreAnalysisTask):
+    pass
 
 
 class PlotResults(luigi.Task):
