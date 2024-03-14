@@ -1,5 +1,73 @@
-plots:
-  unique_coicop_values_per_coicop:
-    plot_type: bar_chart
-    x_column:
-    title: Unique COICOP values per COICOP
+result_settings:
+  unique_coicop_values_per_coicop: 
+      pivot: true
+      value_columns: 
+        - product_id_column
+        - receipt_text_column
+      filename: "{store_name}_period_column}_coicop_column}_unique_receipt_values_per_coicop.png"
+      plot_settings: 
+          plot_type: bar_chart
+          x_column: {{coicop_column}}
+          y_column: value
+          group_column: group
+          title: Unique receipt texts per {{coicop_column}} for {{store_name}}
+  unique_column_values_per_period: 
+      pivot: true
+      value_columns: 
+        - {{product_id_column}} 
+        - {{receipt_text_column}}
+      filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_unique_receipt_values_per_period_column}.png"
+      plot_settings: 
+          plot_type: line_chart
+          x_column: {{period_column}}
+          y_column: value
+          group_column: group
+          title: Unique receipt texts per {{period_column}} for {{store_name}}
+  texts_per_ean_histogram: 
+      pivot: false
+      filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_texts_per_ean_histogram.png"
+      plot_settings: 
+          plot_type: bar_chart
+          x_column: {{receipt_text_column}}
+          y_column: count
+          title: Unique receipt texts per EAN for {{store_name}}
+  log_texts_per_ean_histogram: 
+      pivot: false
+      filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_log_texts_per_ean_histogram.png"
+      plot_settings: 
+          plot_type: bar_chart
+          x_column: receipt_text
+          y_column: count
+          title: Unique receipt texts per EAN for {{store_name}} (Log scale)
+  receipt_length_histogram: 
+      pivot: false
+      filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_receipt_length_histogram.png"
+      plot_settings: 
+          plot_type: bar_chart
+          x_column: receipt_text_column
+          y_column: count
+          title: Receipt text length histogram for {{store_name}}
+  ean_length_histogram: 
+      pivot: false
+      filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_ean_length_histogram.png"
+      plot_settings: 
+          plot_type: bar_chart
+          x_column: {{product_id_column}}
+          y_column: count
+          title: EAN length histogram for {{store_name}}
+  compare_products_per_period: 
+      pivot: true
+      value_columns: 
+        - number_{{receipt_text_column}}_introduced
+        - number_{{receipt_text_column}}_removed
+        - number_{{product_id_column}}_introduced
+        - number_{{product_id_column}}_removed
+      filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_compare_products_per_period.png"
+      plot_settings: 
+          plot_type: line_chart
+          x_column: {{period_column}}
+          y_column: value
+          group_column: group
+          title: Number of products introduced/removed per {{period_column}} for {{store_name}}
+      
+  
