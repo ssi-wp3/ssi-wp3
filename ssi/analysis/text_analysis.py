@@ -136,6 +136,33 @@ def unique_split_words(dataframe: pd.DataFrame, text_column: str, delimiter: str
     return set(split_words(dataframe, text_column, delimiter).values.flatten().tolist())
 
 
+def unique_split_words_length_histogram(dataframe: pd.DataFrame, text_column: str, delimiter: str = " ") -> pd.DataFrame:
+    """Splits the words in a text column and returns a histogram of the string lengths of the words.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    text_column : str
+        The column to split
+
+    delimiter : str
+        The delimiter to split the text column on
+
+    Returns
+    -------
+
+    pd.DataFrame
+        A dataframe with a histogram of the string lengths of the words. The first column
+        will be the string length and the second column will be the count of words with that length.
+    """
+    split_words = unique_split_words(dataframe, text_column, delimiter)
+    return pd.DataFrame({
+        "word_length": [len(word) for word in split_words]
+    }).value_counts().sort_index().reset_index().rename(columns={0: "count"})
+
+
 def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int = 80):
     """ Writes a set of texts to a file """
     with open(filename, "w") as text_file:
