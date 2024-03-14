@@ -181,7 +181,7 @@ def revenue_for_coicop_hierarchy(dataframe: pd.DataFrame,
         This dataframe can be used to create sunburst plot of the product revenue.          
     """
     print("Dataframe columns: ", dataframe.columns)
-    return dataframe.groupby(coicop_columns).apply(lambda x: total_revenue(x, amount_column, revenue_column)).reset_index()
+    return dataframe.groupby(["coicop_level_1", "coicop_level_2", "coicop_level_3", "coicop_level_4", "coicop_number"]).apply(lambda x: total_revenue(x, amount_column, revenue_column)).reset_index()
 
 
 def product_revenue_versus_lifetime(dataframe: pd.DataFrame,
