@@ -178,7 +178,7 @@ class CoicopPeriodAnalysis(BaseStoreAnalysisTask):
             f"Running {function_name} for {self.store_name}, period column: {self.period_column}, coicop column: {self.coicop_column}")
 
 
-class PerStoreAnalysis(luigi.Task):
+class PerStoreAnalysis(luigi.WrapperTask):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     parquet_engine = luigi.Parameter(default="pyarrow")
@@ -387,7 +387,6 @@ class PlotResults(luigi.Task):
         }
 
     def output(self):
-        print(f"Inputs: {self.input()}")
         output_dict = dict()
         for function_name in self.input().keys():
             if function_name in self.plot_settings:
@@ -403,7 +402,6 @@ class PlotResults(luigi.Task):
         return output_dict
 
     def run(self):
-        print(f"Inputs: {self.input()}")
         for function_name, input in self.input().items():
             if function_name not in self.plot_settings:
                 continue
