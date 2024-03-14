@@ -674,7 +674,7 @@ class PlotEngine(PlotBackend):
                                                            dimension_titles, title, color_continuous_scale,
                                                            color_continuous_midpoint)
 
-    def plot_settings(self, dataframe: pd.DataFrame, plot_settings: Dict[str, Any]) -> PlotBackend.FigureWrapper:
+    def plot_from_settings(self, dataframe: pd.DataFrame, plot_settings: Dict[str, Any]) -> PlotBackend.FigureWrapper:
         """ Create a plot with the given dataframe and plot settings.
 
         Parameters

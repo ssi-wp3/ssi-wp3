@@ -431,7 +431,7 @@ class PlotResults(luigi.Task):
             dataframe = unpivot(dataframe, value_columns)
 
         with self.output()[function_name].open("w") as output_file:
-            figure = self.plot_engine.plot_settings(
+            figure = self.plot_engine.plot_from_settings(
                 dataframe, plot_settings["plot_settings"])
             figure.save(output_file)
 
