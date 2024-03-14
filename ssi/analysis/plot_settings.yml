@@ -1,8 +1,6 @@
 result_settings:
-  
-  
- 
   # Analysis for whole store
+
   texts_per_ean_histogram: 
       pivot: false
       filename: "{{store_name}}_texts_per_ean_histogram.png"
@@ -52,6 +50,7 @@ result_settings:
           x_column: {{product_id_column}}
           y_column: {{revenue_column}}
           title: Product revenue versus lifetime for {{store_name}}
+  
   # Analysis per COICOP
 
   unique_coicop_values_per_coicop: 
@@ -68,6 +67,7 @@ result_settings:
           title: Unique receipt texts per {{coicop_column}} for {{store_name}}
 
   # Analysis per period
+  
   unique_column_values_per_period: 
       pivot: true
       value_columns: 
