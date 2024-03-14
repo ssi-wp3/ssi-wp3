@@ -274,6 +274,7 @@ class PerStoreAnalysis(luigi.Task):
                                  amount_column=self.amount_column,
                                  revenue_column=self.revenue_column,
                                  coicop_column=self.coicop_column,
+                                 coicop_columns=list(self.coicop_columns)
                                  )
 
         return settings

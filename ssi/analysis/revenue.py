@@ -197,8 +197,8 @@ def product_revenue_versus_lifetime(dataframe: pd.DataFrame,
     dataframe : pd.DataFrame
         The dataframe containing the revenue data.
 
-    lifetime_column : str
-        The name of the column containing the lifetime.   
+    product_id_column : str
+        The name of the column containing the product id.   
 
     amount_column : str
         The name of the column containing the amount of products.
