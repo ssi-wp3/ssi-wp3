@@ -464,10 +464,6 @@ class AllStoresAnalysis(luigi.WrapperTask):
                         filename)
                     output_directory = os.path.join(
                         self.output_directory, "products")
-                    output_directory = os.path.join(
-                        output_directory, store_name)
-                    output_directory = os.path.join(
-                        output_directory, coicop_column)
                     os.makedirs(output_directory, exist_ok=True)
 
                     yield PlotResults(
