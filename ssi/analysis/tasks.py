@@ -183,7 +183,7 @@ class PerStoreAnalysis(luigi.WrapperTask):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     plot_settings_filename = luigi.Parameter(default=os.path.join(
-        os.path.dirname(__file__), "plot_settings.yaml"))
+        os.path.dirname(__file__), "plot_settings.yml"))
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     store_name = luigi.Parameter()
