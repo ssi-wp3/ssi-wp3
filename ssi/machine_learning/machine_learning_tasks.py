@@ -63,6 +63,7 @@ class TrainAdversarialModelTask(luigi.Task):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
         with input()[0].open("r") as store1_file, input()[1].open("r") as store2_file:
+            print("Reading parquet files")
             store1_dataframe = pd.read_parquet(
                 store1_file, engine=self.parquet_engine)
             store1_dataframe[self.store_id_column] = store1
@@ -70,6 +71,7 @@ class TrainAdversarialModelTask(luigi.Task):
                 store2_file, engine=self.parquet_engine)
             store2_dataframe[self.store_id_column] = store2
 
+            print("Training adversarial model")
             pipeline, evaluation_dict = train_adversarial_model(store1_dataframe,
                                                                 store2_dataframe,
                                                                 self.store_id_column,
