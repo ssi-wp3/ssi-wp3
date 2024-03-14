@@ -387,7 +387,6 @@ class PlotResults(luigi.Task):
         }
 
     def output(self):
-        print(f"Input: {self.input()}")
         output_dict = dict()
         for function_name in self.input().keys():
             if function_name in self.plot_settings:
