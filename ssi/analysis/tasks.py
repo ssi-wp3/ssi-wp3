@@ -264,6 +264,8 @@ class PlotResults(luigi.Task):
     period_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
     product_id_column = luigi.Parameter()
+    amount_column = luigi.Parameter()
+    revenue_column = luigi.Parameter()
     coicop_column = luigi.Parameter()
 
     def requires(self):
@@ -275,6 +277,8 @@ class PlotResults(luigi.Task):
             period_column=self.period_column,
             receipt_text_column=self.receipt_text_column,
             product_id_column=self.product_id_column,
+            amount_column=self.amount_column,
+            revenue_column=self.revenue_column,
             coicop_column=self.coicop_column
         )
 
@@ -446,6 +450,8 @@ class AllStoresAnalysis(luigi.WrapperTask):
     period_columns = luigi.ListParameter()
     receipt_text_column = luigi.Parameter()
     product_id_column = luigi.Parameter()
+    amount_column = luigi.Parameter()
+    revenue_column = luigi.Parameter()
     coicop_columns = luigi.ListParameter()
 
     def requires(self):
@@ -470,5 +476,7 @@ class AllStoresAnalysis(luigi.WrapperTask):
                         period_column=period_column,
                         receipt_text_column=self.receipt_text_column,
                         product_id_column=self.product_id_column,
+                        amount_column=self.amount_column,
+                        revenue_column=self.revenue_column,
                         coicop_column=coicop_column
                     )
