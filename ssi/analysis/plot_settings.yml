@@ -36,7 +36,7 @@ result_settings:
       filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_log_texts_per_ean_histogram.png"
       plot_settings: 
           plot_type: bar_chart
-          x_column: receipt_text
+          x_column: {{receipt_text_column}}
           y_column: count
           title: Unique receipt texts per EAN for {{store_name}} (Log scale)
   receipt_length_histogram: 
@@ -44,7 +44,7 @@ result_settings:
       filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_receipt_length_histogram.png"
       plot_settings: 
           plot_type: bar_chart
-          x_column: receipt_text_column
+          x_column: {{receipt_text_column}}
           y_column: count
           title: Receipt text length histogram for {{store_name}}
   ean_length_histogram: 
