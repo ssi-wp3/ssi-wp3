@@ -2,8 +2,8 @@ result_settings:
   unique_coicop_values_per_coicop: 
       pivot: true
       value_columns: 
-        - product_id_column
-        - receipt_text_column
+        - {{product_id_column}}
+        - {{receipt_text_column}}
       filename: "{store_name}_period_column}_coicop_column}_unique_receipt_values_per_coicop.png"
       plot_settings: 
           plot_type: bar_chart
