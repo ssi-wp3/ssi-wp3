@@ -492,3 +492,60 @@ def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
             number_of_products)
 
     return texts_per_period_coicop_df
+
+
+def product_lifetime_in_periods(dataframe: pd.DataFrame,
+                                product_id_column: str = "ean_number",
+                                period_column: str = "year_month"
+                                ) -> pd.DataFrame:
+    """ This function calculates the lifetime of a product. The lifetime is the number of periods a product is present in the dataframe.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    product_id_column : str
+        The column containing the product id. By default, it is "ean_number".
+        Can also be the receipt text column to see how long a receipt text is present in the dataframe.
+
+    period_column : str
+        The column containing the period information. By default, it is "year_month".
+        Pass a different column name for other periods, for example "year". It's also
+        possible to pass a list of columns to period_column to group by multiple columns.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe containing the lifetime of a product.
+    """
+    return dataframe.groupby(product_id_column)[period_column].nunique().to_frame().reset_index()
+
+
+def product_availability_in_period(dataframe: pd.DataFrame,
+                                   product_id_column: str = "ean_number",
+                                   period_column: str = "year_month"
+                                   ) -> pd.DataFrame:
+    """ This function calculates the availability of a product in a period. The availability is the number of periods a product is present in the dataframe. The resulting dataframe contains the product_id column and all unique product ids in the dataframe. In addition, the dataframe contains a column for each of the unique periods in the dataframe.
+    Each of the period column contains a bool value whether the product is present in that specific period.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    product_id_column : str
+        The column containing the product id. By default, it is "ean_number".
+        Can also be the receipt text column to see how long a receipt text is present in the dataframe.
+
+    period_column : str
+        The column containing the period information. By default, it is "year_month".
+        Pass a different column name for other periods, for example "year". It's also
+        possible to pass a list of columns to period_column to group by multiple columns.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe containing the availability of a product in a period.
+    """
+    return dataframe.pivot_table(index=product_id_column, columns=period_column, aggfunc="size", fill_value=0).reset_index() > 0
