@@ -402,6 +402,7 @@ class PlotResults(luigi.Task):
         return output_dict
 
     def run(self):
+        print(f"Inputs: {self.input()}")
         for function_name, input in self.input().items():
             if function_name not in self.plot_settings:
                 continue
