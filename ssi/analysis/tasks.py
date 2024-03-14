@@ -8,6 +8,7 @@ from .text_analysis import string_length_histogram
 from ..preprocessing.files import get_store_name_from_combined_filename
 from ..constants import Constants
 from ..plots import PlotEngine
+from ..settings import Settings
 import pandas as pd
 import luigi
 import os
@@ -284,6 +285,8 @@ class CrossStoreAnalysis(luigi.Task):
 class PlotResults(luigi.Task):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
+    plot_settings_filename = luigi.Parameter(default=os.path.join(
+        os.path.dirname(__file__), "plot_settings.yaml"))
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     store_name = luigi.Parameter()
@@ -320,93 +323,106 @@ class PlotResults(luigi.Task):
         # COICOP level, and plots that need to be run for each period.
         # TODO Add sunburst with number of products (EAN/Receipt texts) per coicop
         # TODO Add sunburst with total products sold/revenue?
-        return {
-            # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
-            "unique_coicop_values_per_coicop": {
-                "pivot": True,
-                "value_columns": [self.product_id_column, self.receipt_text_column],
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_coicop.png",
-                "plot_settings": {
-                    "plot_type": "bar_chart",
-                    "x_column": self.coicop_column,
-                    "y_column": "value",
-                    "group_column": "group",
-                    "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}"
-                },
-            },
-            "unique_column_values_per_period": {
-                "pivot": True,
-                "value_columns": [self.product_id_column, self.receipt_text_column],
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_{self.period_column}.png",
-                "plot_settings": {
-                    "plot_type": "line_chart",
-                    "x_column": self.period_column,
-                    "y_column": "value",
-                    "group_column": "group",
-                    "title": f"Unique receipt texts per {self.period_column} for {self.store_name}"
-                },
-            },
-            "texts_per_ean_histogram": {
-                "pivot": False,
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_texts_per_ean_histogram.png",
-                "plot_settings": {
-                    "plot_type": "bar_chart",
-                    "x_column": "receipt_text",
-                    "y_column": "count",
-                    "title": f"Unique receipt texts per EAN for {self.store_name}"
-                },
-            },
-            "log_texts_per_ean_histogram": {
-                "pivot": False,
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_log_texts_per_ean_histogram.png",
-                "plot_settings": {
-                    "plot_type": "bar_chart",
-                    "x_column": "receipt_text",
-                    "y_column": "count",
-                    "title": f"Unique receipt texts per EAN for {self.store_name} (Log scale)"
-                },
-            },
-            "receipt_length_histogram": {
-                "pivot": False,
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_receipt_length_histogram.png",
-                "plot_settings": {
-                    "plot_type": "bar_chart",
-                    "x_column": self.receipt_text_column,
-                    "y_column": "count",
-                    "title": f"Receipt text length histogram for {self.store_name}"
-                },
-            },
-            "ean_length_histogram": {
-                "pivot": False,
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_ean_length_histogram.png",
-                "plot_settings": {
-                    "plot_type": "bar_chart",
-                    "x_column": self.product_id_column,
-                    "y_column": "count",
-                    "title": f"EAN length histogram for {self.store_name}"
-                },
-            },
-            "compare_products_per_period": {
-                "pivot": True,
-                "value_columns": [
-                    f"number_{self.receipt_text_column}_introduced",
-                    f"number_{self.receipt_text_column}_removed",
-                    f"number_{self.product_id_column}_introduced",
-                    f"number_{self.product_id_column}_removed",
-                ],
-                "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_compare_products_per_period.png",
-                "plot_settings": {
-                    "plot_type": "line_chart",
-                    "x_column": self.period_column,
-                    "y_column": "value",
-                    "group_column": "group",
-                    "title": f"Number of products introduced/removed per {self.period_column} for {self.store_name}"
-                },
-            },
-            # "compare_products_per_period_coicop_level":{
+        settings = Settings.load(self.plot_settings_filename,
+                                 "plot_settings",
+                                 True,
+                                 store_name=self.store_name,
+                                 period_column=self.period_column,
+                                 receipt_text_column=self.receipt_text_column,
+                                 product_id_column=self.product_id_column,
+                                 amount_column=self.amount_column,
+                                 revenue_column=self.revenue_column,
+                                 coicop_column=self.coicop_column,
+                                 )
 
+        return settings
 
-        }
+        # {
+        #     # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
+        #     "unique_coicop_values_per_coicop": {
+        #         "pivot": True,
+        #         "value_columns": [self.product_id_column, self.receipt_text_column],
+        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_coicop.png",
+        #         "plot_settings": {
+        #             "plot_type": "bar_chart",
+        #             "x_column": self.coicop_column,
+        #             "y_column": "value",
+        #             "group_column": "group",
+        #             "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}"
+        #         },
+        #     },
+        #     "unique_column_values_per_period": {
+        #         "pivot": True,
+        #         "value_columns": [self.product_id_column, self.receipt_text_column],
+        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_{self.period_column}.png",
+        #         "plot_settings": {
+        #             "plot_type": "line_chart",
+        #             "x_column": self.period_column,
+        #             "y_column": "value",
+        #             "group_column": "group",
+        #             "title": f"Unique receipt texts per {self.period_column} for {self.store_name}"
+        #         },
+        #     },
+        #     "texts_per_ean_histogram": {
+        #         "pivot": False,
+        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_texts_per_ean_histogram.png",
+        #         "plot_settings": {
+        #             "plot_type": "bar_chart",
+        #             "x_column": "receipt_text",
+        #             "y_column": "count",
+        #             "title": f"Unique receipt texts per EAN for {self.store_name}"
+        #         },
+        #     },
+        #     "log_texts_per_ean_histogram": {
+        #         "pivot": False,
+        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_log_texts_per_ean_histogram.png",
+        #         "plot_settings": {
+        #             "plot_type": "bar_chart",
+        #             "x_column": "receipt_text",
+        #             "y_column": "count",
+        #             "title": f"Unique receipt texts per EAN for {self.store_name} (Log scale)"
+        #         },
+        #     },
+        #     "receipt_length_histogram": {
+        #         "pivot": False,
+        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_receipt_length_histogram.png",
+        #         "plot_settings": {
+        #             "plot_type": "bar_chart",
+        #             "x_column": self.receipt_text_column,
+        #             "y_column": "count",
+        #             "title": f"Receipt text length histogram for {self.store_name}"
+        #         },
+        #     },
+        #     "ean_length_histogram": {
+        #         "pivot": False,
+        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_ean_length_histogram.png",
+        #         "plot_settings": {
+        #             "plot_type": "bar_chart",
+        #             "x_column": self.product_id_column,
+        #             "y_column": "count",
+        #             "title": f"EAN length histogram for {self.store_name}"
+        #         },
+        #     },
+        #     "compare_products_per_period": {
+        #         "pivot": True,
+        #         "value_columns": [
+        #             f"number_{self.receipt_text_column}_introduced",
+        #             f"number_{self.receipt_text_column}_removed",
+        #             f"number_{self.product_id_column}_introduced",
+        #             f"number_{self.product_id_column}_removed",
+        #         ],
+        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_compare_products_per_period.png",
+        #         "plot_settings": {
+        #             "plot_type": "line_chart",
+        #             "x_column": self.period_column,
+        #             "y_column": "value",
+        #             "group_column": "group",
+        #             "title": f"Number of products introduced/removed per {self.period_column} for {self.store_name}"
+        #         },
+        #     },
+        #     # "compare_products_per_period_coicop_level":{
+
+        # }
 
     def output(self):
         output_dict = dict()
