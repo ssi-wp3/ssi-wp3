@@ -182,4 +182,32 @@ def revenue_for_coicop_hierarchy(dataframe: pd.DataFrame,
     return dataframe.groupby(coicop_columns).apply(lambda x: total_revenue(x, amount_column, revenue_column)).reset_index()
 
 
-# TODO revenue scatter plot
+def product_revenue_versus_lifetime(dataframe: pd.DataFrame,
+                                    lifetime_column: str,
+                                    product_id_column: str,
+                                    amount_column: str,
+                                    revenue_column: str) -> pd.DataFrame:
+    """ Calculate the total revenue for each lifetime in the dataframe.
+
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The dataframe containing the revenue data.
+
+    lifetime_column : str
+        The name of the column containing the lifetime.   
+
+    amount_column : str
+        The name of the column containing the amount of products.
+
+    revenue_column : str
+        The name of the column containing the revenue.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe containing the lifetime, total amount and total revenue.    
+    """
+    pass
+    # return dataframe.groupby(lifetime_column).apply(lambda x: total_revenue(x, amount_column, revenue_column)).reset_index()
