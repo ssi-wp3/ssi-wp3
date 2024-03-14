@@ -6,6 +6,7 @@ from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
 from ..preprocessing.files import get_store_name_from_combined_filename
+from ..constants import Constants
 from ..plots import PlotEngine
 import pandas as pd
 import luigi
@@ -64,6 +65,10 @@ class TableAnalysis(BaseStoreAnalysisTask):
     """
     receipt_text_column = luigi.Parameter()
     product_id_column = luigi.Parameter()
+    amount_column = luigi.Parameter()
+    revenue_column = luigi.Parameter()
+    coicop_columns = luigi.ListParameter(
+        default=Constants.COICOP_LEVELS_COLUMNS)
 
     @property
     def analysis_functions(self) -> Dict[str, Callable]:
@@ -73,8 +78,16 @@ class TableAnalysis(BaseStoreAnalysisTask):
             "unique_column_values": lambda dataframe: unique_column_values(dataframe, value_columns),
             "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
+            # Receipt and EAN lengths
             "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
             "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
+
+            # Revenue
+            "total_revenue": lambda dataframe: total_revenue(dataframe, self.amount_column, self.revenue_column),
+            "total_revenue_per_product": lambda dataframe: total_revenue_per_product(dataframe, self.product_id_column, self.amount_column, self.revenue_column),
+            "total_revenue_per_receipt_text": lambda dataframe: total_revenue_per_product(dataframe, self.receipt_text_column, self.amount_column, self.revenue_column),
+
+            "revenue_for_coicop_hierarchy": lambda dataframe: revenue_for_coicop_hierarchy(dataframe, self.coicop_columns, self.amount_column, self.revenue_column),
         }
 
     def get_store_analysis_filename(self, function_name: str) -> str:
@@ -125,8 +138,10 @@ class CoicopAnalysis(BaseStoreAnalysisTask):
         return {
             # Grouped per coicop
             "unique_coicop_values_per_coicop": lambda dataframe: unique_column_values_per_coicop(dataframe, self.coicop_column, value_columns),
-            "revenue_for_coicop_hierarchy": lambda dataframe: revenue_for_coicop_hierarchy(dataframe, self.coicop_column, self.amount_column, self.revenue_column),
 
+            # Revenue
+            "total_revenue_per_coicop": lambda dataframe: total_revenue_per_coicop(dataframe, self.coicop_column, self.amount_column, self.revenue_column),
+            "product_revenue_versus_lifetime": lambda dataframe: product_revenue_versus_lifetime(dataframe, self.coicop_column, self.product_id_column, self.amount_column, self.revenue_column),
         }
 
     def get_store_analysis_filename(self, function_name: str) -> str:
@@ -152,7 +167,6 @@ class CoicopPeriodAnalysis(BaseStoreAnalysisTask):
         value_columns = [self.product_id_column, self.receipt_text_column]
         return {
             "total_revenue_per_coicop_and_period": lambda dataframe: total_revenue_per_coicop_and_period(dataframe, self.period_column, self.coicop_column, self.amount_column, self.revenue_column),
-            "revenue_for_coicop_hierarchy": lambda dataframe: revenue_for_coicop_hierarchy(dataframe, self.coicop_column, self.amount_column, self.revenue_column),
             "compare_products_per_period_coicop_level": lambda dataframe: compare_products_per_period_coicop_level(dataframe, self.period_column, self.coicop_column, value_columns),
         }
 
