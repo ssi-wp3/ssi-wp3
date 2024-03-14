@@ -71,8 +71,7 @@ result_settings:
       plot_settings: 
           plot_type: sunburst_chart
           sunburst_columns: {{coicop_columns}}
-          y_column: value
-          group_column: group
+          amount_column: {{revenue_column}}
           title: Sunburst of revenue per coicop level for {{store_name}}
   product_revenue_versus_lifetime:
       pivot: false
