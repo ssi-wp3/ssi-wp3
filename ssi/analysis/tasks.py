@@ -314,14 +314,13 @@ class PerStoreAnalysis(luigi.WrapperTask):
                     plot_settings = self.plot_settings[function_name]
                     if isinstance(plot_settings, list):
                         for settings in plot_settings:
-                            self.plot_to_file(
-                                function_name, dataframe, settings)
+                            self.plot_to_file(dataframe, settings)
                     else:
-                        self.plot_to_file(
-                            function_name, dataframe, plot_settings)
+                        self.plot_to_file(dataframe, plot_settings)
 
-    def plot_to_file(self, function_name, dataframe, settings):
-        with self.output()[function_name].open("w") as output_file:
+    def plot_to_file(self, dataframe, settings):
+        filename = settings["filename"]
+        with self.output()[filename].open("w") as output_file:
             self.plot_with_settings(
                 dataframe, settings, output_file)
 
