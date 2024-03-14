@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from typing import Dict, Callable, Any
 from .utils import unpivot
 from .files import get_combined_revenue_files_in_directory
@@ -15,6 +16,29 @@ class StoreFile(luigi.ExternalTask):
 
     def output(self):
         return luigi.LocalTarget(self.input_filename, format=luigi.format.Nop)
+
+
+class RevenueAnalysis(luigi.Task):
+    """ This task analyzes the revenue data for a certain supermarket.
+    """
+    input_filename = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    store_name = luigi.Parameter()
+    period_column = luigi.Parameter()
+    revenue_column = luigi.Parameter()
+    amount_column = luigi.Parameter()
+    coicop_column = luigi.Parameter()
+
+    def requires(self):
+        return super().requires()
+
+    def output(self):
+        pass
+
+    def run(self):
+        pass
 
 
 class StoreProductAnalysis(luigi.Task):
@@ -105,8 +129,6 @@ class PlotResults(luigi.Task):
 
     @property
     def plot_settings(self) -> Dict[str, Any]:
-        # Plus plots start at 202203 instead of 202107 at calculator, what happened? --> Checks out, Plus receipts
-        # start at 202203 earlier plots must have been wrong.
         # TODO split up in plots that need to be run once for the whole dataset, plots that needt to be run for each
         # COICOP level, and plots that need to be run for each period.
         # TODO Add sunburst with number of products (EAN/Receipt texts) per coicop
