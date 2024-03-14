@@ -178,8 +178,28 @@ class CoicopPeriodAnalysis(BaseStoreAnalysisTask):
             f"Running {function_name} for {self.store_name}, period column: {self.period_column}, coicop column: {self.coicop_column}")
 
 
-class StoreProductAnalysis(BaseStoreAnalysisTask):
-    pass
+class StoreProductAnalysis(luigi.Task):
+    input_filename = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    store_name = luigi.Parameter()
+    period_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    product_id_column = luigi.Parameter()
+    amount_column = luigi.Parameter()
+    revenue_column = luigi.Parameter()
+    coicop_column = luigi.Parameter()
+
+    @property
+    def directories(self) -> Dict[str, str]:
+        store_directory = os.path.join(self.output_directory, self.store_name)
+        return {
+            "table": os.path.join(store_directory, "table"),
+            "period": os.path.join(store_directory, "period"),
+            "coicop": os.path.join(store_directory, "coicop"),
+            "period_coicop": os.path.join(store_directory, "period_coicops")
+        }
 
 
 class PlotResults(luigi.Task):
