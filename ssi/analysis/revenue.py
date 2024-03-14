@@ -180,6 +180,7 @@ def revenue_for_coicop_hierarchy(dataframe: pd.DataFrame,
         The amount and revenue columns specify the values for each leaf in the coicop hierarchy.
         This dataframe can be used to create sunburst plot of the product revenue.          
     """
+    print("Dataframe columns: ", dataframe.columns)
     return dataframe.groupby(coicop_columns).apply(lambda x: total_revenue(x, amount_column, revenue_column)).reset_index()
 
 
