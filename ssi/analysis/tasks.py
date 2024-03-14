@@ -393,13 +393,18 @@ class PlotResults(luigi.Task):
                 plot_settings = self.plot_settings[function_name]
                 if isinstance(plot_settings, list):
                     for settings in plot_settings:
-                        output_dict[function_name] = luigi.LocalTarget(os.path.join(
-                            self.output_directory, settings["filename"]), format=luigi.format.Nop)
+                        self.create_output_for_plot_settings(
+                            output_dict, settings)
                 else:
-                    output_dict[function_name] = luigi.LocalTarget(os.path.join(
-                        self.output_directory, plot_settings["filename"]), format=luigi.format.Nop)
+                    self.create_output_for_plot_settings(
+                        output_dict, plot_settings)
 
         return output_dict
+
+    def create_output_for_plot_settings(self, output_dict, settings):
+        filename = settings["filename"]
+        output_dict[filename] = luigi.LocalTarget(os.path.join(
+            self.output_directory, filename), format=luigi.format.Nop)
 
     def run(self):
         for function_name, input in self.input().items():
