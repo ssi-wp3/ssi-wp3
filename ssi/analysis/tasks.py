@@ -179,7 +179,7 @@ class CoicopPeriodAnalysis(BaseStoreAnalysisTask):
             f"Running {function_name} for {self.store_name}, period column: {self.period_column}, coicop column: {self.coicop_column}")
 
 
-class PerStoreAnalysis(luigi.WrapperTask):
+class PerStoreAnalysis(luigi.Task):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     plot_settings_filename = luigi.Parameter(default=os.path.join(
