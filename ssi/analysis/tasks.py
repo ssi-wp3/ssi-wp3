@@ -281,6 +281,7 @@ class PlotResults(luigi.Task):
             product_id_column=self.product_id_column,
             amount_column=self.amount_column,
             revenue_column=self.revenue_column,
+            coicop_columns=self.coicop_columns,
             coicop_column=self.coicop_column
         )
 
