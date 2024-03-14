@@ -265,7 +265,7 @@ class PerStoreAnalysis(luigi.WrapperTask):
         # TODO Add sunburst with number of products (EAN/Receipt texts) per coicop
         # TODO Add sunburst with total products sold/revenue?
         settings = Settings.load(self.plot_settings_filename,
-                                 "plot_settings",
+                                 "result_settings",
                                  True,
                                  store_name=self.store_name,
                                  period_column=self.period_column,
