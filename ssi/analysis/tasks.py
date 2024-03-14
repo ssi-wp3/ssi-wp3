@@ -277,6 +277,7 @@ class CrossStoreAnalysis(luigi.Task):
         return luigi.LocalTarget(self.output_directory, format=luigi.format.Nop)
 
     def run(self):
+        # TODO create list with file combinations
         return super().run()
 
 
