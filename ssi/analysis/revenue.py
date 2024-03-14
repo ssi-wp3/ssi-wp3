@@ -213,6 +213,12 @@ def product_revenue_versus_lifetime(dataframe: pd.DataFrame,
     """
     product_lifetime_df = product_lifetime_in_periods(
         dataframe, period_column, product_id_column)
+    product_lifetime_df[product_id_column] = product_lifetime_df[product_id_column].astype(
+        str)
+
     revenue_per_product_df = total_revenue_per_product(
         dataframe, product_id_column, amount_column, revenue_column)
+    revenue_per_product_df[product_id_column] = revenue_per_product_df[product_id_column].astype(
+        str)
+
     return pd.merge(product_lifetime_df, revenue_per_product_df, on=product_id_column)
