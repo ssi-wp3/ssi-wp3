@@ -63,7 +63,7 @@ class TrainAdversarialModelTask(luigi.Task):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
         print(f"Store1: {store1}, Store2: {store2}")
-        with input()[0].open("r") as store1_file, input()[1].open("r") as store2_file:
+        with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
             print("Reading parquet files")
             store1_dataframe = pd.read_parquet(
                 store1_file, engine=self.parquet_engine)
