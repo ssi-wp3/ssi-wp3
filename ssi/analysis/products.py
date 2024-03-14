@@ -529,6 +529,8 @@ def product_availability_in_period(dataframe: pd.DataFrame,
     """ This function calculates the availability of a product in a period. The availability is the number of periods a product is present in the dataframe. The resulting dataframe contains the product_id column and all unique product ids in the dataframe. In addition, the dataframe contains a column for each of the unique periods in the dataframe.
     Each of the period column contains a bool value whether the product is present in that specific period.
 
+    Occurence is derived by first pivoting the table with the product_id_column as index and the period_column as columns. The resulting dataframe contains the number of occurences of a product in a period. Then the dataframe is converted to a boolean dataframe by checking whether the number of occurences is greater than 0.
+
     Parameters
     ----------
     dataframe : pd.DataFrame
