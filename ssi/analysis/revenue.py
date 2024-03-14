@@ -1,4 +1,5 @@
 from typing import List
+from .products import product_lifetime_in_periods
 import pandas as pd
 
 
@@ -30,10 +31,10 @@ def total_revenue(dataframe: pd.DataFrame,
     return pd.DataFrame({'Total Amount': [total_amount], 'Total Revenue': [total_revenue]})
 
 
-def total_revenue_per_products(dataframe: pd.DataFrame,
-                               product_id_column: str,
-                               amount_column: str,
-                               revenue_column: str) -> pd.DataFrame:
+def total_revenue_per_product(dataframe: pd.DataFrame,
+                              product_id_column: str,
+                              amount_column: str,
+                              revenue_column: str) -> pd.DataFrame:
     """ Calculate the total revenue for each product in the dataframe.
 
     Parameters
@@ -183,7 +184,7 @@ def revenue_for_coicop_hierarchy(dataframe: pd.DataFrame,
 
 
 def product_revenue_versus_lifetime(dataframe: pd.DataFrame,
-                                    lifetime_column: str,
+                                    period_column: str,
                                     product_id_column: str,
                                     amount_column: str,
                                     revenue_column: str) -> pd.DataFrame:
@@ -207,7 +208,11 @@ def product_revenue_versus_lifetime(dataframe: pd.DataFrame,
     Returns
     -------
     pd.DataFrame
-        A dataframe containing the lifetime, total amount and total revenue.    
+        A dataframe containing the product lifetime, total amount and total revenue.    
+        This can be used to make a scatter plot of product lifetime versus revenue or amount of products sold.
     """
-    pass
-    # return dataframe.groupby(lifetime_column).apply(lambda x: total_revenue(x, amount_column, revenue_column)).reset_index()
+    product_lifetime_df = product_lifetime_in_periods(
+        dataframe, period_column, product_id_column)
+    revenue_per_product_df = total_revenue_per_product(
+        dataframe, product_id_column, amount_column, revenue_column)
+    return pd.merge(product_lifetime_df, revenue_per_product_df, on=product_id_column)
