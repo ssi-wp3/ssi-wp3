@@ -361,38 +361,6 @@ class CrossStoreAnalysis(luigi.Task):
         return super().run()
 
 
-class PlotResults(luigi.Task):
-    input_filename = luigi.PathParameter()
-    output_directory = luigi.PathParameter()
-    plot_settings_filename = luigi.Parameter(default=os.path.join(
-        os.path.dirname(__file__), "plot_settings.yaml"))
-    parquet_engine = luigi.Parameter(default="pyarrow")
-
-    store_name = luigi.Parameter()
-    period_column = luigi.Parameter()
-    receipt_text_column = luigi.Parameter()
-    product_id_column = luigi.Parameter()
-    amount_column = luigi.Parameter()
-    revenue_column = luigi.Parameter()
-    coicop_columns = luigi.ListParameter()
-    coicop_column = luigi.Parameter()
-
-    def requires(self):
-        return PerStoreAnalysis(
-            input_filename=self.input_filename,
-            output_directory=self.output_directory,
-            parquet_engine=self.parquet_engine,
-            store_name=self.store_name,
-            period_column=self.period_column,
-            receipt_text_column=self.receipt_text_column,
-            product_id_column=self.product_id_column,
-            amount_column=self.amount_column,
-            revenue_column=self.revenue_column,
-            coicop_columns=self.coicop_columns,
-            coicop_column=self.coicop_column
-        )
-
-
 class AllStoresAnalysis(luigi.WrapperTask):
     """ This task analyses the product inventory and dynamics for all stores in a certain
     directory.
