@@ -189,6 +189,7 @@ class PerStoreAnalysis(luigi.Task):
     product_id_column = luigi.Parameter()
     amount_column = luigi.Parameter()
     revenue_column = luigi.Parameter()
+    coicop_columns = luigi.ListParameter()
     coicop_column = luigi.Parameter()
 
     @property
@@ -212,7 +213,7 @@ class PerStoreAnalysis(luigi.Task):
                 product_id_column=self.product_id_column,
                 amount_column=self.amount_column,
                 revenue_column=self.revenue_column,
-                coicop_columns=self.coicop_column
+                coicop_columns=self.coicop_columns
             ),
             "period": PeriodAnalysis(
                 input_filename=self.input_filename,
@@ -266,6 +267,7 @@ class PlotResults(luigi.Task):
     product_id_column = luigi.Parameter()
     amount_column = luigi.Parameter()
     revenue_column = luigi.Parameter()
+    coicop_columns = luigi.ListParameter()
     coicop_column = luigi.Parameter()
 
     def requires(self):
@@ -478,5 +480,6 @@ class AllStoresAnalysis(luigi.WrapperTask):
                         product_id_column=self.product_id_column,
                         amount_column=self.amount_column,
                         revenue_column=self.revenue_column,
+                        coicop_columns=self.coicop_columns,
                         coicop_column=coicop_column
                     )
