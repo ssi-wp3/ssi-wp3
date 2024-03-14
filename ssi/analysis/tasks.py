@@ -253,7 +253,10 @@ class PerStoreAnalysis(luigi.Task):
 
 
 class CrossStoreAnalysis(luigi.Task):
-    pass
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    project_prefix = luigi.Parameter(default="ssi")
+    parquet_engine = luigi.Parameter(default="pyarrow")
 
 
 class PlotResults(luigi.Task):
