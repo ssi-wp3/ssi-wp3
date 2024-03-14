@@ -49,7 +49,7 @@ class BaseStoreAnalysisTask(luigi.Task, metaclass=ABCMeta):
         with self.input().open("r") as input_file:
             dataframe = pd.read_parquet(
                 input_file, engine=self.parquet_engine)
-            for function_name, function in self.product_analysis_functions.items():
+            for function_name, function in self.analysis_functions.items():
                 self.log_analysis_status(function_name)
                 result_df = function(dataframe)
                 with self.output()[function_name].open("w") as output_file:
