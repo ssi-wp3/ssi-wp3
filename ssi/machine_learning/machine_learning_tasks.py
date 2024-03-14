@@ -58,6 +58,8 @@ class TrainAdversarialModelTask(luigi.Task):
         }
 
     def run(self):
+        print(
+            f"Running adversarial model training task for {self.store1_filename} and {self.store2_filename}")
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
         with input()[0].open("r") as store1_file, input()[1].open("r") as store2_file:
@@ -76,9 +78,11 @@ class TrainAdversarialModelTask(luigi.Task):
                                                                 self.model_type,
                                                                 self.test_size,
                                                                 self.verbose)
+            print("Writing adversarial model to disk")
             with self.output()["model"].open("w") as model_file:
                 joblib.dump(pipeline, model_file)
 
+            print("Writing evaluation to disk")
             with self.output()["evaluation"].open("w") as evaluation_file:
                 evaluation_file.write(evaluation_dict)
 
