@@ -1,0 +1,5 @@
+settings:
+  first_setting: true
+  second_setting: {{product_id}}
+  third_setting: 3
+  fourth_setting: "{{coicop_code}}"
