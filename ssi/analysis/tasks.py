@@ -178,7 +178,7 @@ class CoicopPeriodAnalysis(BaseStoreAnalysisTask):
             f"Running {function_name} for {self.store_name}, period column: {self.period_column}, coicop column: {self.coicop_column}")
 
 
-class StoreProductAnalysis(luigi.Task):
+class PerStoreAnalysis(luigi.Task):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     parquet_engine = luigi.Parameter(default="pyarrow")
@@ -267,7 +267,7 @@ class PlotResults(luigi.Task):
     coicop_column = luigi.Parameter()
 
     def requires(self):
-        return StoreProductAnalysis(
+        return PerStoreAnalysis(
             input_filename=self.input_filename,
             output_directory=self.output_directory,
             parquet_engine=self.parquet_engine,
