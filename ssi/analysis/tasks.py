@@ -251,6 +251,10 @@ class StoreProductAnalysis(luigi.Task):
         }
 
 
+class CrossStoreAnalysis(luigi.Task):
+    pass
+
+
 class PlotResults(luigi.Task):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
