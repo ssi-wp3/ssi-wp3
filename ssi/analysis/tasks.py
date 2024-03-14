@@ -389,15 +389,17 @@ class PlotResults(luigi.Task):
     def output(self):
         output_dict = dict()
         for function_name in self.input().keys():
-            if function_name in self.plot_settings:
-                plot_settings = self.plot_settings[function_name]
-                if isinstance(plot_settings, list):
-                    for settings in plot_settings:
-                        self.create_output_for_plot_settings(
-                            output_dict, settings)
-                else:
+            if function_name not in self.plot_settings:
+                continue
+
+            plot_settings = self.plot_settings[function_name]
+            if isinstance(plot_settings, list):
+                for settings in plot_settings:
                     self.create_output_for_plot_settings(
-                        output_dict, plot_settings)
+                        output_dict, settings)
+            else:
+                self.create_output_for_plot_settings(
+                    output_dict, plot_settings)
 
         return output_dict
 
@@ -415,8 +417,6 @@ class PlotResults(luigi.Task):
                 dataframe = pd.read_parquet(
                     input_file, engine=self.parquet_engine)
 
-                if function_name not in self.plot_settings:
-                    continue
                 plot_settings = self.plot_settings[function_name]
                 if isinstance(plot_settings, list):
                     for settings in plot_settings:
