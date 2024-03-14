@@ -88,7 +88,7 @@ class TableAnalysis(BaseStoreAnalysisTask):
             "total_revenue_per_product": lambda dataframe: total_revenue_per_product(dataframe, self.product_id_column, self.amount_column, self.revenue_column),
             "total_revenue_per_receipt_text": lambda dataframe: total_revenue_per_product(dataframe, self.receipt_text_column, self.amount_column, self.revenue_column),
 
-            "revenue_for_coicop_hierarchy": lambda dataframe: revenue_for_coicop_hierarchy(dataframe, self.coicop_columns, self.amount_column, self.revenue_column),
+            "revenue_for_coicop_hierarchy": lambda dataframe: revenue_for_coicop_hierarchy(dataframe, list(self.coicop_columns), self.amount_column, self.revenue_column),
         }
 
     def get_store_analysis_filename(self, function_name: str) -> str:
@@ -182,6 +182,8 @@ class CoicopPeriodAnalysis(BaseStoreAnalysisTask):
 class PerStoreAnalysis(luigi.WrapperTask):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
+    plot_settings_filename = luigi.Parameter(default=os.path.join(
+        os.path.dirname(__file__), "plot_settings.yaml"))
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     store_name = luigi.Parameter()
