@@ -4,7 +4,7 @@ result_settings:
       value_columns: 
         - {{product_id_column}}
         - {{receipt_text_column}}
-      filename: "{store_name}_{{coicop_column}}_unique_receipt_values_per_coicop.png"
+      filename: "{{store_name}}_{{coicop_column}}_unique_receipt_values_per_coicop.png"
       plot_settings: 
           plot_type: bar_chart
           x_column: {{coicop_column}}
