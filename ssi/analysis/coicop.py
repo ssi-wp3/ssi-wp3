@@ -28,5 +28,5 @@ def coicop_sunburst(dataframe: pd.DataFrame, coicop_columns: List[str], value_co
     """
     group_column = coicop_columns[-1]
     dataframe_with_counts = dataframe.groupby(
-        group_column)["value_column"].nunique().reset_index(name="count")
+        group_column)[value_column].nunique().reset_index(name="count")
     return PlotEngine().sunburst_chart(dataframe_with_counts, coicop_columns, "count")

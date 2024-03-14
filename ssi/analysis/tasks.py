@@ -251,12 +251,33 @@ class PerStoreAnalysis(luigi.WrapperTask):
             )
         }
 
+    def output(self):
+        pass
+
+    def run(self):
+        return super().run()
+
 
 class CrossStoreAnalysis(luigi.Task):
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     project_prefix = luigi.Parameter(default="ssi")
     parquet_engine = luigi.Parameter(default="pyarrow")
+
+    @property
+    def combined_revenue_files(self) -> List[str]:
+        return [filename
+                for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)]
+
+    def requires(self):
+        return [StoreFile(filename)
+                for filename in self.combined_revenue_files]
+
+    def output(self):
+        return luigi.LocalTarget(self.output_directory, format=luigi.format.Nop)
+
+    def run(self):
+        return super().run()
 
 
 class PlotResults(luigi.Task):
