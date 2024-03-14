@@ -204,8 +204,8 @@ class PerStoreAnalysis(luigi.WrapperTask):
         }
 
     def requires(self):
-        return {
-            "table": TableAnalysis(
+        return [
+            TableAnalysis(
                 input_filename=self.input_filename,
                 output_directory=self.directories["table"],
                 parquet_engine=self.parquet_engine,
@@ -216,7 +216,7 @@ class PerStoreAnalysis(luigi.WrapperTask):
                 revenue_column=self.revenue_column,
                 coicop_columns=self.coicop_columns
             ),
-            "period": PeriodAnalysis(
+            PeriodAnalysis(
                 input_filename=self.input_filename,
                 output_directory=self.directories["period"],
                 parquet_engine=self.parquet_engine,
@@ -227,7 +227,7 @@ class PerStoreAnalysis(luigi.WrapperTask):
                 amount_column=self.amount_column,
                 revenue_column=self.revenue_column
             ),
-            "coicop": CoicopAnalysis(
+            CoicopAnalysis(
                 input_filename=self.input_filename,
                 output_directory=self.directories["coicop"],
                 parquet_engine=self.parquet_engine,
@@ -238,7 +238,7 @@ class PerStoreAnalysis(luigi.WrapperTask):
                 amount_column=self.amount_column,
                 revenue_column=self.revenue_column
             ),
-            "period_coicop": CoicopPeriodAnalysis(
+            CoicopPeriodAnalysis(
                 input_filename=self.input_filename,
                 output_directory=self.directories["period_coicop"],
                 parquet_engine=self.parquet_engine,
@@ -250,13 +250,91 @@ class PerStoreAnalysis(luigi.WrapperTask):
                 amount_column=self.amount_column,
                 revenue_column=self.revenue_column
             )
-        }
+        ]
+
+    @property
+    def plot_engine(self) -> PlotEngine:
+        return PlotEngine()
+
+    @property
+    def plot_settings(self) -> Dict[str, Any]:
+        # TODO split up in plots that need to be run once for the whole dataset, plots that needt to be run for each
+        # COICOP level, and plots that need to be run for each period.
+        # TODO Add sunburst with number of products (EAN/Receipt texts) per coicop
+        # TODO Add sunburst with total products sold/revenue?
+        settings = Settings.load(self.plot_settings_filename,
+                                 "plot_settings",
+                                 True,
+                                 store_name=self.store_name,
+                                 period_column=self.period_column,
+                                 receipt_text_column=self.receipt_text_column,
+                                 product_id_column=self.product_id_column,
+                                 amount_column=self.amount_column,
+                                 revenue_column=self.revenue_column,
+                                 coicop_column=self.coicop_column,
+                                 )
+
+        return settings
 
     def output(self):
-        pass
+        output_dict = dict()
+        for task in self.input():
+            for function_name in task.keys():
+                if function_name not in self.plot_settings:
+                    continue
+
+                plot_settings = self.plot_settings[function_name]
+                if isinstance(plot_settings, list):
+                    for settings in plot_settings:
+                        self.create_output_for_plot_settings(
+                            output_dict, settings)
+                else:
+                    self.create_output_for_plot_settings(
+                        output_dict, plot_settings)
+
+        return output_dict
+
+    def create_output_for_plot_settings(self, output_dict, settings):
+        filename = settings["filename"]
+        output_dict[filename] = luigi.LocalTarget(os.path.join(
+            self.output_directory, filename), format=luigi.format.Nop)
 
     def run(self):
-        return super().run()
+        for task in self.input():
+            for function_name, input in task.items():
+                if function_name not in self.plot_settings:
+                    continue
+
+                with input.open("r") as input_file:
+                    dataframe = pd.read_parquet(
+                        input_file, engine=self.parquet_engine)
+
+                    plot_settings = self.plot_settings[function_name]
+                    if isinstance(plot_settings, list):
+                        for settings in plot_settings:
+                            self.plot_to_file(
+                                function_name, dataframe, settings)
+                    else:
+                        self.plot_to_file(
+                            function_name, dataframe, plot_settings)
+
+    def plot_to_file(self, function_name, dataframe, settings):
+        with self.output()[function_name].open("w") as output_file:
+            self.plot_with_settings(
+                dataframe, settings, output_file)
+
+    def plot_with_settings(self,
+                           dataframe: pd.DataFrame,
+                           plot_settings: Dict[str, Any],
+                           output_file,
+                           value_columns: List[str] = None):
+        if "pivot" in plot_settings and plot_settings["pivot"]:
+            value_columns = plot_settings["value_columns"]
+            dataframe = unpivot(dataframe, value_columns)
+
+        figure = self.plot_engine.plot_from_settings(
+            dataframe, plot_settings["plot_settings"])
+        figure.save(output_file)
 
 
 class CrossStoreAnalysis(luigi.Task):
@@ -313,173 +391,6 @@ class PlotResults(luigi.Task):
             coicop_column=self.coicop_column
         )
 
-    @property
-    def plot_engine(self) -> PlotEngine:
-        return PlotEngine()
-
-    @property
-    def plot_settings(self) -> Dict[str, Any]:
-        # TODO split up in plots that need to be run once for the whole dataset, plots that needt to be run for each
-        # COICOP level, and plots that need to be run for each period.
-        # TODO Add sunburst with number of products (EAN/Receipt texts) per coicop
-        # TODO Add sunburst with total products sold/revenue?
-        settings = Settings.load(self.plot_settings_filename,
-                                 "plot_settings",
-                                 True,
-                                 store_name=self.store_name,
-                                 period_column=self.period_column,
-                                 receipt_text_column=self.receipt_text_column,
-                                 product_id_column=self.product_id_column,
-                                 amount_column=self.amount_column,
-                                 revenue_column=self.revenue_column,
-                                 coicop_column=self.coicop_column,
-                                 )
-
-        return settings
-
-        # {
-        #     # "unique_column_values": lambda file, dataframe: dataframe.to_latex(file),
-        #     "unique_coicop_values_per_coicop": {
-        #         "pivot": True,
-        #         "value_columns": [self.product_id_column, self.receipt_text_column],
-        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_coicop.png",
-        #         "plot_settings": {
-        #             "plot_type": "bar_chart",
-        #             "x_column": self.coicop_column,
-        #             "y_column": "value",
-        #             "group_column": "group",
-        #             "title": f"Unique receipt texts per {self.coicop_column} for {self.store_name}"
-        #         },
-        #     },
-        #     "unique_column_values_per_period": {
-        #         "pivot": True,
-        #         "value_columns": [self.product_id_column, self.receipt_text_column],
-        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_unique_receipt_values_per_{self.period_column}.png",
-        #         "plot_settings": {
-        #             "plot_type": "line_chart",
-        #             "x_column": self.period_column,
-        #             "y_column": "value",
-        #             "group_column": "group",
-        #             "title": f"Unique receipt texts per {self.period_column} for {self.store_name}"
-        #         },
-        #     },
-        #     "texts_per_ean_histogram": {
-        #         "pivot": False,
-        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_texts_per_ean_histogram.png",
-        #         "plot_settings": {
-        #             "plot_type": "bar_chart",
-        #             "x_column": "receipt_text",
-        #             "y_column": "count",
-        #             "title": f"Unique receipt texts per EAN for {self.store_name}"
-        #         },
-        #     },
-        #     "log_texts_per_ean_histogram": {
-        #         "pivot": False,
-        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_log_texts_per_ean_histogram.png",
-        #         "plot_settings": {
-        #             "plot_type": "bar_chart",
-        #             "x_column": "receipt_text",
-        #             "y_column": "count",
-        #             "title": f"Unique receipt texts per EAN for {self.store_name} (Log scale)"
-        #         },
-        #     },
-        #     "receipt_length_histogram": {
-        #         "pivot": False,
-        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_receipt_length_histogram.png",
-        #         "plot_settings": {
-        #             "plot_type": "bar_chart",
-        #             "x_column": self.receipt_text_column,
-        #             "y_column": "count",
-        #             "title": f"Receipt text length histogram for {self.store_name}"
-        #         },
-        #     },
-        #     "ean_length_histogram": {
-        #         "pivot": False,
-        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_ean_length_histogram.png",
-        #         "plot_settings": {
-        #             "plot_type": "bar_chart",
-        #             "x_column": self.product_id_column,
-        #             "y_column": "count",
-        #             "title": f"EAN length histogram for {self.store_name}"
-        #         },
-        #     },
-        #     "compare_products_per_period": {
-        #         "pivot": True,
-        #         "value_columns": [
-        #             f"number_{self.receipt_text_column}_introduced",
-        #             f"number_{self.receipt_text_column}_removed",
-        #             f"number_{self.product_id_column}_introduced",
-        #             f"number_{self.product_id_column}_removed",
-        #         ],
-        #         "filename": f"{self.store_name}_{self.period_column}_{self.coicop_column}_compare_products_per_period.png",
-        #         "plot_settings": {
-        #             "plot_type": "line_chart",
-        #             "x_column": self.period_column,
-        #             "y_column": "value",
-        #             "group_column": "group",
-        #             "title": f"Number of products introduced/removed per {self.period_column} for {self.store_name}"
-        #         },
-        #     },
-        #     # "compare_products_per_period_coicop_level":{
-
-        # }
-
-    def output(self):
-        output_dict = dict()
-        for function_name in self.input().keys():
-            if function_name not in self.plot_settings:
-                continue
-
-            plot_settings = self.plot_settings[function_name]
-            if isinstance(plot_settings, list):
-                for settings in plot_settings:
-                    self.create_output_for_plot_settings(
-                        output_dict, settings)
-            else:
-                self.create_output_for_plot_settings(
-                    output_dict, plot_settings)
-
-        return output_dict
-
-    def create_output_for_plot_settings(self, output_dict, settings):
-        filename = settings["filename"]
-        output_dict[filename] = luigi.LocalTarget(os.path.join(
-            self.output_directory, filename), format=luigi.format.Nop)
-
-    def run(self):
-        for function_name, input in self.input().items():
-            if function_name not in self.plot_settings:
-                continue
-
-            with input.open("r") as input_file:
-                dataframe = pd.read_parquet(
-                    input_file, engine=self.parquet_engine)
-
-                plot_settings = self.plot_settings[function_name]
-                if isinstance(plot_settings, list):
-                    for settings in plot_settings:
-                        self.plot_to_file(function_name, dataframe, settings)
-                else:
-                    self.plot_to_file(function_name, dataframe, plot_settings)
-
-    def plot_to_file(self, function_name, dataframe, settings):
-        with self.output()[function_name].open("w") as output_file:
-            self.plot_with_settings(
-                dataframe, settings, output_file)
-
-    def plot_with_settings(self,
-                           dataframe: pd.DataFrame,
-                           plot_settings: Dict[str, Any],
-                           output_file,
-                           value_columns: List[str] = None):
-        if "pivot" in plot_settings and plot_settings["pivot"]:
-            value_columns = plot_settings["value_columns"]
-            dataframe = unpivot(dataframe, value_columns)
-
-        figure = self.plot_engine.plot_from_settings(
-            dataframe, plot_settings["plot_settings"])
-        figure.save(output_file)
-
 
 class AllStoresAnalysis(luigi.WrapperTask):
     """ This task analyses the product inventory and dynamics for all stores in a certain
@@ -519,7 +430,7 @@ class AllStoresAnalysis(luigi.WrapperTask):
                         self.output_directory, "products")
                     os.makedirs(output_directory, exist_ok=True)
 
-                    yield PlotResults(
+                    yield PerStoreAnalysis(
                         input_filename=filename,
                         output_directory=output_directory,
                         parquet_engine=self.parquet_engine,
