@@ -421,7 +421,11 @@ class PlotResults(luigi.Task):
                     self.plot_with_settings(
                         function_name, dataframe, plot_settings)
 
-    def plot_with_settings(self, function_name: str, dataframe: pd.DataFrame, plot_settings: Dict[str, Any], value_columns: List[str] = None):
+    def plot_with_settings(self,
+                           function_name: str,
+                           dataframe: pd.DataFrame,
+                           plot_settings: Dict[str, Any],
+                           value_columns: List[str] = None):
         if "pivot" in plot_settings and plot_settings["pivot"]:
             value_columns = plot_settings["value_columns"]
             dataframe = unpivot(dataframe, value_columns)
