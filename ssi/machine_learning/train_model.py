@@ -197,7 +197,7 @@ def train_and_evaluate_model(dataframe: pd.DataFrame,
         The evaluation dictionary containing the evaluation metrics
     """
     dataframe = drop_labels_with_few_samples(
-        dataframe, label_column, min_samples=1)
+        dataframe, label_column, min_samples=10)
     train_df, test_df = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[label_column])
     if not feature_extractor:
