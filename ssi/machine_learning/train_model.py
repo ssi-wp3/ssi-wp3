@@ -83,8 +83,8 @@ def fit_pipeline(train_dataframe: pd.DataFrame,
                  receipt_text_column: str,
                  label_column: str,
                  ) -> Pipeline:
-    pipeline.fit(train_dataframe[receipt_text_column],
-                 train_dataframe[label_column])
+    pipeline.fit(train_dataframe[receipt_text_column].values.tolist(),
+                 train_dataframe[label_column].values.tolist())
 
     return pipeline
 
