@@ -62,7 +62,7 @@ def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, 
         f"precision{suffix}": precision_score(y_true, y_pred, average="macro"),
         f"recall{suffix}": recall_score(y_true, y_pred, average="macro"),
         f"f1{suffix}": f1_score(y_true, y_pred, average="macro"),
-        f"classification_report{suffix}": classification_report(y_true, y_pred),
+        f"classification_report{suffix}": classification_report(y_true, y_pred, output_dict=True),
         f"confusion_matrix{suffix}": confusion_matrix(y_true, y_pred).tolist()
     }
 
