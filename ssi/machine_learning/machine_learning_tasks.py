@@ -108,7 +108,7 @@ class TrainAllAdversarialModels(luigi.Task):
     filename_prefix = luigi.Parameter()
 
     def requires(self):
-        store_filenames = [filename
+        store_filenames = [os.path.join(self.input_directory, filename)
                            for filename in get_features_files_in_directory(
                                self.input_directory, self.filename_prefix)
                            if self.feature_extractor.value in filename]
