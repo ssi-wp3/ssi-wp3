@@ -9,6 +9,7 @@ import pandas as pd
 import luigi
 import joblib
 import os
+import json
 
 
 # TODO add an evaluation that trains a model on one supermarket and evaluates it on another.
@@ -207,11 +208,11 @@ class CrossStoreEvaluation(luigi.Task):
 
                 print("Writing training evaluation to disk")
                 with self.output()[f"train_evaluation_{store1}_{store2}"].open("w") as train_evaluation_file:
-                    train_evaluation_file.write(train_evaluation_dict)
+                    json.dump(train_evaluation_dict, train_evaluation_file)
 
                 print("Writing evaluation to disk")
                 with self.output()[f"evaluation_{store1}_{store2}"].open("w") as evaluation_file:
-                    evaluation_file.write(evaluation_dict)
+                    json.dump(evaluation_dict, evaluation_file)
 
 
 class AllCrossStoreEvaluations(luigi.WrapperTask):
