@@ -1,5 +1,6 @@
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.preprocessing import LabelEncoder
 from typing import Dict, Any
 from .train_model import train_and_evaluate_model
 from ..feature_extraction.feature_extraction import FeatureExtractorType
@@ -139,6 +140,10 @@ def evaluate_adversarial_pipeline(y_true: np.array,
     Evaluate the adversarial pipeline.
     """
     # TODO convert labels to numeric ones...
+    label_encoder = LabelEncoder()
+    y_true = label_encoder.fit_transform(y_true)
+    y_pred = label_encoder.transform(y_pred)
+
     return {
         "roc_auc": roc_auc_score(y_true, y_pred),
         "accuracy": accuracy_score(y_true, y_pred),
