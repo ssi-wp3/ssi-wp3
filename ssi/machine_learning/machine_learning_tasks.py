@@ -208,6 +208,7 @@ class CrossStoreEvaluation(luigi.Task):
                                                  )
 
                 print("Writing model to disk")
+                # TODO crashes here as it expects a list of targets
                 with self.output()[f"model_{store1}_{store2}"].open("w") as model_file:
                     joblib.dump(pipeline, model_file)
 
