@@ -161,8 +161,8 @@ class CrossStoreEvaluation(luigi.Task):
         return [
             {
                 f"model_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(model_filename, format=luigi.format.Nop),
-                f"train_evaluation_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(train_evaluation_filename, format=luigi.format.Nop),
-                f"evaluation_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(train_evaluation_filename, format=luigi.format.Nop)
+                f"train_evaluation_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(train_evaluation_filename),
+                f"evaluation_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(evaluation_filename)
             }
             for combinations in [(store1, store2), (store2, store1)
                                  ]
