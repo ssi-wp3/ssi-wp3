@@ -185,8 +185,12 @@ class CrossStoreEvaluation(luigi.Task):
                 print("Reading parquet files")
                 store1_dataframe = pd.read_parquet(
                     store1_file, engine=self.parquet_engine)
+                store1_dataframe = store1_dataframe.drop_duplicates(
+                    [self.receipt_text_column, self.label_column])
                 store2_dataframe = pd.read_parquet(
                     store2_file, engine=self.parquet_engine)
+                store2_dataframe = store2_dataframe.drop_duplicates(
+                    [self.receipt_text_column, self.label_column])
 
                 print(f"Training model on {store1}")
                 pipeline, train_evaluation_dict = train_and_evaluate_model(store1_dataframe,
