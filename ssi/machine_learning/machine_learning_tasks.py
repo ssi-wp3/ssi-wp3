@@ -102,6 +102,7 @@ class TrainAllAdversarialModels(luigi.WrapperTask):
     model_type = luigi.Parameter()
     store_id_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
+    features_column = luigi.Parameter(default="features")
     test_size = luigi.FloatParameter(default=0.2)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
@@ -121,6 +122,7 @@ class TrainAllAdversarialModels(luigi.WrapperTask):
                                           model_type=self.model_type,
                                           store_id_column=self.store_id_column,
                                           receipt_text_column=self.receipt_text_column,
+                                          features_column=self.features_column,
                                           test_size=self.test_size,
                                           parquet_engine=self.parquet_engine,
                                           verbose=self.verbose)
