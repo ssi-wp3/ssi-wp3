@@ -1,5 +1,5 @@
 from typing import List
-from .adversarial import train_adversarial_model
+from .adversarial import train_adversarial_model, evaluate_adversarial_pipeline
 from .train_model import train_and_evaluate_model
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..preprocessing.files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder

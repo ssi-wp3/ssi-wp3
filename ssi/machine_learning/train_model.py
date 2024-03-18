@@ -188,12 +188,47 @@ def train_and_evaluate_model(dataframe: pd.DataFrame,
                                                        label_column,
                                                        verbose)
 
+    evaluation_dict = evaluate_model(pipeline, test_df,
+                                     feature_column, label_column, evaluation_function)
+
+    return pipeline, evaluation_dict
+
+
+def evaluate_model(pipeline: Pipeline,
+                   test_df: pd.DataFrame,
+                   feature_column: str,
+                   label_column: str,
+                   evaluation_function: Callable[[np.array, np.array], Dict[str, object]]) -> Dict[str, object]:
+    """Evaluate a model pipeline
+
+    Parameters
+    ----------
+    pipeline : Pipeline
+        The trained model pipeline
+
+    test_df : pd.DataFrame
+        The dataframe to use for testing
+
+    feature_column : str
+        The column name containing the features, this can be a column containing the
+        already extracted feature vectors, or the column containing the receipt text.
+
+    label_column : str
+        The column name containing the labels
+
+    evaluation_function : Callable[[np.array, np.array], Dict[str, object]]
+        The evaluation function to use
+
+    Returns
+    -------
+    Dict[str, object]
+        The evaluation dictionary containing the evaluation metrics
+    """
     y_true = test_df[label_column]
     y_pred = pipeline.predict(test_df[feature_column].values.tolist())
 
     evaluation_dict = evaluation_function(y_true, y_pred)
-
-    return pipeline, evaluation_dict
+    return evaluation_dict
 
 
 def evaluate_hiclass(y_true: np.array, y_pred: np.array) -> Dict[str, Any]:
