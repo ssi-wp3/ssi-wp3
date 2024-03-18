@@ -113,7 +113,7 @@ class TrainAllAdversarialModels(luigi.WrapperTask):
         store_filenames = [os.path.join(self.input_directory, filename)
                            for filename in get_features_files_in_directory(
                                self.input_directory, self.filename_prefix)
-                           if f"_{self.feature_extractor.value}_" in filename]
+                           if f"{self.feature_extractor.value}.parquet" in filename]
 
         return [TrainAdversarialModelTask(store1_filename=store1_filename,
                                           store2_filename=store2_filename,
