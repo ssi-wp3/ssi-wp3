@@ -94,7 +94,7 @@ class TrainAdversarialModelTask(luigi.Task):
                 evaluation_file.write(evaluation_dict)
 
 
-class TrainAllAdversarialModels(luigi.Task):
+class TrainAllAdversarialModels(luigi.WrapperTask):
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
@@ -123,6 +123,71 @@ class TrainAllAdversarialModels(luigi.Task):
                                           test_size=self.test_size,
                                           parquet_engine=self.parquet_engine,
                                           verbose=self.verbose)
+                for store1_filename, store2_filename in store_combinations(store_filenames)]
+
+
+class CrossStoreEvaluation(luigi.Task):
+    store1_filename = luigi.PathParameter()
+    store2_filename = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
+    model_type = luigi.Parameter()
+
+    store_id_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    features_column = luigi.Parameter(default="features")
+    test_size = luigi.FloatParameter(default=0.2)
+    parquet_engine = luigi.Parameter()
+    verbose = luigi.BoolParameter(default=False)
+
+    def requires(self):
+        return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
+
+    def output(self):
+        store1 = get_store_name_from_combined_filename(self.store1_filename)
+        store2 = get_store_name_from_combined_filename(self.store2_filename)
+        model_filename = os.path.join(
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
+        evaluation_filename = os.path.join(
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
+        return {
+            "model": luigi.LocalTarget(model_filename, format=luigi.format.Nop),
+            "evaluation": luigi.LocalTarget(evaluation_filename, format=luigi.format.Nop)
+        }
+
+    def run(self):
+        pass
+
+
+class AllCrossStoreEvaluations(luigi.WrapperTask):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
+    model_type = luigi.Parameter()
+    store_id_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    test_size = luigi.FloatParameter(default=0.2)
+    parquet_engine = luigi.Parameter()
+    verbose = luigi.BoolParameter(default=False)
+
+    filename_prefix = luigi.Parameter()
+
+    def requires(self):
+        store_filenames = [os.path.join(self.input_directory, filename)
+                           for filename in get_features_files_in_directory(
+                               self.input_directory, self.filename_prefix)
+                           if self.feature_extractor.value in filename]
+
+        return [CrossStoreEvaluation(store1_filename=store1_filename,
+                                     store2_filename=store2_filename,
+                                     output_directory=self.output_directory,
+                                     feature_extractor=self.feature_extractor,
+                                     model_type=self.model_type,
+                                     store_id_column=self.store_id_column,
+                                     receipt_text_column=self.receipt_text_column,
+                                     test_size=self.test_size,
+                                     parquet_engine=self.parquet_engine,
+                                     verbose=self.verbose)
                 for store1_filename, store2_filename in store_combinations(store_filenames)]
 
 
