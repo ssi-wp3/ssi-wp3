@@ -219,8 +219,9 @@ class AllCrossStoreEvaluations(luigi.WrapperTask):
     output_directory = luigi.PathParameter()
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     model_type = luigi.Parameter()
-    store_id_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
+    features_column = luigi.Parameter(default="features")
+    label_column = luigi.Parameter()
     test_size = luigi.FloatParameter(default=0.2)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
@@ -238,8 +239,9 @@ class AllCrossStoreEvaluations(luigi.WrapperTask):
                                      output_directory=self.output_directory,
                                      feature_extractor=self.feature_extractor,
                                      model_type=self.model_type,
-                                     store_id_column=self.store_id_column,
                                      receipt_text_column=self.receipt_text_column,
+                                     features_column=self.features_column,
+                                     label_column=self.label_column,
                                      test_size=self.test_size,
                                      parquet_engine=self.parquet_engine,
                                      verbose=self.verbose)
