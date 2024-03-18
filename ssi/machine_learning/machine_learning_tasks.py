@@ -46,10 +46,7 @@ class TrainAdversarialModelTask(luigi.Task):
     verbose = luigi.BoolParameter(default=False)
 
     def requires(self):
-        return [ParquetFile(os.path.join(self.input_directory, filename))
-                for filename in get_features_files_in_directory(self.input_directory, self.filename_prefix)
-                if self.feature_extractor.value in filename
-                ]
+        return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
 
     def output(self):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
