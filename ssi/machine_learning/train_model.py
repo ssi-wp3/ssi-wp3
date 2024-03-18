@@ -118,6 +118,24 @@ def train_model_with_feature_extractors(train_dataframe: pd.DataFrame,
 
 
 def drop_labels_with_few_samples(dataframe: pd.DataFrame, label_column: str, min_samples: int = 10) -> pd.DataFrame:
+    """ Drops labels where the sample count is less than min_samples.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe to use for training and testing
+
+    label_column : str
+        The column name containing the labels
+
+    min_samples : int, optional
+        The minimum number of samples for a label to be kept, by default 10
+
+    Returns
+    -------
+    pd.DataFrame
+        The dataframe containing only the labels with at least min_samples
+    """
     label_counts = dataframe[label_column].value_counts()
     labels_to_drop = label_counts[label_counts < min_samples].index
     return dataframe[~dataframe[label_column].isin(labels_to_drop)]
