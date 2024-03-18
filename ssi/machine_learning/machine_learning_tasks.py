@@ -45,22 +45,6 @@ class TrainAdversarialModelTask(luigi.Task):
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
 
-    @property
-    def train_from_scratch(self) -> List[FeatureExtractorType]:
-        # TODO only necessary for period evaluation. Adversarial validation can use the full dataset for the entire supermarket.
-        """ Return the feature extractors that require training from scratch.
-        TFIDF and CountVectorizer require a word dictionary that is specific to the
-        receipt texts seen at training time. To evaluate these models correctly we cannot
-        use the files with extracted features as they are trained on the full dataset, not
-        the specific period that we may want to evaluate.
-        """
-        return {
-            FeatureExtractorType.tfidf_char,
-            FeatureExtractorType.tfidf_word,
-            FeatureExtractorType.count_char,
-            FeatureExtractorType.count_vectorizer
-        }
-
     def requires(self):
         return [ParquetFile(os.path.join(self.input_directory, filename))
                 for filename in get_features_files_in_directory(self.input_directory, self.filename_prefix)
@@ -141,3 +125,20 @@ class TrainAllAdversarialModels(luigi.Task):
                                           parquet_engine=self.parquet_engine,
                                           verbose=self.verbose)
                 for store1_filename, store2_filename in store_combinations(store_filenames)]
+
+
+class TrainModelOnPeriod(luigi.Task):
+    @property
+    def train_from_scratch(self) -> List[FeatureExtractorType]:
+        """ Return the feature extractors that require training from scratch.
+        TFIDF and CountVectorizer require a word dictionary that is specific to the
+        receipt texts seen at training time. To evaluate these models correctly we cannot
+        use the files with extracted features as they are trained on the full dataset, not
+        the specific period that we may want to evaluate.
+        """
+        return {
+            FeatureExtractorType.tfidf_char,
+            FeatureExtractorType.tfidf_word,
+            FeatureExtractorType.count_char,
+            FeatureExtractorType.count_vectorizer
+        }
