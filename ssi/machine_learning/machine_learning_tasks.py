@@ -111,8 +111,9 @@ class TrainAllAdversarialModels(luigi.Task):
     filename_prefix = luigi.Parameter()
 
     def requires(self):
-        store_filenames = [filename for filename in get_combined_revenue_files_in_folder(
-            self.input_directory, self.filename_prefix)]
+        store_filenames = [filename
+                           for filename in get_features_files_in_directory(
+                               self.input_directory, self.filename_prefix)]
 
         return [TrainAdversarialModelTask(store1_filename=store1_filename,
                                           store2_filename=store2_filename,
