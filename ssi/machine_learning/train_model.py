@@ -189,7 +189,7 @@ def train_and_evaluate_model(dataframe: pd.DataFrame,
                                                        verbose)
 
     y_true = test_df[label_column]
-    y_pred = pipeline.predict(test_df[feature_column])
+    y_pred = pipeline.predict(test_df[feature_column].values.tolist())
 
     evaluation_dict = evaluation_function(y_true, y_pred)
 
