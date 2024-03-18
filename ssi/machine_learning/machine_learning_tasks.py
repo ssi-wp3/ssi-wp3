@@ -128,6 +128,9 @@ class TrainAllAdversarialModels(luigi.Task):
 
 
 class TrainModelOnPeriod(luigi.Task):
+
+    period_column = luigi.Parameter()
+
     @property
     def train_from_scratch(self) -> List[FeatureExtractorType]:
         """ Return the feature extractors that require training from scratch.
