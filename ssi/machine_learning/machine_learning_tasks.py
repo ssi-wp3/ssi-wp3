@@ -93,7 +93,7 @@ class TrainAdversarialModelTask(luigi.Task):
 
             print("Writing evaluation to disk")
             with self.output()["evaluation"].open("w") as evaluation_file:
-                evaluation_file.write(evaluation_dict)
+                json.dump(evaluation_dict, evaluation_file)
 
 
 class TrainAllAdversarialModels(luigi.WrapperTask):
