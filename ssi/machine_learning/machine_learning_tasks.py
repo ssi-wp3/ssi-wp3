@@ -1,6 +1,6 @@
 from typing import List
 from .adversarial import train_adversarial_model, evaluate_adversarial_pipeline
-from .train_model import train_and_evaluate_model
+from .train_model import train_and_evaluate_model, evaluate_model
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..preprocessing.files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder
 from ..files import get_features_files_in_directory
@@ -194,11 +194,12 @@ class CrossStoreEvaluation(luigi.Task):
                                                                            test_size=self.test_size,
                                                                            verbose=self.verbose)
                 print(f"Evaluating model on {store2}")
-                evaluation_dict = evaluate_model(store2_dataframe,
+                evaluation_dict = evaluate_model(pipeline,
+                                                 store2_dataframe,
                                                  self.features_column,
                                                  self.label_column,
-                                                 pipeline,
-                                                 verbose=self.verbose)
+                                                 evaluation_function=evaluate_adversarial_pipeline,
+                                                 )
 
                 print("Writing model to disk")
                 with self.output()[f"model_{store1}_{store2}"].open("w") as model_file:
