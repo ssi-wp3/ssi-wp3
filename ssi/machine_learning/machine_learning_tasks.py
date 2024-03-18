@@ -113,7 +113,8 @@ class TrainAllAdversarialModels(luigi.Task):
     def requires(self):
         store_filenames = [filename
                            for filename in get_features_files_in_directory(
-                               self.input_directory, self.filename_prefix)]
+                               self.input_directory, self.filename_prefix)
+                           if self.feature_extractor.value in filename]
 
         return [TrainAdversarialModelTask(store1_filename=store1_filename,
                                           store2_filename=store2_filename,
