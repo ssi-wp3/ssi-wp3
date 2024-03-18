@@ -139,9 +139,13 @@ def evaluate_adversarial_pipeline(y_true: np.array,
     """
     Evaluate the adversarial pipeline.
     """
-    # TODO convert labels to numeric ones...
     label_encoder = LabelEncoder()
-    y_true = label_encoder.fit_transform(y_true)
+
+    # Fit the label encoder on the combined labels to prevent errors when the labels are not the same
+    combined_labels = np.concatenate([y_true, y_pred])
+    label_encoder.fit(combined_labels)
+
+    y_true = label_encoder.transform(y_true)
     y_pred = label_encoder.transform(y_pred)
 
     return {
