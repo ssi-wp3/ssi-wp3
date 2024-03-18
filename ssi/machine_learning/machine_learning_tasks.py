@@ -59,7 +59,7 @@ class TrainAdversarialModelTask(luigi.Task):
             self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
         return {
             "model": luigi.LocalTarget(model_filename, format=luigi.format.Nop),
-            "evaluation": luigi.LocalTarget(evaluation_filename, format=luigi.format.Nop)
+            "evaluation": luigi.LocalTarget(evaluation_filename)
         }
 
     def run(self):
