@@ -78,7 +78,6 @@ class TrainAdversarialModelTask(luigi.Task):
             store2_dataframe[self.store_id_column] = store2
 
             print("Training adversarial model")
-            # TODO need to batch feature extraction otherwise GPU will run out of memory
             pipeline, evaluation_dict = train_adversarial_model(store1_dataframe,
                                                                 store2_dataframe,
                                                                 self.store_id_column,
