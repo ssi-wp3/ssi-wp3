@@ -123,13 +123,12 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
     print("Training and evaluating model")
 
     pipeline, evaluation_dict = train_and_evaluate_model(unique_dataframe,
-                                                         receipt_text_column,
+                                                         features_column,
                                                          store_id_column,
-                                                         feature_extractor,
                                                          model_type,
-                                                         test_size,
-                                                         evaluate_adversarial_pipeline,
-                                                         verbose)
+                                                         test_size=test_size,
+                                                         evaluation_function=evaluate_adversarial_pipeline,
+                                                         verbose=verbose)
     return pipeline, evaluation_dict
 
 
