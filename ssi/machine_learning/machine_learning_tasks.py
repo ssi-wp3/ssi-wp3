@@ -47,6 +47,7 @@ class TrainAdversarialModelTask(luigi.Task):
 
     @property
     def train_from_scratch(self) -> List[FeatureExtractorType]:
+        # TODO only necessary for period evaluation. Adversarial validation can use the full dataset for the entire supermarket.
         """ Return the feature extractors that require training from scratch.
         TFIDF and CountVectorizer require a word dictionary that is specific to the
         receipt texts seen at training time. To evaluate these models correctly we cannot
@@ -61,10 +62,6 @@ class TrainAdversarialModelTask(luigi.Task):
         }
 
     def requires(self):
-        if self.feature_extractor in self.train_from_scratch:
-            # For now do not use tfidf of count vectorizer as they require training from scratch
-            return []
-
         return [ParquetFile(os.path.join(self.input_directory, filename))
                 for filename in get_features_files_in_directory(self.input_directory, self.filename_prefix)
                 if self.feature_extractor.value in filename
