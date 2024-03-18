@@ -138,6 +138,7 @@ def evaluate_adversarial_pipeline(y_true: np.array,
     """
     Evaluate the adversarial pipeline.
     """
+    # TODO convert labels to numeric ones...
     return {
         "roc_auc": roc_auc_score(y_true, y_pred),
         "accuracy": accuracy_score(y_true, y_pred),
