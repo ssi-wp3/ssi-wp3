@@ -65,7 +65,7 @@ def filter_unique_combinations(dataframe: pd.DataFrame,
     pd.DataFrame
         The dataframe containing only unique combinations of store id, receipt text, and features
     """
-    return dataframe.drop_duplicates(subset=[store_id_column, receipt_text_column, features_column])
+    return dataframe.drop_duplicates(subset=[store_id_column, receipt_text_column])
 
 
 def train_adversarial_model(store1_dataframe: pd.DataFrame,
