@@ -1,6 +1,8 @@
+from typing import List
 from .adversarial import train_adversarial_model
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..preprocessing.files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder
+from ..files import get_features_files_in_directory
 from .utils import store_combinations
 import pandas as pd
 import luigi
@@ -38,12 +40,35 @@ class TrainAdversarialModelTask(luigi.Task):
 
     store_id_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
+    features_column = luigi.Parameter(default="features")
     test_size = luigi.FloatParameter(default=0.2)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
 
+    @property
+    def train_from_scratch(self) -> List[FeatureExtractorType]:
+        """ Return the feature extractors that require training from scratch.
+        TFIDF and CountVectorizer require a word dictionary that is specific to the
+        receipt texts seen at training time. To evaluate these models correctly we cannot
+        use the files with extracted features as they are trained on the full dataset, not
+        the specific period that we may want to evaluate.
+        """
+        return {
+            FeatureExtractorType.tfidf_char,
+            FeatureExtractorType.tfidf_word,
+            FeatureExtractorType.count_char,
+            FeatureExtractorType.count_vectorizer
+        }
+
     def requires(self):
-        return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
+        if self.feature_extractor in self.train_from_scratch:
+            # For now do not use tfidf of count vectorizer as they require training from scratch
+            return []
+
+        return [ParquetFile(os.path.join(self.input_directory, filename))
+                for filename in get_features_files_in_directory(self.input_directory, self.filename_prefix)
+                if self.feature_extractor.value in filename
+                ]
 
     def output(self):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
@@ -78,7 +103,7 @@ class TrainAdversarialModelTask(luigi.Task):
                                                                 store2_dataframe,
                                                                 self.store_id_column,
                                                                 self.receipt_text_column,
-                                                                self.feature_extractor,
+                                                                self.features_column,
                                                                 self.model_type,
                                                                 self.test_size,
                                                                 self.verbose)

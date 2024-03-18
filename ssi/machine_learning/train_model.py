@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.ensemble._voting import _BaseVoting
 from sklearn.ensemble._stacking import _BaseStacking
 from hiclass import LocalClassifierPerParentNode
-from typing import List, Dict, Callable, Any
+from typing import List, Dict, Callable, Any, Optional
 from enum import Enum
 import pandas as pd
 import numpy as np
@@ -67,58 +67,129 @@ def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, 
     }
 
 
-def train_model(train_dataframe: pd.DataFrame,
-                model_type: str,
-                feature_extractor: FeatureExtractorType,
-                receipt_text_column: str,
-                label_column: str,
-                verbose: bool = False
-                ) -> Pipeline:
+def get_model(model_type: str, number_of_jobs: int = -1, verbose: bool = False):
     model_factory = ModelFactory()
     if model_type == "hiclass":
         model = model_factory.create_model(
-            model_type, local_classifier=LogisticRegression(), verbose=1)
+            model_type, local_classifier=LogisticRegression(), verbose=verbose)
     else:
         model = model_factory.create_model(
             model_type)  # , n_jobs=number_of_jobs)
+    return model
 
-    feature_extractor_factory = FeatureExtractorFactory()
-    feature_extractor = feature_extractor_factory.create_feature_extractor(
-        feature_extractor)
 
-    pipeline = Pipeline([
-        ('features', feature_extractor),
-        ('classifier', model)
-    ], verbose=verbose)
-
+def fit_pipeline(train_dataframe: pd.DataFrame,
+                 pipeline: Pipeline,
+                 receipt_text_column: str,
+                 label_column: str,
+                 ) -> Pipeline:
     pipeline.fit(train_dataframe[receipt_text_column],
                  train_dataframe[label_column])
 
     return pipeline
 
 
+def train_model(train_dataframe: pd.DataFrame,
+                model_type: str,
+                feature_column: str,
+                label_column: str,
+                verbose: bool = False
+                ) -> Pipeline:
+    model = get_model(model_type, verbose=verbose)
+    pipeline = Pipeline([
+        ('classifier', model)
+    ], verbose=verbose)
+    return fit_pipeline(train_dataframe, pipeline, feature_column, label_column)
+
+
+def train_model_with_feature_extractors(train_dataframe: pd.DataFrame,
+                                        model_type: str,
+                                        feature_extractor: FeatureExtractorType,
+                                        receipt_text_column: str,
+                                        label_column: str,
+                                        verbose: bool = False
+                                        ) -> Pipeline:
+    model = get_model(model_type, verbose=verbose)
+    pipeline = Pipeline([
+        ('features', feature_extractor),
+        ('classifier', model)
+    ], verbose=verbose)
+    return fit_pipeline(train_dataframe, pipeline, receipt_text_column, label_column)
+
+
 def train_and_evaluate_model(dataframe: pd.DataFrame,
-                             receipt_text_column: str,
+                             feature_column: str,
                              label_column: str,
-                             feature_extractor: FeatureExtractorType,
                              model_type: str,
-                             test_size: float,
+                             feature_extractor: Optional[FeatureExtractorType] = None,
+                             test_size: float = 0.2,
                              evaluation_function: Callable[[
                                  np.array, np.array], Dict[str, object]] = evaluate,
                              number_of_jobs: int = -1,
                              verbose: bool = False):
+    # TODO check in training scripts whether the function signature should be updated to this new one.
+    """ Trains and evaluates a model pipeline
+
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The dataframe to use for training and testing
+
+    feature_column : str
+        The column name containing the features, this can be a column containing the
+        already extracted feature vectors, or the column containing the receipt text.
+
+    label_column : str
+        The column name containing the labels
+
+    model_type : str
+        The model to use, one of the classification models provided by the ModelFactory.
+        At this moment, all scikit-learn classifiers are available, as well as, the hiclass hierarchical
+        classifier.
+
+    feature_extractor : FeatureExtractorType, optional
+        The feature extractor to use, by default None. If None, the feature_column is assumed to contain
+        the feature vectors.
+
+    test_size : float, optional
+        The test size for the train/test split, by default 0.2
+
+    evaluation_function : Callable[[np.array, np.array], Dict[str, object]], optional
+        The evaluation function to use, by default evaluate
+
+    number_of_jobs : int, optional
+        The number of jobs to use, by default -1
+
+    verbose : bool, optional
+        Specifies this if you want verbose output from the classifier, by default False
+
+    Returns
+    -------
+    Pipeline
+        The trained model pipeline
+
+    Dict[str, object]
+        The evaluation dictionary containing the evaluation metrics
+    """
     train_df, test_df = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[label_column])
-
-    pipeline = train_model(train_df,
-                           model_type,
-                           feature_extractor,
-                           receipt_text_column,
-                           label_column,
-                           verbose)
+    if not feature_extractor:
+        pipeline = train_model(train_df,
+                               model_type,
+                               feature_column,
+                               label_column,
+                               verbose)
+    else:
+        pipeline = train_model_with_feature_extractors(train_df,
+                                                       model_type,
+                                                       feature_extractor,
+                                                       feature_column,
+                                                       label_column,
+                                                       verbose)
 
     y_true = test_df[label_column]
-    y_pred = pipeline.predict(test_df[receipt_text_column])
+    y_pred = pipeline.predict(test_df[feature_column])
 
     evaluation_dict = evaluation_function(y_true, y_pred)
 

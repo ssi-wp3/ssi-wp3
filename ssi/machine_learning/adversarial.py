@@ -10,7 +10,8 @@ import numpy as np
 def create_combined_dataframe(store1_dataframe: pd.DataFrame,
                               store2_dataframe: pd.DataFrame,
                               store_id_column: str,
-                              receipt_text_column: str
+                              receipt_text_column: str,
+                              features_column: str
                               ) -> pd.DataFrame:
     """Combine two store dataframes into one dataframe for adversarial validation.
     The two dataframes are combined by concatenating the receipt text columns and the store id columns.
@@ -31,14 +32,17 @@ def create_combined_dataframe(store1_dataframe: pd.DataFrame,
         The column name containing the receipt text    
     """
     return pd.concat([
-        store1_dataframe[[store_id_column, receipt_text_column]],
-        store2_dataframe[[store_id_column, receipt_text_column]]
+        store1_dataframe[[store_id_column,
+                          receipt_text_column, features_column]],
+        store2_dataframe[[store_id_column,
+                          receipt_text_column, features_column]]
     ])
 
 
 def filter_unique_combinations(dataframe: pd.DataFrame,
                                store_id_column: str,
-                               receipt_text_column: str
+                               receipt_text_column: str,
+                               features_column: str
                                ) -> pd.DataFrame:
     """Filter the dataframe to only contain unique combinations of store id and receipt text.
 
@@ -51,16 +55,24 @@ def filter_unique_combinations(dataframe: pd.DataFrame,
         The column name containing the store id
 
     receipt_text_column : str
-        The column name containing the receipt text    
+        The column name containing the receipt text   
+
+    features_column : str
+        The column name containing the features
+
+    Returns
+    -------
+    pd.DataFrame
+        The dataframe containing only unique combinations of store id, receipt text, and features
     """
-    return dataframe.drop_duplicates(subset=[store_id_column, receipt_text_column])
+    return dataframe.drop_duplicates(subset=[store_id_column, receipt_text_column, features_column])
 
 
 def train_adversarial_model(store1_dataframe: pd.DataFrame,
                             store2_dataframe: pd.DataFrame,
                             store_id_column: str,
                             receipt_text_column: str,
-                            feature_extractor: FeatureExtractorType,
+                            features_column: str,
                             model_type: str,
                             test_size: float = 0.2,
                             number_of_jobs: int = -1,
@@ -78,6 +90,9 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
 
     receipt_text_column : str
         The column name containing the receipt text
+
+    features_column : str
+        The column name containing the features
 
     store_id_column : str
         The column name containing the store id
@@ -101,11 +116,12 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
     """
     print("Creating combined dataframe")
     combined_dataframe = create_combined_dataframe(
-        store1_dataframe, store2_dataframe, store_id_column, receipt_text_column)
+        store1_dataframe, store2_dataframe, store_id_column, receipt_text_column, features_column)
     print("Filtering unique combinations")
     unique_dataframe = filter_unique_combinations(
-        combined_dataframe, store_id_column, receipt_text_column)
+        combined_dataframe, store_id_column, receipt_text_column, features_column)
     print("Training and evaluating model")
+
     pipeline, evaluation_dict = train_and_evaluate_model(unique_dataframe,
                                                          receipt_text_column,
                                                          store_id_column,
