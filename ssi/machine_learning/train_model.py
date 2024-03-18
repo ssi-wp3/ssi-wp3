@@ -117,6 +117,12 @@ def train_model_with_feature_extractors(train_dataframe: pd.DataFrame,
     return fit_pipeline(train_dataframe, pipeline, receipt_text_column, label_column)
 
 
+def drop_labels_with_few_samples(dataframe: pd.DataFrame, label_column: str, min_samples: int = 10) -> pd.DataFrame:
+    label_counts = dataframe[label_column].value_counts()
+    labels_to_drop = label_counts[label_counts < min_samples].index
+    return dataframe[~dataframe[label_column].isin(labels_to_drop)]
+
+
 def train_and_evaluate_model(dataframe: pd.DataFrame,
                              feature_column: str,
                              label_column: str,
@@ -172,6 +178,8 @@ def train_and_evaluate_model(dataframe: pd.DataFrame,
     Dict[str, object]
         The evaluation dictionary containing the evaluation metrics
     """
+    dataframe = drop_labels_with_few_samples(
+        dataframe, label_column, min_samples=1)
     train_df, test_df = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[label_column])
     if not feature_extractor:
