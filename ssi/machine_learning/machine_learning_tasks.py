@@ -1,5 +1,6 @@
 from typing import List
 from .adversarial import train_adversarial_model
+from .train_model import train_and_evaluate_model
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..preprocessing.files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder
 from ..files import get_features_files_in_directory
@@ -133,7 +134,7 @@ class CrossStoreEvaluation(luigi.Task):
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     model_type = luigi.Parameter()
 
-    store_id_column = luigi.Parameter()
+    label_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
     test_size = luigi.FloatParameter(default=0.2)
@@ -150,13 +151,43 @@ class CrossStoreEvaluation(luigi.Task):
             self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
         evaluation_filename = os.path.join(
             self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
-        return {
-            "model": luigi.LocalTarget(model_filename, format=luigi.format.Nop),
-            "evaluation": luigi.LocalTarget(evaluation_filename, format=luigi.format.Nop)
-        }
+        return [
+            {
+                f"model_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(model_filename, format=luigi.format.Nop),
+                f"evaluation_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(evaluation_filename, format=luigi.format.Nop)
+            }
+            for combinations in [(store1, store2), (store2, store1)
+                                 ]
+        ]
 
     def run(self):
-        pass
+        print(
+            f"Running cross store evaluation training task for {self.store1_filename} and {self.store2_filename}")
+        store1 = get_store_name_from_combined_filename(self.store1_filename)
+        store2 = get_store_name_from_combined_filename(self.store2_filename)
+        print(f"Store1: {store1}, Store2: {store2}")
+        with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
+            print("Reading parquet files")
+            store1_dataframe = pd.read_parquet(
+                store1_file, engine=self.parquet_engine)
+            store2_dataframe = pd.read_parquet(
+                store2_file, engine=self.parquet_engine)
+
+            print(f"Training model on {store1} and evaluating on {store2}")
+            pipeline, evaluation_dict = train_and_evaluate_model(store1_dataframe,
+                                                                 self.features_column,
+                                                                 self.label_column,
+                                                                 self.model_type,
+                                                                 test_size=self.test_size,
+                                                                 verbose=self.verbose)
+
+            print("Writing adversarial model to disk")
+            with self.output()["model"].open("w") as model_file:
+                joblib.dump(pipeline, model_file)
+
+            print("Writing evaluation to disk")
+            with self.output()["evaluation"].open("w") as evaluation_file:
+                evaluation_file.write(evaluation_dict)
 
 
 class AllCrossStoreEvaluations(luigi.WrapperTask):
