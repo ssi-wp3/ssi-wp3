@@ -151,23 +151,29 @@ class CrossStoreEvaluation(luigi.Task):
         ]
         ]
 
+    def get_model_filename(self, store1: str, store2: str) -> str:
+        return os.path.join(
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
+
+    def get_train_evaluation_filename(self, store1: str, store2: str) -> str:
+        return os.path.join(
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_train_evaluation.json")
+
+    def get_evaluation_filename(self, store1: str, store2: str) -> str:
+        return os.path.join(
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_evaluation.json")
+
     def output(self):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
-        model_filename = os.path.join(
-            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
-        train_evaluation_filename = os.path.join(
-            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_train_evaluation.json")
-        evaluation_filename = os.path.join(
-            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_evaluation.json")
         return [
             {
-                f"model_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(model_filename, format=luigi.format.Nop),
-                f"train_evaluation_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(train_evaluation_filename),
-                f"evaluation_{combinations[0]}_{combinations[1]}": luigi.LocalTarget(evaluation_filename)
+                f"model_{combination_store1}_{combination_store2}": luigi.LocalTarget(self.get_model_filename(combination_store1, combination_store2), format=luigi.format.Nop),
+                f"train_evaluation_{combination_store1}_{combination_store2}": luigi.LocalTarget(self.get_evaluation_filename(combination_store1, combination_store2)),
+                f"evaluation_{combination_store1}_{combination_store2}": luigi.LocalTarget(self.get_evaluation_filename(combination_store1, combination_store2))
             }
-            for combinations in [(store1, store2), (store2, store1)
-                                 ]
+            for combination_store1, combination_store2 in [(store1, store2), (store2, store1)
+                                                           ]
         ]
 
     def run(self):
