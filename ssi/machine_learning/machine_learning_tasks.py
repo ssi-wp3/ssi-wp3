@@ -358,13 +358,14 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     model_type = luigi.Parameter()
 
+    filename_prefix = luigi.Parameter()
     label_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
     batch_size = luigi.IntParameter(default=1000)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
-    period_column = luigi.Parameter()
+    period_columns = luigi.ListParameter()
 
     def requires(self):
         return [TrainModelOnPeriod(input_filename=os.path.join(self.input_directory, feature_filename),
@@ -379,6 +380,7 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
                                    verbose=self.verbose,
                                    period_column=self.period_column,
                                    train_period=period)
-                for feature_filename in get_features_files_in_directory(self.input_directory, self.feature_extractor.value)
-                for period in pd.read_parquet(feature_filename, engine=self.parquet_engine)[self.period_column].unique()
+                for feature_filename in get_features_files_in_directory(self.input_directory, self.filename_prefix, self.feature_extractor.value)
+                for period_column in self.period_columns
+                for period in pd.read_parquet(feature_filename, engine=self.parquet_engine)[period_column].unique()
                 ]
