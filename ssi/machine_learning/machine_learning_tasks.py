@@ -302,6 +302,8 @@ class TrainModelOnPeriod(luigi.Task):
         }
 
     def run(self):
+        print(
+            f"Training model: {self.model_type} on period: {self.train_period}")
         with self.input().open() as input_file:
             dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
             dataframe = dataframe.drop_duplicates(
