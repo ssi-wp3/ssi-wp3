@@ -153,15 +153,15 @@ class CrossStoreEvaluation(luigi.Task):
 
     def get_model_filename(self, store1: str, store2: str) -> str:
         return os.path.join(
-            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_model.joblib")
 
     def get_train_evaluation_filename(self, store1: str, store2: str) -> str:
         return os.path.join(
-            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_train_evaluation.json")
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_train_evaluation.json")
 
     def get_evaluation_filename(self, store1: str, store2: str) -> str:
         return os.path.join(
-            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_evaluation.json")
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_evaluation.json")
 
     def output(self):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
