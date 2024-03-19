@@ -330,3 +330,18 @@ class TrainModelOnPeriod(luigi.Task):
             print("Writing model to disk")
             with self.output()["model"].open("w") as model_file:
                 joblib.dump(pipeline, model_file)
+
+            print("Writing predictions to disk")
+            with self.output()["model_predictions"].open("w") as predictions_file:
+                dataframe.to_parquet(
+                    predictions_file, engine=self.parquet_engine)
+
+            print("Evaluating model")
+            evaluation_dict = evaluate_model(pipeline,
+                                             dataframe,
+                                             self.features_column,
+                                             self.label_column,
+                                             evaluation_function=evaluate,
+                                             )
+            with self.output()["evaluation"].open("w") as evaluation_file:
+                json.dump(evaluation_dict, evaluation_file)
