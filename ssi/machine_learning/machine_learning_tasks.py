@@ -294,11 +294,20 @@ class TrainModelOnPeriod(luigi.Task):
     def requires(self):
         return ParquetFile(self.input_filename)
 
+    def get_model_filename(self) -> str:
+        return os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
+
+    def get_predictions_filename(self) -> str:
+        return os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
+
+    def get_evaluations_filename(self) -> str:
+        return os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
+
     def output(self):
         return {
-            "model": luigi.LocalTarget(os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.train_period}.joblib"), format=luigi.format.Nop),
-            "model_predictions": luigi.LocalTarget(os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.train_period}.predictions.parquet"), format=luigi.format.Nop),
-            "evaluation": luigi.LocalTarget(os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.train_period}.evaluation.json"))
+            "model": luigi.LocalTarget(self.get_model_filename(), format=luigi.format.Nop),
+            "model_predictions": luigi.LocalTarget(self.get_predictions_filename(), format=luigi.format.Nop),
+            "evaluation": luigi.LocalTarget(self.get_evaluations_filename())
         }
 
     def run(self):
