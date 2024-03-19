@@ -1,6 +1,6 @@
 from typing import List
 from .adversarial import train_adversarial_model
-from .train_model import train_and_evaluate_model, evaluate_model, evaluate
+from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..preprocessing.files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder
 from ..files import get_features_files_in_directory
@@ -256,8 +256,19 @@ class AllCrossStoreEvaluations(luigi.WrapperTask):
 
 
 class TrainModelOnPeriod(luigi.Task):
+    input_filename = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
+    model_type = luigi.Parameter()
 
+    label_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    features_column = luigi.Parameter(default="features")
+    test_size = luigi.FloatParameter(default=0.2)
+    parquet_engine = luigi.Parameter()
+    verbose = luigi.BoolParameter(default=False)
     period_column = luigi.Parameter()
+    train_period = luigi.Parameter()
 
     @property
     def train_from_scratch(self) -> List[FeatureExtractorType]:
@@ -273,3 +284,38 @@ class TrainModelOnPeriod(luigi.Task):
             FeatureExtractorType.count_char,
             FeatureExtractorType.count_vectorizer
         }
+
+    def requires(self):
+        return ParquetFile(self.input_filename)
+
+    def output(self):
+        return {
+            "model": luigi.LocalTarget(os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.train_period}.joblib"), format=luigi.format.Nop),
+            "evaluation": luigi.LocalTarget(os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.train_period}.evaluation.json"))
+        }
+
+    def run(self):
+        with self.input().open() as input_file:
+            dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
+            dataframe = dataframe.drop_duplicates(
+                [self.receipt_text_column, self.label_column])
+
+            train_dataframe = dataframe[dataframe[self.period_column ==
+                                                  self.train_period]]
+            test_dataframe = dataframe[dataframe[self.period_column !=
+                                                 self.train_period]]
+
+            if self.feature_extractor in self.train_from_scratch:
+                raise NotImplementedError(
+                    "Training feature extractor from scratch not implemented")
+
+            pipeline = train_model(train_dataframe,
+                                   model_type=self.model_type,
+                                   feature_column=self.features_column,
+                                   label_column=self.label_column,
+                                   test_size=self.test_size,
+                                   verbose=self.verbose)
+
+            print("Writing model to disk")
+            with self.output()["model"].open("w") as model_file:
+                joblib.dump(pipeline, model_file)
