@@ -270,7 +270,6 @@ class TrainModelOnPeriod(luigi.Task):
     label_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
-    test_size = luigi.FloatParameter(default=0.2)
     batch_size = luigi.IntParameter(default=1000)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
@@ -351,3 +350,35 @@ class TrainModelOnPeriod(luigi.Task):
                                              )
             with self.output()["evaluation"].open("w") as evaluation_file:
                 json.dump(evaluation_dict, evaluation_file)
+
+
+class TrainModelOnAllPeriods(luigi.WrapperTask):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
+    model_type = luigi.Parameter()
+
+    label_column = luigi.Parameter()
+    receipt_text_column = luigi.Parameter()
+    features_column = luigi.Parameter(default="features")
+    batch_size = luigi.IntParameter(default=1000)
+    parquet_engine = luigi.Parameter()
+    verbose = luigi.BoolParameter(default=False)
+    period_column = luigi.Parameter()
+
+    def requires(self):
+        return [TrainModelOnPeriod(input_filename=os.path.join(self.input_directory, feature_filename),
+                                   output_directory=self.output_directory,
+                                   feature_extractor=self.feature_extractor,
+                                   model_type=self.model_type,
+                                   label_column=self.label_column,
+                                   receipt_text_column=self.receipt_text_column,
+                                   features_column=self.features_column,
+                                   batch_size=self.batch_size,
+                                   parquet_engine=self.parquet_engine,
+                                   verbose=self.verbose,
+                                   period_column=self.period_column,
+                                   train_period=period)
+                for feature_filename in get_features_files_in_directory(self.input_directory, self.feature_extractor.value)
+                for period in pd.read_parquet(feature_filename, engine=self.parquet_engine)[self.period_column].unique()
+                ]
