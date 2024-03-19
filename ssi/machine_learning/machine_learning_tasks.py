@@ -174,7 +174,7 @@ class CrossStoreEvaluation(luigi.Task):
 
         print(
             f"Running cross store evaluation training task for {self.store1_filename} and {self.store2_filename}")
-        for input_combinations in self.input():
+        for index, input_combinations in enumerate(self.input()):
             store1 = get_store_name_from_combined_filename(
                 input_combinations[0].path)
             store2 = get_store_name_from_combined_filename(
@@ -208,16 +208,16 @@ class CrossStoreEvaluation(luigi.Task):
                                                  )
 
                 print("Writing model to disk")
-                # TODO crashes here as it expects a list of targets
-                with self.output()[f"model_{store1}_{store2}"].open("w") as model_file:
+                outputs = self.output()[index]
+                with outputs[f"model_{store1}_{store2}"].open("w") as model_file:
                     joblib.dump(pipeline, model_file)
 
                 print("Writing training evaluation to disk")
-                with self.output()[f"train_evaluation_{store1}_{store2}"].open("w") as train_evaluation_file:
+                with outputs[f"train_evaluation_{store1}_{store2}"].open("w") as train_evaluation_file:
                     json.dump(train_evaluation_dict, train_evaluation_file)
 
                 print("Writing evaluation to disk")
-                with self.output()[f"evaluation_{store1}_{store2}"].open("w") as evaluation_file:
+                with outputs[f"evaluation_{store1}_{store2}"].open("w") as evaluation_file:
                     json.dump(evaluation_dict, evaluation_file)
 
 
