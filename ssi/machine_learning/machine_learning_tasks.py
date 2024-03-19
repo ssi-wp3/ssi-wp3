@@ -265,6 +265,7 @@ class TrainModelOnPeriod(luigi.Task):
     receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
     test_size = luigi.FloatParameter(default=0.2)
+    batch_size = luigi.IntParameter(default=1000)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
     period_column = luigi.Parameter()
@@ -291,6 +292,7 @@ class TrainModelOnPeriod(luigi.Task):
     def output(self):
         return {
             "model": luigi.LocalTarget(os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.train_period}.joblib"), format=luigi.format.Nop),
+            "model_predictions": luigi.LocalTarget(os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.train_period}.predictions.parquet"), format=luigi.format.Nop),
             "evaluation": luigi.LocalTarget(os.path.join(self.output_directory, f"{self.feature_extractor.value}_{self.model_type}_{self.train_period}.evaluation.json"))
         }
 
@@ -299,12 +301,9 @@ class TrainModelOnPeriod(luigi.Task):
             dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
             dataframe = dataframe.drop_duplicates(
                 [self.receipt_text_column, self.label_column])
+            dataframe["is_train"] = dataframe[self.period_column] == self.train_period
 
-            train_dataframe = dataframe[dataframe[self.period_column ==
-                                                  self.train_period]]
-            test_dataframe = dataframe[dataframe[self.period_column !=
-                                                 self.train_period]]
-
+            train_dataframe = dataframe[dataframe["is_train"] == True]
             if self.feature_extractor in self.train_from_scratch:
                 raise NotImplementedError(
                     "Training feature extractor from scratch not implemented")
@@ -315,6 +314,18 @@ class TrainModelOnPeriod(luigi.Task):
                                    label_column=self.label_column,
                                    test_size=self.test_size,
                                    verbose=self.verbose)
+
+            # Predict labels on dataframe in batches
+            for i in range(0, dataframe.shape[0], self.batch_size):
+                print(f"Predicting batch {i} to {i+self.batch_size}")
+                predictions = pipeline.predict(
+                    dataframe[self.features_column].iloc[i:i+self.batch_size])
+
+                for prediction_index, prediction in enumerate(predictions):
+                    dataframe[f"y_pred_{prediction_index}"].iloc[i +
+                                                                 self.batch_size] = prediction[:, prediction_index]
+                dataframe["predictions"].iloc[i:i +
+                                              self.batch_size] = predictions
 
             print("Writing model to disk")
             with self.output()["model"].open("w") as model_file:
