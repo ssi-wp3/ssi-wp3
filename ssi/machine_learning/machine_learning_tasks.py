@@ -328,7 +328,6 @@ class TrainModelOnPeriod(luigi.Task):
                                    model_type=self.model_type,
                                    feature_column=self.features_column,
                                    label_column=self.label_column,
-                                   test_size=self.test_size,
                                    verbose=self.verbose)
 
             # Predict labels on dataframe in batches
