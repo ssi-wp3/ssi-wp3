@@ -454,6 +454,13 @@ class TrainModelOnPeriod(luigi.Task):
             "evaluation": luigi.LocalTarget(self.get_evaluations_filename())
         }
 
+    def get_data_for_period(self, input_file):
+        dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
+        dataframe = dataframe.drop_duplicates(
+            [self.receipt_text_column, self.label_column])
+        dataframe["is_train"] = dataframe[self.period_column] == self.train_period
+        return dataframe
+
     def predict_batch(self,
                       batch_dataframe: pd.DataFrame,
                       progress_bar: tqdm.tqdm,
@@ -473,10 +480,7 @@ class TrainModelOnPeriod(luigi.Task):
         print(
             f"Training model: {self.model_type} on period: {self.train_period}")
         with self.input().open() as input_file:
-            dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
-            dataframe = dataframe.drop_duplicates(
-                [self.receipt_text_column, self.label_column])
-            dataframe["is_train"] = dataframe[self.period_column] == self.train_period
+            dataframe = self.get_data_for_period(input_file)
 
             train_dataframe = dataframe[dataframe["is_train"] == True]
             if self.feature_extractor in self.train_from_scratch:
