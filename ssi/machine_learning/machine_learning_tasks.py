@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any
 from .adversarial import train_adversarial_model
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
@@ -25,6 +25,44 @@ class ParquetFile(luigi.ExternalTask):
 
     def output(self):
         return luigi.LocalTarget(self.filename, format=luigi.format.Nop)
+
+
+class ModelTrainer:
+    def __init__(self):
+        self._train_evaluation_dict = {}
+        self._evaluation_dict = {}
+        self._pipeline = None
+
+    @property
+    def pipeline(self):
+        return self._pipeline
+
+    @property
+    def train_evaluation_dict(self) -> Dict[str, Any]:
+        return self._train_evaluation_dict
+
+    @property
+    def evaluation_dict(self) -> Dict[str, Any]:
+        return self._evaluation_dict
+
+    def fit():
+        pass
+
+    def predict():
+        pass
+
+    def write_model(self, model_file):
+        joblib.dump(self.pipeline, model_file)
+
+    def write_predictions(self, predictions_file):
+        # self.dataframe.to_parquet(predictions_file)
+        pass
+
+    def write_training_evaluation(self, evaluation_file):
+        json.dump(self.train_evaluation_dict, evaluation_file)
+
+    def write_evaluation(self, evaluation_file):
+        json.dump(self.evaluation_dict, evaluation_file)
 
 
 class TrainAdversarialModelTask(luigi.Task):
