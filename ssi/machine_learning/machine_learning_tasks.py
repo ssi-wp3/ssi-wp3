@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Callable
 from .adversarial import train_adversarial_model
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
@@ -45,10 +45,18 @@ class ModelTrainer:
     def evaluation_dict(self) -> Dict[str, Any]:
         return self._evaluation_dict
 
-    def fit():
+    def fit(self,
+            training_data_loader: Callable[[], pd.DataFrame],
+            model_type: str,
+            features_column: str,
+            label_column: str,
+            test_size: float
+            ):
         pass
 
-    def predict():
+    def predict(self,
+                predictions_data_loader: Callable[[], pd.DataFrame],
+                predictions_file: str):
         pass
 
     def write_model(self, model_file):
