@@ -4,7 +4,7 @@ from .adversarial import train_adversarial_model
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..preprocessing.files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder
-from ..files import get_features_files_in_directory
+from ..files import get_features_files_in_directory, batched_writer
 from .utils import store_combinations
 import pandas as pd
 import luigi
@@ -108,24 +108,18 @@ class ModelTrainer:
     def batch_predict(self,
                       predictions_data_loader: Callable[[], pd.DataFrame],
                       predictions_file: str,
+                      batch_size: int,
                       evaluation_function: Callable[[pd.DataFrame], Dict[str, Any]],
-                      batch_size: int):
+                      ):
         dataframe = predictions_data_loader()
-        for i in range(0, dataframe.shape[0], self.batch_predict_size):
-            print(f"Predicting element {i} to {i+self.batch_predict_size}")
-            X = dataframe[self.features_column].iloc[i:i +
-                                                     self.batch_predict_size]
-            predictions = self.pipeline.predict(X.values.tolist())
+        batched_writer(predictions_file, dataframe, batch_size, lambda batch: self.__predict(
+            batch), pipeline=self.pipeline, feature_column=self.features_column)
 
-            # TODO: this is returning one label per prediction, maybe use predict_proba?
-            for prediction_index, prediction in enumerate(predictions):
-                dataframe[f"y_pred_{prediction_index}"].iloc[i +
-                                                             self.batch_size] = prediction[prediction_index]
-            dataframe["predictions"].iloc[i:i +
-                                          self.batch_predict_size] = predictions
-
-            # Batch write to parquet!
-            # dataframe.to_parquet(predictions_file, engine=self.parquet_engine)
+    def __predict(self, batch_dataframe: pd.DataFrame, pipeline, features_column: str) -> pd.DataFrame:
+        X = batch_dataframe[features_column]
+        predictions = pipeline.predict(X.values.tolist())
+        for prediction_index, prediction in enumerate(predictions):
+            batch_dataframe[f"y_pred_{prediction_index}"] = prediction[prediction_index]
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)
@@ -444,6 +438,15 @@ class TrainModelOnPeriod(luigi.Task):
             "evaluation": luigi.LocalTarget(self.get_evaluations_filename())
         }
 
+    def predict_batch(self,
+                      batch_dataframe: pd.DataFrame,
+                      pipeline,
+                      features_column: str) -> pd.DataFrame:
+        X = batch_dataframe[features_column]
+        predictions = pipeline.predict(X.values.tolist())
+        for prediction_index, prediction in enumerate(predictions):
+            batch_dataframe[f"y_pred_{prediction_index}"] = prediction[prediction_index]
+
     def run(self):
         print(
             f"Training model: {self.model_type} on period: {self.train_period}")
@@ -464,28 +467,19 @@ class TrainModelOnPeriod(luigi.Task):
                                    label_column=self.label_column,
                                    verbose=self.verbose)
 
-            # Predict labels on dataframe in batches
-
-            for i in range(0, dataframe.shape[0], self.batch_size):
-                print(f"Predicting element {i} to {i+self.batch_size}")
-                X = dataframe[self.features_column].iloc[i:i+self.batch_size]
-                predictions = pipeline.predict(X.values.tolist())
-
-                # TODO: this is returning one label per prediction, maybe use predict_proba?
-                for prediction_index, prediction in enumerate(predictions):
-                    dataframe[f"y_pred_{prediction_index}"].iloc[i +
-                                                                 self.batch_size] = prediction[prediction_index]
-                dataframe["predictions"].iloc[i:i +
-                                              self.batch_size] = predictions
-
             print("Writing model to disk")
             with self.output()["model"].open("w") as model_file:
                 joblib.dump(pipeline, model_file)
 
+            # Predict labels on dataframe in batches
             print("Writing predictions to disk")
             with self.output()["model_predictions"].open("w") as predictions_file:
-                dataframe.to_parquet(
-                    predictions_file, engine=self.parquet_engine)
+                batched_writer(predictions_file,
+                               dataframe,
+                               self.batch_size,
+                               self.predict_batch,
+                               pipeline=pipeline,
+                               features_column=self.features_column)
 
             print("Evaluating model")
             evaluation_dict = evaluate_model(pipeline,
