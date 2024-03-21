@@ -61,11 +61,9 @@ class TrainAdversarialModelTask(luigi.Task):
     def output(self):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
-        model_filename = self.get_model_filename(store1, store2)
-        evaluation_filename = self.get_evaluation_filename(store1, store2)
         return {
-            "model": luigi.LocalTarget(model_filename, format=luigi.format.Nop),
-            "evaluation": luigi.LocalTarget(evaluation_filename)
+            "model": luigi.LocalTarget(self.get_model_filename(store1, store2), format=luigi.format.Nop),
+            "evaluation": luigi.LocalTarget(self.get_evaluation_filename(store1, store2))
         }
 
     def run(self):
