@@ -543,6 +543,7 @@ class TrainModelOnPeriod(luigi.Task):
                       progress_bar: tqdm.tqdm,
                       pipeline,
                       features_column: str) -> pd.DataFrame:
+        batch_dataframe = batch_dataframe.copy()
         X = batch_dataframe[features_column]
 
         progress_bar.set_description("Predicting probabilities")
