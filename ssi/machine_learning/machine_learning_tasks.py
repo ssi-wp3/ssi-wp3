@@ -87,13 +87,18 @@ class ModelTrainer:
     def evaluation_dict(self, value: Dict[str, Any]):
         self._evaluation_dict = value
 
+    def get_kwargs_with_prefix(self, prefix: str, **kwargs) -> Dict[str, Any]:
+        return {key: value for key, value in kwargs.items() if key.startswith(prefix)}
+
     def fit(self,
             training_data_loader: Callable[[], pd.DataFrame],
             training_function: Callable[[pd.DataFrame, str, str, str], Any],
             training_predictions_file: str,
             **training_kwargs
             ):
-        training_data = training_data_loader()
+        training_data_kwargs = self.get_kwargs_with_prefix(
+            "training_data_", **training_kwargs)
+        training_data = training_data_loader(training_data_kwargs)
         self._pipeline, self._train_evaluation_dict = training_function(
             training_data, training_kwargs)
         self.batch_predict(training_data_loader,
