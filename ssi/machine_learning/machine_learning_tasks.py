@@ -388,7 +388,7 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
                                    batch_size=self.batch_size,
                                    parquet_engine=self.parquet_engine,
                                    verbose=self.verbose,
-                                   period_column=self.period_column,
+                                   period_column=period_column,
                                    train_period=period)
                 for feature_filename in get_features_files_in_directory(self.input_directory, self.filename_prefix, self.feature_extractor.value)
                 for period_column in self.period_columns
