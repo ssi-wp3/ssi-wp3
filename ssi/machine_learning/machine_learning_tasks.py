@@ -452,11 +452,14 @@ class TrainModelOnPeriod(luigi.Task):
                       progress_bar: tqdm.tqdm,
                       pipeline,
                       features_column: str) -> pd.DataFrame:
-        progress_bar.set_description("Predicting labels")
         X = batch_dataframe[features_column]
-        predictions = pipeline.predict(X.values.tolist())
-        for prediction_index, prediction in enumerate(predictions):
-            batch_dataframe[f"y_pred_{prediction_index}"] = prediction[prediction_index]
+
+        progress_bar.set_description("Predicting probabilities")
+        probabilities = pipeline.predict_proba(X.values.tolist())
+        for prediction_index, prediction in enumerate(probabilities):
+            batch_dataframe[f"y_proba_{prediction_index}"] = prediction[prediction_index]
+
+        batch_dataframe["y_pred"] = pipeline.predict(X.values.tolist())
 
     def run(self):
         print(
