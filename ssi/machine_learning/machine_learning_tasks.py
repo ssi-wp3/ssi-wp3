@@ -11,7 +11,7 @@ import luigi
 import joblib
 import os
 import json
-
+import tqdm
 
 # TODO add an evaluation that trains a model on one supermarket and evaluates it on another.
 # Check TFIDF and CountVectorizer for the feature extraction; they use a word dictionary,
@@ -440,8 +440,10 @@ class TrainModelOnPeriod(luigi.Task):
 
     def predict_batch(self,
                       batch_dataframe: pd.DataFrame,
+                      progress_bar: tqdm.tqdm,
                       pipeline,
                       features_column: str) -> pd.DataFrame:
+        progress_bar.set_description("Predicting labels")
         X = batch_dataframe[features_column]
         predictions = pipeline.predict(X.values.tolist())
         for prediction_index, prediction in enumerate(predictions):
