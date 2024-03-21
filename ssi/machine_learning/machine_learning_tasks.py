@@ -533,6 +533,7 @@ class TrainModelOnPeriod(luigi.Task):
                 batch_dataframe.iloc[index][f"y_proba_{class_label}"] = probability_value
 
         batch_dataframe["y_pred"] = pipeline.predict(X.values.tolist())
+        return batch_dataframe
 
     def run(self):
         print(
