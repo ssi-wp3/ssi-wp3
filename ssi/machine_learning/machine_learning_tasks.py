@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Callable, Tuple
 from abc import ABC, abstractmethod
-from .adversarial import train_adversarial_model
+from sklearn.pipeline import Pipeline
+from .adversarial import evaluate_adversarial_pipeline, create_combined_and_filtered_dataframe
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..preprocessing.files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder
@@ -147,7 +148,7 @@ class ModelTrainer:
         json.dump(self.evaluation_dict, evaluation_file)
 
 
-class TrainAdversarialModelTask(luigi.Task):
+class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
     """
     Train an adversarial model to predict the store id based on the receipt text column.
     If we can predict the store id based on the receipt text, then the receipt text between
@@ -164,8 +165,17 @@ class TrainAdversarialModelTask(luigi.Task):
     receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
     test_size = luigi.FloatParameter(default=0.2)
+    batch_predict_size = luigi.IntParameter(default=1000)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
+
+    @property
+    def model_trainer(self) -> ModelTrainer:
+        return ModelTrainer(
+            model_evaluator=self,
+            batch_predict_size=self.batch_predict_size,
+            parquet_engine=self.parquet_engine
+        )
 
     def get_model_filename(self, store1: str, store2: str) -> str:
         return os.path.join(
@@ -199,10 +209,36 @@ class TrainAdversarialModelTask(luigi.Task):
         store1_dataframe[self.store_id_column] = store_name
         return store1_dataframe
 
-    def get_all_adversarial_data(self, store1: str, store2: str, store1_file, store2_file) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def get_all_adversarial_data(self, store1: str, store2: str, store1_file, store2_file) -> pd.DataFrame:
         store1_dataframe = self.get_adversarial_data(store1_file, store1)
         store2_dataframe = self.get_adversarial_data(store2_file, store2)
-        return store1_dataframe, store2_dataframe
+        return create_combined_and_filtered_dataframe(store1_dataframe,
+                                                      store2_dataframe,
+                                                      self.store_id_column,
+                                                      self.receipt_text_column,
+                                                      self.features_column)
+
+    def train_adversarial_model(self,
+                                adversarial_dataframe: pd.DataFrame,
+                                features_column: str,
+                                store_id_column: str,
+                                model_type: str,
+                                test_size: float = 0.2,
+                                verbose: bool = False
+                                ) -> Tuple[Pipeline, Dict[str, Any]]:
+        return train_and_evaluate_model(adversarial_dataframe,
+                                        features_column,
+                                        store_id_column,
+                                        model_type,
+                                        test_size=test_size,
+                                        evaluation_function=evaluate_adversarial_pipeline,
+                                        verbose=verbose)
+
+    def evaluate_training(self, training_data_loader: Callable[[], pd.DataFrame]) -> Dict[str, Any]:
+        return dict()
+
+    def evaluate(self, predictions_data_loader: Callable[[], pd.DataFrame]) -> Dict[str, Any]:
+        return dict()
 
     def run(self):
         print(
@@ -212,25 +248,26 @@ class TrainAdversarialModelTask(luigi.Task):
         print(f"Store1: {store1}, Store2: {store2}")
         with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
             print("Reading parquet files")
-            store1_dataframe, store2_dataframe = self.get_all_adversarial_data(
+            adversarial_dataframe = self.get_all_adversarial_data(
                 store1, store2, store1_file, store2_file)
 
             print("Training adversarial model")
-            pipeline, evaluation_dict = train_adversarial_model(store1_dataframe,
-                                                                store2_dataframe,
-                                                                self.store_id_column,
-                                                                self.receipt_text_column,
-                                                                self.features_column,
-                                                                self.model_type,
-                                                                self.test_size,
-                                                                self.verbose)
+            self.model_trainer.fit()
+            # pipeline, evaluation_dict = train_adversarial_model(store1_dataframe,
+            #                                                     store2_dataframe,
+            #                                                     self.store_id_column,
+            #                                                     self.receipt_text_column,
+            #                                                     self.features_column,
+            #                                                     self.model_type,
+            #                                                     self.test_size,
+            #                                                     self.verbose)
             print("Writing adversarial model to disk")
             with self.output()["model"].open("w") as model_file:
-                joblib.dump(pipeline, model_file)
+                self.model_trainer.write_model(model_file)
 
             print("Writing evaluation to disk")
             with self.output()["evaluation"].open("w") as evaluation_file:
-                json.dump(evaluation_dict, evaluation_file)
+                self.model_trainer.write_evaluation(evaluation_file)
 
 
 class TrainAllAdversarialModels(luigi.WrapperTask):
