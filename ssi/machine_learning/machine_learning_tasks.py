@@ -1,7 +1,8 @@
-from typing import List, Dict, Any, Callable, Tuple
+from typing import List, Dict, Any, Callable, Tuple, Union
 from abc import ABC, abstractmethod
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix
+from functools import reduce
 from .adversarial import evaluate_adversarial_pipeline, create_combined_and_filtered_dataframe
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
@@ -32,11 +33,11 @@ class ParquetFile(luigi.ExternalTask):
 
 class ModelEvaluator(ABC):
     @abstractmethod
-    def evaluate_training(self, training_data_loader: Callable[[], pd.DataFrame]) -> Dict[str, Any]:
+    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
         pass
 
     @abstractmethod
-    def evaluate(self, predictions_data_loader: Callable[[], pd.DataFrame]) -> Dict[str, Any]:
+    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
         pass
 
 
@@ -286,11 +287,14 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
                                         evaluation_function=evaluate_adversarial_pipeline,
                                         verbose=verbose)
 
-    def evaluate_training(self, training_data_loader: Callable[[], pd.DataFrame]) -> Dict[str, Any]:
-        return dict()
+    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
+        return self.evaluate(dataframe)
 
-    def evaluate(self, predictions_data_loader: Callable[[], pd.DataFrame]) -> Dict[str, Any]:
-        return dict()
+    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
+        summed_confusion_matrix = reduce(dataframe, lambda x, y: x.add(y))
+        # Calculate other metrics here!
+
+        return {"confusion_matrix": summed_confusion_matrix.to_dict()}
 
     def run(self):
         print(
