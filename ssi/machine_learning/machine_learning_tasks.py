@@ -181,6 +181,14 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
         return os.path.join(
             self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
 
+    def get_training_predictions_filename(self, store1: str, store2: str) -> str:
+        return os.path.join(
+            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_training_predictions.parquet")
+
+    def get_predictions_filename(self, store1: str, store2: str) -> str:
+        return os.path.join(
+            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_predictions.parquet")
+
     def get_evaluation_filename(self, store1: str, store2: str) -> str:
         return os.path.join(
             self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
@@ -193,6 +201,8 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
         store2 = get_store_name_from_combined_filename(self.store2_filename)
         return {
             "model": luigi.LocalTarget(self.get_model_filename(store1, store2), format=luigi.format.Nop),
+            "training_predictions_file": luigi.LocalTarget(self.get_training_predictions_filename(store1, store2), format=luigi.format.Nop),
+            "predictions_file": luigi.LocalTarget(self.get_predictions_filename(store1, store2), format=luigi.format.Nop),
             "evaluation": luigi.LocalTarget(self.get_evaluation_filename(store1, store2))
         }
 
@@ -251,16 +261,22 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
             adversarial_dataframe = self.get_all_adversarial_data(
                 store1, store2, store1_file, store2_file)
 
-            print("Training adversarial model")
-            self.model_trainer.fit()
-            # pipeline, evaluation_dict = train_adversarial_model(store1_dataframe,
-            #                                                     store2_dataframe,
-            #                                                     self.store_id_column,
-            #                                                     self.receipt_text_column,
-            #                                                     self.features_column,
-            #                                                     self.model_type,
-            #                                                     self.test_size,
-            #                                                     self.verbose)
+            print("Training adversarial model & writing training predictions to disk")
+            with self.output()["training_predictions_file"].open("w") as training_predictions_file:
+                self.model_trainer.fit(lambda: adversarial_dataframe,
+                                       self.train_adversarial_model,
+                                       training_predictions_file,
+                                       features_column=self.features_column,
+                                       store_id_column=self.store_id_column,
+                                       model_type=self.model_type,
+                                       test_size=self.test_size,
+                                       verbose=self.verbose)
+
+            print("Writing raw predictions to disk")
+            with self.output()["predictions_file"].open("w") as predictions_file:
+                self.model_trainer.predict(lambda: adversarial_dataframe,
+                                           predictions_file)
+
             print("Writing adversarial model to disk")
             with self.output()["model"].open("w") as model_file:
                 self.model_trainer.write_model(model_file)
