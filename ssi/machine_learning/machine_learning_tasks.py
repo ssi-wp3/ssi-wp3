@@ -103,22 +103,28 @@ class ModelTrainer:
             training_data, training_kwargs)
         self.batch_predict(training_data_loader,
                            training_predictions_file,
-                           lambda dataframe: self.model_evaluator.evaluate_training(dataframe))
+                           lambda dataframe: self.model_evaluator.evaluate_training(
+                               dataframe),
+                           training_data_kwargs)
 
     def predict(self,
                 predictions_data_loader: Callable[[], pd.DataFrame],
-                predictions_file: str):
+                predictions_file: str,
+                **data_loader_kwargs):
         self.batch_predict(predictions_data_loader,
                            predictions_file,
-                           lambda dataframe: self.model_evaluator.evaluate(dataframe))
+                           lambda dataframe: self.model_evaluator.evaluate(
+                               dataframe),
+                           **data_loader_kwargs)
 
     def batch_predict(self,
                       predictions_data_loader: Callable[[], pd.DataFrame],
                       predictions_file: str,
                       batch_size: int,
                       evaluation_function: Callable[[pd.DataFrame], Dict[str, Any]],
+                      **data_loader_kwargs
                       ):
-        dataframe = predictions_data_loader()
+        dataframe = predictions_data_loader(**data_loader_kwargs)
         batched_writer(predictions_file,
                        dataframe,
                        batch_size,
