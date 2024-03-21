@@ -530,7 +530,7 @@ class TrainModelOnPeriod(luigi.Task):
         probabilities = pipeline.predict_proba(X.values.tolist())
         for index, probability_vector in enumerate(probabilities):
             for class_label, probability_value in zip(pipeline.classes_, probability_vector):
-                batch_dataframe[f"y_proba_{class_label}"].iloc[index] = probability_value
+                batch_dataframe.iloc[index][f"y_proba_{class_label}"] = probability_value
 
         batch_dataframe["y_pred"] = pipeline.predict(X.values.tolist())
 
