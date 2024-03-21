@@ -26,7 +26,6 @@ def batched_writer(filename: str,
                    dataframe: pd.DataFrame,
                    batch_size: int,
                    process_batch: Callable[[pd.DataFrame], pd.DataFrame],
-                   progress_bar: Optional[tqdm] = None,
                    **process_batch_kwargs):
     """Process a DataFrame in batches and write it to a Parquet file batch per batch.
     Use this function to avoid memory issues when writing large DataFrames to Parquet files.
@@ -46,27 +45,25 @@ def batched_writer(filename: str,
     process_batch: Callable[[pd.DataFrame], pd.DataFrame]
         A function that processes a batch of the DataFrame. This function should return a DataFrame.
 
-    progress_bar: Optional[tqdm]
-        A tqdm progress bar to update after each batch.
-
     **process_batch_kwargs
         Additional keyword arguments to pass to the process_batch function.
 
     """
     pq_writer = None
-    for i in range(0, len(dataframe), batch_size):
-        batch_df = dataframe.iloc[i:i+batch_size].copy()
-        processed_batch_df = process_batch(
-            batch_df, progress_bar, **process_batch_kwargs)
+    with tqdm(total=len(dataframe)) as progress_bar:
+        for i in range(0, len(dataframe), batch_size):
+            batch_df = dataframe.iloc[i:i+batch_size].copy()
+            processed_batch_df = process_batch(
+                batch_df, progress_bar, **process_batch_kwargs)
 
-        table = pa.Table.from_pandas(processed_batch_df)
-        if i == 0:
-            pq_writer = pq.ParquetWriter(filename, table.schema)
-        pq_writer.write_table(table)
+            table = pa.Table.from_pandas(processed_batch_df)
+            if i == 0:
+                pq_writer = pq.ParquetWriter(filename, table.schema)
+            pq_writer.write_table(table)
 
-        if not progress_bar:
-            continue
-        progress_bar.update(batch_size)
+            if not progress_bar:
+                continue
+            progress_bar.update(batch_size)
 
     if pq_writer:
         pq_writer.close()
