@@ -457,7 +457,8 @@ class TrainModelOnPeriod(luigi.Task):
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X.values.tolist())
         for prediction_index, prediction in enumerate(probabilities):
-            batch_dataframe[f"y_proba_{prediction_index}"] = prediction[prediction_index]
+            batch_dataframe[f"y_proba_{prediction_index}"] = prediction[:,
+                                                                        prediction_index]
 
         batch_dataframe["y_pred"] = pipeline.predict(X.values.tolist())
 
