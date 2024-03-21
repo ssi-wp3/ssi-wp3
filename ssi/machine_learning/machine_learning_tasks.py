@@ -468,10 +468,8 @@ class TrainModelOnPeriod(luigi.Task):
             for i in range(0, dataframe.shape[0], self.batch_size):
                 print(f"Predicting element {i} to {i+self.batch_size}")
                 X = dataframe[self.features_column].iloc[i:i+self.batch_size]
-                print(f"X shape: {X.shape}")
                 predictions = pipeline.predict(X.values.tolist())
 
-                print("Predictions:", predictions)
                 # TODO: this is returning one label per prediction, maybe use predict_proba?
                 for prediction_index, prediction in enumerate(predictions):
                     dataframe[f"y_pred_{prediction_index}"].iloc[i +
