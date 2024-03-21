@@ -117,20 +117,26 @@ class ModelTrainer:
                                dataframe),
                            **data_loader_kwargs)
 
+    def batch_statistics(self, dataframe: pd.DataFrame) -> Dict[str, Any]:
+        return dict()
+
     def batch_predict(self,
                       predictions_data_loader: Callable[[], pd.DataFrame],
                       predictions_file: str,
                       batch_size: int,
                       evaluation_function: Callable[[pd.DataFrame], Dict[str, Any]],
                       **data_loader_kwargs
-                      ):
+                      ) -> Dict[str, Any]:
         dataframe = predictions_data_loader(**data_loader_kwargs)
-        batched_writer(predictions_file,
-                       dataframe,
-                       batch_size,
-                       lambda batch: self.__predict(batch),
-                       pipeline=self.pipeline,
-                       feature_column=self.features_column)
+        batch_statistics = batched_writer(predictions_file,
+                                          dataframe,
+                                          batch_size,
+                                          process_batch=lambda batch: self.__predict(
+                                              batch),
+                                          batch_statistics=self.batch_statistics,
+                                          pipeline=self.pipeline,
+                                          feature_column=self.features_column)
+        return evaluation_function(batch_statistics)
 
     def __predict(self,
                   batch_dataframe: pd.DataFrame,
