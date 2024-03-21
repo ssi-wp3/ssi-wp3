@@ -392,5 +392,5 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
                                    train_period=period)
                 for feature_filename in get_features_files_in_directory(self.input_directory, self.filename_prefix, self.feature_extractor.value)
                 for period_column in self.period_columns
-                for period in pd.read_parquet(feature_filename, engine=self.parquet_engine)[period_column].unique()
+                for period in pd.read_parquet(os.path.join(self.input_directory, feature_filename), engine=self.parquet_engine)[period_column].unique()
                 ]
