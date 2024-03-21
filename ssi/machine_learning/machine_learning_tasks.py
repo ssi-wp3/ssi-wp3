@@ -428,7 +428,7 @@ class TrainModelOnPeriod(luigi.Task):
                 print(f"Predicting element {i} to {i+self.batch_size}")
                 X = dataframe[self.features_column].iloc[i:i+self.batch_size]
                 print(f"X shape: {X.shape}")
-                predictions = pipeline.predict(X.values)
+                predictions = pipeline.predict(X.values.tolist())
 
                 for prediction_index, prediction in enumerate(predictions):
                     dataframe[f"y_pred_{prediction_index}"].iloc[i +
