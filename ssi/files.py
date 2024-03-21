@@ -61,8 +61,6 @@ def batched_writer(filename: str,
                 pq_writer = pq.ParquetWriter(filename, table.schema)
             pq_writer.write_table(table)
 
-            if not progress_bar:
-                continue
             progress_bar.update(batch_size)
 
     if pq_writer:
