@@ -54,7 +54,7 @@ def batched_writer(filename: str,
         for i in range(0, len(dataframe), batch_size):
             batch_df = dataframe.iloc[i:i+batch_size].copy()
             processed_batch_df = process_batch(
-                batch_df, progress_bar, **process_batch_kwargs)
+                batch_df, progress_bar=progress_bar, **process_batch_kwargs)
 
             table = pa.Table.from_pandas(processed_batch_df)
             if i == 0:
