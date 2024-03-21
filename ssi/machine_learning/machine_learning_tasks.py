@@ -303,6 +303,14 @@ class CrossStoreEvaluation(luigi.Task):
                                                            ]
         ]
 
+    def get_store_data(self, store_file) -> pd.DataFrame:
+        store_dataframe = pd.read_parquet(
+            store_file, engine=self.parquet_engine)
+        store_dataframe = store_dataframe.drop_duplicates(
+            [self.receipt_text_column, self.label_column])
+
+        return store_dataframe
+
     def run(self):
 
         print(
@@ -316,10 +324,7 @@ class CrossStoreEvaluation(luigi.Task):
 
             with input_combinations[0].open("r") as store1_file, input_combinations[1].open("r") as store2_file:
                 print("Reading parquet files")
-                store1_dataframe = pd.read_parquet(
-                    store1_file, engine=self.parquet_engine)
-                store1_dataframe = store1_dataframe.drop_duplicates(
-                    [self.receipt_text_column, self.label_column])
+                store1_dataframe = self.get_store_data(store1_file)
                 store2_dataframe = pd.read_parquet(
                     store2_file, engine=self.parquet_engine)
                 store2_dataframe = store2_dataframe.drop_duplicates(
