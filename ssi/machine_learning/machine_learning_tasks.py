@@ -354,6 +354,10 @@ class CrossStoreEvaluation(luigi.Task):
         return os.path.join(
             self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_evaluation.json")
 
+    def get_evaluation_filename(self, store1: str, store2: str) -> str:
+        return os.path.join(
+            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_evaluation.json")
+
     def output(self):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
@@ -361,6 +365,7 @@ class CrossStoreEvaluation(luigi.Task):
             {
                 f"model_{combination_store1}_{combination_store2}": luigi.LocalTarget(self.get_model_filename(combination_store1, combination_store2), format=luigi.format.Nop),
                 f"train_evaluation_{combination_store1}_{combination_store2}": luigi.LocalTarget(self.get_evaluation_filename(combination_store1, combination_store2)),
+                # TODO add evaluation filename here.
                 f"evaluation_{combination_store1}_{combination_store2}": luigi.LocalTarget(self.get_evaluation_filename(combination_store1, combination_store2))
             }
             for combination_store1, combination_store2 in [(store1, store2), (store2, store1)
