@@ -113,22 +113,29 @@ class ModelTrainer:
                       evaluation_function: Callable[[pd.DataFrame], Dict[str, Any]],
                       ):
         dataframe = predictions_data_loader()
-        batched_writer(predictions_file, dataframe, batch_size, lambda batch: self.__predict(
-            batch), pipeline=self.pipeline, feature_column=self.features_column)
+        batched_writer(predictions_file,
+                       dataframe,
+                       batch_size,
+                       lambda batch: self.__predict(batch),
+                       pipeline=self.pipeline,
+                       feature_column=self.features_column)
 
     def __predict(self,
                   batch_dataframe: pd.DataFrame,
                   progress_bar: tqdm.tqdm,
                   pipeline,
-                  features_column: str) -> pd.DataFrame:
+                  features_column: str,
+                  probability_column_prefix: str = "y_proba",
+                  prediction_column: str = "y_pred") -> pd.DataFrame:
         X = batch_dataframe[features_column]
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X.values.tolist())
         for prediction_index, prediction in enumerate(probabilities):
-            batch_dataframe[f"y_proba_{prediction_index}"] = prediction[prediction_index]
+            batch_dataframe[f"{probability_column_prefix}_{prediction_index}"] = prediction[prediction_index]
 
-        batch_dataframe["y_pred"] = pipeline.predict(X.values.tolist())
+        batch_dataframe[prediction_column] = pipeline.predict(
+            X.values.tolist())
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)
@@ -456,9 +463,9 @@ class TrainModelOnPeriod(luigi.Task):
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X.values.tolist())
-        for prediction_index, prediction in enumerate(probabilities):
-            batch_dataframe[f"y_proba_{prediction_index}"] = prediction[:,
-                                                                        prediction_index]
+        for probality_vector in enumerate(probabilities):
+            for prediction_index, probability_value in enumerate(probality_vector):
+                batch_dataframe[f"y_proba_{prediction_index}"] = probability_value
 
         batch_dataframe["y_pred"] = pipeline.predict(X.values.tolist())
 
