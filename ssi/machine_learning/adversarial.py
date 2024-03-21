@@ -69,6 +69,49 @@ def filter_unique_combinations(dataframe: pd.DataFrame,
     return dataframe.drop_duplicates(subset=[store_id_column, receipt_text_column])
 
 
+def create_combined_and_filtered_dataframe(store1_dataframe: pd.DataFrame,
+                                           store2_dataframe: pd.DataFrame,
+                                           store_id_column: str,
+                                           receipt_text_column: str,
+                                           features_column: str):
+    """Create a combined and filtered dataframe for adversarial validation.
+    It first combines the two store dataframes into one dataframe and then filters the dataframe to only contain unique combinations of store id and receipt text.
+
+    Parameters
+    ----------
+
+    store1_dataframe : pd.DataFrame
+        The first store dataframe
+
+    store2_dataframe : pd.DataFrame
+        The second store dataframe
+
+    store_id_column : str
+        The column name containing the store id
+
+    receipt_text_column : str
+        The column name containing the receipt text
+
+    features_column : str
+        The column name containing the features
+
+    Returns
+    -------
+
+    pd.DataFrame
+        The combined and filtered dataframe
+    """
+
+    print("Creating combined dataframe")
+    combined_dataframe = create_combined_dataframe(
+        store1_dataframe, store2_dataframe, store_id_column, receipt_text_column, features_column)
+    print("Filtering unique combinations")
+    unique_dataframe = filter_unique_combinations(
+        combined_dataframe, store_id_column, receipt_text_column, features_column)
+
+    return unique_dataframe
+
+
 def train_adversarial_model(store1_dataframe: pd.DataFrame,
                             store2_dataframe: pd.DataFrame,
                             store_id_column: str,
@@ -115,12 +158,8 @@ def train_adversarial_model(store1_dataframe: pd.DataFrame,
     object
         The trained model
     """
-    print("Creating combined dataframe")
-    combined_dataframe = create_combined_dataframe(
+    unique_dataframe = create_combined_and_filtered_dataframe(
         store1_dataframe, store2_dataframe, store_id_column, receipt_text_column, features_column)
-    print("Filtering unique combinations")
-    unique_dataframe = filter_unique_combinations(
-        combined_dataframe, store_id_column, receipt_text_column, features_column)
     print("Training and evaluating model")
 
     pipeline, evaluation_dict = train_and_evaluate_model(unique_dataframe,
