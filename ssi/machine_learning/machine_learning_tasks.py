@@ -1,4 +1,5 @@
 from typing import List, Dict, Any, Callable
+from abc import ABC, abstractmethod
 from .adversarial import train_adversarial_model
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
@@ -27,36 +28,71 @@ class ParquetFile(luigi.ExternalTask):
         return luigi.LocalTarget(self.filename, format=luigi.format.Nop)
 
 
+class ModelEvaluator(ABC):
+    @abstractmethod
+    def evaluate_training(self, training_data_loader: Callable[[], pd.DataFrame]) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def evaluate(self, predictions_data_loader: Callable[[], pd.DataFrame]) -> Dict[str, Any]:
+        pass
+
+
 class ModelTrainer:
-    def __init__(self):
+    def __init__(self, model_evaluator: ModelEvaluator):
         self._train_evaluation_dict = {}
         self._evaluation_dict = {}
         self._pipeline = None
+        self._model_evaluator = model_evaluator
 
     @property
     def pipeline(self):
         return self._pipeline
 
     @property
+    def model_evaluator(self) -> ModelEvaluator:
+        return self._model_evaluator
+
+    @property
     def train_evaluation_dict(self) -> Dict[str, Any]:
         return self._train_evaluation_dict
+
+    @train_evaluation_dict.setter
+    def train_evaluation_dict(self, value: Dict[str, Any]):
+        self._train_evaluation_dict = value
 
     @property
     def evaluation_dict(self) -> Dict[str, Any]:
         return self._evaluation_dict
 
+    @evaluation_dict.setter
+    def evaluation_dict(self, value: Dict[str, Any]):
+        self._evaluation_dict = value
+
     def fit(self,
             training_data_loader: Callable[[], pd.DataFrame],
-            model_type: str,
-            features_column: str,
-            label_column: str,
-            test_size: float
+            training_function: Callable[[pd.DataFrame, str, str, str], Any],
+            training_predictions_file: str,
+            **training_kwargs
             ):
-        pass
+        training_data = training_data_loader()
+        self._pipeline, self._train_evaluation_dict = training_function(
+            training_data, training_kwargs)
+        self.batch_predict(training_data_loader,
+                           training_predictions_file,
+                           lambda dataframe: self.model_evaluator.evaluate_training(dataframe))
 
     def predict(self,
                 predictions_data_loader: Callable[[], pd.DataFrame],
                 predictions_file: str):
+        self.batch_predict(predictions_data_loader, predictions_file,
+                           lambda dataframe: self.model_evaluator.evaluate(dataframe))
+
+    def batch_predict(self,
+                      predictions_data_loader: Callable[[], pd.DataFrame],
+                      predictions_file: str,
+                      evaluation_function: Callable[[pd.DataFrame], Dict[str, Any]],
+                      batch_size: int):
         pass
 
     def write_model(self, model_file):
