@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Callable
+from typing import List, Dict, Any, Callable, Tuple
 from abc import ABC, abstractmethod
 from .adversarial import train_adversarial_model
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
@@ -186,6 +186,11 @@ class TrainAdversarialModelTask(luigi.Task):
         store1_dataframe[self.store_id_column] = store_name
         return store1_dataframe
 
+    def get_all_adversarial_data(self, store1: str, store2: str, store1_file, store2_file) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        store1_dataframe = self.get_adversarial_data(store1_file, store1)
+        store2_dataframe = self.get_adversarial_data(store2_file, store2)
+        return store1_dataframe, store2_dataframe
+
     def run(self):
         print(
             f"Running adversarial model training task for {self.store1_filename} and {self.store2_filename}")
@@ -194,8 +199,8 @@ class TrainAdversarialModelTask(luigi.Task):
         print(f"Store1: {store1}, Store2: {store2}")
         with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
             print("Reading parquet files")
-            store1_dataframe = self.get_adversarial_data(store1_file, store1)
-            store2_dataframe = self.get_adversarial_data(store2_file, store2)
+            store1_dataframe, store2_dataframe = self.get_all_adversarial_data(
+                store1, store2, store1_file, store2_file)
 
             print("Training adversarial model")
             pipeline, evaluation_dict = train_adversarial_model(store1_dataframe,
