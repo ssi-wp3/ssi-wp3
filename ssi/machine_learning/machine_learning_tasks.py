@@ -47,16 +47,22 @@ class TrainAdversarialModelTask(luigi.Task):
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
 
+    def get_model_filename(self, store1: str, store2: str) -> str:
+        return os.path.join(
+            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
+
+    def get_evaluation_filename(self, store1: str, store2: str) -> str:
+        return os.path.join(
+            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
+
     def requires(self):
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
 
     def output(self):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
-        model_filename = os.path.join(
-            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
-        evaluation_filename = os.path.join(
-            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
+        model_filename = self.get_model_filename(store1, store2)
+        evaluation_filename = self.get_evaluation_filename(store1, store2)
         return {
             "model": luigi.LocalTarget(model_filename, format=luigi.format.Nop),
             "evaluation": luigi.LocalTarget(evaluation_filename)
