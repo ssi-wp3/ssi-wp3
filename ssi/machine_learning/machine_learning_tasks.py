@@ -311,6 +311,11 @@ class CrossStoreEvaluation(luigi.Task):
 
         return store_dataframe
 
+    def get_all_store_data(self, store1_file, store2_file) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        store1_dataframe = self.get_store_data(store1_file)
+        store2_dataframe = self.get_store_data(store2_file)
+        return store1_dataframe, store2_dataframe
+
     def run(self):
 
         print(
@@ -324,8 +329,8 @@ class CrossStoreEvaluation(luigi.Task):
 
             with input_combinations[0].open("r") as store1_file, input_combinations[1].open("r") as store2_file:
                 print("Reading parquet files")
-                store1_dataframe = self.get_store_data(store1_file)
-                store2_dataframe = self.get_store_data(store2_file)
+                store1_dataframe, store2_dataframe = self.get_all_store_data(
+                    store1_file, store2_file)
                 print(f"Training model on {store1}")
                 pipeline, train_evaluation_dict = train_and_evaluate_model(store1_dataframe,
                                                                            self.features_column,
