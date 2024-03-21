@@ -102,7 +102,8 @@ class ModelTrainer:
     def predict(self,
                 predictions_data_loader: Callable[[], pd.DataFrame],
                 predictions_file: str):
-        self.batch_predict(predictions_data_loader, predictions_file,
+        self.batch_predict(predictions_data_loader,
+                           predictions_file,
                            lambda dataframe: self.model_evaluator.evaluate(dataframe))
 
     def batch_predict(self,
@@ -115,7 +116,12 @@ class ModelTrainer:
         batched_writer(predictions_file, dataframe, batch_size, lambda batch: self.__predict(
             batch), pipeline=self.pipeline, feature_column=self.features_column)
 
-    def __predict(self, batch_dataframe: pd.DataFrame, pipeline, features_column: str) -> pd.DataFrame:
+    def __predict(self,
+                  batch_dataframe: pd.DataFrame,
+                  progress_bar: tqdm.tqdm,
+                  pipeline,
+                  features_column: str) -> pd.DataFrame:
+        progress_bar.set_description("Predicting labels")
         X = batch_dataframe[features_column]
         predictions = pipeline.predict(X.values.tolist())
         for prediction_index, prediction in enumerate(predictions):
