@@ -28,7 +28,7 @@ def batched_writer(filename: str,
                    process_batch: Callable[[pd.DataFrame], pd.DataFrame],
                    batch_statistics: Optional[Callable[[
                        pd.DataFrame], Any]] = None,
-                   **process_batch_kwargs) -> List[Any]:
+                   **process_batch_kwargs) -> List[pd.DataFrame]:
     """Process a DataFrame in batches and write it to a Parquet file batch per batch.
     Use this function to avoid memory issues when writing large DataFrames to Parquet files.
 
@@ -53,6 +53,11 @@ def batched_writer(filename: str,
     **process_batch_kwargs
         Additional keyword arguments to pass to the process_batch function.
 
+    Returns:
+    -------
+
+    List[pd.DataFrame]
+        A list of the results of the batch_statistics function for each batch.
     """
     pq_writer = None
     batch_statistics_results = []

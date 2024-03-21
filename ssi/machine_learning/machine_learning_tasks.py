@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Callable, Tuple
 from abc import ABC, abstractmethod
 from sklearn.pipeline import Pipeline
+from sklearn.metrics import confusion_matrix
 from .adversarial import evaluate_adversarial_pipeline, create_combined_and_filtered_dataframe
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
@@ -42,12 +43,18 @@ class ModelEvaluator(ABC):
 class ModelTrainer:
     def __init__(self,
                  model_evaluator: ModelEvaluator,
+                 features_column: str,
+                 label_column: str,
+                 prediction_column: str = "y_pred",
                  batch_predict_size: int = 1000,
                  parquet_engine: str = "pyarrow"):
         self._train_evaluation_dict = {}
         self._evaluation_dict = {}
         self._pipeline = None
         self._model_evaluator = model_evaluator
+        self._features_column = features_column
+        self._label_column = label_column
+        self._prediction_column = prediction_column
         self._batch_predict_size = batch_predict_size
         self._parquet_engine = parquet_engine
 
@@ -58,6 +65,18 @@ class ModelTrainer:
     @property
     def model_evaluator(self) -> ModelEvaluator:
         return self._model_evaluator
+
+    @property
+    def features_column(self) -> str:
+        return self._features_column
+
+    @property
+    def label_column(self) -> str:
+        return self._label_column
+
+    @property
+    def prediction_column(self) -> str:
+        return self._prediction_column
 
     @property
     def batch_predict_size(self) -> int:
@@ -117,8 +136,10 @@ class ModelTrainer:
                                dataframe),
                            **data_loader_kwargs)
 
-    def batch_statistics(self, dataframe: pd.DataFrame) -> Dict[str, Any]:
-        return dict()
+    def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
+        y_true = dataframe[label_column]
+        y_pred = dataframe[predicted_label_column]
+        return pd.DataFrame(confusion_matrix(y_true, y_pred))
 
     def batch_predict(self,
                       predictions_data_loader: Callable[[], pd.DataFrame],
@@ -133,9 +154,13 @@ class ModelTrainer:
                                           batch_size,
                                           process_batch=lambda batch: self.__predict(
                                               batch),
-                                          batch_statistics=self.batch_statistics,
+                                          batch_statistics=lambda dataframe: self.batch_statistics(
+                                              dataframe=dataframe,
+                                              label_column=self.label_column,
+                                              predicted_label_column=self._prediction_column),
                                           pipeline=self.pipeline,
-                                          feature_column=self.features_column)
+                                          feature_column=self.features_column,
+                                          prediction_column=self.prediction_column)
         return evaluation_function(batch_statistics)
 
     def __predict(self,
