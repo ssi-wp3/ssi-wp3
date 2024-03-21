@@ -117,9 +117,10 @@ class ModelTrainer:
                                                      self.batch_predict_size]
             predictions = self.pipeline.predict(X.values.tolist())
 
+            # TODO: this is returning one label per prediction, maybe use predict_proba?
             for prediction_index, prediction in enumerate(predictions):
                 dataframe[f"y_pred_{prediction_index}"].iloc[i +
-                                                             self.batch_size] = prediction[:, prediction_index]
+                                                             self.batch_size] = prediction[prediction_index]
             dataframe["predictions"].iloc[i:i +
                                           self.batch_predict_size] = predictions
 
@@ -471,9 +472,10 @@ class TrainModelOnPeriod(luigi.Task):
                 predictions = pipeline.predict(X.values.tolist())
 
                 print("Predictions:", predictions)
+                # TODO: this is returning one label per prediction, maybe use predict_proba?
                 for prediction_index, prediction in enumerate(predictions):
                     dataframe[f"y_pred_{prediction_index}"].iloc[i +
-                                                                 self.batch_size] = prediction[:, prediction_index]
+                                                                 self.batch_size] = prediction[prediction_index]
                 dataframe["predictions"].iloc[i:i +
                                               self.batch_size] = predictions
 
