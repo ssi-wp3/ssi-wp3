@@ -39,11 +39,16 @@ class ModelEvaluator(ABC):
 
 
 class ModelTrainer:
-    def __init__(self, model_evaluator: ModelEvaluator):
+    def __init__(self,
+                 model_evaluator: ModelEvaluator,
+                 batch_predict_size: int = 1000,
+                 parquet_engine: str = "pyarrow"):
         self._train_evaluation_dict = {}
         self._evaluation_dict = {}
         self._pipeline = None
         self._model_evaluator = model_evaluator
+        self._batch_predict_size = batch_predict_size
+        self._parquet_engine = parquet_engine
 
     @property
     def pipeline(self):
@@ -52,6 +57,18 @@ class ModelTrainer:
     @property
     def model_evaluator(self) -> ModelEvaluator:
         return self._model_evaluator
+
+    @property
+    def batch_predict_size(self) -> int:
+        return self._batch_predict_size
+
+    @batch_predict_size.setter
+    def batch_predict_size(self, value: int):
+        self._batch_predict_size = value
+
+    @property
+    def parquet_engine(self) -> str:
+        return self._parquet_engine
 
     @property
     def train_evaluation_dict(self) -> Dict[str, Any]:
@@ -93,14 +110,24 @@ class ModelTrainer:
                       predictions_file: str,
                       evaluation_function: Callable[[pd.DataFrame], Dict[str, Any]],
                       batch_size: int):
-        pass
+        dataframe = predictions_data_loader()
+        for i in range(0, dataframe.shape[0], self.batch_predict_size):
+            print(f"Predicting element {i} to {i+self.batch_predict_size}")
+            X = dataframe[self.features_column].iloc[i:i +
+                                                     self.batch_predict_size]
+            predictions = self.pipeline.predict(X.values.tolist())
+
+            for prediction_index, prediction in enumerate(predictions):
+                dataframe[f"y_pred_{prediction_index}"].iloc[i +
+                                                             self.batch_size] = prediction[:, prediction_index]
+            dataframe["predictions"].iloc[i:i +
+                                          self.batch_predict_size] = predictions
+
+            # Batch write to parquet!
+            # dataframe.to_parquet(predictions_file, engine=self.parquet_engine)
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)
-
-    def write_predictions(self, predictions_file):
-        # self.dataframe.to_parquet(predictions_file)
-        pass
 
     def write_training_evaluation(self, evaluation_file):
         json.dump(self.train_evaluation_dict, evaluation_file)
