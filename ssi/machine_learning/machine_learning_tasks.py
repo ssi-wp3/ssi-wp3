@@ -183,6 +183,8 @@ class TrainAdversarialModelTask(luigi.Task):
 
     def get_adversarial_data(self, store1_file, store_name: str):
         store1_dataframe = self.read_parquet_data(store1_file)
+        store1_dataframe = store1_dataframe.drop_duplicates(
+            [self.receipt_text_column, self.store_id_column])
         store1_dataframe[self.store_id_column] = store_name
         return store1_dataframe
 
