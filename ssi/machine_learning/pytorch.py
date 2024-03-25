@@ -92,18 +92,3 @@ class PytorchModel(Model):
 
     def load_data(self, filename: str, **kwargs) -> ParquetDataset:
         return ParquetDataset(filename, **kwargs)
-
-
-def create_skorch_model(max_epochs: int,
-                        batch_size: int,
-                        lr: float,
-                        test_size: float) -> NeuralNetClassifier:
-    model = NeuralNetClassifier(
-        LogisticRegression,
-        max_epochs=max_epochs,
-        batch_size=batch_size,
-        lr=lr,
-        train_split=test_size,
-        criterion=nn.CrossEntropyLoss,
-    )
-    return model
