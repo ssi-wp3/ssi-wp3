@@ -520,7 +520,7 @@ class TrainModelOnPeriod(TrainModelTask):
     def prepare_data(self) -> pd.DataFrame:
         with self.input().open() as input_file:
             dataframe = self.get_data_for_period(input_file)
-            return dataframe[dataframe["is_train"] == True]
+            return dataframe
 
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame]:
         """ The training split is different for the period evaluation task: we train on one period and evaluate 
