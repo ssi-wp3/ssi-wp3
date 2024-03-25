@@ -56,7 +56,7 @@ class ModelFactory:
     def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
         # (local_classifier=LogisticRegression(), verbose=1)
         models["hiclass"] = LocalClassifierPerParentNode
-        models["pytorch_classifier"] = PytorchModel(LogisticRegression)
+        models["pytorch_classifier"] = PytorchModel(model=LogisticRegression)
         return models
 
 
