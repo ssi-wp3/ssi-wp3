@@ -145,15 +145,6 @@ class TrainAdversarialModelTask(TrainModelTask):
     store_id_column = luigi.Parameter()
 
     @property
-    def model_trainer(self) -> ModelTrainer:
-        model_evaluator = ConfusionMatrixEvaluator()
-        return ModelTrainer(
-            model_evaluator=model_evaluator,
-            batch_predict_size=self.batch_predict_size,
-            parquet_engine=self.parquet_engine
-        )
-
-    @property
     def model_filename(self) -> str:
         return os.path.join(
             self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
