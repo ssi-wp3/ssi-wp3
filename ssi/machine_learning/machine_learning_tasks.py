@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Callable, Tuple, Union
 from sklearn.pipeline import Pipeline
-from evaluate import ModelEvaluator
+from evaluate import ModelEvaluator, calculate_confusion_matrix_statistics, precision_score, recall_score, f1_score, accuracy_score
 from trainer import ModelTrainer
 from functools import reduce
 from .adversarial import evaluate_adversarial_pipeline, create_combined_and_filtered_dataframe
@@ -134,16 +134,15 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
     def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
         summed_confusion_matrix = reduce(dataframe, lambda x, y: x.add(y))
         # https://stackoverflow.com/questions/48100173/how-to-get-precision-recall-and-f-measure-from-confusion-matrix-in-python
-        precision = np.diag(summed_confusion_matrix) / \
-            np.sum(summed_confusion_matrix, axis=0)
-        recall = np.diag(summed_confusion_matrix) / \
-            np.sum(summed_confusion_matrix, axis=1)
-        f1_score = 2 * (precision * recall) / (precision + recall)
+        confusion_matrix_statistics = calculate_confusion_matrix_statistics(
+            summed_confusion_matrix)
 
         return {"confusion_matrix": summed_confusion_matrix.to_dict(),
-                "precision": precision.tolist(),
-                "recall": recall.tolist(),
-                "f1_score": f1_score.tolist()}
+                "precision": precision_score(confusion_matrix_statistics),
+                "recall": recall_score(confusion_matrix_statistics),
+                "f1_score": f1_score(confusion_matrix_statistics),
+                "accuracy": accuracy_score(confusion_matrix_statistics)
+                }
 
     def run(self):
         print(
