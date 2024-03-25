@@ -16,8 +16,26 @@ class SklearnModel(Model):
         The scikit-learn classifier
     """
 
-    def __init__(self, model_type: str, model: ClassifierMixin):
-        super().__init__(model_type, model)
+    def __init__(self, model: ClassifierMixin):
+        super().__init__()
+        self.__model = model
+
+    @property
+    def model(self):
+        return self.__model
+
+    def fit(self, X, y):
+        self.model.fit(X, y)
+        return self
+
+    def predict(self, X):
+        return self.model.predict(X)
+
+    def predict_proba(self, X):
+        return self.model.predict_proba(X)
+
+    def score(self, X, y):
+        return self.model.score(X, y)
 
     def load_data(self, filename: str, **kwargs) -> pd.DataFrame:
         """ Load data from a parquet file using pandas

@@ -13,6 +13,7 @@ from ..label_extractor import LabelExtractor
 from ..constants import Constants
 from .model import Model
 from .scikit_model import SklearnModel
+from .pytorch import PytorchModel, LogisticRegression
 import pandas as pd
 import numpy as np
 import tqdm
@@ -38,7 +39,7 @@ class ModelFactory:
     def models(self) -> Dict[str, Callable[[Dict[str, object]], Model]]:
         # From: https://stackoverflow.com/questions/42160313/how-to-list-all-classification-regression-clustering-algorithms-in-scikit-learn
         if not self._models:
-            self._models = {model_name: SklearnModel(model_name, model)
+            self._models = {model_name: SklearnModel(model)
                             for model_name, model in all_estimators(type_filter=self.model_type_filter)
                             if not issubclass(model, _BaseVoting) and not issubclass(model, _BaseStacking)
                             }
@@ -55,6 +56,7 @@ class ModelFactory:
     def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
         # (local_classifier=LogisticRegression(), verbose=1)
         models["hiclass"] = LocalClassifierPerParentNode
+        models["pytorch_classifier"] = PytorchModel(LogisticRegression)
         return models
 
 

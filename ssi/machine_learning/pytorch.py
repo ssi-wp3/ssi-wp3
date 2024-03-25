@@ -2,6 +2,7 @@ import torch as nn
 import torch
 import pyarrow.parquet as pq
 from skorch import NeuralNetClassifier
+from .model import Model
 
 
 class ParquetDataset(nn.utils.data.Dataset):
@@ -39,6 +40,26 @@ class LogisticRegression(nn.Module):
 
     def forward(self, x):
         return self.linear(x)
+
+
+class PytorchModel(Model):
+    def __init__(self,
+                 model,
+                 max_epochs: int,
+                 batch_size: int,
+                 lr: float,
+                 test_size: float):
+        model = NeuralNetClassifier(
+            model,
+            max_epochs=max_epochs,
+            batch_size=batch_size,
+            lr=lr,
+            train_split=test_size,
+        )
+        super().__init__(model)
+
+    def load_data(self, filename: str, **kwargs) -> ParquetDataset:
+        return ParquetDataset(filename, **kwargs)
 
 
 def create_skorch_model(max_epochs: int,
