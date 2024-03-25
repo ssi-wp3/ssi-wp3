@@ -469,38 +469,41 @@ class TrainModelOnPeriod(TrainModelTask):
                            label_column,
                            verbose=verbose)
 
+    def prepare_data(self) -> pd.DataFrame:
+        with self.input().open() as input_file:
+            dataframe = self.get_data_for_period(input_file)
+            return dataframe[dataframe["is_train"] == True]
+
+    def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame]:
+        """ The training split is different for the period evaluation task: we train on one period and evaluate 
+        on the others. Therefore we override the split_data method here. Furthermore, we would like to create a graph 
+        for the whole range of periods, so we only split the data here for training and evaluate on the whole dataset.  
+        The items for the training period have a True value in the is_train column, so we can 
+        distinguish them in the test set. We also use this to filter the training items out here.
+
+        Parameters:
+        -----------
+        dataframe: pd.DataFrame
+            The dataframe to split
+
+        test_size: float
+            The size of the test set (Unused)
+
+        Returns:
+        --------
+        Tuple[pd.DataFrame]
+            The training and test dataframes
+        """
+        return dataframe[dataframe["is_train" == True]], dataframe
+
     def run(self):
         print(
             f"Training model: {self.model_type} on period: {self.train_period}")
-        with self.input().open() as input_file:
-            dataframe = self.get_data_for_period(input_file)
-            train_dataframe = dataframe[dataframe["is_train"] == True]
-            if self.feature_extractor in self.train_from_scratch:
-                raise NotImplementedError(
-                    "Training feature extractor from scratch not implemented")
 
-            with self.output()["training_predictions"].open("w") as training_predictions_file:
-                self.model_trainer.fit(lambda: train_dataframe,
-                                       self.train_period_model,
-                                       training_predictions_file,
-                                       feature_column=self.features_column,
-                                       label_colum=self.label_column,
-                                       model_type=self.model_type,
-                                       test_size=self.test_size,
-                                       verbose=self.verbose)
-
-            print("Writing predictions to disk")
-            with self.output()["predictions"].open("w") as predictions_file:
-                self.model_trainer.predict(lambda: dataframe,
-                                           predictions_file)
-
-            print("Writing model to disk")
-            with self.output()["model"].open("w") as model_file:
-                self.model_trainer.write_model(model_file)
-
-            print("Evaluating model")
-            with self.output()["evaluation"].open("w") as evaluation_file:
-                self.model_trainer.write_evaluation(evaluation_file)
+        if self.feature_extractor in self.train_from_scratch:
+            raise NotImplementedError(
+                "Training feature extractor from scratch not implemented")
+        super().run()
 
 
 class TrainModelOnAllPeriods(luigi.WrapperTask):
