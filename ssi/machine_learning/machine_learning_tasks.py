@@ -197,6 +197,8 @@ class TrainAdversarialModelTask(TrainModelTask):
                                 ) -> Tuple[Pipeline, Dict[str, Any]]:
         """This trains the adversarial model and uses an additional validation set to evaluate the model.
 
+        TODO not sure whether we should use validation split.
+
         Parameters:
         -----------
         adversarial_dataframe: pd.DataFrame
