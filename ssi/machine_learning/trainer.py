@@ -142,11 +142,13 @@ class ModelTrainer:
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X.values.tolist())
-        for prediction_index, prediction in enumerate(probabilities):
-            batch_dataframe[f"{probability_column_prefix}_{prediction_index}"] = prediction[prediction_index]
+        for index, probability_vector in enumerate(probabilities):
+            for class_label, probability_value in zip(pipeline.classes_, probability_vector):
+                batch_dataframe.iloc[index][f"{probability_column_prefix}_{class_label}"] = probability_value
 
         batch_dataframe[prediction_column] = pipeline.predict(
             X.values.tolist())
+        return batch_dataframe
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)

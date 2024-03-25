@@ -31,7 +31,29 @@ class ParquetFile(luigi.ExternalTask):
         return luigi.LocalTarget(self.filename, format=luigi.format.Nop)
 
 
-class TrainAdversarialModelTask(luigi.Task):
+class TrainModelTask(luigi.Task):
+    output_directory = luigi.PathParameter()
+    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
+    model_type = luigi.Parameter()
+
+    receipt_text_column = luigi.Parameter()
+    features_column = luigi.Parameter(default="features")
+    test_size = luigi.FloatParameter(default=0.2)
+    batch_predict_size = luigi.IntParameter(default=1000)
+    parquet_engine = luigi.Parameter()
+    verbose = luigi.BoolParameter(default=False)
+
+    @property
+    def model_trainer(self) -> ModelTrainer:
+        model_evaluator = ConfusionMatrixEvaluator()
+        return ModelTrainer(
+            model_evaluator=model_evaluator,
+            batch_predict_size=self.batch_predict_size,
+            parquet_engine=self.parquet_engine
+        )
+
+
+class TrainAdversarialModelTask(TrainModelTask):
     """
     Train an adversarial model to predict the store id based on the receipt text column.
     If we can predict the store id based on the receipt text, then the receipt text between
@@ -40,17 +62,8 @@ class TrainAdversarialModelTask(luigi.Task):
     """
     store1_filename = luigi.PathParameter()
     store2_filename = luigi.PathParameter()
-    output_directory = luigi.PathParameter()
-    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
-    model_type = luigi.Parameter()
 
     store_id_column = luigi.Parameter()
-    receipt_text_column = luigi.Parameter()
-    features_column = luigi.Parameter(default="features")
-    test_size = luigi.FloatParameter(default=0.2)
-    batch_predict_size = luigi.IntParameter(default=1000)
-    parquet_engine = luigi.Parameter()
-    verbose = luigi.BoolParameter(default=False)
 
     @property
     def model_trainer(self) -> ModelTrainer:
@@ -85,8 +98,8 @@ class TrainAdversarialModelTask(luigi.Task):
         store2 = get_store_name_from_combined_filename(self.store2_filename)
         return {
             "model": luigi.LocalTarget(self.get_model_filename(store1, store2), format=luigi.format.Nop),
-            "training_predictions_file": luigi.LocalTarget(self.get_training_predictions_filename(store1, store2), format=luigi.format.Nop),
-            "predictions_file": luigi.LocalTarget(self.get_predictions_filename(store1, store2), format=luigi.format.Nop),
+            "training_predictions": luigi.LocalTarget(self.get_training_predictions_filename(store1, store2), format=luigi.format.Nop),
+            "predictions": luigi.LocalTarget(self.get_predictions_filename(store1, store2), format=luigi.format.Nop),
             "evaluation": luigi.LocalTarget(self.get_evaluation_filename(store1, store2))
         }
 
@@ -140,7 +153,7 @@ class TrainAdversarialModelTask(luigi.Task):
                 store1, store2, store1_file, store2_file)
 
             print("Training adversarial model & writing training predictions to disk")
-            with self.output()["training_predictions_file"].open("w") as training_predictions_file:
+            with self.output()["training_predictions"].open("w") as training_predictions_file:
                 self.model_trainer.fit(lambda: adversarial_dataframe,
                                        self.train_adversarial_model,
                                        training_predictions_file,
@@ -151,7 +164,7 @@ class TrainAdversarialModelTask(luigi.Task):
                                        verbose=self.verbose)
 
             print("Writing raw predictions to disk")
-            with self.output()["predictions_file"].open("w") as predictions_file:
+            with self.output()["predictions"].open("w") as predictions_file:
                 self.model_trainer.predict(lambda: adversarial_dataframe,
                                            predictions_file)
 
@@ -341,18 +354,8 @@ class AllCrossStoreEvaluations(luigi.WrapperTask):
                 for store1_filename, store2_filename in store_combinations(store_filenames)]
 
 
-class TrainModelOnPeriod(luigi.Task):
+class TrainModelOnPeriod(TrainModelTask):
     input_filename = luigi.PathParameter()
-    output_directory = luigi.PathParameter()
-    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
-    model_type = luigi.Parameter()
-
-    label_column = luigi.Parameter()
-    receipt_text_column = luigi.Parameter()
-    features_column = luigi.Parameter(default="features")
-    batch_size = luigi.IntParameter(default=1000)
-    parquet_engine = luigi.Parameter()
-    verbose = luigi.BoolParameter(default=False)
     period_column = luigi.Parameter()
     train_period = luigi.Parameter()
 
@@ -377,6 +380,9 @@ class TrainModelOnPeriod(luigi.Task):
     def get_model_filename(self, feature_filename: str) -> str:
         return os.path.join(self.output_directory, f"{feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
 
+    def get_training_predictions_filename(self, feature_filename: str) -> str:
+        return os.path.join(self.output_directory, f"{feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_predictions.parquet")
+
     def get_predictions_filename(self, feature_filename: str) -> str:
         return os.path.join(self.output_directory, f"{feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
 
@@ -388,7 +394,8 @@ class TrainModelOnPeriod(luigi.Task):
             os.path.basename(self.input_filename))
         return {
             "model": luigi.LocalTarget(self.get_model_filename(feature_filename), format=luigi.format.Nop),
-            "model_predictions": luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
+            "training_predictions": luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
+            "predictions": luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
             "evaluation": luigi.LocalTarget(self.get_evaluations_filename(feature_filename))
         }
 
