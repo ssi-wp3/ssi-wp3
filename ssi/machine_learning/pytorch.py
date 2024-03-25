@@ -11,26 +11,20 @@ class ParquetDataset(nn.utils.data.Dataset):
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
 
-    def __init__(self, filename, feature_column: str, target_column: str):
-        self.parquet = pq.ParquetFile(filename)
-        self.columns = self.parquet.schema.names if not feature_column and not target_column else [
-            feature_column, target_column]
-        self.length = len(self.parquet)
-        self.row_group_size = self.parquet.metadata.row_group(0).num_rows
-        self.data = None
-        self.current_row_group = -1
+    def __init__(self, dataframe: pd.DataFrame, feature_column: str, target_column: str):
+        self.__dataframe = dataframe
+        self.__feature_column = feature_column
+        self.__target_column = target_column
+
+    @property
+    def dataframe(self) -> pd.DataFrame:
+        return self.__dataframe
 
     def __len__(self):
-        return self.length
+        return len(self.dataframe)
 
     def __getitem__(self, index):
-        row_group = index // self.row_group_size
-        row_within_group = index % self.row_group_size
-        if row_group != self.current_row_group:
-            self.data = self.parquet.read_row_group(
-                row_group, columns=self.columns).to_pandas()
-            self.current_row_group = row_group
-        sample = self.data.iloc[row_within_group]
+        sample = self.dataframe.iloc[index]
         return torch.tensor(sample.values, dtype=torch.float32)
 
     @staticmethod
