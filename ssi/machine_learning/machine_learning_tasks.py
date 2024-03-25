@@ -475,28 +475,27 @@ class TrainModelOnPeriod(TrainModelTask):
     def requires(self):
         return ParquetFile(self.input_filename)
 
-    def get_model_filename(self, feature_filename: str) -> str:
-        return os.path.join(self.output_directory, f"{feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
-
-    def get_training_predictions_filename(self, feature_filename: str) -> str:
-        return os.path.join(self.output_directory, f"{feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_predictions.parquet")
-
-    def get_predictions_filename(self, feature_filename: str) -> str:
-        return os.path.join(self.output_directory, f"{feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
-
-    def get_evaluations_filename(self, feature_filename: str) -> str:
-        return os.path.join(self.output_directory, f"{feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
-
-    def output(self):
+    @property
+    def feature_filename(self) -> str:
         feature_filename, _ = os.path.splitext(
             os.path.basename(self.input_filename))
-        return {
-            self.model_key: luigi.LocalTarget(self.get_model_filename(feature_filename), format=luigi.format.Nop),
-            self.training_predictions_key: luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
-            self.predictions_key: luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
-            self.evaluation_key: luigi.LocalTarget(
-                self.get_evaluations_filename(feature_filename))
-        }
+        return feature_filename
+
+    @property
+    def model_filename(self) -> str:
+        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
+
+    @property
+    def training_predictions_filename(self) -> str:
+        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_predictions.parquet")
+
+    @property
+    def predictions_filename(self) -> str:
+        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
+
+    @property
+    def evaluations_filename(self) -> str:
+        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
 
     def get_data_for_period(self, input_file):
         dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
