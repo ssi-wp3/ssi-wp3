@@ -496,6 +496,15 @@ class TrainModelOnPeriod(TrainModelTask):
         """
         return dataframe[dataframe["is_train" == True]], dataframe
 
+    def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
+        self.model_trainer.fit(lambda: train_dataframe,
+                               self.train_period_model,
+                               training_predictions_file,
+                               model_type=self.model_type,
+                               feature_column=self.features_column,
+                               label_column=self.label_column,
+                               verbose=self.verbose)
+
     def run(self):
         print(
             f"Training model: {self.model_type} on period: {self.train_period}")
