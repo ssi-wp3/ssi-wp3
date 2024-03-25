@@ -192,9 +192,36 @@ class TrainAdversarialModelTask(TrainModelTask):
                                 features_column: str,
                                 store_id_column: str,
                                 model_type: str,
-                                test_size: float = 0.2,
+                                test_size: float = 0.1,
                                 verbose: bool = False
                                 ) -> Tuple[Pipeline, Dict[str, Any]]:
+        """This trains the adversarial model and uses an additional validation set to evaluate the model.
+
+        Parameters:
+        -----------
+        adversarial_dataframe: pd.DataFrame
+            The dataframe with the adversarial data
+
+        features_column: str
+            The column with the features
+
+        store_id_column: str
+            The column with the store ids
+
+        model_type: str
+            The type of model to train
+
+        test_size: float
+            The size of the test set
+
+        verbose: bool
+            Whether to print verbose output
+
+        Returns:
+        --------
+        Tuple[Pipeline, Dict[str, Any]]
+            The trained pipeline and the evaluation dictionary
+        """
         return train_and_evaluate_model(adversarial_dataframe,
                                         features_column,
                                         store_id_column,
