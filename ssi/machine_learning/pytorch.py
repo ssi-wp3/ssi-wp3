@@ -69,6 +69,7 @@ class PytorchModel(Model):
             batch_size=batch_size,
             lr=lr,
             train_split=test_size,
+            **kwargs
         )
         self.classifier.fit(X, y)
         return self
