@@ -358,6 +358,7 @@ class TrainModelOnPeriod(TrainModelTask):
     input_filename = luigi.PathParameter()
     period_column = luigi.Parameter()
     train_period = luigi.Parameter()
+    label_column = luigi.Parameter()
 
     @property
     def train_from_scratch(self) -> List[FeatureExtractorType]:
@@ -406,63 +407,51 @@ class TrainModelOnPeriod(TrainModelTask):
         dataframe["is_train"] = dataframe[self.period_column] == self.train_period
         return dataframe
 
-    def predict_batch(self,
-                      batch_dataframe: pd.DataFrame,
-                      progress_bar: tqdm.tqdm,
-                      pipeline,
-                      features_column: str) -> pd.DataFrame:
-        batch_dataframe = batch_dataframe.copy()
-        X = batch_dataframe[features_column]
-
-        progress_bar.set_description("Predicting probabilities")
-        probabilities = pipeline.predict_proba(X.values.tolist())
-        for index, probability_vector in enumerate(probabilities):
-            for class_label, probability_value in zip(pipeline.classes_, probability_vector):
-                batch_dataframe.iloc[index][f"y_proba_{class_label}"] = probability_value
-
-        batch_dataframe["y_pred"] = pipeline.predict(X.values.tolist())
-        return batch_dataframe
+    def train_period_model(self,
+                           train_dataframe: pd.DataFrame,
+                           model_type: str,
+                           feature_column: str,
+                           label_column: str,
+                           verbose: bool = False
+                           ) -> Tuple[Pipeline, Dict[str, Any]]:
+        return train_model(train_dataframe,
+                           model_type,
+                           feature_column,
+                           label_column,
+                           verbose=verbose)
 
     def run(self):
         print(
             f"Training model: {self.model_type} on period: {self.train_period}")
         with self.input().open() as input_file:
             dataframe = self.get_data_for_period(input_file)
-
             train_dataframe = dataframe[dataframe["is_train"] == True]
             if self.feature_extractor in self.train_from_scratch:
                 raise NotImplementedError(
                     "Training feature extractor from scratch not implemented")
 
-            pipeline = train_model(train_dataframe,
-                                   model_type=self.model_type,
-                                   feature_column=self.features_column,
-                                   label_column=self.label_column,
-                                   verbose=self.verbose)
+            with self.output()["training_predictions"].open("w") as training_predictions_file:
+                self.model_trainer.fit(lambda: train_dataframe,
+                                       self.train_period_model,
+                                       training_predictions_file,
+                                       feature_column=self.features_column,
+                                       label_colum=self.label_column,
+                                       model_type=self.model_type,
+                                       test_size=self.test_size,
+                                       verbose=self.verbose)
+
+            print("Writing predictions to disk")
+            with self.output()["predictions"].open("w") as predictions_file:
+                self.model_trainer.predict(lambda: dataframe,
+                                           predictions_file)
 
             print("Writing model to disk")
             with self.output()["model"].open("w") as model_file:
-                joblib.dump(pipeline, model_file)
-
-            # Predict labels on dataframe in batches
-            print("Writing predictions to disk")
-            with self.output()["model_predictions"].open("w") as predictions_file:
-                batched_writer(predictions_file,
-                               dataframe,
-                               self.batch_size,
-                               self.predict_batch,
-                               pipeline=pipeline,
-                               features_column=self.features_column)
+                self.model_trainer.write_model(model_file)
 
             print("Evaluating model")
-            evaluation_dict = evaluate_model(pipeline,
-                                             dataframe,
-                                             self.features_column,
-                                             self.label_column,
-                                             evaluation_function=evaluate,
-                                             )
             with self.output()["evaluation"].open("w") as evaluation_file:
-                json.dump(evaluation_dict, evaluation_file)
+                self.model_trainer.write_evaluation(evaluation_file)
 
 
 class TrainModelOnAllPeriods(luigi.WrapperTask):
