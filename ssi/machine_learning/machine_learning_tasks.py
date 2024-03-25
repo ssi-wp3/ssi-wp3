@@ -472,10 +472,11 @@ class TrainModelOnPeriod(TrainModelTask):
         feature_filename, _ = os.path.splitext(
             os.path.basename(self.input_filename))
         return {
-            "model": luigi.LocalTarget(self.get_model_filename(feature_filename), format=luigi.format.Nop),
-            "training_predictions": luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
-            "predictions": luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
-            "evaluation": luigi.LocalTarget(self.get_evaluations_filename(feature_filename))
+            self.model_key: luigi.LocalTarget(self.get_model_filename(feature_filename), format=luigi.format.Nop),
+            self.training_predictions_key: luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
+            self.predictions_key: luigi.LocalTarget(self.get_predictions_filename(feature_filename), format=luigi.format.Nop),
+            self.evaluation_key: luigi.LocalTarget(
+                self.get_evaluations_filename(feature_filename))
         }
 
     def get_data_for_period(self, input_file):
