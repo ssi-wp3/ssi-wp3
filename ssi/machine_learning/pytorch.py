@@ -69,6 +69,8 @@ class PytorchModel(Model):
     def classifier(self, value):
         self.__classifier = value
 
+    # TODO: this should use fit(dataset) instead of fit(X, y)
+    # See: https://skorch.readthedocs.io/en/stable/user/FAQ.html#faq-how-do-i-use-a-pytorch-dataset-with-skorch
     def fit(self, X, y,
             max_epochs: int,
             batch_size: int,
