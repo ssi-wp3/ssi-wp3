@@ -62,6 +62,7 @@ class PytorchModel(Model):
             batch_size: int,
             lr: float,
             test_size: float,
+            iterator_train__shuffle: bool = True,
             **kwargs):
         self.classifier = NeuralNetClassifier(
             self.model,
@@ -69,6 +70,7 @@ class PytorchModel(Model):
             batch_size=batch_size,
             lr=lr,
             train_split=test_size,
+            iterator_train__shuffle=iterator_train__shuffle,
             **kwargs
         )
         self.classifier.fit(X, y)
