@@ -522,7 +522,7 @@ class TrainModelOnPeriod(TrainModelTask):
             dataframe = self.get_data_for_period(input_file)
             return dataframe
 
-    def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame]:
+    def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """ The training split is different for the period evaluation task: we train on one period and evaluate 
         on the others. Therefore we override the split_data method here. Furthermore, we would like to create a graph 
         for the whole range of periods, so we only split the data here for training and evaluate on the whole dataset.  
@@ -539,7 +539,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
         Returns:
         --------
-        Tuple[pd.DataFrame]
+        Tuple[pd.DataFrame, pd.DataFrame]
             The training and test dataframes
         """
         return dataframe[dataframe["is_train" == True]], dataframe
