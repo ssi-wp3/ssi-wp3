@@ -1,4 +1,3 @@
-from typing import Any
 from sklearn.base import ClassifierMixin
 from .model import Model
 import pandas as pd

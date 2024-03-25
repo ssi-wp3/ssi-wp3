@@ -1,17 +1,18 @@
 
 from typing import List, Dict, Callable, Any, Optional
-from ..feature_extraction.feature_extraction import FeatureExtractorType
-from ..label_extractor import LabelExtractor
-from ..constants import Constants
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.discovery import all_estimators
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
-from sklearn.base import ClassifierMixin
 from sklearn.ensemble._voting import _BaseVoting
 from sklearn.ensemble._stacking import _BaseStacking
 from hiclass import LocalClassifierPerParentNode
+from ..feature_extraction.feature_extraction import FeatureExtractorType
+from ..label_extractor import LabelExtractor
+from ..constants import Constants
+from .model import Model
+from .scikit_model import SklearnModel
 import pandas as pd
 import numpy as np
 import tqdm
