@@ -1,11 +1,13 @@
 from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from typing import List, Dict, Any, Union
 from abc import ABC, abstractmethod
+from collections import namedtuple
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import pandas as pd
+import numpy as np
 
 
 class ModelEvaluator(ABC):
@@ -33,6 +35,42 @@ def calculate_metrics(y_true, y_pred):
     auc_roc = roc_auc_score(y_true, y_pred)
 
     return accuracy, precision, recall, f1, auc_roc
+
+
+ConfusionMatrix = namedtuple('ConfusionMatrix', [
+                             'true_positive', 'false_positive', 'true_negative', 'false_negative'])
+
+
+def calculate_confusion_matrix_statistics(confusion_matrix: np.array) -> ConfusionMatrix:
+    """ Takes a multi-class confusion matrix and returns the statistics for each class. 
+
+    Parameters:
+    -----------
+
+    confusion_matrix: np.array
+        A multi-class confusion matrix
+
+    Returns:
+    --------
+    ConfusionMatrix
+        A named tuple containing the statistics (TP, FP, TN, FN) for each class
+
+    For more info see: https://stackoverflow.com/questions/48100173/how-to-get-precision-recall-and-f-measure-from-confusion-matrix-in-python
+    """
+    TP = np.diag(confusion_matrix)
+    FP = np.sum(confusion_matrix, axis=0) - TP
+    FN = np.sum(confusion_matrix, axis=1) - TP
+
+    # True negatives
+    num_classes = confusion_matrix.shape[0]
+    TN = []
+    for i in range(num_classes):
+        temp = np.delete(confusion_matrix, i, 0)    # delete ith row
+        temp = np.delete(temp, i, 1)
+        TN.append(sum(sum(temp)))
+    TN = np.array(TN)
+
+    return ConfusionMatrix(TP, FP, TN, FN)
 
 
 def save_metrics(accuracy, precision, recall, f1, auc_roc, output_path):

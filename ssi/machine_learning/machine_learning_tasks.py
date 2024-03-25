@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Callable, Tuple, Union
 from sklearn.pipeline import Pipeline
 from evaluate import ModelEvaluator
+from trainer import ModelTrainer
 from functools import reduce
 from .adversarial import evaluate_adversarial_pipeline, create_combined_and_filtered_dataframe
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
@@ -9,6 +10,7 @@ from ..preprocessing.files import get_store_name_from_combined_filename, get_com
 from ..files import get_features_files_in_directory, batched_writer
 from .utils import store_combinations
 import pandas as pd
+import numpy as np
 import luigi
 import joblib
 import os
@@ -131,9 +133,17 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
 
     def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
         summed_confusion_matrix = reduce(dataframe, lambda x, y: x.add(y))
-        # Calculate other metrics here!
+        # https://stackoverflow.com/questions/48100173/how-to-get-precision-recall-and-f-measure-from-confusion-matrix-in-python
+        precision = np.diag(summed_confusion_matrix) / \
+            np.sum(summed_confusion_matrix, axis=0)
+        recall = np.diag(summed_confusion_matrix) / \
+            np.sum(summed_confusion_matrix, axis=1)
+        f1_score = 2 * (precision * recall) / (precision + recall)
 
-        return {"confusion_matrix": summed_confusion_matrix.to_dict()}
+        return {"confusion_matrix": summed_confusion_matrix.to_dict(),
+                "precision": precision.tolist(),
+                "recall": recall.tolist(),
+                "f1_score": f1_score.tolist()}
 
     def run(self):
         print(
