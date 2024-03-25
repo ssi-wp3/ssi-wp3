@@ -65,8 +65,8 @@ def calculate_confusion_matrix_statistics(confusion_matrix: np.array) -> Confusi
     num_classes = confusion_matrix.shape[0]
     TN = []
     for i in range(num_classes):
-        temp = np.delete(confusion_matrix, i, 0)    # delete ith row
-        temp = np.delete(temp, i, 1)
+        temp = np.delete(confusion_matrix, i, axis=0)    # delete ith row
+        temp = np.delete(temp, i, axis=1)
         TN.append(sum(sum(temp)))
     TN = np.array(TN)
 
