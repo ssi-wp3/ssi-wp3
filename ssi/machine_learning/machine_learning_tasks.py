@@ -54,6 +54,22 @@ class TrainModelTask(luigi.Task, ABC):
             parquet_engine=self.parquet_engine
         )
 
+    @property
+    def training_predictions_key(self) -> str:
+        return "training_predictions"
+
+    @property
+    def predictions_key(self) -> str:
+        return "predictions"
+
+    @property
+    def model_key(self) -> str:
+        return f"model"
+
+    @property
+    def evaluation_key(self) -> str:
+        return "evaluation"
+
     @abstractmethod
     def prepare_data(self) -> pd.DataFrame:
         pass
@@ -74,20 +90,20 @@ class TrainModelTask(luigi.Task, ABC):
             dataframe, test_size=self.test_size)
 
         print("Training model & writing training predictions to disk")
-        with self.output()["training_predictions"].open("w") as training_predictions_file:
+        with self.output()[self.training_predictions_key].open("w") as training_predictions_file:
             self.train_model(train_dataframe, training_predictions_file)
 
         print("Writing raw predictions to disk")
-        with self.output()["predictions"].open("w") as predictions_file:
+        with self.output()[self.predictions_key].open("w") as predictions_file:
             self.model_trainer.predict(lambda: test_dataframe,
                                        predictions_file)
 
         print("Writing model to disk")
-        with self.output()["model"].open("w") as model_file:
+        with self.output()[self.model_key].open("w") as model_file:
             self.model_trainer.write_model(model_file)
 
         print("Writing evaluation to disk")
-        with self.output()["evaluation"].open("w") as evaluation_file:
+        with self.output()[self.evaluation_key].open("w") as evaluation_file:
             self.model_trainer.write_evaluation(evaluation_file)
 
 
