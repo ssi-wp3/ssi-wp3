@@ -107,7 +107,7 @@ class TrainModelOnPeriod(TrainModelTask):
         Tuple[pd.DataFrame, pd.DataFrame]
             The training and test dataframes
         """
-        return dataframe[dataframe["is_train" == True]], dataframe
+        return dataframe[dataframe["is_train"] == True], dataframe
 
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
         self.model_trainer.fit(lambda: train_dataframe,

@@ -18,5 +18,5 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
         return self.__model
 
     @abstractmethod
-    def load_data(self, **kwargs) -> Any:
+    def load_data(self, filename: str, **kwargs) -> Any:
         pass
