@@ -1,4 +1,4 @@
-from .utils import ParquetFile
+from ..parquet_file import ParquetFile
 from .combine import CombineRevenueFiles
 from .preprocess_data import preprocess_data
 from .files import get_store_name_from_combined_filename

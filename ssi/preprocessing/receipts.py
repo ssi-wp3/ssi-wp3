@@ -1,4 +1,4 @@
-from .utils import ParquetFile
+from ..parquet_file import ParquetFile
 from .files import get_combined_revenue_files_in_folder, get_store_name_from_combined_filename, get_receipt_texts_for_store
 import pandas as pd
 import luigi
