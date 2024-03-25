@@ -3,6 +3,7 @@ import torch
 import pyarrow.parquet as pq
 from skorch import NeuralNetClassifier
 from .model import Model
+import pandas as pd
 
 
 class ParquetDataset(nn.utils.data.Dataset):
@@ -31,6 +32,15 @@ class ParquetDataset(nn.utils.data.Dataset):
             self.current_row_group = row_group
         sample = self.data.iloc[row_within_group]
         return torch.tensor(sample.values, dtype=torch.float32)
+
+    @staticmethod
+    def from_filename(filename: str, feature_column: str, target_column: str, engine: str = "pyarrow"):
+        dataframe = pd.read_parquet(filename, engine=engine)
+        return ParquetDataset(dataframe, feature_column, target_column)
+
+    @staticmethod
+    def from_dataframe(dataframe, feature_column: str, target_column: str):
+        return ParquetDataset(dataframe, feature_column, target_column)
 
 
 class LogisticRegression(nn.Module):
