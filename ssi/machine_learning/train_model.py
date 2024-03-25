@@ -1,4 +1,6 @@
-from ..feature_extraction.feature_extraction import FeatureExtractorType, FeatureExtractorFactory
+
+from typing import List, Dict, Callable, Any, Optional
+from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..label_extractor import LabelExtractor
 from ..constants import Constants
 from sklearn.pipeline import Pipeline
@@ -6,11 +8,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.utils.discovery import all_estimators
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
+from sklearn.base import ClassifierMixin
 from sklearn.ensemble._voting import _BaseVoting
 from sklearn.ensemble._stacking import _BaseStacking
 from hiclass import LocalClassifierPerParentNode
-from typing import List, Dict, Callable, Any, Optional
-from enum import Enum
 import pandas as pd
 import numpy as np
 import tqdm
@@ -33,10 +34,10 @@ class ModelFactory:
         return list(self.models.keys())
 
     @property
-    def models(self) -> Dict[str, Callable[[Dict[str, object]], object]]:
+    def models(self) -> Dict[str, Callable[[Dict[str, object]], Model]]:
         # From: https://stackoverflow.com/questions/42160313/how-to-list-all-classification-regression-clustering-algorithms-in-scikit-learn
         if not self._models:
-            self._models = {model_name: model
+            self._models = {model_name: SklearnModel(model_name, model)
                             for model_name, model in all_estimators(type_filter=self.model_type_filter)
                             if not issubclass(model, _BaseVoting) and not issubclass(model, _BaseStacking)
                             }
@@ -44,7 +45,7 @@ class ModelFactory:
 
         return self._models
 
-    def create_model(self, model_type: str, **model_kwargs):
+    def create_model(self, model_type: str, **model_kwargs) -> Model:
         if model_type in self.models:
             return self.models[model_type](**model_kwargs)
         else:
