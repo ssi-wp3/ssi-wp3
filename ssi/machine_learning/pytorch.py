@@ -45,18 +45,32 @@ class LogisticRegression(nn.Module):
 class PytorchModel(Model):
     def __init__(self,
                  model,
-                 max_epochs: int,
-                 batch_size: int,
-                 lr: float,
-                 test_size: float):
-        model = NeuralNetClassifier(
-            model,
+                 ):
+        super().__init__(model)
+        self.__classifier = None
+
+    @property
+    def classifier(self):
+        return self.__classifier
+
+    @classifier.setter
+    def classifier(self, value):
+        self.__classifier = value
+
+    def fit(self, X, y,
+            max_epochs: int,
+            batch_size: int,
+            lr: float,
+            test_size: float,
+            **kwargs):
+        self.classifier = NeuralNetClassifier(
+            self.model,
             max_epochs=max_epochs,
             batch_size=batch_size,
             lr=lr,
             train_split=test_size,
         )
-        super().__init__(model)
+        return self
 
     def load_data(self, filename: str, **kwargs) -> ParquetDataset:
         return ParquetDataset(filename, **kwargs)

@@ -17,12 +17,7 @@ class SklearnModel(Model):
     """
 
     def __init__(self, model: ClassifierMixin):
-        super().__init__()
-        self.__model = model
-
-    @property
-    def model(self):
-        return self.__model
+        super().__init__(model)
 
     def fit(self, X, y):
         self.model.fit(X, y)

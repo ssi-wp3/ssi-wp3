@@ -9,6 +9,14 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
      as well as PyTorch models using the same scikit-learn compatible API. In addition, this class provides a way to 
     read the training and evaluation data in a form suitable to the model type.
     """
+
+    def __init__(self, model: Any):
+        self.__model = model
+
+    @property
+    def model(self) -> Any:
+        return self.__model
+
     @abstractmethod
     def load_data(self, **kwargs) -> Any:
         pass
