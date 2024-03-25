@@ -159,10 +159,11 @@ class TrainAdversarialModelTask(TrainModelTask):
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
         return {
-            "model": luigi.LocalTarget(self.get_model_filename(store1, store2), format=luigi.format.Nop),
-            "training_predictions": luigi.LocalTarget(self.get_training_predictions_filename(store1, store2), format=luigi.format.Nop),
-            "predictions": luigi.LocalTarget(self.get_predictions_filename(store1, store2), format=luigi.format.Nop),
-            "evaluation": luigi.LocalTarget(self.get_evaluation_filename(store1, store2))
+            self.model_key: luigi.LocalTarget(self.get_model_filename(store1, store2), format=luigi.format.Nop),
+            self.training_predictions_key: luigi.LocalTarget(self.get_training_predictions_filename(store1, store2), format=luigi.format.Nop),
+            self.predictions_key: luigi.LocalTarget(self.get_predictions_filename(store1, store2), format=luigi.format.Nop),
+            self.evaluation_key: luigi.LocalTarget(
+                self.get_evaluation_filename(store1, store2))
         }
 
     def read_parquet_data(self, store1_file: str) -> pd.DataFrame:
