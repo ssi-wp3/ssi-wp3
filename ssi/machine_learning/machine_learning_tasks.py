@@ -31,7 +31,7 @@ class ParquetFile(luigi.ExternalTask):
         return luigi.LocalTarget(self.filename, format=luigi.format.Nop)
 
 
-class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
+class TrainAdversarialModelTask(luigi.Task):
     """
     Train an adversarial model to predict the store id based on the receipt text column.
     If we can predict the store id based on the receipt text, then the receipt text between
