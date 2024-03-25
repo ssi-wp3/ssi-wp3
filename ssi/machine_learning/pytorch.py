@@ -20,12 +20,20 @@ class ParquetDataset(nn.utils.data.Dataset):
     def dataframe(self) -> pd.DataFrame:
         return self.__dataframe
 
+    @property
+    def feature_column(self) -> str:
+        return self.__feature_column
+
+    @property
+    def target_column(self) -> str:
+        return self.__target_column
+
     def __len__(self):
         return len(self.dataframe)
 
     def __getitem__(self, index):
         sample = self.dataframe.iloc[index]
-        return torch.tensor(sample.values, dtype=torch.float32)
+        return torch.tensor(sample[self.feature_column].values, dtype=torch.float32), torch.tensor(sample[self.target_column], dtype=torch.float32)
 
     @staticmethod
     def from_filename(filename: str, feature_column: str, target_column: str, engine: str = "pyarrow"):
