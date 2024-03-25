@@ -132,8 +132,8 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
         return self.evaluate(dataframe)
 
     def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
-        summed_confusion_matrix = reduce(dataframe, lambda x, y: x.add(y))
         # https://stackoverflow.com/questions/48100173/how-to-get-precision-recall-and-f-measure-from-confusion-matrix-in-python
+        summed_confusion_matrix = reduce(dataframe, lambda x, y: x.add(y))
         confusion_matrix_statistics = calculate_confusion_matrix_statistics(
             summed_confusion_matrix)
 
