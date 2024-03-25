@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Tuple
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from evaluate import ConfusionMatrixEvaluator
@@ -70,6 +70,22 @@ class TrainModelTask(luigi.Task, ABC):
     def evaluation_key(self) -> str:
         return "evaluation"
 
+    @abstractproperty
+    def training_predictions_filename(self) -> str:
+        pass
+
+    @abstractproperty
+    def predictions_filename(self) -> str:
+        pass
+
+    @abstractproperty
+    def model_filename(self) -> str:
+        pass
+
+    @abstractproperty
+    def evaluation_filename(self) -> str:
+        pass
+
     @abstractmethod
     def prepare_data(self) -> pd.DataFrame:
         pass
@@ -80,6 +96,15 @@ class TrainModelTask(luigi.Task, ABC):
     @abstractmethod
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
         pass
+
+    def output(self):
+        return {
+            self.model_key: luigi.LocalTarget(self.model_filename, format=luigi.format.Nop),
+            self.training_predictions_key: luigi.LocalTarget(self.training_predictions_filename, format=luigi.format.Nop),
+            self.predictions_key: luigi.LocalTarget(self.predictions_filename, format=luigi.format.Nop),
+            self.evaluation_key: luigi.LocalTarget(
+                self.evaluation_filename)
+        }
 
     def run(self):
         print("Preparing data")
@@ -128,21 +153,25 @@ class TrainAdversarialModelTask(TrainModelTask):
             parquet_engine=self.parquet_engine
         )
 
-    def get_model_filename(self, store1: str, store2: str) -> str:
+    @property
+    def model_filename(self) -> str:
         return os.path.join(
-            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
+            self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
 
-    def get_training_predictions_filename(self, store1: str, store2: str) -> str:
+    @property
+    def training_predictions_filename(self) -> str:
         return os.path.join(
-            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_training_predictions.parquet")
+            self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_training_predictions.parquet")
 
-    def get_predictions_filename(self, store1: str, store2: str) -> str:
+    @property
+    def predictions_filename(self) -> str:
         return os.path.join(
-            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_predictions.parquet")
+            self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_predictions.parquet")
 
-    def get_evaluation_filename(self, store1: str, store2: str) -> str:
+    @property
+    def evaluation_filename(self) -> str:
         return os.path.join(
-            self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
+            self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
 
     @property
     def store1(self):
@@ -154,17 +183,6 @@ class TrainAdversarialModelTask(TrainModelTask):
 
     def requires(self):
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
-
-    def output(self):
-        store1 = get_store_name_from_combined_filename(self.store1_filename)
-        store2 = get_store_name_from_combined_filename(self.store2_filename)
-        return {
-            self.model_key: luigi.LocalTarget(self.get_model_filename(store1, store2), format=luigi.format.Nop),
-            self.training_predictions_key: luigi.LocalTarget(self.get_training_predictions_filename(store1, store2), format=luigi.format.Nop),
-            self.predictions_key: luigi.LocalTarget(self.get_predictions_filename(store1, store2), format=luigi.format.Nop),
-            self.evaluation_key: luigi.LocalTarget(
-                self.get_evaluation_filename(store1, store2))
-        }
 
     def read_parquet_data(self, store1_file: str) -> pd.DataFrame:
         store1_dataframe = pd.read_parquet(
