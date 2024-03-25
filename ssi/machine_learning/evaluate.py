@@ -73,6 +73,82 @@ def calculate_confusion_matrix_statistics(confusion_matrix: np.array) -> Confusi
     return ConfusionMatrix(TP, FP, TN, FN)
 
 
+def precision_score(confusion_matrix: ConfusionMatrix) -> np.array:
+    """ Calculate the precision score for each class. The precision is calculated
+    as the number of true positives divided by the sum of true positives and false positives:
+
+    precision = TP / (TP + FP)
+
+    Parameters:
+    -----------
+    confusion_matrix: ConfusionMatrix
+        A named tuple containing the statistics (TP, FP, TN, FN) for each class
+
+    Returns:
+    --------
+    np.array
+        An array of precision scores for each class. 
+    """
+    return confusion_matrix.true_positive / (confusion_matrix.true_positive + confusion_matrix.false_positive)
+
+
+def recall_score(confusion_matrix: ConfusionMatrix) -> np.array:
+    """ Calculate the recall score for each class. The recall
+    is calculated as the number of true positives divided by the sum of true positives and false negatives:
+
+    recall = TP / (TP + FN)
+
+    Parameters:
+    -----------
+    confusion_matrix: ConfusionMatrix
+        A named tuple containing the statistics (TP, FP, TN, FN) for each class
+
+    Returns:
+    --------
+    np.array
+        An array of recall scores for each class.   
+    """
+    return confusion_matrix.true_positive / (confusion_matrix.true_positive + confusion_matrix.false_negative)
+
+
+def f1_score(confusion_matrix: ConfusionMatrix) -> np.array:
+    """ Calculate the F1 score for each class. The F1 score is the harmonic mean of the precision and recall:
+
+    F1 = 2 * (precision * recall) / (precision + recall)
+
+    Parameters:
+    -----------
+    confusion_matrix: ConfusionMatrix
+        A named tuple containing the statistics (TP, FP, TN, FN) for each class
+
+    Returns:
+    --------
+    np.array
+        An array of F1 scores for each class.
+    """
+    precision = precision_score(confusion_matrix)
+    recall = recall_score(confusion_matrix)
+    return 2 * (precision * recall) / (precision + recall)
+
+
+def accuracy_score(confusion_matrix: ConfusionMatrix) -> np.array:
+    """ Calculate the accuracy score for each class. The accuracy score is calculated as the sum of true positives and true negatives divided by the sum of true positives, true negatives, false positives, and false negatives:
+
+    accuracy = (TP + TN) / (TP + TN + FP + FN)
+
+    Parameters:
+    -----------
+    confusion_matrix: ConfusionMatrix
+        A named tuple containing the statistics (TP, FP, TN, FN) for each class
+
+    Returns:
+    --------
+    np.array
+        An array of accuracy scores for each class.
+    """
+    return (confusion_matrix.true_positive + confusion_matrix.true_negative) / (confusion_matrix.true_positive + confusion_matrix.true_negative + confusion_matrix.false_positive + confusion_matrix.false_negative)
+
+
 def save_metrics(accuracy, precision, recall, f1, auc_roc, output_path):
     # Save metrics to disk
     with open(os.path.join(output_path, 'evaluation_metrics.txt'), 'w') as f:
