@@ -1,12 +1,14 @@
 from typing import List, Dict, Any, Tuple
+from abc import ABC, abstractmethod
 from sklearn.pipeline import Pipeline
-from evaluate import ModelEvaluator, ConfusionMatrixEvaluator
+from sklearn.model_selection import train_test_split
+from evaluate import ConfusionMatrixEvaluator
 from trainer import ModelTrainer
 from .adversarial import evaluate_adversarial_pipeline, create_combined_and_filtered_dataframe
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..preprocessing.files import get_store_name_from_combined_filename
-from ..files import get_features_files_in_directory, batched_writer
+from ..files import get_features_files_in_directory
 from .utils import store_combinations
 import pandas as pd
 import numpy as np
@@ -31,7 +33,7 @@ class ParquetFile(luigi.ExternalTask):
         return luigi.LocalTarget(self.filename, format=luigi.format.Nop)
 
 
-class TrainModelTask(luigi.Task):
+class TrainModelTask(luigi.Task, ABC):
     output_directory = luigi.PathParameter()
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     model_type = luigi.Parameter()
@@ -51,6 +53,42 @@ class TrainModelTask(luigi.Task):
             batch_predict_size=self.batch_predict_size,
             parquet_engine=self.parquet_engine
         )
+
+    @abstractmethod
+    def prepare_data(self) -> pd.DataFrame:
+        pass
+
+    def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        return train_test_split(dataframe, test_size=test_size)
+
+    @abstractmethod
+    def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
+        pass
+
+    def run(self):
+        print("Preparing data")
+        dataframe = self.prepare_data()
+
+        print("Splitting data")
+        train_dataframe, test_dataframe = self.split_data(
+            dataframe, test_size=self.test_size)
+
+        print("Training model & writing training predictions to disk")
+        with self.output()["training_predictions"].open("w") as training_predictions_file:
+            self.train_model(train_dataframe, training_predictions_file)
+
+        print("Writing raw predictions to disk")
+        with self.output()["predictions"].open("w") as predictions_file:
+            self.model_trainer.predict(lambda: test_dataframe,
+                                       predictions_file)
+
+        print("Writing model to disk")
+        with self.output()["model"].open("w") as model_file:
+            self.model_trainer.write_model(model_file)
+
+        print("Writing evaluation to disk")
+        with self.output()["evaluation"].open("w") as evaluation_file:
+            self.model_trainer.write_evaluation(evaluation_file)
 
 
 class TrainAdversarialModelTask(TrainModelTask):
@@ -89,6 +127,14 @@ class TrainAdversarialModelTask(TrainModelTask):
     def get_evaluation_filename(self, store1: str, store2: str) -> str:
         return os.path.join(
             self.output_directory, f"adversarial_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
+
+    @property
+    def store1(self):
+        return get_store_name_from_combined_filename(self.store1_filename)
+
+    @property
+    def store2(self):
+        return get_store_name_from_combined_filename(self.store2_filename)
 
     def requires(self):
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
@@ -141,40 +187,27 @@ class TrainAdversarialModelTask(TrainModelTask):
                                         evaluation_function=evaluate_adversarial_pipeline,
                                         verbose=verbose)
 
+    def prepare_data(self) -> pd.DataFrame:
+        with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
+            print("Reading parquet files")
+            return self.get_all_adversarial_data(
+                self.store1, self.store2, store1_file, store2_file)
+
+    def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
+        self.model_trainer.fit(lambda: train_dataframe,
+                               self.train_adversarial_model,
+                               training_predictions_file,
+                               features_column=self.features_column,
+                               store_id_column=self.store_id_column,
+                               model_type=self.model_type,
+                               test_size=self.test_size,
+                               verbose=self.verbose)
+
     def run(self):
         print(
             f"Running adversarial model training task for {self.store1_filename} and {self.store2_filename}")
-        store1 = get_store_name_from_combined_filename(self.store1_filename)
-        store2 = get_store_name_from_combined_filename(self.store2_filename)
-        print(f"Store1: {store1}, Store2: {store2}")
-        with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
-            print("Reading parquet files")
-            adversarial_dataframe = self.get_all_adversarial_data(
-                store1, store2, store1_file, store2_file)
-
-            print("Training adversarial model & writing training predictions to disk")
-            with self.output()["training_predictions"].open("w") as training_predictions_file:
-                self.model_trainer.fit(lambda: adversarial_dataframe,
-                                       self.train_adversarial_model,
-                                       training_predictions_file,
-                                       features_column=self.features_column,
-                                       store_id_column=self.store_id_column,
-                                       model_type=self.model_type,
-                                       test_size=self.test_size,
-                                       verbose=self.verbose)
-
-            print("Writing raw predictions to disk")
-            with self.output()["predictions"].open("w") as predictions_file:
-                self.model_trainer.predict(lambda: adversarial_dataframe,
-                                           predictions_file)
-
-            print("Writing adversarial model to disk")
-            with self.output()["model"].open("w") as model_file:
-                self.model_trainer.write_model(model_file)
-
-            print("Writing evaluation to disk")
-            with self.output()["evaluation"].open("w") as evaluation_file:
-                self.model_trainer.write_evaluation(evaluation_file)
+        print(f"Store1: {self.store1}, Store2: {self.store2}")
+        super().run()
 
 
 class TrainAllAdversarialModels(luigi.WrapperTask):
