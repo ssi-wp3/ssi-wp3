@@ -1,12 +1,11 @@
-from typing import List, Dict, Any, Callable, Tuple, Union
+from typing import List, Dict, Any, Tuple
 from sklearn.pipeline import Pipeline
-from evaluate import ModelEvaluator, calculate_confusion_matrix_statistics, precision_score, recall_score, f1_score, accuracy_score
+from evaluate import ModelEvaluator, ConfusionMatrixEvaluator
 from trainer import ModelTrainer
-from functools import reduce
 from .adversarial import evaluate_adversarial_pipeline, create_combined_and_filtered_dataframe
 from .train_model import train_and_evaluate_model, train_model, evaluate_model, evaluate
 from ..feature_extraction.feature_extraction import FeatureExtractorType
-from ..preprocessing.files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder
+from ..preprocessing.files import get_store_name_from_combined_filename
 from ..files import get_features_files_in_directory, batched_writer
 from .utils import store_combinations
 import pandas as pd
@@ -55,8 +54,9 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
 
     @property
     def model_trainer(self) -> ModelTrainer:
+        model_evaluator = ConfusionMatrixEvaluator()
         return ModelTrainer(
-            model_evaluator=self,
+            model_evaluator=model_evaluator,
             batch_predict_size=self.batch_predict_size,
             parquet_engine=self.parquet_engine
         )
@@ -127,22 +127,6 @@ class TrainAdversarialModelTask(luigi.Task, ModelEvaluator):
                                         test_size=test_size,
                                         evaluation_function=evaluate_adversarial_pipeline,
                                         verbose=verbose)
-
-    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
-        return self.evaluate(dataframe)
-
-    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
-        # https://stackoverflow.com/questions/48100173/how-to-get-precision-recall-and-f-measure-from-confusion-matrix-in-python
-        summed_confusion_matrix = reduce(dataframe, lambda x, y: x.add(y))
-        confusion_matrix_statistics = calculate_confusion_matrix_statistics(
-            summed_confusion_matrix)
-
-        return {"confusion_matrix": summed_confusion_matrix.to_dict(),
-                "precision": precision_score(confusion_matrix_statistics),
-                "recall": recall_score(confusion_matrix_statistics),
-                "f1_score": f1_score(confusion_matrix_statistics),
-                "accuracy": accuracy_score(confusion_matrix_statistics)
-                }
 
     def run(self):
         print(
