@@ -70,7 +70,25 @@ class PytorchModel(Model):
             lr=lr,
             train_split=test_size,
         )
+        self.classifier.fit(X, y)
         return self
+
+    def predict(self, X):
+        self._check_classifier_trained()
+        return self.classifier.predict(X)
+
+    def predict_proba(self, X):
+        self._check_classifier_trained()
+        return self.classifier.predict_proba(X)
+
+    def score(self, X, y):
+        self._check_classifier_trained()
+        return self.classifier.score(X, y)
+
+    def _check_classifier_trained(self):
+        if not self.classifier:
+            raise ValueError(
+                "Cannot predict without fitting the model first. Call the fit method first.")
 
     def load_data(self, filename: str, **kwargs) -> ParquetDataset:
         return ParquetDataset(filename, **kwargs)
