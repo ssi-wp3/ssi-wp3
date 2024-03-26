@@ -54,11 +54,9 @@ class ModelFactory:
             raise ValueError("Invalid model type: {model_type}")
 
     @staticmethod
-    def model_for(model_type: str, number_of_jobs: int = -1, verbose: bool = False) -> Model:
+    def model_for(model_type: str, **model_kwargs) -> Model:
         model_factory = ModelFactory()
-        model = model_factory.create_model(
-            model_type)  # , n_jobs=number_of_jobs)
-        return model
+        return model_factory.create_model(model_type, **model_kwargs)
 
     def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
         # (local_classifier=LogisticRegression(), verbose=1)
