@@ -71,7 +71,7 @@ def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, 
     }
 
 
-def get_model(model_type: str, number_of_jobs: int = -1, verbose: bool = False):
+def get_model(model_type: str, number_of_jobs: int = -1, verbose: bool = False) -> Model:
     model_factory = ModelFactory()
     model = model_factory.create_model(
         model_type)  # , n_jobs=number_of_jobs)
