@@ -246,13 +246,9 @@ class TrainAdversarialModelTask(TrainModelTask):
     def requires(self):
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
 
-    def read_parquet_data(self, store1_file: str) -> pd.DataFrame:
+    def get_adversarial_data(self, store1_file, store_name: str):
         store1_dataframe = pd.read_parquet(
             store1_file, engine=self.parquet_engine)
-
-        return store1_dataframe
-
-    def get_adversarial_data(self, store1_file, store_name: str):
         store1_dataframe = self.read_parquet_data(store1_file)
         store1_dataframe = store1_dataframe.drop_duplicates(
             [self.receipt_text_column, self.store_id_column])
