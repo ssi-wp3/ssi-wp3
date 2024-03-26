@@ -5,7 +5,7 @@ import pandas as pd
 
 class HiClassModel(Model):
     def __init__(self,
-                 model,
+                 model
                  ):
         super().__init__(model)
         self.__classifier = LocalClassifierPerParentNode(
