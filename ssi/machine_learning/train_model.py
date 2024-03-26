@@ -53,6 +53,13 @@ class ModelFactory:
         else:
             raise ValueError("Invalid model type: {model_type}")
 
+    @staticmethod
+    def model_for(model_type: str, number_of_jobs: int = -1, verbose: bool = False) -> Model:
+        model_factory = ModelFactory()
+        model = model_factory.create_model(
+            model_type)  # , n_jobs=number_of_jobs)
+        return model
+
     def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
         # (local_classifier=LogisticRegression(), verbose=1)
         models["hiclass"] = HiClassModel(model=LogisticRegression)
@@ -69,13 +76,6 @@ def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, 
         f"classification_report{suffix}": classification_report(y_true, y_pred, output_dict=True),
         f"confusion_matrix{suffix}": confusion_matrix(y_true, y_pred).tolist()
     }
-
-
-def get_model(model_type: str, number_of_jobs: int = -1, verbose: bool = False) -> Model:
-    model_factory = ModelFactory()
-    model = model_factory.create_model(
-        model_type)  # , n_jobs=number_of_jobs)
-    return model
 
 
 def fit_pipeline(train_dataframe: pd.DataFrame,
@@ -95,7 +95,7 @@ def train_model(train_dataframe: pd.DataFrame,
                 label_column: str,
                 verbose: bool = False
                 ) -> Pipeline:
-    model = get_model(model_type, verbose=verbose)
+    model = ModelFactory.model_for(model_type, verbose=verbose)
     pipeline = Pipeline([
         ('classifier', model)
     ], verbose=verbose)
@@ -109,7 +109,7 @@ def train_model_with_feature_extractors(train_dataframe: pd.DataFrame,
                                         label_column: str,
                                         verbose: bool = False
                                         ) -> Pipeline:
-    model = get_model(model_type, verbose=verbose)
+    model = ModelFactory.model_for(model_type, verbose=verbose)
     pipeline = Pipeline([
         ('features', feature_extractor),
         ('classifier', model)
