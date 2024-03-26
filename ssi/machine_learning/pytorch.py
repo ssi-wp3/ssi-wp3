@@ -36,12 +36,12 @@ class ParquetDataset(nn.utils.data.Dataset):
         return torch.tensor(sample[self.feature_column].values, dtype=torch.float32), torch.tensor(sample[self.target_column], dtype=torch.float32)
 
     @staticmethod
-    def from_filename(filename: str, feature_column: str, target_column: str, engine: str = "pyarrow"):
+    def from_filename(filename: str, feature_column: str, target_column: str, engine: str = "pyarrow") -> 'ParquetDataset':
         dataframe = pd.read_parquet(filename, engine=engine)
         return ParquetDataset(dataframe, feature_column, target_column)
 
     @staticmethod
-    def from_dataframe(dataframe, feature_column: str, target_column: str):
+    def from_dataframe(dataframe, feature_column: str, target_column: str) -> 'ParquetDataset':
         return ParquetDataset(dataframe, feature_column, target_column)
 
 
