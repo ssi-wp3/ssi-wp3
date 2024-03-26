@@ -49,7 +49,7 @@ class ModelFactory:
 
     def create_model(self, model_type: str, **model_kwargs) -> Model:
         if model_type in self.models:
-            return self.models[model_type](**model_kwargs)
+            return self.models[model_type]  # (**model_kwargs)
         else:
             raise ValueError("Invalid model type: {model_type}")
 
