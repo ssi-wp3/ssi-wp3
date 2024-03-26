@@ -71,13 +71,6 @@ def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, 
     }
 
 
-def get_model(model_type: str, number_of_jobs: int = -1, verbose: bool = False):
-    model_factory = ModelFactory()
-    model = model_factory.create_model(
-        model_type)  # , n_jobs=number_of_jobs)
-    return model
-
-
 def fit_pipeline(train_dataframe: pd.DataFrame,
                  pipeline: Pipeline,
                  receipt_text_column: str,
@@ -95,7 +88,9 @@ def train_model(train_dataframe: pd.DataFrame,
                 label_column: str,
                 verbose: bool = False
                 ) -> Pipeline:
-    model = get_model(model_type, verbose=verbose)
+    model_factory = ModelFactory()
+    model = model_factory.create_model(
+        model_type)
     pipeline = Pipeline([
         ('classifier', model)
     ], verbose=verbose)
