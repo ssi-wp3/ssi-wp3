@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 from sklearn.ensemble._voting import _BaseVoting
 from sklearn.ensemble._stacking import _BaseStacking
-from hiclass import LocalClassifierPerParentNode
+from hiclass_model import HiClassModel
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..label_extractor import LabelExtractor
 from ..constants import Constants
@@ -55,7 +55,7 @@ class ModelFactory:
 
     def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
         # (local_classifier=LogisticRegression(), verbose=1)
-        models["hiclass"] = LocalClassifierPerParentNode
+        models["hiclass"] = HiClassModel(model=LogisticRegression)
         models["pytorch_classifier"] = PytorchModel(model=LogisticRegression)
         return models
 
@@ -73,12 +73,8 @@ def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, 
 
 def get_model(model_type: str, number_of_jobs: int = -1, verbose: bool = False):
     model_factory = ModelFactory()
-    if model_type == "hiclass":
-        model = model_factory.create_model(
-            model_type, local_classifier=LogisticRegression(), verbose=verbose)
-    else:
-        model = model_factory.create_model(
-            model_type)  # , n_jobs=number_of_jobs)
+    model = model_factory.create_model(
+        model_type)  # , n_jobs=number_of_jobs)
     return model
 
 
