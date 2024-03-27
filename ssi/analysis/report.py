@@ -19,6 +19,25 @@ class ReportEngine:
         return {result_key: result_settings["filename"]
                 for result_key, result_settings in self.settings.items()}
 
+    @property
+    def reports(self) -> List['Report']:
+        reports = []
+        for report_settings in self.settings.items():
+            if isinstance(report_settings, list):
+                for settings in report_settings:
+                    reports.append(self.create_report(settings))
+            else:
+                reports.append(self.create_report(report_settings))
+        return reports
+
+    def create_report(self, result_settings: Dict[str, Any]) -> 'Report':
+        if result_settings["type"] == "plot":
+            return PlotReport(result_settings)
+        elif result_settings["type"] == "table":
+            return TableReport(result_settings)
+        else:
+            raise ValueError(f"Unknown report type: {result_settings['type']}")
+
 
 class ReportType(Enum):
     plot = "plot"
@@ -46,7 +65,7 @@ class Report:
         return self.settings["output_filename"]
 
 
-class PlotResult(Report):
+class PlotReport(Report):
     def __init__(self, settings: Dict[str, Any], plot_engine: PlotEngine = PlotEngine()):
         super().__init__(settings)
         self.__plot_engine = plot_engine
@@ -69,7 +88,7 @@ class PlotResult(Report):
         figure.save(output_file)
 
 
-class TableResult(Report):
+class TableReport(Report):
     def __init__(self, settings: Dict[str, Any]):
         super().__init__(settings)
 
