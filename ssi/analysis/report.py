@@ -14,8 +14,9 @@ class ReportType(Enum):
 
 
 class Report(ABC):
-    def __init__(self, settings: Dict[str, Any]):
+    def __init__(self, settings: Dict[str, Any], needs_binary_file: bool = True):
         self.__settings = settings
+        self.__needs_binary_file = needs_binary_file
 
     @property
     def settings(self) -> Dict[str, Any]:
@@ -30,6 +31,10 @@ class Report(ABC):
         return self.settings["settings"]
 
     @property
+    def needs_binary_file(self) -> bool:
+        return self.__needs_binary_file
+
+    @property
     def output_filename(self) -> str:
         return self.settings["output_filename"]
 
@@ -40,7 +45,7 @@ class Report(ABC):
 
 class PlotReport(Report):
     def __init__(self, settings: Dict[str, Any], plot_engine: PlotEngine = PlotEngine()):
-        super().__init__(settings)
+        super().__init__(settings, True)
         self.__plot_engine = plot_engine
 
     @property
@@ -72,7 +77,7 @@ class TableReport(Report):
         latex = "latex"
 
     def __init__(self, settings: Dict[str, Any]):
-        super().__init__(settings)
+        super().__init__(settings, False)
 
     def write_to_file(self, dataframe: pd.DataFrame, filename: str):
         table_type = TableReport.TableType[self.type_settings.get(
@@ -106,8 +111,8 @@ class ReportEngine:
         return self.__settings
 
     @property
-    def output_filenames(self) -> List[str]:
-        return [report.output_filename
+    def flattened_reports(self) -> List[Report]:
+        return [report
                 for _, report_list in self.reports.items()
                 for report in report_list]
 
