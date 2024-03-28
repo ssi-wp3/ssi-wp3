@@ -81,6 +81,7 @@ class TableReport(Report):
 
         table_settings = self.type_settings.copy()
         table_settings.pop("table_type", None)
+        print("table_settings", table_settings)
 
         self.to_table(dataframe, table_type=table_type,
                       output_file=filename, **table_settings)
