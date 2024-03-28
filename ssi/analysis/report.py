@@ -79,6 +79,7 @@ class TableReport(Report):
         print(table_settings)
         table_type = TableReport.TableType[table_settings.get(
             "table_type", "csv")]
+        print("table_type", table_type)
         table_settings.pop("table_type", None)
 
         self.to_table(dataframe, table_type=table_type,
