@@ -6,6 +6,7 @@ from ..parquet_file import ParquetFile
 from .train_model import train_model
 from .train_model_task import TrainModelTask
 import pandas as pd
+import pyarrow as pa
 import luigi
 import os
 
@@ -146,7 +147,9 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
     def identify_unique_periods(self, input_filename: str, period_column: str) -> pd.Series:
         print(
             f"Identifying unique periods for column {period_column} in {input_filename}")
-        return pd.read_parquet(input_filename, engine=self.parquet_engine)[period_column].unique()
+
+        return pa.parquet.read_table(input_filename, columns=[period_column]).to_pandas()[period_column].unique()
+        # return pd.read_parquet(input_filename, engine=self.parquet_engine)[period_column].unique()
 
     def requires(self):
         return [TrainModelOnPeriod(input_filename=os.path.join(self.input_directory, feature_filename),
