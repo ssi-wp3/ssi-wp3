@@ -359,6 +359,7 @@ class TrainAllAdversarialModels(luigi.WrapperTask):
                                           store_id_column=self.store_id_column,
                                           receipt_text_column=self.receipt_text_column,
                                           features_column=self.features_column,
+                                          label_column=self.store_id_column,
                                           test_size=self.test_size,
                                           parquet_engine=self.parquet_engine,
                                           verbose=self.verbose)

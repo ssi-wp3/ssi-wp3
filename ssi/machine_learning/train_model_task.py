@@ -13,6 +13,7 @@ class TrainModelTask(luigi.Task, ABC):
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     model_type = luigi.Parameter()
 
+    receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
     label_column = luigi.Parameter()
     test_size = luigi.FloatParameter(default=0.2)

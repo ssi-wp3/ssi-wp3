@@ -21,7 +21,6 @@ class TrainModelOnPeriod(TrainModelTask):
     input_filename = luigi.PathParameter()
     period_column = luigi.Parameter()
     train_period = luigi.Parameter()
-    label_column = luigi.Parameter()
 
     @property
     def train_from_scratch(self) -> List[FeatureExtractorType]:
