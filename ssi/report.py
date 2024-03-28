@@ -185,8 +185,6 @@ class PlotReport(Report):
 
         plot_format = self.type_settings.get("format", "png")
 
-        print(
-            f"Plotting to {output_file} with format: {plot_format} and needs_binary_file: {self.needs_binary_file}")
         figure = self.plot_engine.plot_from_settings(
             dataframe, self.type_settings)
         figure.save(output_file, format=plot_format)
