@@ -63,9 +63,12 @@ class TrainModelOnPeriod(TrainModelTask):
         return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
 
     def get_data_for_period(self, input_file) -> pd.DataFrame:
+        print(f"Reading data for {self.train_period} from {input_file.path}")
         dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
+        print("Dropping duplicates")
         dataframe = dataframe.drop_duplicates(
             [self.receipt_text_column, self.label_column])
+        print("Adding is_train column")
         dataframe["is_train"] = dataframe[self.period_column] == self.train_period
         return dataframe
 
