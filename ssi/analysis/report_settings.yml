@@ -4,7 +4,7 @@ report_settings:
   texts_per_ean_histogram: 
       - type: plot
         pivot: false
-        filename: "{{store_name}}_texts_per_ean_histogram.png"
+        output_filename: "{{store_name}}_texts_per_ean_histogram.png"
         settings: 
             plot_type: bar_chart
             x_column: {{receipt_text_column}}
@@ -12,14 +12,14 @@ report_settings:
             title: Unique receipt texts per EAN for {{store_name}}
       - type: table
         pivot: false
-        filename: "{{store_name}}_texts_per_ean_histogram.md"
+        output_filename: "{{store_name}}_texts_per_ean_histogram.md"
         settings:
             table_type: markdown 
             table_fmt: grid
   log_texts_per_ean_histogram: 
       - type: plot
         pivot: false
-        filename: "{{store_name}}_log_texts_per_ean_histogram.png"
+        output_filename: "{{store_name}}_log_texts_per_ean_histogram.png"
         settings: 
             plot_type: bar_chart
             x_column: {{receipt_text_column}}
@@ -28,7 +28,7 @@ report_settings:
   receipt_length_histogram: 
       - type: plot
         pivot: false
-        filename: "{{store_name}}_receipt_length_histogram.png"
+        output_filename: "{{store_name}}_receipt_length_histogram.png"
         settings: 
             plot_type: bar_chart
             x_column: {{receipt_text_column}}
@@ -37,7 +37,7 @@ report_settings:
   ean_length_histogram: 
       - type: plot
         pivot: false
-        filename: "{{store_name}}_ean_length_histogram.png"
+        output_filename: "{{store_name}}_ean_length_histogram.png"
         settings: 
             plot_type: bar_chart
             x_column: {{product_id_column}}
@@ -46,7 +46,7 @@ report_settings:
   revenue_for_coicop_hierarchy: 
     - type: plot
       pivot: false
-      filename: "{{store_name}}_revenue_for_coicop_hierarchy_sunburst.png"
+      output_filename: "{{store_name}}_revenue_for_coicop_hierarchy_sunburst.png"
       settings: 
           plot_type: sunburst_chart
           sunburst_columns: {{coicop_columns}}
@@ -56,7 +56,7 @@ report_settings:
   product_revenue_versus_lifetime:
     - type: plot  
       pivot: false
-      filename: "{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
+      output_filename: "{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
       settings: 
           plot_type: scatter_plot
           x_column: {{product_id_column}}
@@ -71,7 +71,7 @@ report_settings:
       value_columns: 
         - {{product_id_column}}
         - {{receipt_text_column}}
-      filename: "{{store_name}}_{{coicop_column}}_unique_receipt_values_per_coicop.png"
+      output_filename: "{{store_name}}_{{coicop_column}}_unique_receipt_values_per_coicop.png"
       settings: 
           plot_type: bar_chart
           x_column: {{coicop_column}}
@@ -87,7 +87,7 @@ report_settings:
       value_columns: 
         - {{product_id_column}} 
         - {{receipt_text_column}}
-      filename: "{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column}.png"
+      output_filename: "{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column}.png"
       settings: 
           plot_type: line_chart
           x_column: {{period_column}}
@@ -97,7 +97,7 @@ report_settings:
   total_revenue_per_period: 
     - type: plot  
       pivot: false
-      filename: "{{store_name}}_{{period_column}}_total_revenue_per_period.png"
+      output_filename: "{{store_name}}_{{period_column}}_total_revenue_per_period.png"
       settings: 
           plot_type: line_chart
           x_column: {{period_column}}
@@ -111,7 +111,7 @@ report_settings:
         - number_{{receipt_text_column}}_removed
         - number_{{product_id_column}}_introduced
         - number_{{product_id_column}}_removed
-      filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_compare_products_per_period.png"
+      output_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_compare_products_per_period.png"
       settings: 
           plot_type: line_chart
           x_column: {{period_column}}
