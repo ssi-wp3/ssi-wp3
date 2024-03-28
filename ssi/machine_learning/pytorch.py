@@ -6,7 +6,7 @@ from .model import Model
 import pandas as pd
 
 
-class ParquetDataset(nn.utils.data.Dataset):
+class ParquetDataset(torch.utils.data.Dataset):
     """ This class is a PyTorch Dataset specifically designed to read Parquet files.
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
