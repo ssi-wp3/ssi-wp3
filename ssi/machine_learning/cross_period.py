@@ -117,7 +117,7 @@ class TrainModelOnPeriod(TrainModelTask):
         return self.prepare_data()
 
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
-        self.model_trainer.fit(lambda: train_dataframe,
+        self.model_trainer.fit(train_dataframe,
                                self.train_period_model,
                                training_predictions_file,
                                model_type=self.model_type,
