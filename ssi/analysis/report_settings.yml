@@ -1,4 +1,4 @@
-result_settings:
+report_settings:
   # Analysis for whole store
 
   texts_per_ean_histogram: 

@@ -5,6 +5,7 @@ from .files import get_combined_revenue_files_in_directory
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
+from .report import ReportEngine
 from ..preprocessing.files import get_store_name_from_combined_filename
 from ..constants import Constants
 from ..plots import PlotEngine
@@ -259,13 +260,13 @@ class PerStoreAnalysis(luigi.Task):
         return PlotEngine()
 
     @property
-    def plot_settings(self) -> Dict[str, Any]:
+    def report_settings(self) -> Dict[str, Any]:
         # TODO split up in plots that need to be run once for the whole dataset, plots that needt to be run for each
         # COICOP level, and plots that need to be run for each period.
         # TODO Add sunburst with number of products (EAN/Receipt texts) per coicop
         # TODO Add sunburst with total products sold/revenue?
         settings = Settings.load(self.plot_settings_filename,
-                                 "result_settings",
+                                 "report_settings",
                                  True,
                                  store_name=self.store_name,
                                  period_column=self.period_column,
@@ -279,64 +280,28 @@ class PerStoreAnalysis(luigi.Task):
 
         return settings
 
+    @property
+    def report_engine(self) -> ReportEngine:
+        return ReportEngine(self.report_settings)
+
     def output(self):
-        output_dict = dict()
-        for task in self.input():
-            for function_name in task.keys():
-                if function_name not in self.plot_settings:
-                    continue
-
-                plot_settings = self.plot_settings[function_name]
-                if isinstance(plot_settings, list):
-                    for settings in plot_settings:
-                        self.create_output_for_plot_settings(
-                            output_dict, settings)
-                else:
-                    self.create_output_for_plot_settings(
-                        output_dict, plot_settings)
-
-        return output_dict
-
-    def create_output_for_plot_settings(self, output_dict, settings):
-        filename = settings["filename"]
-        output_dict[filename] = luigi.LocalTarget(os.path.join(
-            self.output_directory, filename), format=luigi.format.Nop)
+        return {report.output_filename: luigi.LocalTarget(os.path.join(self.output_directory, report.output_filename), format=luigi.format.Nop)
+                for _, report in self.report_engine.reports.items()}
 
     def run(self):
         for task in self.input():
             for function_name, input in task.items():
-                if function_name not in self.plot_settings:
+                if function_name not in self.report_settings:
                     continue
 
                 with input.open("r") as input_file:
                     dataframe = pd.read_parquet(
                         input_file, engine=self.parquet_engine)
 
-                    plot_settings = self.plot_settings[function_name]
-                    if isinstance(plot_settings, list):
-                        for settings in plot_settings:
-                            self.plot_to_file(dataframe, settings)
-                    else:
-                        self.plot_to_file(dataframe, plot_settings)
-
-    def plot_to_file(self, dataframe, settings):
-        filename = settings["filename"]
-        with self.output()[filename].open("w") as output_file:
-            self.plot_with_settings(
-                dataframe, settings, output_file)
-
-    def plot_with_settings(self,
-                           dataframe: pd.DataFrame,
-                           plot_settings: Dict[str, Any],
-                           output_file,
-                           value_columns: List[str] = None):
-        if "pivot" in plot_settings and plot_settings["pivot"]:
-            value_columns = plot_settings["value_columns"]
-            dataframe = unpivot(dataframe, value_columns)
-
-        figure = self.plot_engine.plot_from_settings(
-            dataframe, plot_settings["plot_settings"])
-        figure.save(output_file)
+                    reports = self.report_engine.reports[function_name]
+                    for report in reports:
+                        report.write_to_file(dataframe, self.output()[
+                                             report.output_filename])
 
 
 class CrossStoreAnalysis(luigi.Task):
