@@ -77,20 +77,20 @@ class TableReport(Report):
     def write_to_file(self, dataframe: pd.DataFrame, filename: str):
         table_type = TableReport.TableType[self.type_settings.get(
             "table_type", "csv")]
-        print("table_type", table_type)
 
         table_settings = self.type_settings.copy()
         table_settings.pop("table_type", None)
-        print("table_settings", table_settings)
 
-        self.to_table(dataframe, table_type=table_type,
-                      output_file=filename, **table_settings)
+        self.to_table(dataframe,
+                      table_type=table_type,
+                      output_file=filename,
+                      **table_settings)
 
     def to_table(self, dataframe: pd.DataFrame, table_type: 'TableReport.TableType', output_file: str, **kwargs):
         if table_type == TableReport.TableType.csv:
             dataframe.to_csv(output_file, **kwargs)
         elif table_type == TableReport.TableType.markdown:
-            dataframe.to_markdown(output_file, **kwargs)
+            dataframe.to_markdown(output_file)
         elif table_type == TableReport.TableType.latex:
             dataframe.to_latex(output_file, **kwargs)
         else:
