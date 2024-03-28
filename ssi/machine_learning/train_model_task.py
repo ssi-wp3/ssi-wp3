@@ -15,6 +15,7 @@ class TrainModelTask(luigi.Task, ABC):
 
     receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
+    label_column = luigi.Parameter()
     test_size = luigi.FloatParameter(default=0.2)
     batch_size = luigi.IntParameter(default=1000)
     parquet_engine = luigi.Parameter()
@@ -25,6 +26,8 @@ class TrainModelTask(luigi.Task, ABC):
         model_evaluator = ConfusionMatrixEvaluator()
         return ModelTrainer(
             model_evaluator=model_evaluator,
+            features_column=self.features_column,
+            label_column=self.label_column,
             batch_predict_size=self.batch_size,
             parquet_engine=self.parquet_engine
         )

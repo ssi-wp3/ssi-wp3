@@ -21,7 +21,6 @@ class TrainModelOnPeriod(TrainModelTask):
     input_filename = luigi.PathParameter()
     period_column = luigi.Parameter()
     train_period = luigi.Parameter()
-    label_column = luigi.Parameter()
 
     @property
     def train_from_scratch(self) -> List[FeatureExtractorType]:
@@ -149,7 +148,6 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
             f"Identifying unique periods for column {period_column} in {input_filename}")
 
         return pa.parquet.read_table(input_filename, columns=[period_column]).to_pandas()[period_column].unique()
-        # return pd.read_parquet(input_filename, engine=self.parquet_engine)[period_column].unique()
 
     def requires(self):
         return [TrainModelOnPeriod(input_filename=os.path.join(self.input_directory, feature_filename),
