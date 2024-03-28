@@ -1,4 +1,5 @@
 from typing import Dict, Any, List
+from abc import ABC, abstractmethod
 from enum import Enum
 from .utils import unpivot
 from ..plots import PlotEngine
@@ -25,15 +26,15 @@ class ReportEngine:
         for report_settings in self.settings.items():
             if isinstance(report_settings, list):
                 for settings in report_settings:
-                    reports.append(self.create_report(settings))
+                    reports.append(self.report_for(settings))
             else:
-                reports.append(self.create_report(report_settings))
+                reports.append(self.report_for(report_settings))
         return reports
 
-    def create_report(self, result_settings: Dict[str, Any]) -> 'Report':
-        if result_settings["type"] == "plot":
+    def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
+        if result_settings["type"].lower() == ReportType.plot.value:
             return PlotReport(result_settings)
-        elif result_settings["type"] == "table":
+        elif result_settings["type"].lower() == ReportType.table.value:
             return TableReport(result_settings)
         else:
             raise ValueError(f"Unknown report type: {result_settings['type']}")
@@ -44,7 +45,7 @@ class ReportType(Enum):
     table = "table"
 
 
-class Report:
+class Report(ABC):
     def __init__(self, settings: Dict[str, Any]):
         self.__settings = settings
 
@@ -64,6 +65,10 @@ class Report:
     def output_filename(self) -> str:
         return self.settings["output_filename"]
 
+    @abstractmethod
+    def write_to_file(self, dataframe: pd.DataFrame, filename: str):
+        pass
+
 
 class PlotReport(Report):
     def __init__(self, settings: Dict[str, Any], plot_engine: PlotEngine = PlotEngine()):
@@ -74,11 +79,16 @@ class PlotReport(Report):
     def plot_engine(self) -> PlotEngine:
         return self.__plot_engine
 
+    def write_to_file(self, dataframe: pd.DataFrame, filename: str):
+        self.plot_with_settings(dataframe, self.type_settings, filename)
+
     def plot_with_settings(self,
                            dataframe: pd.DataFrame,
                            plot_settings: Dict[str, Any],
                            output_file,
                            value_columns: List[str] = None):
+
+        # TODO this has changed a bit, need to update
         if "pivot" in plot_settings and plot_settings["pivot"]:
             value_columns = plot_settings["value_columns"]
             dataframe = unpivot(dataframe, value_columns)
@@ -91,6 +101,9 @@ class PlotReport(Report):
 class TableReport(Report):
     def __init__(self, settings: Dict[str, Any]):
         super().__init__(settings)
+
+    def write_to_file(self, dataframe: pd.DataFrame, filename: str):
+        self.to_table(dataframe, filename)
 
     def to_table(self, dataframe: pd.DataFrame, output_file: str):
         dataframe.to_csv(output_file, index=False)
