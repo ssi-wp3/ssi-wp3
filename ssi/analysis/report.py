@@ -76,8 +76,10 @@ class TableReport(Report):
 
     def write_to_file(self, dataframe: pd.DataFrame, filename: str):
         table_settings = self.type_settings.get("settings", {})
+        print(table_settings)
         table_type = TableReport.TableType[table_settings.get(
             "table_type", "csv")]
+        print("table_type", table_type)
         table_settings.pop("table_type", None)
 
         self.to_table(dataframe, table_type=table_type,
