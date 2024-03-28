@@ -2,9 +2,9 @@ from typing import Dict, Any, List
 from abc import ABC, abstractmethod
 from enum import Enum
 from collections import defaultdict
-from .utils import unpivot
-from ..plots import PlotEngine
-from ..settings import Settings
+from .analysis.utils import unpivot
+from .plots import PlotEngine
+from .settings import Settings
 import pandas as pd
 
 

@@ -1,11 +1,10 @@
 from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
-from .utils import unpivot
 from .files import get_combined_revenue_files_in_directory
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
-from .report import ReportEngine
+from ..report import ReportEngine
 from ..preprocessing.files import get_store_name_from_combined_filename
 from ..constants import Constants
 from ..plots import PlotEngine
