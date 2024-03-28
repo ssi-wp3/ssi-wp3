@@ -10,6 +10,12 @@ result_settings:
             x_column: {{receipt_text_column}}
             y_column: count
             title: Unique receipt texts per EAN for {{store_name}}
+      - type: table
+        pivot: false
+        filename: "{{store_name}}_texts_per_ean_histogram.md"
+        settings:
+            table_type: markdown 
+            table_fmt: grid
   log_texts_per_ean_histogram: 
       - type: plot
         pivot: false

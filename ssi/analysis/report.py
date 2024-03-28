@@ -66,14 +66,31 @@ class PlotReport(Report):
 
 
 class TableReport(Report):
+    class TableType(Enum):
+        csv = "csv"
+        markdown = "markdown"
+        latex = "latex"
+
     def __init__(self, settings: Dict[str, Any]):
         super().__init__(settings)
 
     def write_to_file(self, dataframe: pd.DataFrame, filename: str):
-        self.to_table(dataframe, filename)
+        table_type = TableReport.TableType[self.type_settings.get(
+            "table_type", "csv")]
+        table_settings = self.type_settings.get("settings", {})
 
-    def to_table(self, dataframe: pd.DataFrame, output_file: str):
-        dataframe.to_csv(output_file, index=False)
+        self.to_table(dataframe, table_type=table_type,
+                      output_file=filename, **table_settings)
+
+    def to_table(self, dataframe: pd.DataFrame, table_type: 'TableReport.TableType', output_file: str, **kwargs):
+        if table_type == TableReport.TableType.csv:
+            dataframe.to_csv(output_file, **kwargs)
+        elif table_type == TableReport.TableType.markdown:
+            dataframe.to_markdown(output_file, **kwargs)
+        elif table_type == TableReport.TableType.latex:
+            dataframe.to_latex(output_file, **kwargs)
+        else:
+            raise ValueError(f"Unknown table type: {table_type}")
 
 
 class ReportEngine:
