@@ -78,31 +78,28 @@ class ModelTrainer:
         return {key: value for key, value in kwargs.items() if key.startswith(prefix)}
 
     def fit(self,
-            training_data_loader: Callable[[], pd.DataFrame],
+            training_data: pd.DataFrame,
             training_function: Callable[[pd.DataFrame, str, str, str], Any],
             training_predictions_file: str,
             **training_kwargs
             ):
-        training_data_kwargs = self.get_kwargs_with_prefix(
-            "training_data_", **training_kwargs)
-        training_data = training_data_loader(training_data_kwargs)
         self._pipeline, self._train_evaluation_dict = training_function(
             training_data, training_kwargs)
-        self.batch_predict(training_data_loader,
+        self.batch_predict(training_data,
                            training_predictions_file,
                            lambda dataframe: self.model_evaluator.evaluate_training(
-                               dataframe),
-                           training_data_kwargs)
+                               dataframe)
+                           )
 
     def predict(self,
-                predictions_data_loader: Callable[[], pd.DataFrame],
-                predictions_file: str,
-                **data_loader_kwargs):
-        self.batch_predict(predictions_data_loader,
+                predictions_data: pd.DataFrame,
+                predictions_file: str
+                ):
+        self.batch_predict(predictions_data,
                            predictions_file,
                            lambda dataframe: self.model_evaluator.evaluate(
-                               dataframe),
-                           **data_loader_kwargs)
+                               dataframe)
+                           )
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
         y_true = dataframe[label_column]
@@ -110,15 +107,14 @@ class ModelTrainer:
         return pd.DataFrame(confusion_matrix(y_true, y_pred))
 
     def batch_predict(self,
-                      predictions_data_loader: Callable[[], pd.DataFrame],
+                      predictions_data: pd.DataFrame,
                       predictions_file: str,
                       batch_size: int,
-                      evaluation_function: Callable[[pd.DataFrame], Dict[str, Any]],
-                      **data_loader_kwargs
+                      evaluation_function: Callable[[
+                          pd.DataFrame], Dict[str, Any]]
                       ) -> Dict[str, Any]:
-        dataframe = predictions_data_loader(**data_loader_kwargs)
         batch_statistics = batched_writer(predictions_file,
-                                          dataframe,
+                                          predictions_data,
                                           batch_size,
                                           process_batch=lambda batch: self.__predict(
                                               batch),
