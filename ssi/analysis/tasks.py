@@ -284,8 +284,13 @@ class PerStoreAnalysis(luigi.Task):
     def report_engine(self) -> ReportEngine:
         return ReportEngine(self.report_settings)
 
+    def target_for(self, filename: str, binary_file: bool = True) -> luigi.LocalTarget:
+        if binary_file:
+            return luigi.LocalTarget(filename, format=luigi.format.Nop)
+        return luigi.LocalTarget(filename)
+
     def output(self):
-        return {output_filename: luigi.LocalTarget(os.path.join(self.output_directory, output_filename), format=luigi.format.Nop)
+        return {output_filename: self.target_for(os.path.join(self.output_directory, output_filename), binary_file=not output_filename.endswith(".md"))
                 for output_filename in self.report_engine.output_filenames}
 
     def run(self):
@@ -301,8 +306,6 @@ class PerStoreAnalysis(luigi.Task):
                     reports = self.report_engine.reports[function_name]
                     for report in reports:
                         with self.output()[report.output_filename].open("w") as output_file:
-                            print(
-                                f"Saving {report.output_filename} to {output_file} ")
                             report.write_to_file(dataframe, output_file)
 
 
