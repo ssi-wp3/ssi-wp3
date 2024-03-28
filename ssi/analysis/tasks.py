@@ -184,7 +184,7 @@ class PerStoreAnalysis(luigi.Task):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     plot_settings_filename = luigi.Parameter(default=os.path.join(
-        os.path.dirname(__file__), "plot_settings.yml"))
+        os.path.dirname(__file__), "report_settings.yml"))
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     store_name = luigi.Parameter()
