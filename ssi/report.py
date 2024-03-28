@@ -129,6 +129,13 @@ class PlotReport(Report):
         """
         super().__init__(settings, True)
         self.__plot_engine = plot_engine
+        # Bit of a hack
+        self.__set_plot_format()
+
+    def __set_plot_format(self):
+        plot_format = self.type_settings.get("format", "png")
+        if plot_format.lower() == "html":
+            self.needs_binary_file = False
 
     @property
     def plot_engine(self) -> PlotEngine:
