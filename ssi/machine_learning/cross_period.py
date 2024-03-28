@@ -47,10 +47,6 @@ class TrainModelOnPeriod(TrainModelTask):
         return feature_filename
 
     @property
-    def model_filename(self) -> str:
-        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
-
-    @property
     def training_predictions_filename(self) -> str:
         return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_predictions.parquet")
 
@@ -59,7 +55,11 @@ class TrainModelOnPeriod(TrainModelTask):
         return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
 
     @property
-    def evaluations_filename(self) -> str:
+    def model_filename(self) -> str:
+        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
+
+    @property
+    def evaluation_filename(self) -> str:
         return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
 
     def get_data_for_period(self, input_file) -> pd.DataFrame:
