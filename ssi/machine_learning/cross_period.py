@@ -143,6 +143,11 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
     verbose = luigi.BoolParameter(default=False)
     period_columns = luigi.ListParameter()
 
+    def identify_unique_periods(self, input_filename: str, period_column: str) -> pd.Series:
+        print(
+            f"Identifying unique periods for column {period_column} in {input_filename}")
+        return pd.read_parquet(input_filename, engine=self.parquet_engine)[period_column].unique()
+
     def requires(self):
         return [TrainModelOnPeriod(input_filename=os.path.join(self.input_directory, feature_filename),
                                    output_directory=self.output_directory,
@@ -158,5 +163,5 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
                                    train_period=period)
                 for feature_filename in get_features_files_in_directory(self.input_directory, self.filename_prefix, self.feature_extractor.value)
                 for period_column in self.period_columns
-                for period in pd.read_parquet(os.path.join(self.input_directory, feature_filename), engine=self.parquet_engine)[period_column].unique()
+                for period in self.identify_unique_periods(os.path.join(self.input_directory, feature_filename), period_column)
                 ]
