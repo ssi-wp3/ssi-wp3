@@ -286,7 +286,7 @@ class PerStoreAnalysis(luigi.Task):
 
     def output(self):
         return {report.output_filename: luigi.LocalTarget(os.path.join(self.output_directory, report.output_filename), format=luigi.format.Nop)
-                for _, report in self.report_engine.reports.items()}
+                for _, report in self.report_engine.output_filenames}
 
     def run(self):
         for task in self.input():
