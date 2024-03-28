@@ -78,7 +78,7 @@ class ModelTrainer:
         return {key: value for key, value in kwargs.items() if key.startswith(prefix)}
 
     def fit(self,
-            training_data_loader: Callable[[], pd.DataFrame],
+            training_data_loader: Callable[[Any], pd.DataFrame],
             training_function: Callable[[pd.DataFrame, str, str, str], Any],
             training_predictions_file: str,
             **training_kwargs
