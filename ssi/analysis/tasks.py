@@ -290,8 +290,8 @@ class PerStoreAnalysis(luigi.Task):
         return luigi.LocalTarget(filename)
 
     def output(self):
-        return {output_filename: self.target_for(os.path.join(self.output_directory, output_filename), binary_file=not output_filename.endswith(".md"))
-                for output_filename in self.report_engine.output_filenames}
+        return {report.output_filename: self.target_for(os.path.join(self.output_directory, report.output_filename), binary_file=report.needs_binary_file)
+                for report in self.report_engine.flattened_reports}
 
     def run(self):
         for task in self.input():
