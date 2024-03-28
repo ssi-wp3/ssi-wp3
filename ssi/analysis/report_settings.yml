@@ -14,7 +14,7 @@ report_settings:
         pivot: false
         output_filename: "{{store_name}}_texts_per_ean_histogram.md"
         settings:
-            table_type: markdown 
+            table_type: latex 
   log_texts_per_ean_histogram: 
       - type: plot
         pivot: false
