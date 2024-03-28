@@ -301,6 +301,8 @@ class PerStoreAnalysis(luigi.Task):
                     reports = self.report_engine.reports[function_name]
                     for report in reports:
                         with self.output()[report.output_filename].open("w") as output_file:
+                            print(
+                                f"Saving {report.output_filename} to {output_file} ")
                             report.write_to_file(dataframe, output_file)
 
 
