@@ -300,8 +300,8 @@ class PerStoreAnalysis(luigi.Task):
 
                     reports = self.report_engine.reports[function_name]
                     for report in reports:
-                        report.write_to_file(dataframe, self.output()[
-                                             report.output_filename])
+                        with self.output()[report.output_filename].open("w") as output_file:
+                            report.write_to_file(dataframe, output_file)
 
 
 class CrossStoreAnalysis(luigi.Task):
