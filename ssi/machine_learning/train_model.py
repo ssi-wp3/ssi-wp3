@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 from sklearn.ensemble._voting import _BaseVoting
 from sklearn.ensemble._stacking import _BaseStacking
-from hiclass_model import HiClassModel
+from .hiclass_model import HiClassModel
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..label_extractor import LabelExtractor
 from ..constants import Constants
