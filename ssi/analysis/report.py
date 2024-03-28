@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 from abc import ABC, abstractmethod
 from enum import Enum
+from collections import defaultdict
 from .utils import unpivot
 from ..plots import PlotEngine
 from ..settings import Settings
@@ -86,17 +87,18 @@ class ReportEngine:
     @property
     def output_filenames(self) -> List[str]:
         return [report.output_filename
-                for report in self.reports]
+                for _, report_list in self.reports.items()
+                for report in report_list]
 
     @property
-    def reports(self) -> List['Report']:
-        reports = []
-        for report_settings in self.settings.items():
+    def reports(self) -> Dict[str, List['Report']]:
+        reports = defaultdict(list)
+        for report_key, report_settings in self.settings.items():
             if isinstance(report_settings, list):
                 for settings in report_settings:
-                    reports.append(self.report_for(settings))
+                    reports[report_key].append(self.report_for(settings))
             else:
-                reports.append(self.report_for(report_settings))
+                reports[report_key].append(self.report_for(report_settings))
         return reports
 
     def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
