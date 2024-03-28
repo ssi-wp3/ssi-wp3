@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod, abstractproperty
 from typing import Tuple
 from sklearn.model_selection import train_test_split
-from evaluate import ConfusionMatrixEvaluator
-from trainer import ModelTrainer
+from .evaluate import ConfusionMatrixEvaluator
+from .trainer import ModelTrainer
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 import pandas as pd
 import luigi
