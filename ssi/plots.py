@@ -694,6 +694,7 @@ class PlotEngine(PlotBackend):
         """
         plot_type = PlotBackend.PlotType[plot_settings.get("plot_type")]
         plot_settings.pop("plot_type", None)
+        plot_settings.pop("format", None)
         if plot_type:
             return self.plot_backend.plot(dataframe, plot_type, **plot_settings)
         else:
