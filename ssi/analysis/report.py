@@ -90,7 +90,7 @@ class TableReport(Report):
         if table_type == TableReport.TableType.csv:
             dataframe.to_csv(output_file, **kwargs)
         elif table_type == TableReport.TableType.markdown:
-            dataframe.to_markdown(output_file)
+            dataframe.to_markdown(output_file, **kwargs)
         elif table_type == TableReport.TableType.latex:
             dataframe.to_latex(output_file, **kwargs)
         else:
