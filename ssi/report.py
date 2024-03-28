@@ -183,7 +183,7 @@ class PlotReport(Report):
             value_columns = plot_settings["value_columns"]
             dataframe = unpivot(dataframe, value_columns)
 
-        plot_format = plot_settings.get("format", "png")
+        plot_format = self.type_settings.get("format", "png")
 
         print(
             f"Plotting to {output_file} with format: {plot_format} and needs_binary_file: {self.needs_binary_file}")
