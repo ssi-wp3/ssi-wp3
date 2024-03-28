@@ -176,9 +176,11 @@ class PlotReport(Report):
             value_columns = plot_settings["value_columns"]
             dataframe = unpivot(dataframe, value_columns)
 
+        plot_format = plot_settings.get("format", "png")
+
         figure = self.plot_engine.plot_from_settings(
             dataframe, self.type_settings)
-        figure.save(output_file)
+        figure.save(output_file, format=plot_format)
 
 
 class TableReport(Report):
