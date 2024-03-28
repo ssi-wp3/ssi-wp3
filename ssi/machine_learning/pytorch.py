@@ -1,4 +1,4 @@
-import torch as nn
+import torch.nn as nn
 import torch
 import pyarrow.parquet as pq
 from skorch import NeuralNetClassifier
