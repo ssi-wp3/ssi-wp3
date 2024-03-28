@@ -163,7 +163,6 @@ class PlotBackend(ABC):
         **kwargs
             Additional arguments to pass to the plot
         """
-        print(f"plot_type: {type}")
         if type not in self.plot_types:
             raise ValueError(f"Plot type {type} not supported")
         return self.plot_types[type](dataframe, **kwargs)
