@@ -34,6 +34,10 @@ class Report(ABC):
     def needs_binary_file(self) -> bool:
         return self.__needs_binary_file
 
+    @needs_binary_file.setter
+    def needs_binary_file(self, value: bool):
+        self.__needs_binary_file = value
+
     @property
     def output_filename(self) -> str:
         return self.settings["output_filename"]
