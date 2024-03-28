@@ -7,39 +7,6 @@ from ..settings import Settings
 import pandas as pd
 
 
-class ReportEngine:
-    def __init__(self, settings: Settings):
-        self.__settings = settings
-
-    @property
-    def settings(self) -> Settings:
-        return self.__settings
-
-    @property
-    def output_filenames(self) -> Dict[str, str]:
-        return {result_key: result_settings["filename"]
-                for result_key, result_settings in self.settings.items()}
-
-    @property
-    def reports(self) -> List['Report']:
-        reports = []
-        for report_settings in self.settings.items():
-            if isinstance(report_settings, list):
-                for settings in report_settings:
-                    reports.append(self.report_for(settings))
-            else:
-                reports.append(self.report_for(report_settings))
-        return reports
-
-    def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
-        if result_settings["type"].lower() == ReportType.plot.value:
-            return PlotReport(result_settings)
-        elif result_settings["type"].lower() == ReportType.table.value:
-            return TableReport(result_settings)
-        else:
-            raise ValueError(f"Unknown report type: {result_settings['type']}")
-
-
 class ReportType(Enum):
     plot = "plot"
     table = "table"
@@ -80,7 +47,7 @@ class PlotReport(Report):
         return self.__plot_engine
 
     def write_to_file(self, dataframe: pd.DataFrame, filename: str):
-        self.plot_with_settings(dataframe, self.type_settings, filename)
+        self.plot_with_settings(dataframe, self.settings, filename)
 
     def plot_with_settings(self,
                            dataframe: pd.DataFrame,
@@ -88,13 +55,12 @@ class PlotReport(Report):
                            output_file,
                            value_columns: List[str] = None):
 
-        # TODO this has changed a bit, need to update
         if "pivot" in plot_settings and plot_settings["pivot"]:
             value_columns = plot_settings["value_columns"]
             dataframe = unpivot(dataframe, value_columns)
 
         figure = self.plot_engine.plot_from_settings(
-            dataframe, plot_settings["plot_settings"])
+            dataframe, self.type_settings)
         figure.save(output_file)
 
 
@@ -107,3 +73,36 @@ class TableReport(Report):
 
     def to_table(self, dataframe: pd.DataFrame, output_file: str):
         dataframe.to_csv(output_file, index=False)
+
+
+class ReportEngine:
+    def __init__(self, settings: Settings):
+        self.__settings = settings
+
+    @property
+    def settings(self) -> Settings:
+        return self.__settings
+
+    @property
+    def output_filenames(self) -> List[str]:
+        return [report.output_filename
+                for report in self.reports]
+
+    @property
+    def reports(self) -> List['Report']:
+        reports = []
+        for report_settings in self.settings.items():
+            if isinstance(report_settings, list):
+                for settings in report_settings:
+                    reports.append(self.report_for(settings))
+            else:
+                reports.append(self.report_for(report_settings))
+        return reports
+
+    def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
+        if result_settings["type"].lower() == ReportType.plot.value:
+            return PlotReport(result_settings)
+        elif result_settings["type"].lower() == ReportType.table.value:
+            return TableReport(result_settings)
+        else:
+            raise ValueError(f"Unknown report type: {result_settings['type']}")
