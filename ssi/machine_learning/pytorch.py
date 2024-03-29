@@ -11,14 +11,14 @@ class ParquetDataset(torch.utils.data.Dataset):
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
 
-    def __init__(self, dataframe: pd.DataFrame, feature_column: str, target_column: str):
-        self.__dataframe = dataframe
+    def __init__(self, filename: str, feature_column: str, target_column: str, memory_map: bool = False):
+        self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
         self.__feature_column = feature_column
         self.__target_column = target_column
 
     @property
-    def dataframe(self) -> pd.DataFrame:
-        return self.__dataframe
+    def parquet_file(self):
+        return self.__parquet_file
 
     @property
     def feature_column(self) -> str:
@@ -28,21 +28,30 @@ class ParquetDataset(torch.utils.data.Dataset):
     def target_column(self) -> str:
         return self.__target_column
 
+    @property
+    def number_of_row_groups(self) -> int:
+        return self.parquet_file.num_row_groups
+
+    def number_of_rows_in_row_group(self, row_group_index: int) -> int:
+        return self.parquet_file.metadata.row_group(row_group_index).num_rows
+
+    def get_row_group_for_index(self, index: int) -> int:
+        for row_group_index in range(self.number_of_row_groups):
+            number_of_rows = self.number_of_rows_in_row_group(row_group_index)
+            index -= number_of_rows
+            if index < 0:
+                return row_group_index
+        raise ValueError("Index out of bounds")
+
     def __len__(self):
-        return len(self.dataframe)
+        return self.parquet_file.metadata.num_rows
 
     def __getitem__(self, index):
-        sample = self.dataframe.iloc[index]
+        row_group_index = self.get_row_group_for_index(index)
+        row_group = self.parquet_file.read_row_group(row_group_index)
+        dataframe = row_group.to_pandas()
+        sample = dataframe.iloc[index]
         return torch.tensor(sample[self.feature_column].values, dtype=torch.float32), torch.tensor(sample[self.target_column], dtype=torch.float32)
-
-    @staticmethod
-    def from_filename(filename: str, feature_column: str, target_column: str, engine: str = "pyarrow") -> 'ParquetDataset':
-        dataframe = pd.read_parquet(filename, engine=engine)
-        return ParquetDataset(dataframe, feature_column, target_column)
-
-    @staticmethod
-    def from_dataframe(dataframe, feature_column: str, target_column: str) -> 'ParquetDataset':
-        return ParquetDataset(dataframe, feature_column, target_column)
 
 
 class TorchLogisticRegression(nn.Module):
