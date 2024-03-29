@@ -70,8 +70,7 @@ class TrainModelOnPeriod(TrainModelTask):
         dataframe = pa.parquet.read_table(
             input_file, columns=[self.period_column, self.receipt_text_column, self.label_column, self.features_column], filters=[(self.period_column, '=', self.train_period)]).to_pandas()
         print("Dropping duplicates")
-        dataframe = dataframe.drop_duplicates(
-            [self.receipt_text_column, self.label_column])
+        dataframe = dataframe
         print("Only reading")
 
         print("Adding is_train column")
@@ -116,7 +115,9 @@ class TrainModelOnPeriod(TrainModelTask):
         Tuple[pd.DataFrame, pd.DataFrame]
             The training and test dataframes
         """
-        return dataframe[dataframe["is_train"] == True], dataframe
+        training_dataframe = dataframe[dataframe["is_train"] == True].drop_duplicates(
+            [self.receipt_text_column, self.label_column])
+        return training_dataframe, dataframe
 
     def load_training_data(self, **kwargs) -> pd.DataFrame:
         return self.prepare_data()
