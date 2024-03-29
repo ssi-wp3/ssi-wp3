@@ -98,9 +98,7 @@ class ConfusionMatrix:
         np.array
             An array of F1 scores for each class.
         """
-        precision = precision_score(self)
-        recall = recall_score(self)
-        return 2 * (precision * recall) / (precision + recall)
+        return 2 * (self.precision_score * self.recall_score) / (self.precision_score + self.recall_score)
 
     @property
     def accuracy_score(self) -> np.array:
