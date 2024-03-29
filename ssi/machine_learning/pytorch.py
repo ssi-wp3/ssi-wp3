@@ -99,7 +99,7 @@ class PytorchModel(Model):
         return self
 
     def fit(self,
-            X: ParquetDataset,
+            dataset: ParquetDataset,
             max_epochs: int,
             batch_size: int,
             lr: float,
@@ -115,7 +115,7 @@ class PytorchModel(Model):
             iterator_train__shuffle=iterator_train__shuffle,
             **kwargs
         )
-        self.classifier.fit(X)
+        self.classifier.fit(dataset)
         return self
 
     def predict(self, X):
