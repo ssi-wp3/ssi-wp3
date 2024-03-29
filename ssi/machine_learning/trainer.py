@@ -87,6 +87,7 @@ class ModelTrainer:
             training_data, **training_kwargs)
         self.train_evaluation_dict = self.batch_predict(training_data,
                                                         training_predictions_file,
+                                                        self.batch_predict_size,
                                                         lambda dataframe: self.model_evaluator.evaluate_training(
                                                             dataframe)
                                                         )
@@ -97,6 +98,7 @@ class ModelTrainer:
                 ):
         self.batch_predict(predictions_data,
                            predictions_file,
+                           self.batch_predict_size,
                            lambda dataframe: self.model_evaluator.evaluate(
                                dataframe)
                            )
