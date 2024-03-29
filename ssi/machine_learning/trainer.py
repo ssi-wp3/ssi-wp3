@@ -83,13 +83,13 @@ class ModelTrainer:
             training_predictions_file: str,
             **training_kwargs
             ):
-        self._pipeline, self._train_evaluation_dict = training_function(
+        self._pipeline = training_function(
             training_data, **training_kwargs)
-        self.batch_predict(training_data,
-                           training_predictions_file,
-                           lambda dataframe: self.model_evaluator.evaluate_training(
-                               dataframe)
-                           )
+        self.train_evaluation_dict = self.batch_predict(training_data,
+                                                        training_predictions_file,
+                                                        lambda dataframe: self.model_evaluator.evaluate_training(
+                                                            dataframe)
+                                                        )
 
     def predict(self,
                 predictions_data: pd.DataFrame,
