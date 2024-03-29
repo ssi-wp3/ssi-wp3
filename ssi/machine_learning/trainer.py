@@ -84,7 +84,7 @@ class ModelTrainer:
             **training_kwargs
             ):
         self._pipeline, self._train_evaluation_dict = training_function(
-            training_data, training_kwargs)
+            training_data, **training_kwargs)
         self.batch_predict(training_data,
                            training_predictions_file,
                            lambda dataframe: self.model_evaluator.evaluate_training(
