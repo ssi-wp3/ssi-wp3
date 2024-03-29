@@ -98,6 +98,26 @@ class PytorchModel(Model):
         self.classifier.fit(X, y)
         return self
 
+    def fit(self,
+            X: ParquetDataset,
+            max_epochs: int,
+            batch_size: int,
+            lr: float,
+            test_size: float,
+            iterator_train__shuffle: bool = True,
+            **kwargs):
+        self.classifier = NeuralNetClassifier(
+            self.model,
+            max_epochs=max_epochs,
+            batch_size=batch_size,
+            lr=lr,
+            train_split=test_size,
+            iterator_train__shuffle=iterator_train__shuffle,
+            **kwargs
+        )
+        self.classifier.fit(X)
+        return self
+
     def predict(self, X):
         self._check_classifier_trained()
         return self.classifier.predict(X)
