@@ -68,7 +68,7 @@ class TrainModelOnPeriod(TrainModelTask):
         # dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
 
         dataframe = pa.parquet.read_table(
-            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column], filters=[(self.period_column, '=', self.train_period)]).to_pandas()
+            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column, self.features_column], filters=[(self.period_column, '=', self.train_period)]).to_pandas()
         print("Dropping duplicates")
         dataframe = dataframe.drop_duplicates(
             [self.receipt_text_column, self.label_column])
