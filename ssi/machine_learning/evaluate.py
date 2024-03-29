@@ -26,7 +26,7 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
 
     def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
         if isinstance(dataframe, list):
-            dataframe = reduce(dataframe, lambda x, y: x.add(y))
+            dataframe = reduce(lambda x, y: x.add(y), dataframe)
 
         confusion_matrix = ConfusionMatrix(dataframe)
 
