@@ -65,10 +65,15 @@ class TrainModelOnPeriod(TrainModelTask):
     def get_data_for_period(self, input_file) -> pd.DataFrame:
         print(
             f"Reading data for {self.train_period} from {self.input_filename}")
-        dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
+        # dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
+
+        dataframe = pa.parquet.read_table(
+            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column], filters=[(self.period_column, '=', self.train_period)]).to_pandas()
         print("Dropping duplicates")
         dataframe = dataframe.drop_duplicates(
             [self.receipt_text_column, self.label_column])
+        print("Only reading")
+
         print("Adding is_train column")
         dataframe["is_train"] = dataframe[self.period_column] == self.train_period
         return dataframe
