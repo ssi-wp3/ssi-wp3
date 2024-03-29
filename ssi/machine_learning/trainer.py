@@ -31,6 +31,10 @@ class ModelTrainer:
     def pipeline(self):
         return self._pipeline
 
+    @pipeline.setter
+    def pipeline(self, value):
+        self._pipeline = value
+
     @property
     def model_evaluator(self) -> ModelEvaluator:
         return self._model_evaluator
@@ -84,7 +88,7 @@ class ModelTrainer:
             training_predictions_file: str,
             **training_kwargs
             ):
-        self._pipeline = training_function(
+        self.pipeline = training_function(
             training_data, **training_kwargs)
         self.train_evaluation_dict = self.batch_predict(training_data,
                                                         training_predictions_file,
