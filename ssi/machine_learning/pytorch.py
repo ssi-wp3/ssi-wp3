@@ -43,13 +43,17 @@ class ParquetDataset(torch.utils.data.Dataset):
                 return row_group_index
         raise ValueError("Index out of bounds")
 
+    def get_data_for_row_group(self, row_group_index: int) -> pd.DataFrame:
+        row_group = self.parquet_file.read_row_group(row_group_index)
+        dataframe = row_group.to_pandas()
+        return dataframe
+
     def __len__(self):
         return self.parquet_file.metadata.num_rows
 
     def __getitem__(self, index):
         row_group_index = self.get_row_group_for_index(index)
-        row_group = self.parquet_file.read_row_group(row_group_index)
-        dataframe = row_group.to_pandas()
+        dataframe = self.get_data_for_row_group(row_group_index)
         sample = dataframe.iloc[index]
         return torch.tensor(sample[self.feature_column].values, dtype=torch.float32), torch.tensor(sample[self.target_column], dtype=torch.float32)
 

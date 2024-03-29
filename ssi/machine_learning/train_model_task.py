@@ -98,7 +98,7 @@ class TrainModelTask(luigi.Task, ABC):
 
         print("Writing test predictions to disk")
         with self.output()[self.predictions_key].open("w") as predictions_file:
-            self.model_trainer.predict(lambda: test_dataframe,
+            self.model_trainer.predict(test_dataframe,
                                        predictions_file)
 
         print("Writing model to disk")

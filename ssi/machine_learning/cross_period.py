@@ -5,6 +5,7 @@ from ..files import get_features_files_in_directory
 from ..parquet_file import ParquetFile
 from .train_model import train_model
 from .train_model_task import TrainModelTask
+from .pytorch import ParquetDataset
 import pandas as pd
 import pyarrow as pa
 import luigi
@@ -68,24 +69,11 @@ class TrainModelOnPeriod(TrainModelTask):
         # dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
 
         dataframe = pa.parquet.read_table(
-            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column, self.features_column]).to_pandas()
+            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column]).to_pandas()
 
         print("Adding is_train column")
         dataframe["is_train"] = dataframe[self.period_column] == self.train_period
         return dataframe
-
-    def train_period_model(self,
-                           train_dataframe: pd.DataFrame,
-                           model_type: str,
-                           feature_column: str,
-                           label_column: str,
-                           verbose: bool = False
-                           ) -> Tuple[Pipeline, Dict[str, Any]]:
-        return train_model(train_dataframe,
-                           model_type,
-                           feature_column,
-                           label_column,
-                           verbose=verbose)
 
     def prepare_data(self) -> pd.DataFrame:
         with self.input().open() as input_file:
@@ -114,6 +102,7 @@ class TrainModelOnPeriod(TrainModelTask):
         """
         training_dataframe = dataframe[dataframe["is_train"] == True].drop_duplicates(
             [self.receipt_text_column, self.label_column])
+
         return training_dataframe, dataframe
 
     def load_training_data(self, **kwargs) -> pd.DataFrame:
@@ -121,7 +110,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
         self.model_trainer.fit(train_dataframe,
-                               self.train_period_model,
+                               train_model,
                                training_predictions_file,
                                model_type=self.model_type,
                                feature_column=self.features_column,
