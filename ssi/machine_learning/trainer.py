@@ -140,8 +140,6 @@ class ModelTrainer:
                   feature_column: str,
                   probability_column_prefix: str = "y_proba",
                   prediction_column: str = "y_pred") -> pd.DataFrame:
-        print(
-            f"Predicting with: {pipeline}, feature_column: {feature_column}, probability_column_prefix: {probability_column_prefix}, prediction_column: {prediction_column}")
 
         batch_dataframe = batch_dataframe.copy()
 

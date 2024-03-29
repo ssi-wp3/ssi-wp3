@@ -21,16 +21,22 @@ class TrainModelTask(luigi.Task, ABC):
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__model_trainer = None
+
     @property
     def model_trainer(self) -> ModelTrainer:
-        model_evaluator = ConfusionMatrixEvaluator()
-        return ModelTrainer(
-            model_evaluator=model_evaluator,
-            features_column=self.features_column,
-            label_column=self.label_column,
-            batch_predict_size=self.batch_size,
-            parquet_engine=self.parquet_engine
-        )
+        if not self.__model_trainer:
+            model_evaluator = ConfusionMatrixEvaluator()
+            self.__model_trainer = ModelTrainer(
+                model_evaluator=model_evaluator,
+                features_column=self.features_column,
+                label_column=self.label_column,
+                batch_predict_size=self.batch_size,
+                parquet_engine=self.parquet_engine
+            )
+        return self.__model_trainer
 
     @property
     def training_predictions_key(self) -> str:
