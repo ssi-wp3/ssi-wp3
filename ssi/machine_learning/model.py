@@ -11,10 +11,13 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
     """
 
     def __init__(self, model: Any):
-        self.__model = model
+        self.__model_class = model
+        self.__model = None
 
     @property
     def model(self) -> Any:
+        if self.__model is None:
+            self.__model = self.__model_class()
         return self.__model
 
     @abstractmethod
