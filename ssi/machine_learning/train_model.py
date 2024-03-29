@@ -13,7 +13,7 @@ from ..label_extractor import LabelExtractor
 from ..constants import Constants
 from .model import Model
 from .scikit_model import SklearnModel
-from .pytorch import PytorchModel, LogisticRegression
+from .pytorch import PytorchModel, TorchLogisticRegression
 import pandas as pd
 import numpy as np
 import tqdm
@@ -61,7 +61,8 @@ class ModelFactory:
     def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
         # (local_classifier=LogisticRegression(), verbose=1)
         models["hiclass"] = HiClassModel(model=LogisticRegression)
-        models["pytorch_classifier"] = PytorchModel(model=LogisticRegression)
+        models["pytorch_classifier"] = PytorchModel(
+            model=TorchLogisticRegression)
         return models
 
 

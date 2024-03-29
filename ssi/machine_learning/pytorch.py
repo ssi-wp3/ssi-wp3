@@ -45,9 +45,9 @@ class ParquetDataset(torch.utils.data.Dataset):
         return ParquetDataset(dataframe, feature_column, target_column)
 
 
-class LogisticRegression(nn.Module):
+class TorchLogisticRegression(nn.Module):
     def __init__(self, input_dim, output_dim):
-        super(LogisticRegression, self).__init__()
+        super().__init__()
         self.linear = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
