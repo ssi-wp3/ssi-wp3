@@ -19,6 +19,10 @@ class SklearnModel(Model):
     def __init__(self, model: ClassifierMixin):
         super().__init__(model)
 
+    @property
+    def classes_(self):
+        return self.model.classes_
+
     def fit(self, X, y):
         print(f"Fitting model {self.model}")
         self.model.fit(X, y)

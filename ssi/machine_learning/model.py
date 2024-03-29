@@ -1,6 +1,7 @@
 from typing import Any
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from sklearn.base import BaseEstimator, ClassifierMixin
+import numpy as np
 
 
 class Model(BaseEstimator, ClassifierMixin, ABC):
@@ -10,15 +11,24 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
     read the training and evaluation data in a form suitable to the model type.
     """
 
-    def __init__(self, model: Any):
+    def __init__(self, model: Any, classes: np.ndarray = None):
         self.__model_class = model
         self.__model = None
+        self.__classes = classes
 
     @property
     def model(self) -> Any:
         if self.__model is None:
             self.__model = self.__model_class()
         return self.__model
+
+    @property
+    def classes_(self) -> np.ndarray:
+        return self.__classes
+
+    @classes_.setter
+    def classes_(self, value: np.ndarray):
+        self.__classes = value
 
     @abstractmethod
     def load_data(self, filename: str, **kwargs) -> Any:
