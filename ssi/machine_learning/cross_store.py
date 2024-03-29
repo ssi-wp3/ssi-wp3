@@ -1,3 +1,4 @@
+from typing import Tuple
 from ..preprocessing.files import get_store_name_from_combined_filename
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..parquet_file import ParquetFile
