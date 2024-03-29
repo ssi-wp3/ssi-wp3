@@ -20,6 +20,7 @@ class SklearnModel(Model):
         super().__init__(model)
 
     def fit(self, X, y):
+        print(f"Fitting model {self.model}, {X} and {y}")
         self.model.fit(X, y)
         return self
 
