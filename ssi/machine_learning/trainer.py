@@ -131,17 +131,19 @@ class ModelTrainer:
     def __predict(self,
                   batch_dataframe: pd.DataFrame,
                   progress_bar: tqdm.tqdm,
+                  pipeline,
+                  features_column: str,
                   probability_column_prefix: str = "y_proba",
                   prediction_column: str = "y_pred") -> pd.DataFrame:
-        X = batch_dataframe[self.features_column]
+        X = batch_dataframe[features_column]
 
         progress_bar.set_description("Predicting probabilities")
-        probabilities = self.pipeline.predict_proba(X.values.tolist())
+        probabilities = pipeline.predict_proba(X.values.tolist())
         for index, probability_vector in enumerate(probabilities):
-            for class_label, probability_value in zip(self.pipeline.classes_, probability_vector):
+            for class_label, probability_value in zip(pipeline.classes_, probability_vector):
                 batch_dataframe.iloc[index][f"{probability_column_prefix}_{class_label}"] = probability_value
 
-        batch_dataframe[prediction_column] = self.pipeline.predict(
+        batch_dataframe[prediction_column] = pipeline.predict(
             X.values.tolist())
         return batch_dataframe
 
