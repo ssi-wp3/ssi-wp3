@@ -132,10 +132,10 @@ class ModelTrainer:
                   batch_dataframe: pd.DataFrame,
                   progress_bar: tqdm.tqdm,
                   pipeline,
-                  features_column: str,
+                  feature_column: str,
                   probability_column_prefix: str = "y_proba",
                   prediction_column: str = "y_pred") -> pd.DataFrame:
-        X = batch_dataframe[features_column]
+        X = batch_dataframe[feature_column]
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X.values.tolist())
