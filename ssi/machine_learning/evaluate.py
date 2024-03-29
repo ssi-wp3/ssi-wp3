@@ -115,7 +115,7 @@ class ConfusionMatrix:
         """
         return (self.true_positive + self.true_negative) / (self.true_positive + self.true_negative + self.false_positive + self.false_negative)
 
-    def _calculate_confusion_matrix_statistics(confusion_matrix: np.array) -> Tuple[np.array, np.array, np.array, np.array]:
+    def _calculate_confusion_matrix_statistics(self, confusion_matrix: np.array) -> Tuple[np.array, np.array, np.array, np.array]:
         """ Takes a multi-class confusion matrix and returns the statistics for each class. 
 
         Parameters:
