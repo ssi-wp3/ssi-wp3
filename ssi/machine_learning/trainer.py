@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict
 from sklearn.metrics import confusion_matrix
+from collections import defaultdict
 from ..files import batched_writer
 from .evaluate import ModelEvaluator
 import pandas as pd
@@ -141,9 +142,15 @@ class ModelTrainer:
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X.values.tolist())
-        for index, probability_vector in enumerate(probabilities):
+
+        probability_dict = defaultdict(list)
+        for probability_vector in probabilities:
             for class_label, probability_value in zip(pipeline.classes_, probability_vector):
-                batch_dataframe.iloc[index][f"{probability_column_prefix}_{class_label}"] = probability_value
+                probability_dict[f"{probability_column_prefix}_{class_label}"].append(
+                    probability_value)
+
+        for column, values in probability_dict.items():
+            batch_dataframe[column] = values
 
         batch_dataframe[prediction_column] = pipeline.predict(
             X.values.tolist())
