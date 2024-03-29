@@ -69,7 +69,7 @@ class TrainModelOnPeriod(TrainModelTask):
         # dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
 
         dataframe = pa.parquet.read_table(
-            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column]).to_pandas()
+            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column, self.features_column]).to_pandas()
 
         print("Adding is_train column")
         dataframe["is_train"] = dataframe[self.period_column] == self.train_period
