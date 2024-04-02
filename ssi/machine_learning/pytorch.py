@@ -42,7 +42,7 @@ class ParquetDataset(torch.utils.data.Dataset):
             previous_index = index
             index -= number_of_rows
             if index < 0:
-                return row_group_index-1, previous_index
+                return row_group_index, previous_index
         raise ValueError("Index out of bounds")
 
     def get_data_for_row_group(self, row_group_index: int) -> pd.DataFrame:
