@@ -58,7 +58,7 @@ class ParquetDataset(torch.utils.data.Dataset):
             index)
         dataframe = self.get_data_for_row_group(row_group_index)
         sample = dataframe.iloc[index_in_row_group]
-        return torch.tensor(sample[self.feature_column], dtype=torch.float32), torch.tensor(int(sample[self.target_column]), dtype=torch.int32)
+        return torch.tensor(sample[self.feature_column], dtype=torch.float32), torch.tensor(int(sample[self.target_column]), dtype=torch.long)
 
 
 class TorchLogisticRegression(nn.Module):
