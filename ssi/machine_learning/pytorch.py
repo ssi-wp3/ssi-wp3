@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 import pyarrow.parquet as pq
 from skorch import NeuralNetClassifier
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 from .model import Model
 import pandas as pd
 import numpy as np
@@ -36,13 +36,13 @@ class ParquetDataset(torch.utils.data.Dataset):
         return self.parquet_file.num_row_groups
 
     @property
-    def label_encoder(self) -> LabelEncoder:
+    def label_encoder(self) -> OneHotEncoder:
         return self.__label_encoder
 
-    def _fit_label_encoder(self, parquet_file) -> LabelEncoder:
+    def _fit_label_encoder(self, parquet_file) -> OneHotEncoder:
         label_df = parquet_file.read(
             columns=[self.target_column]).to_pandas()
-        label_encoder = LabelEncoder()
+        label_encoder = OneHotEncoder()
         label_encoder.fit(label_df[self.target_column])
         return label_encoder
 
@@ -74,7 +74,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         feature_tensor = torch.tensor(
             sample[self.feature_column], dtype=torch.float32)
         label_tensor = torch.tensor(
-            self.label_encoder.transform([sample[self.target_column]]), dtype=torch.long)
+            self.label_encoder.transform(sample[self.target_column]), dtype=torch.long)
 
         return feature_tensor, label_tensor
 
