@@ -137,7 +137,7 @@ class TrainModelOnPeriod(TrainModelTask):
                   batch_size: int,
                   early_stopping_patience: int) -> Any:
 
-        experiment = Experiment()
+        # experiment = Experiment()
         model = TorchLogisticRegression()
 
         model = model.to(device)
@@ -174,7 +174,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
         @train_engine.on(Events.ITERATION_COMPLETED(every=log_interval))
         def log_training_loss(engine):
-            experiment.log_metric("loss", engine.state.output)
+            # experiment.log_metric("loss", engine.state.output)
             print(
                 f"Epoch[{engine.state.epoch}], Iter[{engine.state.iteration}] Loss: {engine.state.output:.2f}")
 
@@ -183,8 +183,8 @@ class TrainModelOnPeriod(TrainModelTask):
             train_evaluator.run(train_loader)
             metrics = train_evaluator.state.metrics
 
-            for metric, value in metrics.items():
-                experiment.log_metric(f"train_{metric}", value)
+            # for metric, value in metrics.items():
+            #    experiment.log_metric(f"train_{metric}", value)
             print(
                 f"Training Results - Epoch[{trainer.state.epoch}] Avg loss: {metrics['loss']:.2f}")
 
@@ -193,8 +193,8 @@ class TrainModelOnPeriod(TrainModelTask):
             val_evaluator.run(val_loader)
             metrics = val_evaluator.state.metrics
 
-            for metric, value in metrics.items():
-                experiment.log_metric(f"val_{metric}", value)
+            # for metric, value in metrics.items():
+            #    experiment.log_metric(f"val_{metric}", value)
             print(
                 f"Validation Results - Epoch[{trainer.state.epoch}] Avg loss: {metrics['loss']:.2f}")
 
