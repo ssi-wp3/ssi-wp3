@@ -4,6 +4,7 @@ import pyarrow.parquet as pq
 from skorch import NeuralNetClassifier
 from .model import Model
 import pandas as pd
+import numpy as np
 
 
 class ParquetDataset(torch.utils.data.Dataset):
@@ -56,9 +57,8 @@ class ParquetDataset(torch.utils.data.Dataset):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
             index)
         dataframe = self.get_data_for_row_group(row_group_index)
-        print(f" Read data: {dataframe.head()} ")
         sample = dataframe.iloc[index_in_row_group]
-        return torch.tensor(sample[self.feature_column], dtype=torch.float32), torch.tensor(sample[self.target_column], dtype=torch.float32)
+        return torch.tensor(sample[self.feature_column], dtype=torch.float32), torch.tensor(sample[self.target_column].astype(np.int32), dtype=torch.float32)
 
 
 class TorchLogisticRegression(nn.Module):
