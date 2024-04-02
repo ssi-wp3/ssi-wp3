@@ -43,7 +43,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         label_df = parquet_file.read(
             columns=[self.target_column]).to_pandas()
         label_encoder = OneHotEncoder()
-        label_encoder.fit(label_df[self.target_column].reshape(-1, 1))
+        label_encoder.fit(label_df[self.target_column].values.reshape(-1, 1))
         return label_encoder
 
     def number_of_rows_in_row_group(self, row_group_index: int) -> int:
