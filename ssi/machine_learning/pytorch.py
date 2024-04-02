@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 import pyarrow.parquet as pq
 from skorch import NeuralNetClassifier
+from sklearn.preprocessing import LabelEncoder
 from .model import Model
 import pandas as pd
 import numpy as np
@@ -16,6 +17,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
         self.__feature_column = feature_column
         self.__target_column = target_column
+        self.__label_encoder = self._fit_label_encoder(self.parquet_file)
 
     @property
     def parquet_file(self):
@@ -32,6 +34,17 @@ class ParquetDataset(torch.utils.data.Dataset):
     @property
     def number_of_row_groups(self) -> int:
         return self.parquet_file.num_row_groups
+
+    @property
+    def label_encoder(self) -> LabelEncoder:
+        return self.__label_encoder
+
+    def _fit_label_encoder(self, parquet_file) -> LabelEncoder:
+        label_df = parquet_file.read_table(
+            column=[self.target_column]).to_pandas()
+        label_encoder = LabelEncoder()
+        label_encoder.fit(label_df[self.target_column])
+        return label_encoder
 
     def number_of_rows_in_row_group(self, row_group_index: int) -> int:
         return self.parquet_file.metadata.row_group(row_group_index).num_rows
@@ -61,7 +74,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         feature_tensor = torch.tensor(
             sample[self.feature_column], dtype=torch.float32)
         label_tensor = torch.tensor(
-            int(sample[self.target_column]), dtype=torch.long)
+            self.label_encoder.transform(sample[self.target_column]), dtype=torch.long)
 
         print(
             f"Target column: {sample[self.target_column]}, label tensor: {label_tensor}")
