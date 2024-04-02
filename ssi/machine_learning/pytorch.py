@@ -41,7 +41,7 @@ class ParquetDataset(torch.utils.data.Dataset):
 
     def _fit_label_encoder(self, parquet_file) -> LabelEncoder:
         label_df = parquet_file.read(
-            column=[self.target_column]).to_pandas()
+            columns=[self.target_column]).to_pandas()
         label_encoder = LabelEncoder()
         label_encoder.fit(label_df[self.target_column])
         return label_encoder
