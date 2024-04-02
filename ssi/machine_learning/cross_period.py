@@ -152,8 +152,11 @@ class TrainModelOnPeriod(TrainModelTask):
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
         criterion = F.cross_entropy
 
+        data_size = len(train_dataframe)
+        training_size = int(data_size * 0.8)
+        val_size = data_size - training_size
         train_set, val_set = torch.utils.data.random_split(
-            train_dataframe, [int(len(train_dataframe) * 0.8), int(len(train_dataframe) * 0.2)])
+            train_dataframe, [training_size, val_size])
 
         train_loader = DataLoader(
             train_set, batch_size=batch_size, shuffle=True)
