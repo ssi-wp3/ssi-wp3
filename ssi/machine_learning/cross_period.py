@@ -1,15 +1,24 @@
 from typing import List, Dict, Any, Tuple
-from sklearn.pipeline import Pipeline
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..files import get_features_files_in_directory
 from ..parquet_file import ParquetFile
-from .train_model import train_model
 from .train_model_task import TrainModelTask
-from .pytorch import ParquetDataset
+from .pytorch import ParquetDataset, TorchLogisticRegression
+import torch
+import torch.optim as optim
+from torch.nn import functional as F
+from torch.utils.data import DataLoader
+from ignite.engine import create_supervised_trainer, create_supervised_evaluator, Events
+from ignite.metrics import Accuracy, Precision, Recall, Loss
+from ignite.handlers import EarlyStopping, ModelCheckpoint
+from ignite.contrib.handlers import global_step_from_engine
+from ignite.contrib.handlers.tqdm_logger import ProgressBar
+from cnvrg import Experiment
 import pandas as pd
 import pyarrow as pa
 import luigi
 import os
+import torch
 
 
 # TODO add an evaluation that trains a model on one supermarket and evaluates it on another.
@@ -22,6 +31,10 @@ class TrainModelOnPeriod(TrainModelTask):
     input_filename = luigi.PathParameter()
     period_column = luigi.Parameter()
     train_period = luigi.Parameter()
+
+    gpu_device = luigi.Parameter(default="cuda:0")
+    learning_rate = luigi.FloatParameter(default=0.001)
+    batch_size = luigi.IntParameter(default=1000)
 
     @property
     def train_from_scratch(self) -> List[FeatureExtractorType]:
@@ -69,7 +82,7 @@ class TrainModelOnPeriod(TrainModelTask):
         # dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
 
         dataframe = pa.parquet.read_table(
-            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column, self.features_column]).to_pandas()
+            input_file, columns=[self.period_column, self.receipt_text_column, self.label_column]).to_pandas()
 
         print("Adding is_train column")
         dataframe["is_train"] = dataframe[self.period_column] == self.train_period
@@ -80,7 +93,7 @@ class TrainModelOnPeriod(TrainModelTask):
             dataframe = self.get_data_for_period(input_file)
             return dataframe
 
-    def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def split_data(self, dataframe: ParquetDataset, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """ The training split is different for the period evaluation task: we train on one period and evaluate 
         on the others. Therefore we override the split_data method here. Furthermore, we would like to create a graph 
         for the whole range of periods, so we only split the data here for training and evaluate on the whole dataset.  
@@ -100,22 +113,143 @@ class TrainModelOnPeriod(TrainModelTask):
         Tuple[pd.DataFrame, pd.DataFrame]
             The training and test dataframes
         """
-        training_dataframe = dataframe[dataframe["is_train"] == True].drop_duplicates(
+        training_dataframe = dataframe[dataframe[self.period_column] == self.train_period].drop_duplicates(
+            [self.receipt_text_column, self.label_column])
+        testing_dataframe = dataframe[dataframe[self.period_column] != self.train_period].drop_duplicates(
             [self.receipt_text_column, self.label_column])
 
-        return training_dataframe, dataframe
+        with self.input().open() as input_file:
+            parquet_dataset = ParquetDataset(
+                input_file, self.features_column, self.label_column, memory_map=True)
 
-    def load_training_data(self, **kwargs) -> pd.DataFrame:
-        return self.prepare_data()
+        training_dataset = torch.utils.data.Subset(
+            parquet_dataset, training_dataframe.index)
+        testing_dataset = torch.utils.data.Subset(
+            parquet_dataset, testing_dataframe.index)
 
-    def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
+        return training_dataset, testing_dataset
+
+    def fit_model(self,
+                  train_dataframe: pd.DataFrame,
+                  device: str,
+                  learning_rate: float,
+                  num_epochs: int,
+                  batch_size: int,
+                  early_stopping_patience: int) -> Any:
+
+        experiment = Experiment()
+        model = TorchLogisticRegression()
+
+        model = model.to(device)
+        print(f"Model moved to {device}: {next(model.parameters()).is_cuda}")
+
+        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+        criterion = F.cross_entropy
+
+        train_set, val_set = torch.utils.data.random_split(
+            train_dataframe, [int(len(train_dataframe) * 0.8), int(len(train_dataframe) * 0.2)])
+
+        train_loader = DataLoader(
+            train_set, batch_size=batch_size, shuffle=True)
+
+        val_loader = DataLoader(
+            val_set, batch_size=batch_size, shuffle=True)
+
+        train_engine = create_supervised_trainer(
+            model, optimizer=optimizer, loss_fn=criterion, non_blocking=True, device=device)
+
+        # TODO pass as argument
+        val_metrics = {
+            "accuracy": Accuracy(),
+            "precision": Precision(),
+            "recall": Recall(),
+            "loss": Loss(criterion)
+        }
+        train_evaluator = create_supervised_evaluator(
+            model, metrics=val_metrics, device=device)
+        val_evaluator = create_supervised_evaluator(
+            model, metrics=val_metrics, device=device)
+
+        log_interval = 1000
+
+        @train_engine.on(Events.ITERATION_COMPLETED(every=log_interval))
+        def log_training_loss(engine):
+            experiment.log_metric("loss", engine.state.output)
+            print(
+                f"Epoch[{engine.state.epoch}], Iter[{engine.state.iteration}] Loss: {engine.state.output:.2f}")
+
+        @train_engine.on(Events.EPOCH_COMPLETED)
+        def log_training_results(trainer):
+            train_evaluator.run(train_loader)
+            metrics = train_evaluator.state.metrics
+
+            for metric, value in metrics.items():
+                experiment.log_metric(f"train_{metric}", value)
+            print(
+                f"Training Results - Epoch[{trainer.state.epoch}] Avg loss: {metrics['loss']:.2f}")
+
+        @train_engine.on(Events.EPOCH_COMPLETED)
+        def log_validation_results(trainer):
+            val_evaluator.run(val_loader)
+            metrics = val_evaluator.state.metrics
+
+            for metric, value in metrics.items():
+                experiment.log_metric(f"val_{metric}", value)
+            print(
+                f"Validation Results - Epoch[{trainer.state.epoch}] Avg loss: {metrics['loss']:.2f}")
+
+        # Score function to return current value of any metric we defined above in val_metrics
+        def score_function(engine):
+            return engine.state.metrics["accuracy"]
+
+        # Checkpoint to store n_saved best models wrt score function
+        model_directory = os.path.join(self.output_directory, "models")
+        if not os.path.exists(model_directory):
+            os.makedirs(model_directory)
+
+        model_checkpoint = ModelCheckpoint(
+            model_directory,
+            n_saved=2,
+            filename_prefix="best",
+            score_function=score_function,
+            score_name="accuracy",
+            global_step_transform=global_step_from_engine(
+                train_engine),  # helps fetch the trainer's state
+        )
+
+        # Early stopping
+        def early_stopping_score_function(engine):
+            val_loss = engine.state.metrics[f'loss']
+            return -val_loss
+
+        stopper_handler = EarlyStopping(patience=early_stopping_patience,
+                                        score_function=early_stopping_score_function,
+                                        trainer=train_engine)
+        val_evaluator.add_event_handler(Events.COMPLETED, stopper_handler)
+
+        # Save the model after every epoch of val_evaluator is completed
+        val_evaluator.add_event_handler(
+            Events.COMPLETED, model_checkpoint, {"model": model})
+
+        progress_bar = ProgressBar()
+        progress_bar.attach(
+            train_engine, output_transform=lambda x: {"loss": x})
+        train_engine.run(train_loader, max_epochs=num_epochs)
+
+        return model
+
+    def train_model(self, train_dataframe: torch.utils.data.Subset, training_predictions_file):
+        device = torch.device(
+            self.gpu_device if torch.cuda.is_available() else "cpu")
         self.model_trainer.fit(train_dataframe,
-                               train_model,
+                               self.fit_model,
                                training_predictions_file,
-                               model_type=self.model_type,
-                               feature_column=self.features_column,
-                               label_column=self.label_column,
-                               verbose=self.verbose)
+                               device=device,
+                               learning_rate=self.learning_rate,
+                               num_epochs=10,
+                               batch_size=self.batch_size,
+                               early_stopping_patience=3
+                               )
 
     def run(self):
         print(
