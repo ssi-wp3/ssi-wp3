@@ -74,7 +74,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         feature_tensor = torch.tensor(
             sample[self.feature_column], dtype=torch.float32)
         label_tensor = torch.tensor(
-            self.label_encoder.transform(sample[self.target_column]), dtype=torch.long)
+            self.label_encoder.transform([sample[self.target_column]]), dtype=torch.long)
 
         print(
             f"Target column: {sample[self.target_column]}, label tensor: {label_tensor}")
