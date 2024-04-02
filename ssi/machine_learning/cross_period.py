@@ -158,10 +158,10 @@ class TrainModelOnPeriod(TrainModelTask):
             train_dataframe, [training_size, val_size])
 
         train_loader = DataLoader(
-            train_set, batch_size=batch_size, shuffle=True, prefetch_factor=2, pin_memory=True, num_workers=2)
+            train_set, batch_size=batch_size, shuffle=True, prefetch_factor=2, pin_memory=True, num_workers=1)
 
         val_loader = DataLoader(
-            val_set, batch_size=batch_size, shuffle=True, prefetch_factor=2, pin_memory=True, num_workers=2)
+            val_set, batch_size=batch_size, shuffle=True, prefetch_factor=2, pin_memory=True, num_workers=1)
 
         train_engine = create_supervised_trainer(
             model, optimizer=optimizer, loss_fn=criterion, non_blocking=True, device=device)
