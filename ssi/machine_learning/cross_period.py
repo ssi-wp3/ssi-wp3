@@ -115,12 +115,16 @@ class TrainModelOnPeriod(TrainModelTask):
         """
         training_dataframe = dataframe[dataframe[self.period_column] == self.train_period].drop_duplicates(
             [self.receipt_text_column, self.label_column])
+        self.number_of_categories = training_dataframe[self.label_column].nunique(
+        )
+
         testing_dataframe = dataframe[dataframe[self.period_column] != self.train_period].drop_duplicates(
             [self.receipt_text_column, self.label_column])
 
         with self.input().open() as input_file:
             parquet_dataset = ParquetDataset(
                 input_file, self.features_column, self.label_column, memory_map=True)
+            self.feature_vector_size = parquet_dataset[0][0].shape[0]
 
         training_dataset = torch.utils.data.Subset(
             parquet_dataset, training_dataframe.index)
@@ -138,7 +142,9 @@ class TrainModelOnPeriod(TrainModelTask):
                   early_stopping_patience: int) -> Any:
 
         # experiment = Experiment()
-        model = TorchLogisticRegression()
+
+        model = TorchLogisticRegression(
+            input_dim=self.feature_vector_size, output_dim=self.number_of_categories)
 
         model = model.to(device)
         print(f"Model moved to {device}: {next(model.parameters()).is_cuda}")
