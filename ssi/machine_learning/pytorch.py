@@ -64,7 +64,7 @@ class ParquetDataset(torch.utils.data.Dataset):
             int(sample[self.target_column]), dtype=torch.long)
 
         print(
-            f"Feature tensor: {feature_tensor}, Label tensor: {label_tensor}")
+            f"Feature tensor: {feature_tensor.shape}, Label tensor: {label_tensor}")
         return feature_tensor, label_tensor
 
 
