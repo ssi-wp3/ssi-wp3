@@ -121,10 +121,9 @@ class TrainModelOnPeriod(TrainModelTask):
         testing_dataframe = dataframe[dataframe[self.period_column] != self.train_period].drop_duplicates(
             [self.receipt_text_column, self.label_column])
 
-        with self.input().open() as input_file:
-            parquet_dataset = ParquetDataset(
-                input_file, self.features_column, self.label_column, memory_map=True)
-            self.feature_vector_size = parquet_dataset[0][0].shape[0]
+        parquet_dataset = ParquetDataset(
+            self.input().open(), self.features_column, self.label_column, memory_map=True)
+        self.feature_vector_size = parquet_dataset[0][0].shape[0]
 
         training_dataset = torch.utils.data.Subset(
             parquet_dataset, training_dataframe.index)
