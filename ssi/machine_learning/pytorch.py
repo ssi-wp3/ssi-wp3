@@ -11,14 +11,19 @@ import pandas as pd
 import numpy as np
 
 
-class ParquetDataset(torch.utils.data.IterableDataset):
+class ParquetDataset(torch.utils.data.Dataset):
     """ This class is a PyTorch Dataset specifically designed to read Parquet files.
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
 
-    def __init__(self, filename: str, feature_column: str, target_column: str, batch_size: int, filters: List[Tuple[str]],  memory_map: bool = False):
-        # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
+    def __init__(self, filename: str,
+                 feature_column: str,
+                 target_column: str,
+                 batch_size: int,
+                 filters: List[Tuple[str]],
+                 memory_map: bool = False):
         super().__init__()
+        # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
         self.__parquet_file = pq.read_table(
             filename,
             columns=[feature_column, target_column],
@@ -27,10 +32,6 @@ class ParquetDataset(torch.utils.data.IterableDataset):
         self.__feature_column = feature_column
         self.__target_column = target_column
         self.__label_encoder = self._fit_label_encoder(self.parquet_file)
-
-        self.batches = Queue()
-        [self.batches.put(batch)
-         for batch in self.parquet_file.to_batches(batch_size)]
 
     @property
     def parquet_file(self):
@@ -83,15 +84,11 @@ class ParquetDataset(torch.utils.data.IterableDataset):
 
         return feature_tensor, one_hot_label
 
-    def __iter__(self):
-        while True:
-            if self.batches.empty():
-                self.batches.close()
-                break
+    def __getitem__(self, idx):
+        pass
 
-            batch = self.batches.get().to_table().to_pandas()
-            batch.update(self.process_batch(batch))
-            yield batch
+    def __getitems__(self, idx):
+        pass
 
 
 class TorchLogisticRegression(nn.Module):
