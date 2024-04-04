@@ -54,6 +54,10 @@ class ParquetDataset(torch.utils.data.IterableDataset):
         return 768
 
     @property
+    def number_of_classes(self) -> int:
+        return len(self.label_encoder.classes_)
+
+    @property
     def label_encoder(self) -> LabelEncoder:
         return self.__label_encoder
 

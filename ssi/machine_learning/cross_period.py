@@ -138,6 +138,7 @@ class TrainModelOnPeriod(TrainModelTask):
                                               (self.period_column, "=", self.train_period)],
                                           memory_map=True)
         self.feature_vector_size = training_dataset.feature_vector_size
+        self.number_of_categories = training_dataset.number_of_classes
 
         testing_dataset = ParquetDataset(self.input().open(),
                                          self.features_column,
