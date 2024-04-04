@@ -80,7 +80,6 @@ class ParquetDataset(torch.utils.data.Dataset):
         one_hot_label = F.one_hot(label_tensor, num_classes=len(
             self.label_encoder.classes_)).float()
 
-        print(f"One hot label: {one_hot_label}")
         return feature_tensor, one_hot_label
 
 
