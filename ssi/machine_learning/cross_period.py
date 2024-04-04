@@ -113,23 +113,39 @@ class TrainModelOnPeriod(TrainModelTask):
         Tuple[pd.DataFrame, pd.DataFrame]
             The training and test dataframes
         """
-        training_dataframe = dataframe[dataframe[self.period_column] == self.train_period].drop_duplicates(
-            [self.receipt_text_column, self.label_column])
-        self.number_of_categories = training_dataframe[self.label_column].nunique(
-        )
+        # training_dataframe = dataframe[dataframe[self.period_column] == self.train_period].drop_duplicates(
+        #     [self.receipt_text_column, self.label_column])
+        # self.number_of_categories = training_dataframe[self.label_column].nunique(
+        # )
 
-        testing_dataframe = dataframe[dataframe[self.period_column] != self.train_period].drop_duplicates(
-            [self.receipt_text_column, self.label_column])
+        # testing_dataframe = dataframe[dataframe[self.period_column] != self.train_period].drop_duplicates(
+        #     [self.receipt_text_column, self.label_column])
 
-        parquet_dataset = ParquetDataset(
-            self.input().open(), self.features_column, self.label_column, batch_size=self.batch_size, memory_map=True)
-        self.feature_vector_size = parquet_dataset.feature_vector_size
-        print(f"Feature vector size: {self.feature_vector_size}")
+        # parquet_dataset = ParquetDataset(
+        #     self.input().open(), self.features_column, self.label_column, batch_size=self.batch_size, memory_map=True)
+        # self.feature_vector_size = parquet_dataset.feature_vector_size
+        # print(f"Feature vector size: {self.feature_vector_size}")
 
-        training_dataset = torch.utils.data.Subset(
-            parquet_dataset, training_dataframe.index)
-        testing_dataset = torch.utils.data.Subset(
-            parquet_dataset, testing_dataframe.index)
+        # training_dataset = torch.utils.data.Subset(
+        #     parquet_dataset, training_dataframe.index)
+        # testing_dataset = torch.utils.data.Subset(
+        #     parquet_dataset, testing_dataframe.index)
+
+        training_dataset = ParquetDataset(self.input().open(),
+                                          self.features_column,
+                                          self.label_column,
+                                          batch_size=self.batch_size,
+                                          filters=[
+                                              (self.period_column, "=", self.train_period)],
+                                          memory_map=True)
+
+        testing_dataset = ParquetDataset(self.input().open(),
+                                         self.features_column,
+                                         self.label_column,
+                                         batch_size=self.batch_size,
+                                         filters=[
+                                             (self.period_column, "!=", self.train_period)],
+                                         memory_map=True)
 
         return training_dataset, testing_dataset
 
