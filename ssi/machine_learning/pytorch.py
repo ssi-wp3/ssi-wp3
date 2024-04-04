@@ -1,28 +1,33 @@
 import torch.nn as nn
 import torch
-import pyarrow.parquet as pq
+import pyarrow.dataset as ds
 from skorch import NeuralNetClassifier
 from sklearn.preprocessing import LabelEncoder
 from .model import Model
 from torch.nn import functional as F
+from torch.multiprocessing import Queue
 import pandas as pd
 import numpy as np
 
 
-class ParquetDataset(torch.utils.data.Dataset):
+class ParquetDataset(torch.utils.data.IterableDataset):
     """ This class is a PyTorch Dataset specifically designed to read Parquet files.
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
 
     def __init__(self, filename: str, feature_column: str, target_column: str, memory_map: bool = False):
-        self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
+        # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
+        self.__dataset = ds.dataset(filename)
         self.__feature_column = feature_column
         self.__target_column = target_column
-        self.__label_encoder = self._fit_label_encoder(self.parquet_file)
+        self.__label_encoder = self._fit_label_encoder(self.dataset)
+
+        self.batches = Queue()
+        [self.batches.put(batch) for batch in self.dataset.to_batches()]
 
     @property
-    def parquet_file(self):
-        return self.__parquet_file
+    def dataset(self):
+        return self.__dataset
 
     @property
     def feature_column(self) -> str:
@@ -33,54 +38,39 @@ class ParquetDataset(torch.utils.data.Dataset):
         return self.__target_column
 
     @property
-    def number_of_row_groups(self) -> int:
-        return self.parquet_file.num_row_groups
-
-    @property
     def label_encoder(self) -> LabelEncoder:
         return self.__label_encoder
 
-    def _fit_label_encoder(self, parquet_file) -> LabelEncoder:
-        label_df = parquet_file.read(
+    def _fit_label_encoder(self, dataset) -> LabelEncoder:
+        label_df = dataset.to_table(
             columns=[self.target_column]).to_pandas()
         label_encoder = LabelEncoder()
         label_encoder.fit(label_df[self.target_column])
         return label_encoder
 
-    def number_of_rows_in_row_group(self, row_group_index: int) -> int:
-        return self.parquet_file.metadata.row_group(row_group_index).num_rows
-
-    def get_row_group_for_index(self, index: int) -> int:
-        previous_index = 0
-        for row_group_index in range(self.number_of_row_groups):
-            number_of_rows = self.number_of_rows_in_row_group(row_group_index)
-            previous_index = index
-            index -= number_of_rows
-            if index < 0:
-                return row_group_index, previous_index
-        raise ValueError("Index out of bounds")
-
-    def get_data_for_row_group(self, row_group_index: int) -> pd.DataFrame:
-        row_group = self.parquet_file.read_row_group(row_group_index)
-        return row_group.to_pandas()
-
     def __len__(self):
-        return self.parquet_file.metadata.num_rows
+        return self.dataset.count_rows()
 
-    def __getitem__(self, index):
-        row_group_index, index_in_row_group = self.get_row_group_for_index(
-            index)
-        dataframe = self.get_data_for_row_group(row_group_index)
-        sample = dataframe.iloc[index_in_row_group]
+    def process_batch(self, batch: pd.DataFrame):
         feature_tensor = torch.tensor(
-            sample[self.feature_column], dtype=torch.float32)
+            batch[self.feature_column], dtype=torch.float32)
 
         label_tensor = torch.tensor(
-            self.label_encoder.transform([sample[self.target_column]]), dtype=torch.long)
+            self.label_encoder.transform([batch[self.target_column]]), dtype=torch.long)
         one_hot_label = F.one_hot(label_tensor, num_classes=len(
             self.label_encoder.classes_)).float()
 
         return feature_tensor, one_hot_label
+
+    def __iter__(self):
+        while True:
+            if self.batches.empty() == True:
+                self.batches.close()
+                break
+
+            batch = self.batches.get().to_pydict()
+            batch.update(self.process_batch(batch))
+            yield batch
 
 
 class TorchLogisticRegression(nn.Module):
