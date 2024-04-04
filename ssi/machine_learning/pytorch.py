@@ -26,7 +26,7 @@ class ParquetDataset(torch.utils.data.IterableDataset):
 
         self.batches = Queue()
         [self.batches.put(batch)
-         for batch in self.parquet_file.to_batches(max_chunk_size=batch_size)]
+         for batch in self.parquet_file.to_batches(batch_size)]
 
     @property
     def parquet_file(self):
