@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-import pyarrow.dataset as ds
+import pyarrow.parquet as pq
 from skorch import NeuralNetClassifier
 from sklearn.preprocessing import LabelEncoder
 from .model import Model
@@ -15,19 +15,19 @@ class ParquetDataset(torch.utils.data.IterableDataset):
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
 
-    def __init__(self, filename: str, feature_column: str, target_column: str, memory_map: bool = False):
-        # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
-        self.__dataset = ds.dataset(filename)
+    def __init__(self, filename: str, feature_column: str, target_column: str, batch_size: int,  memory_map: bool = False):
+        self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
         self.__feature_column = feature_column
         self.__target_column = target_column
-        self.__label_encoder = self._fit_label_encoder(self.dataset)
+        self.__label_encoder = self._fit_label_encoder(self.parquet_file)
 
         self.batches = Queue()
-        [self.batches.put(batch) for batch in self.dataset.to_batches()]
+        [self.batches.put(batch)
+         for batch in self.parquet_file.iter_batches(batch_size=batch_size)]
 
     @property
-    def dataset(self):
-        return self.__dataset
+    def parquet_file(self):
+        return self.__parquet_file
 
     @property
     def feature_column(self) -> str:
@@ -49,7 +49,7 @@ class ParquetDataset(torch.utils.data.IterableDataset):
         return label_encoder
 
     def __len__(self):
-        return self.dataset.count_rows()
+        return self.parquet_file.count_rows()
 
     def process_batch(self, batch: pd.DataFrame):
         feature_tensor = torch.tensor(
@@ -68,7 +68,7 @@ class ParquetDataset(torch.utils.data.IterableDataset):
                 self.batches.close()
                 break
 
-            batch = self.batches.get().to_pydict()
+            batch = self.batches.get().to_table().to_pandas()
             batch.update(self.process_batch(batch))
             yield batch
 
