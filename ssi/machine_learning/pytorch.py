@@ -85,7 +85,7 @@ class ParquetDataset(torch.utils.data.IterableDataset):
 
     def __iter__(self):
         while True:
-            if self.batches.empty() == True:
+            if self.batches.empty():
                 self.batches.close()
                 break
 
