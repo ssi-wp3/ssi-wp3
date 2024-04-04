@@ -23,6 +23,7 @@ class ParquetDataset(torch.utils.data.Dataset):
                  filters: List[Tuple[str]],
                  memory_map: bool = False):
         super().__init__()
+        # TODO revert back to ParquetFile
         # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
         self.__parquet_file = pq.read_table(
             filename,
@@ -51,6 +52,7 @@ class ParquetDataset(torch.utils.data.Dataset):
 
     @property
     def feature_vector_size(self) -> int:
+        # TODO read from file. This is hardcoded for now
         # feature_df = self.parquet_file.take(
         #    0).to_pandas()
 
@@ -95,6 +97,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         return self.parquet_file.metadata.num_rows
 
     def __getitem__(self, index):
+        # Cache the row group
         row_group_index, index_in_row_group = self.get_row_group_for_index(
             index)
         dataframe = self.get_data_for_row_group(row_group_index)
@@ -102,6 +105,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         return self.process_sample(sample)
 
     def __getitems__(self, idx):
+        # TODO sort idx to make maximum use of cache
         pass
 
     def process_sample(self, sample: pd.DataFrame):
