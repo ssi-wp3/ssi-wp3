@@ -142,6 +142,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
         # experiment = Experiment()
 
+        print(f"Training model on {device} with learning rate {learning_rate}, num_epochs {num_epochs}, batch_size {batch_size}, number of epochs {num_epochs}, and early stopping patience {early_stopping_patience}")
         model = TorchLogisticRegression(
             input_dim=self.feature_vector_size, output_dim=self.number_of_categories)
 
