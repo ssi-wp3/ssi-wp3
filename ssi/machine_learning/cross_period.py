@@ -36,6 +36,9 @@ class TrainModelOnPeriod(TrainModelTask):
     learning_rate = luigi.FloatParameter(default=0.001)
     batch_size = luigi.IntParameter(default=1000)
 
+    number_of_workers = luigi.IntParameter(default=2)
+    prefetch_factor = luigi.IntParameter(default=2)
+
     @property
     def train_from_scratch(self) -> List[FeatureExtractorType]:
         """ Return the feature extractors that require training from scratch.
@@ -178,10 +181,10 @@ class TrainModelOnPeriod(TrainModelTask):
 
         print("Creating DataLoaders")
         train_loader = DataLoader(
-            train_set, shuffle=True, prefetch_factor=2, pin_memory=True, num_workers=1)
+            train_set, shuffle=True, prefetch_factor=self.prefetch_factor, pin_memory=True, num_workers=self.number_of_workers)
 
         val_loader = DataLoader(
-            val_set, prefetch_factor=2, pin_memory=True, num_workers=1)
+            val_set, prefetch_factor=self.prefetch_factor, pin_memory=True, num_workers=self.number_of_workers)
 
         print("Creating trainers and evaluators")
         train_engine = create_supervised_trainer(
