@@ -38,6 +38,13 @@ class ParquetDataset(torch.utils.data.IterableDataset):
         return self.__target_column
 
     @property
+    def feature_vector_size(self) -> int:
+        feature_column_index = self.parquet_file.schema.names.index(
+            self.feature_column)
+
+        return self.parquet_file.schema.column(feature_column_index).length
+
+    @property
     def label_encoder(self) -> LabelEncoder:
         return self.__label_encoder
 

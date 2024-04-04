@@ -123,7 +123,8 @@ class TrainModelOnPeriod(TrainModelTask):
 
         parquet_dataset = ParquetDataset(
             self.input().open(), self.features_column, self.label_column, batch_size=self.batch_size, memory_map=True)
-        self.feature_vector_size = parquet_dataset[0][0].shape[0]
+        self.feature_vector_size = parquet_dataset.feature_vector_size
+        print(f"Feature vector size: {self.feature_vector_size}")
 
         training_dataset = torch.utils.data.Subset(
             parquet_dataset, training_dataframe.index)
