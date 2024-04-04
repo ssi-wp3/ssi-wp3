@@ -42,8 +42,8 @@ class ParquetDataset(torch.utils.data.IterableDataset):
 
     @property
     def feature_vector_size(self) -> int:
-        feature_df = self.parquet_file.read_row_group(
-            0, columns=[self.feature_column]).to_pandas()
+        feature_df = self.parquet_file.take(
+            0).to_pandas()
 
         return len(feature_df[self.feature_column].iloc[0])
 
@@ -52,7 +52,7 @@ class ParquetDataset(torch.utils.data.IterableDataset):
         return self.__label_encoder
 
     def _fit_label_encoder(self, parquet_file) -> LabelEncoder:
-        label_df = parquet_file.read(
+        label_df = parquet_file.select(
             columns=[self.target_column]).to_pandas()
         label_encoder = LabelEncoder()
         label_encoder.fit(label_df[self.target_column])
