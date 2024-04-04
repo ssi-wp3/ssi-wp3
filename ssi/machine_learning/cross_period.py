@@ -178,7 +178,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
         print("Creating DataLoaders")
         train_loader = DataLoader(
-            train_set, prefetch_factor=2, pin_memory=True, num_workers=1)
+            train_set, shuffle=True, prefetch_factor=2, pin_memory=True, num_workers=1)
 
         val_loader = DataLoader(
             val_set, prefetch_factor=2, pin_memory=True, num_workers=1)
