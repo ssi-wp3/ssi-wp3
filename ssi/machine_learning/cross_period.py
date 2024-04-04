@@ -158,12 +158,14 @@ class TrainModelOnPeriod(TrainModelTask):
         train_set, val_set = torch.utils.data.random_split(
             train_dataframe, [training_size, val_size])
 
+        print("Creating DataLoaders")
         train_loader = DataLoader(
             train_set, batch_size=batch_size, shuffle=True, prefetch_factor=2, pin_memory=True, num_workers=1)
 
         val_loader = DataLoader(
             val_set, batch_size=batch_size, shuffle=True, prefetch_factor=2, pin_memory=True, num_workers=1)
 
+        print("Creating trainers and evaluators")
         train_engine = create_supervised_trainer(
             model, optimizer=optimizer, loss_fn=criterion, non_blocking=True, device=device)
 
