@@ -240,6 +240,7 @@ class TrainModelOnPeriod(TrainModelTask):
         val_evaluator.add_event_handler(
             Events.COMPLETED, model_checkpoint, {"model": model})
 
+        print("Training model")
         progress_bar = ProgressBar()
         progress_bar.attach(
             train_engine, output_transform=lambda x: {"loss": x})
