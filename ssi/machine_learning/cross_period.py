@@ -178,10 +178,10 @@ class TrainModelOnPeriod(TrainModelTask):
 
         print("Creating DataLoaders")
         train_loader = DataLoader(
-            train_set, batch_size=batch_size, prefetch_factor=2, pin_memory=True, num_workers=1)
+            train_set, prefetch_factor=2, pin_memory=True, num_workers=1)
 
         val_loader = DataLoader(
-            val_set, batch_size=batch_size, prefetch_factor=2, pin_memory=True, num_workers=1)
+            val_set, prefetch_factor=2, pin_memory=True, num_workers=1)
 
         print("Creating trainers and evaluators")
         train_engine = create_supervised_trainer(
