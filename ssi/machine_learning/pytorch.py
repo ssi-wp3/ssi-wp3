@@ -41,7 +41,7 @@ class ParquetDataset(torch.utils.data.IterableDataset):
     def feature_vector_size(self) -> int:
         print("Column names:", self.parquet_file.schema.names)
         feature_column_index = self.parquet_file.schema.names.index(
-            self.feature_column)
+            "element")
 
         return self.parquet_file.schema.column(feature_column_index).length
 
