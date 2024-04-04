@@ -7,7 +7,6 @@ from .pytorch import ParquetDataset, TorchLogisticRegression
 import torch
 import torch.optim as optim
 from torch.nn import functional as F
-import torch.nn as nn
 from torch.utils.data import DataLoader
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator, Events
 from ignite.metrics import Accuracy, Precision, Recall, Loss
@@ -150,7 +149,7 @@ class TrainModelOnPeriod(TrainModelTask):
         print(f"Model moved to {device}: {next(model.parameters()).is_cuda}")
 
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-        criterion = nn.CrossEntropyLoss()  # F.cross_entropy
+        criterion = F.cross_entropy
 
         data_size = len(train_dataframe)
         training_size = int(data_size * 0.8)
