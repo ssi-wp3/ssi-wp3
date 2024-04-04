@@ -279,7 +279,7 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
     label_column = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
-    batch_size = luigi.IntParameter(default=1000)
+    batch_size = luigi.IntParameter(default=30000)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
     period_columns = luigi.ListParameter()
