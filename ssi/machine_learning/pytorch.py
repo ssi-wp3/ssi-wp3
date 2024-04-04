@@ -1,3 +1,4 @@
+from typing import List, Tuple
 import torch.nn as nn
 import torch
 import pyarrow.parquet as pq
@@ -15,15 +16,17 @@ class ParquetDataset(torch.utils.data.IterableDataset):
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
 
-    def __init__(self, filename: str, feature_column: str, target_column: str, batch_size: int,  memory_map: bool = False):
-        self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
+    def __init__(self, filename: str, feature_column: str, target_column: str, batch_size: int, filters: List[Tuple[str]],  memory_map: bool = False):
+        # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
+        self.__parquet_file = pq.read_table(
+            filename, memory_map=memory_map, filters=filters)
         self.__feature_column = feature_column
         self.__target_column = target_column
         self.__label_encoder = self._fit_label_encoder(self.parquet_file)
 
         self.batches = Queue()
         [self.batches.put(batch)
-         for batch in self.parquet_file.iter_batches(batch_size=batch_size)]
+         for batch in self.parquet_file.to_batches(max_chunk_size=batch_size)]
 
     @property
     def parquet_file(self):
@@ -56,7 +59,7 @@ class ParquetDataset(torch.utils.data.IterableDataset):
         return label_encoder
 
     def __len__(self):
-        return self.parquet_file.count_rows()
+        return self.parquet_file.num_rows
 
     def process_batch(self, batch: pd.DataFrame):
         feature_tensor = torch.tensor(
