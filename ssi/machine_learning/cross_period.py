@@ -265,9 +265,7 @@ class TrainModelOnPeriod(TrainModelTask):
         progress_bar.attach(
             train_engine, output_transform=lambda x: {"loss": x})
 
-        train_engine.run(map(lambda x: x, train_loader),
-                         max_epochs=num_epochs, epoch_length=2)
-        # train_engine.run(train_loader, max_epochs=num_epochs)
+        train_engine.run(train_loader, max_epochs=num_epochs)
 
         return model
 
