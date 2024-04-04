@@ -19,7 +19,10 @@ class ParquetDataset(torch.utils.data.IterableDataset):
     def __init__(self, filename: str, feature_column: str, target_column: str, batch_size: int, filters: List[Tuple[str]],  memory_map: bool = False):
         # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
         self.__parquet_file = pq.read_table(
-            filename, memory_map=memory_map, filters=filters)
+            filename,
+            columns=[feature_column, target_column],
+            memory_map=memory_map,
+            filters=filters)
         self.__feature_column = feature_column
         self.__target_column = target_column
         self.__label_encoder = self._fit_label_encoder(self.parquet_file)
@@ -42,10 +45,13 @@ class ParquetDataset(torch.utils.data.IterableDataset):
 
     @property
     def feature_vector_size(self) -> int:
-        feature_df = self.parquet_file.take(
-            0).to_pandas()
+        # feature_df = self.parquet_file.take(
+        #    0).to_pandas()
 
-        return len(feature_df[self.feature_column].iloc[0])
+        # return len(feature_df[self.feature_column].iloc[0])
+
+        # TODO hardcoded this for now
+        return 768
 
     @property
     def label_encoder(self) -> LabelEncoder:
