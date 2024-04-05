@@ -181,10 +181,21 @@ class TrainModelOnPeriod(TrainModelTask):
 
         print("Creating DataLoaders")
         train_loader = DataLoader(
-            train_set, shuffle=False, prefetch_factor=self.prefetch_factor, pin_memory=True, num_workers=self.number_of_workers)
+            train_set,
+            batch_size=batch_size,
+            shuffle=False,
+            prefetch_factor=self.prefetch_factor,
+            pin_memory=True,
+            num_workers=self.number_of_workers
+        )
 
         val_loader = DataLoader(
-            val_set, prefetch_factor=self.prefetch_factor, pin_memory=True, num_workers=self.number_of_workers)
+            val_set,
+            batch_size=batch_size,
+            prefetch_factor=self.prefetch_factor,
+            pin_memory=True,
+            num_workers=self.number_of_workers
+        )
 
         print("Creating trainers and evaluators")
 
