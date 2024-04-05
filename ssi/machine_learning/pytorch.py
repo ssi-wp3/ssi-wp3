@@ -254,7 +254,7 @@ class ParquetDataset(torch.utils.data.Dataset):
             self.label_encoder.classes_)).float()
 
         print("Label tensor: ", one_hot_label)
-        return feature_tensor, one_hot_label
+        return feature_tensor, one_hot_label.to("cuda:0")
 
     def __getitem__(self, index):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
