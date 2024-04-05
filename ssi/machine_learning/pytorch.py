@@ -121,14 +121,9 @@ class ParquetDataset(torch.utils.data.Dataset):
         int
             The size of the feature vector.
         """
-        # TODO read from file. This is hardcoded for now
-        # feature_df = self.parquet_file.take(
-        #    0).to_pandas()
-
-        # return len(feature_df[self.feature_column].iloc[0])
-
-        # TODO hardcoded this for now
-        return 768
+        feature_df = self.parquet_file.read_row_group(0,
+                                                      columns=[self.feature_column]).to_pandas()
+        return len(feature_df[self.feature_column].iloc[0])
 
     @property
     def number_of_classes(self) -> int:
