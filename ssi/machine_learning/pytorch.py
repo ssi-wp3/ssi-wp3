@@ -80,7 +80,33 @@ class ParquetDataset(torch.utils.data.Dataset):
         return self.__target_column
 
     @property
+    def label_encoder(self) -> LabelEncoder:
+        """ Returns the label encoder used to encode the target column.
+        The labels are string values and need to be converted into integer
+         labels that can be used by the machine learning algorithms. We use 
+        the LabelEncoder class from scikit-learn to perform this encoding.
+
+        Labels are encoded when the ParquetDataset is created.
+
+        Returns
+        -------
+        LabelEncoder
+            The label encoder used to encode the target column.
+        """
+        return self.__label_encoder
+
+    @property
     def feature_vector_size(self) -> int:
+        """ Returns the size of the feature vector. The size of the feature vector
+        is determined by the length of the first feature vector in the feature
+        vector column in the Parquet file. We assume that all feature vectors in
+        the ParquetFile have the same length.
+
+        Returns
+        -------
+        int
+            The size of the feature vector.
+        """
         # TODO read from file. This is hardcoded for now
         # feature_df = self.parquet_file.take(
         #    0).to_pandas()
@@ -92,11 +118,16 @@ class ParquetDataset(torch.utils.data.Dataset):
 
     @property
     def number_of_classes(self) -> int:
-        return len(self.label_encoder.classes_)
+        """ Returns the number of classes in the target column.
+        The number of classes is determined by the number of 
+        unique classes determined by the LabelEncoder.
 
-    @property
-    def label_encoder(self) -> LabelEncoder:
-        return self.__label_encoder
+        Returns
+        -------
+        int
+            The number of classes in the target column.
+        """
+        return len(self.label_encoder.classes_)
 
     def _fit_label_encoder(self, parquet_file) -> LabelEncoder:
         label_df = parquet_file.select(
