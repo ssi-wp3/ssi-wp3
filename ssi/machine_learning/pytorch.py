@@ -288,7 +288,6 @@ class TorchLogisticRegression(nn.Module):
 
     def forward(self, x):
         prediction = self.linear(x)
-        print("Prediction: ", prediction)
         return prediction
 
 
