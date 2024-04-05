@@ -269,6 +269,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         # Get the sort order of the idx array
         # In order retrieval of the data will be more efficient because we can use
         # the cache of the row group
+        indices = np.array(indices)
         sorting_indices = np.argsort(indices)
 
         print("Indices: ", indices)
