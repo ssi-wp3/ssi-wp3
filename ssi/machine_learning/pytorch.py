@@ -15,6 +15,7 @@ class ParquetDataset(torch.utils.data.Dataset):
     """ This class is a PyTorch Dataset specifically designed to read Parquet files.
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
+    # TODO class if not thread safe yet
 
     def __init__(self, filename: str,
                  feature_column: str,
@@ -218,7 +219,6 @@ class ParquetDataset(torch.utils.data.Dataset):
             The data for the row group.
         """
         if not self.__current_row_group or row_group_index != self.current_row_group_index:
-            print("Reading row group: ", row_group_index)
             self.current_row_group_index = row_group_index
             row_group = self.parquet_file.read_row_group(
                 self.current_row_group_index)
@@ -253,6 +253,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         one_hot_label = F.one_hot(label_tensor, num_classes=len(
             self.label_encoder.classes_)).float()
 
+        print("Label tensor: ", one_hot_label)
         return feature_tensor, one_hot_label
 
     def __getitem__(self, index):
@@ -268,10 +269,6 @@ class ParquetDataset(torch.utils.data.Dataset):
         # the cache of the row group
         indices = np.array(indices)
         sorting_indices = np.argsort(indices)
-
-        print("Indices: ", indices)
-        print("Sorting indices: ", sorting_indices)
-
         # Create a dictionary to map the original index to the sorted index
         sort_dict = {original_index: sorted_index
                      for original_index, sorted_index in zip(indices, sorting_indices)}
