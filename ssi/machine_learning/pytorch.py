@@ -73,6 +73,13 @@ class ParquetDataset(torch.utils.data.Dataset):
 
     @property
     def feature_column(self) -> str:
+        """ Returns the name of the feature column in the Parquet file.
+
+        Returns
+        -------
+        str
+            The name of the feature column in the Parquet file.
+        """
         return self.__feature_column
 
     @property
@@ -137,6 +144,19 @@ class ParquetDataset(torch.utils.data.Dataset):
         return label_encoder
 
     def number_of_rows_in_row_group(self, row_group_index: int) -> int:
+        """ Get the number of rows in a row group. The number of rows 
+        in a row group is determined from the metadata of the Parquet file.
+
+        Parameters
+        ----------
+        row_group_index : int
+            The index of the row group to get the number of rows for.
+
+        Returns
+        -------
+        int
+            The number of rows in the row group.
+        """
         return self.parquet_file.metadata.row_group(row_group_index).num_rows
 
     def get_row_group_for_index(self, index: int) -> Tuple[int, int]:
