@@ -191,7 +191,22 @@ class ParquetDataset(torch.utils.data.Dataset):
     def __len__(self):
         return self.parquet_file.metadata.num_rows
 
-    def process_sample(self, sample: pd.DataFrame):
+    def process_sample(self, sample: pd.DataFrame) -> Tuple[torch.Tensor, torch.Tensor]:
+        """ Process a sample of rows from the Parquet file. The process_sample method
+        takes the feature_column and the label_column from the sample and converts them
+        into PyTorch tensors. The feature_column is converted into a PyTorch tensor of
+        type float32. The label_column is one-hot encoded. 
+
+        Parameters
+        ----------
+        sample : pd.DataFrame
+            The sample to process.
+
+        Returns
+        -------
+        Tuple[torch.Tensor, torch.Tensor]
+            A tuple containing the feature tensor and the one-hot encoded label tensor.
+        """
         feature_tensor = torch.tensor(
             sample[self.feature_column], dtype=torch.float32)
 
