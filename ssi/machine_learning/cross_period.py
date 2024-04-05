@@ -223,7 +223,7 @@ class TrainModelOnPeriod(TrainModelTask):
             "accuracy": Accuracy(),
             "precision": Precision(),
             "recall": Recall(),
-            "loss": Loss(loss_function)
+            "loss": Loss(criterion)
         }
         train_evaluator = create_supervised_evaluator(
             model, metrics=val_metrics, device=device)
