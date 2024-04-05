@@ -215,7 +215,7 @@ class TrainModelOnPeriod(TrainModelTask):
             # loss_fn=criterion,
             loss_fn=loss_function,
             device=device,
-            output_transform=output_transform
+            # output_transform=output_transform
         )
 
         # TODO pass as argument
