@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from bisect import bisect_right
 import torch.nn as nn
 import torch
 import pyarrow.parquet as pq
@@ -6,7 +7,6 @@ from skorch import NeuralNetClassifier
 from sklearn.preprocessing import LabelEncoder
 from .model import Model
 from torch.nn import functional as F
-from torch.multiprocessing import Queue
 import pandas as pd
 import numpy as np
 
@@ -35,6 +35,18 @@ class ParquetDataset(torch.utils.data.Dataset):
         self.__label_encoder = self._fit_label_encoder(self.parquet_file)
         self.__current_row_group_index = 0
         self.__current_row_group = None
+        self.__cumulative_row_index = None
+
+    @property
+    def cumulative_row_index(self) -> List[int]:
+        if not self.__cumulative_row_index:
+            self.__cumulative_row_index = [0]
+            for row_group_index in range(self.number_of_row_groups):
+                number_of_rows = self.number_of_rows_in_row_group(
+                    row_group_index)
+                self.__cumulative_row_index.append(
+                    self.__cumulative_row_index[-1] + number_of_rows)
+        return self.__cumulative_row_index
 
     @property
     def parquet_file(self):
@@ -97,15 +109,33 @@ class ParquetDataset(torch.utils.data.Dataset):
     def number_of_rows_in_row_group(self, row_group_index: int) -> int:
         return self.parquet_file.metadata.row_group(row_group_index).num_rows
 
-    def get_row_group_for_index(self, index: int) -> int:
-        previous_index = 0
-        for row_group_index in range(self.number_of_row_groups):
-            number_of_rows = self.number_of_rows_in_row_group(row_group_index)
-            previous_index = index
-            index -= number_of_rows
-            if index < 0:
-                return row_group_index, previous_index
-        raise ValueError("Index out of bounds")
+    def get_row_group_for_index(self, index: int) -> Tuple[int, int]:
+        """ Get the row group index and the index within the row group for a given index.
+        To get the row group index, we first create a cumulative row index list in the 
+        cumulative_row_index property. This list is created only once and then cached.
+        After that, we use a binary search to find the row group index for a given index.
+        The binary search is performed by using the bisect_right function from the bisect module.
+        The bisect_right function returns the row group index for the given index. The index within 
+        the row group is calculated by subtracting the cumulative number of rows in the 
+        previous row groups from the index passed as parameter.
+
+        Parameters
+        ----------
+        index : int
+            The index for which we want to find the row group index and index within the row group for.
+
+        Returns
+        -------
+
+        Tuple[int, int]
+            A tuple containing the row group index and the index within the row group.
+        """
+        row_group_index = bisect_right(self.cumulative_row_index, index) - 1
+        if row_group_index < 0 or row_group_index >= self.number_of_row_groups:
+            raise ValueError("Index out of bounds")
+        index_within_row_group = index - \
+            self.cumulative_row_index[row_group_index]
+        return row_group_index, index_within_row_group
 
     def get_data_for_row_group(self, row_group_index: int) -> pd.DataFrame:
         """ Get the data for a row group. If the data is already cached, return the cached data.
