@@ -201,10 +201,6 @@ class TrainModelOnPeriod(TrainModelTask):
 
         print("Creating trainers and evaluators")
 
-        def output_transform(x, y, y_pred, loss):
-            print(f"y: {y}, y_pred: {y_pred}, loss: {loss}")
-            return loss.item()
-
         def loss_function(y_pred, y):
             print(f"y_pred: {y_pred}, y: {y}")
             return criterion(y_pred, y)
@@ -214,8 +210,7 @@ class TrainModelOnPeriod(TrainModelTask):
             optimizer=optimizer,
             # loss_fn=criterion,
             loss_fn=loss_function,
-            device=device,
-            # output_transform=output_transform
+            device=device
         )
 
         # TODO pass as argument
