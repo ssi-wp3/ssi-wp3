@@ -248,14 +248,13 @@ class ParquetDataset(torch.utils.data.Dataset):
         feature_tensor = torch.tensor(
             sample[self.feature_column], dtype=torch.float32)
 
-        print("Sample: ", sample)
-        label_vector = sample[self.target_column]
+        label_vector = [sample[self.target_column]]
         label_tensor = torch.tensor(
             self.label_encoder.transform(label_vector), dtype=torch.long)
 
         print("Label Tensor: ", label_tensor)
 
-        one_hot_label = F.one_hot(label_tensor, num_classes=len(
+        one_hot_label = F.one_hot(label_tensor[0], num_classes=len(
             self.label_encoder.classes_)).float()
 
         print("One Hot Label: ", one_hot_label)
@@ -266,7 +265,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
             index)
         dataframe = self.get_data_for_row_group(row_group_index)
-        sample = dataframe.iloc[index_in_row_group].to_frame()
+        sample = dataframe.iloc[index_in_row_group]
         return self.process_sample(sample)
 
     def __getitems__(self, indices):
