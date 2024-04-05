@@ -207,7 +207,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
         def loss_function(y_pred, y):
             print(f"y_pred: {y_pred}, y: {y}")
-            return criterion(y_pred, y[0])
+            return criterion(y_pred, y.reshape(-1))
 
         train_engine = create_supervised_trainer(
             model,
