@@ -210,7 +210,8 @@ class TrainModelOnPeriod(TrainModelTask):
             optimizer=optimizer,
             # loss_fn=criterion,
             loss_fn=loss_function,
-            device=device
+            device=device,
+            output_transform=lambda x, y, y_pred, loss: (y_pred, y, loss)
         )
 
         # TODO pass as argument
