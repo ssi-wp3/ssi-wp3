@@ -11,14 +11,20 @@ import pandas as pd
 import numpy as np
 
 
-class ParquetDataset(torch.utils.data.IterableDataset):
+class ParquetDataset(torch.utils.data.Dataset):
     """ This class is a PyTorch Dataset specifically designed to read Parquet files.
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """
 
-    def __init__(self, filename: str, feature_column: str, target_column: str, batch_size: int, filters: List[Tuple[str]],  memory_map: bool = False):
-        # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
+    def __init__(self, filename: str,
+                 feature_column: str,
+                 target_column: str,
+                 batch_size: int,
+                 filters: List[Tuple[str]],
+                 memory_map: bool = False):
         super().__init__()
+        # TODO revert back to ParquetFile
+        # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
         self.__parquet_file = pq.read_table(
             filename,
             columns=[feature_column, target_column],
@@ -28,13 +34,13 @@ class ParquetDataset(torch.utils.data.IterableDataset):
         self.__target_column = target_column
         self.__label_encoder = self._fit_label_encoder(self.parquet_file)
 
-        self.batches = Queue()
-        [self.batches.put(batch)
-         for batch in self.parquet_file.to_batches(batch_size)]
-
     @property
     def parquet_file(self):
         return self.__parquet_file
+
+    @property
+    def number_of_row_groups(self) -> int:
+        return self.parquet_file.num_row_groups
 
     @property
     def feature_column(self) -> str:
@@ -46,6 +52,7 @@ class ParquetDataset(torch.utils.data.IterableDataset):
 
     @property
     def feature_vector_size(self) -> int:
+        # TODO read from file. This is hardcoded for now
         # feature_df = self.parquet_file.take(
         #    0).to_pandas()
 
@@ -69,29 +76,48 @@ class ParquetDataset(torch.utils.data.IterableDataset):
         label_encoder.fit(label_df[self.target_column])
         return label_encoder
 
-    def __len__(self):
-        return self.parquet_file.num_rows
+    def number_of_rows_in_row_group(self, row_group_index: int) -> int:
+        return self.parquet_file.metadata.row_group(row_group_index).num_rows
 
-    def process_batch(self, batch: pd.DataFrame):
+    def get_row_group_for_index(self, index: int) -> int:
+        previous_index = 0
+        for row_group_index in range(self.number_of_row_groups):
+            number_of_rows = self.number_of_rows_in_row_group(row_group_index)
+            previous_index = index
+            index -= number_of_rows
+            if index < 0:
+                return row_group_index, previous_index
+        raise ValueError("Index out of bounds")
+
+    def get_data_for_row_group(self, row_group_index: int) -> pd.DataFrame:
+        row_group = self.parquet_file.read_row_group(row_group_index)
+        return row_group.to_pandas()
+
+    def __len__(self):
+        return self.parquet_file.metadata.num_rows
+
+    def __getitem__(self, index):
+        # Cache the row group
+        row_group_index, index_in_row_group = self.get_row_group_for_index(
+            index)
+        dataframe = self.get_data_for_row_group(row_group_index)
+        sample = dataframe.iloc[index_in_row_group]
+        return self.process_sample(sample)
+
+    def __getitems__(self, idx):
+        # TODO sort idx to make maximum use of cache
+        pass
+
+    def process_sample(self, sample: pd.DataFrame):
         feature_tensor = torch.tensor(
-            batch[self.feature_column], dtype=torch.float32)
+            sample[self.feature_column], dtype=torch.float32)
 
         label_tensor = torch.tensor(
-            self.label_encoder.transform([batch[self.target_column]]), dtype=torch.long)
+            self.label_encoder.transform([sample[self.target_column]]), dtype=torch.long)
         one_hot_label = F.one_hot(label_tensor, num_classes=len(
             self.label_encoder.classes_)).float()
 
         return feature_tensor, one_hot_label
-
-    def __iter__(self):
-        while True:
-            if self.batches.empty() == True:
-                self.batches.close()
-                break
-
-            batch = self.batches.get().to_table().to_pandas()
-            batch.update(self.process_batch(batch))
-            yield batch
 
 
 class TorchLogisticRegression(nn.Module):
