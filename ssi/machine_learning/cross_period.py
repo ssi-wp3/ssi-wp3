@@ -192,17 +192,18 @@ class TrainModelOnPeriod(TrainModelTask):
             print(f"y: {y}, y_pred: {y_pred}, loss: {loss}")
             return loss.item()
 
-        train_engine = create_supervised_trainer(
-            model,
-            optimizer=optimizer,
-            loss_fn=criterion,
-            device=device,
-            output_transform=output_transform
-        )
-
         def loss_function(y_pred, y):
             print(f"y_pred: {y_pred}, y: {y}")
             return criterion(y_pred, y)
+
+        train_engine = create_supervised_trainer(
+            model,
+            optimizer=optimizer,
+            # loss_fn=criterion,
+            loss_fn=loss_function,
+            device=device,
+            output_transform=output_transform
+        )
 
         # TODO pass as argument
         val_metrics = {
