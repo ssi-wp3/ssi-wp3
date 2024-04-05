@@ -284,7 +284,8 @@ class ParquetDataset(torch.utils.data.Dataset):
 class TorchLogisticRegression(nn.Module):
     def __init__(self, input_dim, output_dim):
         super().__init__()
-        self.linear = nn.Linear(in_features=input_dim, out_features=output_dim)
+        self.linear = nn.Sequential(
+            nn.Linear(in_features=input_dim, out_features=output_dim))
 
     def forward(self, x):
         prediction = self.linear(x)
