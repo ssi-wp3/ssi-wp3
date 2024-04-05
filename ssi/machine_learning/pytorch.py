@@ -270,6 +270,10 @@ class ParquetDataset(torch.utils.data.Dataset):
         # In order retrieval of the data will be more efficient because we can use
         # the cache of the row group
         sorting_indices = np.argsort(indices)
+
+        print("Indices: ", indices)
+        print("Sorting indices: ", sorting_indices)
+
         # Create a dictionary to map the original index to the sorted index
         sort_dict = {original_index: sorted_index
                      for original_index, sorted_index in zip(indices, sorting_indices)}
