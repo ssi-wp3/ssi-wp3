@@ -143,8 +143,22 @@ class ParquetDataset(torch.utils.data.Dataset):
         """
         return len(self.label_encoder.classes_)
 
-    def _fit_label_encoder(self, parquet_file) -> LabelEncoder:
-        label_df = parquet_file.select(
+    def _fit_label_encoder(self, parquet_file: pq.ParquetFile) -> LabelEncoder:
+        """ Fit a label encoder to the target column in the Parquet file.
+        The label encoder is used to encode the target column into integer labels.
+        Only the label column is read by this function.
+
+        Parameters
+        ----------
+        parquet_file : pq.ParquetFile
+            The Parquet file to read the target column from.
+
+        Returns
+        -------
+        LabelEncoder
+            The label encoder fitted to the target column.
+        """
+        label_df = parquet_file.read(
             columns=[self.target_column]).to_pandas()
         label_encoder = LabelEncoder()
         label_encoder.fit(label_df[self.target_column])
