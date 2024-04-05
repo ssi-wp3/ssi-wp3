@@ -252,13 +252,13 @@ class ParquetDataset(torch.utils.data.Dataset):
         label_tensor = torch.tensor(
             self.label_encoder.transform(label_vector), dtype=torch.long)
 
-        print("Label Tensor: ", label_tensor)
+        # print("Label Tensor: ", label_tensor)
 
         one_hot_label = F.one_hot(label_tensor[0], num_classes=len(
             self.label_encoder.classes_)).float()
 
-        print("One Hot Label: ", one_hot_label)
-        print("Target Shape:", one_hot_label.shape)
+#        print("One Hot Label: ", one_hot_label)
+#        print("Target Shape:", one_hot_label.shape)
         return feature_tensor, one_hot_label
 
     def __getitem__(self, index):
