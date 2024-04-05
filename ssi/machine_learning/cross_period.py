@@ -202,7 +202,7 @@ class TrainModelOnPeriod(TrainModelTask):
         print("Creating trainers and evaluators")
 
         def loss_function(y_pred, y):
-            print(f"y_pred: {y_pred}, y: {y}")
+            print(f"y_pred: {y_pred.shape}, y: {y.shape}")
             return criterion(y_pred, y)
 
         train_engine = create_supervised_trainer(
