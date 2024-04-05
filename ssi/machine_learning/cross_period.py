@@ -208,8 +208,7 @@ class TrainModelOnPeriod(TrainModelTask):
         train_engine = create_supervised_trainer(
             model,
             optimizer=optimizer,
-            # loss_fn=criterion,
-            loss_fn=loss_function,
+            loss_fn=criterion,
             device=device
         )
 
