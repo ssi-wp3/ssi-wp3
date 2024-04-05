@@ -289,9 +289,7 @@ class TorchLogisticRegression(nn.Module):
         self.linear = nn.Linear(in_features=input_dim, out_features=output_dim)
 
     def forward(self, x):
-        print("Input shape: ", x.shape)
         prediction = self.linear(x)
-        print("Prediction shape: ", prediction.shape)
         return prediction
 
 
