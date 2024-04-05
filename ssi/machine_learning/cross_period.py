@@ -187,8 +187,18 @@ class TrainModelOnPeriod(TrainModelTask):
             val_set, prefetch_factor=self.prefetch_factor, pin_memory=True, num_workers=self.number_of_workers)
 
         print("Creating trainers and evaluators")
+
+        def output_transform(x, y, y_pred, loss):
+            print(f"y: {y}, y_pred: {y_pred}, loss: {loss}")
+            return loss.item()
+
         train_engine = create_supervised_trainer(
-            model, optimizer=optimizer, loss_fn=criterion, non_blocking=True, device=device)
+            model,
+            optimizer=optimizer,
+            loss_fn=criterion,
+            device=device,
+            output_transform=output_transform
+        )
 
         # TODO pass as argument
         val_metrics = {
