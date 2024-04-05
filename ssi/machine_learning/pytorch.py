@@ -23,13 +23,12 @@ class ParquetDataset(torch.utils.data.Dataset):
                  filters: List[Tuple[str]],
                  memory_map: bool = False):
         super().__init__()
-        # TODO revert back to ParquetFile
-        # self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
-        self.__parquet_file = pq.read_table(
-            filename,
-            columns=[feature_column, target_column],
-            memory_map=memory_map,
-            filters=filters)
+        self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
+        # self.__parquet_file = pq.read_table(
+        #     filename,
+        #     columns=[feature_column, target_column],
+        #     memory_map=memory_map,
+        #     filters=filters)
         self.__feature_column = feature_column
         self.__target_column = target_column
         self.__label_encoder = self._fit_label_encoder(self.parquet_file)
