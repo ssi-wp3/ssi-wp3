@@ -223,6 +223,7 @@ class ParquetDataset(torch.utils.data.Dataset):
             The data for the row group.
         """
         if not self.__current_row_group or row_group_index != self.current_row_group_index:
+            self.current_row_group_index = row_group_index
             row_group = self.parquet_file.read_row_group(
                 self.current_row_group_index)
             self.current_row_group = row_group.to_pandas()
