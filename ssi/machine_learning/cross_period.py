@@ -7,6 +7,7 @@ from .pytorch import ParquetDataset, TorchLogisticRegression
 import torch
 import torch.optim as optim
 from torch.nn import functional as F
+from torch.profiler import profiler
 from torch.utils.data import DataLoader
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator, Events
 from ignite.metrics import Accuracy, Precision, Recall, Loss
@@ -290,7 +291,9 @@ class TrainModelOnPeriod(TrainModelTask):
         progress_bar.attach(
             train_engine, output_transform=lambda x: {"loss": x})
 
-        train_engine.run(train_loader, max_epochs=num_epochs)
+        with profiler.profile() as prof:
+            with profiler.record_function("model_training"):
+                train_engine.run(train_loader, max_epochs=num_epochs)
 
         return model
 
