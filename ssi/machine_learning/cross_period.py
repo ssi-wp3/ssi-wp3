@@ -36,7 +36,7 @@ class TrainModelOnPeriod(TrainModelTask):
     learning_rate = luigi.FloatParameter(default=0.001)
     batch_size = luigi.IntParameter(default=1000)
 
-    number_of_workers = luigi.IntParameter(default=2)
+    number_of_workers = luigi.IntParameter(default=1)
     prefetch_factor = luigi.IntParameter(default=2)
 
     @property
