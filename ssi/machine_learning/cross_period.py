@@ -295,6 +295,10 @@ class TrainModelOnPeriod(TrainModelTask):
             with profiler.record_function("model_training"):
                 train_engine.run(train_loader, max_epochs=num_epochs)
 
+        @train_engine.on(Events.ITERATION_COMPLETED)
+        def log_iteration(engine):
+            print(prof.key_averages().table(sort_by="cpu_time_total"))
+
         return model
 
     def train_model(self, train_dataframe: torch.utils.data.Subset, training_predictions_file):
