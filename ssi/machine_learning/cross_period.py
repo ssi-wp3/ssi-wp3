@@ -291,9 +291,12 @@ class TrainModelOnPeriod(TrainModelTask):
         progress_bar.attach(
             train_engine, output_transform=lambda x: {"loss": x})
 
-        with profiler.profile() as prof:
-            with profiler.record_function("model_training"):
-                train_engine.run(train_loader, max_epochs=num_epochs)
+        with profiler.profile(activities=[
+            profiler.ProfilerActivity.CPU,
+            profiler.ProfilerActivity.CUDA
+        ]
+        ) as prof:
+            train_engine.run(train_loader, max_epochs=num_epochs)
 
         @train_engine.on(Events.ITERATION_COMPLETED)
         def log_iteration(engine):
