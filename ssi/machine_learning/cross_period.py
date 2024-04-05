@@ -200,12 +200,16 @@ class TrainModelOnPeriod(TrainModelTask):
             output_transform=output_transform
         )
 
+        def loss_function(y_pred, y):
+            print(f"y_pred: {y_pred}, y: {y}")
+            return criterion(y_pred, y)
+
         # TODO pass as argument
         val_metrics = {
             "accuracy": Accuracy(),
             "precision": Precision(),
             "recall": Recall(),
-            "loss": Loss(criterion)
+            "loss": Loss(loss_function)
         }
         train_evaluator = create_supervised_evaluator(
             model, metrics=val_metrics, device=device)
