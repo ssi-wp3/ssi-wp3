@@ -165,7 +165,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
         print(f"Training model on {device} with learning rate {learning_rate}, num_epochs {num_epochs}, batch_size {batch_size}, number of epochs {num_epochs}, and early stopping patience {early_stopping_patience}")
         model = TorchLogisticRegression(
-            input_dim=self.feature_vector_size, output_dim=self.number_of_categories)
+            input_dim=(batch_size, self.feature_vector_size), output_dim=self.number_of_categories)
 
         model = model.to(device)
         print(f"Model moved to {device}: {next(model.parameters()).is_cuda}")
