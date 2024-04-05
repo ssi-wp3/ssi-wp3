@@ -84,6 +84,13 @@ class ParquetDataset(torch.utils.data.Dataset):
 
     @property
     def target_column(self) -> str:
+        """ Returns the name of the target column in the Parquet file.
+
+        Returns
+        -------
+        str
+            The name of the target column in the Parquet file.
+        """
         return self.__target_column
 
     @property
