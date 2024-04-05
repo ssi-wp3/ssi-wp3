@@ -277,6 +277,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         # Order the idx array
         sorted_idx = indices[sorting_indices]
         # Get the data for the sorted index
+        # TODO see if we can optimize this a bit by retrieving the full batches.
         items = [self.__getitem__(index) for index in sorted_idx]
 
         # Sort the items back to the original order
