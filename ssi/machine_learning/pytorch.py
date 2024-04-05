@@ -33,6 +33,8 @@ class ParquetDataset(torch.utils.data.Dataset):
         self.__feature_column = feature_column
         self.__target_column = target_column
         self.__label_encoder = self._fit_label_encoder(self.parquet_file)
+        self.__current_row_group_index = 0
+        self.__current_row_group = None
 
     @property
     def parquet_file(self):
@@ -41,6 +43,22 @@ class ParquetDataset(torch.utils.data.Dataset):
     @property
     def number_of_row_groups(self) -> int:
         return self.parquet_file.num_row_groups
+
+    @property
+    def current_row_group_index(self) -> int:
+        return self.__current_row_group_index
+
+    @current_row_group_index.setter
+    def current_row_group_index(self, value: int):
+        self.__current_row_group_index = value
+
+    @property
+    def current_row_group(self) -> pd.DataFrame:
+        return self.__current_row_group
+
+    @current_row_group.setter
+    def current_row_group(self, value: pd.DataFrame):
+        self.__current_row_group = value
 
     @property
     def feature_column(self) -> str:
@@ -90,14 +108,41 @@ class ParquetDataset(torch.utils.data.Dataset):
         raise ValueError("Index out of bounds")
 
     def get_data_for_row_group(self, row_group_index: int) -> pd.DataFrame:
-        row_group = self.parquet_file.read_row_group(row_group_index)
-        return row_group.to_pandas()
+        """ Get the data for a row group. If the data is already cached, return the cached data.
+        Otherwise, read the data from the Parquet file and cache it.
+
+        Parameters
+        ----------
+        row_group_index : int
+            The index of the row group to read the data from.
+
+        Returns
+        -------
+        pd.DataFrame
+            The data for the row group.
+        """
+        if not self.__current_row_group or row_group_index != self.current_row_group_index:
+            row_group = self.parquet_file.read_row_group(
+                self.current_row_group_index)
+            self.current_row_group = row_group.to_pandas()
+
+        return self.current_row_group
 
     def __len__(self):
         return self.parquet_file.metadata.num_rows
 
+    def process_sample(self, sample: pd.DataFrame):
+        feature_tensor = torch.tensor(
+            sample[self.feature_column], dtype=torch.float32)
+
+        label_tensor = torch.tensor(
+            self.label_encoder.transform([sample[self.target_column]]), dtype=torch.long)
+        one_hot_label = F.one_hot(label_tensor, num_classes=len(
+            self.label_encoder.classes_)).float()
+
+        return feature_tensor, one_hot_label
+
     def __getitem__(self, index):
-        # Cache the row group
         row_group_index, index_in_row_group = self.get_row_group_for_index(
             index)
         dataframe = self.get_data_for_row_group(row_group_index)
@@ -120,17 +165,6 @@ class ParquetDataset(torch.utils.data.Dataset):
 
         # Sort the items back to the original order
         return [items[sort_dict[original_index]] for original_index in idx]
-
-    def process_sample(self, sample: pd.DataFrame):
-        feature_tensor = torch.tensor(
-            sample[self.feature_column], dtype=torch.float32)
-
-        label_tensor = torch.tensor(
-            self.label_encoder.transform([sample[self.target_column]]), dtype=torch.long)
-        one_hot_label = F.one_hot(label_tensor, num_classes=len(
-            self.label_encoder.classes_)).float()
-
-        return feature_tensor, one_hot_label
 
 
 class TorchLogisticRegression(nn.Module):
