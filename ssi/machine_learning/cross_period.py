@@ -98,10 +98,10 @@ class TrainModelOnPeriod(TrainModelTask):
             return dataframe
 
     def split_data(self, dataframe: ParquetDataset, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """ The training split is different for the period evaluation task: we train on one period and evaluate 
-        on the others. Therefore we override the split_data method here. Furthermore, we would like to create a graph 
-        for the whole range of periods, so we only split the data here for training and evaluate on the whole dataset.  
-        The items for the training period have a True value in the is_train column, so we can 
+        """ The training split is different for the period evaluation task: we train on one period and evaluate
+        on the others. Therefore we override the split_data method here. Furthermore, we would like to create a graph
+        for the whole range of periods, so we only split the data here for training and evaluate on the whole dataset.
+        The items for the training period have a True value in the is_train column, so we can
         distinguish them in the test set. We also use this to filter the training items out here.
 
         Parameters:
@@ -213,11 +213,15 @@ class TrainModelOnPeriod(TrainModelTask):
             device=device
         )
 
+        def label_transform(output):
+            y_pred, y = output
+            return torch.argmax(y_pred, dim=1), y
+
         # TODO pass as argument
         val_metrics = {
-            "accuracy": Accuracy(),
-            "precision": Precision(),
-            "recall": Recall(),
+            "accuracy": Accuracy(label_transform),
+            "precision": Precision(label_transform),
+            "recall": Recall(label_transform),
             "loss": Loss(criterion)
         }
         train_evaluator = create_supervised_evaluator(
@@ -227,13 +231,13 @@ class TrainModelOnPeriod(TrainModelTask):
 
         log_interval = 1000
 
-        @train_engine.on(Events.ITERATION_COMPLETED(every=log_interval))
+        @ train_engine.on(Events.ITERATION_COMPLETED(every=log_interval))
         def log_training_loss(engine):
             # experiment.log_metric("loss", engine.state.output)
             print(
                 f"Epoch[{engine.state.epoch}], Iter[{engine.state.iteration}] Loss: {engine.state.output:.2f}")
 
-        @train_engine.on(Events.EPOCH_COMPLETED)
+        @ train_engine.on(Events.EPOCH_COMPLETED)
         def log_training_results(trainer):
             train_evaluator.run(train_loader)
             metrics = train_evaluator.state.metrics
@@ -243,7 +247,7 @@ class TrainModelOnPeriod(TrainModelTask):
             print(
                 f"Training Results - Epoch[{trainer.state.epoch}] Avg loss: {metrics['loss']:.2f}")
 
-        @train_engine.on(Events.EPOCH_COMPLETED)
+        @ train_engine.on(Events.EPOCH_COMPLETED)
         def log_validation_results(trainer):
             val_evaluator.run(val_loader)
             metrics = val_evaluator.state.metrics
@@ -298,7 +302,7 @@ class TrainModelOnPeriod(TrainModelTask):
         ) as prof:
             train_engine.run(train_loader, max_epochs=num_epochs)
 
-        @train_engine.on(Events.ITERATION_COMPLETED)
+        @ train_engine.on(Events.ITERATION_COMPLETED)
         def log_iteration(engine):
             print(prof.key_averages().table(sort_by="cpu_time_total"))
 
