@@ -250,6 +250,9 @@ class ParquetDataset(torch.utils.data.Dataset):
 
         label_tensor = torch.tensor(
             self.label_encoder.transform([sample[self.target_column]]), dtype=torch.long)
+
+        print("Label Tensor: ", label_tensor)
+
         one_hot_label = F.one_hot(label_tensor, num_classes=len(
             self.label_encoder.classes_)).float()
 
