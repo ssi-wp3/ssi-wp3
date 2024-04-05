@@ -179,22 +179,22 @@ class ParquetDataset(torch.utils.data.Dataset):
         sample = dataframe.iloc[index_in_row_group]
         return self.process_sample(sample)
 
-    def __getitems__(self, idx):
+    def __getitems__(self, indices):
         # Get the sort order of the idx array
         # In order retrieval of the data will be more efficient because we can use
         # the cache of the row group
-        sorting_indices = np.argsort(idx)
+        sorting_indices = np.argsort(indices)
         # Create a dictionary to map the original index to the sorted index
         sort_dict = {original_index: sorted_index
-                     for original_index, sorted_index in zip(idx, sorting_indices)}
+                     for original_index, sorted_index in zip(indices, sorting_indices)}
 
         # Order the idx array
-        sorted_idx = idx[sorting_indices]
+        sorted_idx = indices[sorting_indices]
         # Get the data for the sorted index
         items = [self.__getitem__(index) for index in sorted_idx]
 
         # Sort the items back to the original order
-        return [items[sort_dict[original_index]] for original_index in idx]
+        return [items[sort_dict[original_index]] for original_index in indices]
 
 
 class TorchLogisticRegression(nn.Module):
