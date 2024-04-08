@@ -161,16 +161,16 @@ class ModelTrainer:
         return batch_dataframe
 
     def get_features(self, batch_dataframe, feature_column) -> Tuple[pd.DataFrame, pd.Series]:
-        if isinstance(batch_dataframe, tuple):
-            X = batch_dataframe[0]
-            dataframe = pd.DataFrame({
-                feature_column: X.tolist()
-            })
-            return dataframe, X
+        if isinstance(batch_dataframe, pd.DataFrame):
+            batch_dataframe = batch_dataframe.copy()
+            X = batch_dataframe[feature_column]
+            return batch_dataframe, X
 
-        batch_dataframe = batch_dataframe.copy()
-        X = batch_dataframe[feature_column]
-        return batch_dataframe, X
+        X = batch_dataframe[0]
+        dataframe = pd.DataFrame({
+            feature_column: X.tolist()
+        })
+        return dataframe, X
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)
