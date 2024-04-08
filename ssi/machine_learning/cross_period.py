@@ -269,6 +269,8 @@ class TrainModelOnPeriod(TrainModelTask):
 
         # Checkpoint to store n_saved best models wrt score function
         model_directory = os.path.join(self.output_directory, "models")
+        date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        model_directory = os.path.join(model_directory, date_time)
         if not os.path.exists(model_directory):
             os.makedirs(model_directory)
 
