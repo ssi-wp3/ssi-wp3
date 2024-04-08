@@ -195,7 +195,6 @@ class ParquetDataset(torch.utils.data.Dataset):
         Tuple[int, int]
             A tuple containing the row group index and the index within the row group.
         """
-        print(f"Get row group for index: {index}")
         row_group_index = bisect_right(self.cumulative_row_index, index) - 1
         if row_group_index < 0 or row_group_index >= self.number_of_row_groups:
             raise ValueError("Index out of bounds")
