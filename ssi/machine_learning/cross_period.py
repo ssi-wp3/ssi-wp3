@@ -247,7 +247,7 @@ class TrainModelOnPeriod(TrainModelTask):
             # for metric, value in metrics.items():
             #    experiment.log_metric(f"train_{metric}", value)
 
-            metrics = " ".join([f"Avg {metric}: {value:.2f}" for metric,
+            metrics = " ".join([f"Avg {metric}: {value.item():.2f}" for metric,
                                 value in metrics.items()])
             print(
                 f"Training Results - Epoch[{trainer.state.epoch}] {metrics}")
@@ -260,7 +260,7 @@ class TrainModelOnPeriod(TrainModelTask):
             # for metric, value in metrics.items():
             #    experiment.log_metric(f"val_{metric}", value)
 
-            metrics = " ".join([f"Avg {metric}: {value.numpy():.2f}" for metric,
+            metrics = " ".join([f"Avg {metric}: {value.item():.2f}" for metric,
                                 value in metrics.items()])
             print(
                 f"Validation Results - Epoch[{trainer.state.epoch}] {metrics}")
