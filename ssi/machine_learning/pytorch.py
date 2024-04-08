@@ -20,8 +20,6 @@ class ParquetDataset(torch.utils.data.Dataset):
     def __init__(self, filename: str,
                  feature_column: str,
                  target_column: str,
-                 batch_size: int,
-                 filters: List[Tuple[str]],
                  memory_map: bool = False):
         super().__init__()
         self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
