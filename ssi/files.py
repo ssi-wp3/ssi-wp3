@@ -89,4 +89,4 @@ def get_batch(dataframe, batch_size, i) -> Union[pd.DataFrame, Tuple[torch.Tenso
     if isinstance(dataframe, pd.DataFrame):
         return dataframe.iloc[i:i+batch_size]
     print(f"get_batch, get items from {i} to {i+batch_size}")
-    return dataframe.__getitems__(list(range(i, i+batch_size)))
+    return dataframe[list(range(i, i+batch_size))]
