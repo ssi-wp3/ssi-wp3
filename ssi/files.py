@@ -62,8 +62,9 @@ def batched_writer(filename: str,
     """
     pq_writer = None
     batch_statistics_results = []
-    with tqdm(total=len(dataframe)) as progress_bar:
-        for i in range(0, len(dataframe), batch_size):
+    batch_indices = list(range(0, len(dataframe), batch_size))
+    with tqdm(total=len(batch_indices)) as progress_bar:
+        for i in batch_indices:
             batch_df = get_batch(dataframe, batch_size, i)
             processed_batch_df = process_batch(
                 batch_df, progress_bar=progress_bar, **process_batch_kwargs)
