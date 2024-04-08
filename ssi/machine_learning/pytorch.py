@@ -267,6 +267,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         # TODO see if selection of period makes training already faster
         # Return indices smaller than max index
         indices = [index for index in indices if index < len(self)]
+        print(f"Get items for indices: {indices}")
 
         # Get the sort order of the idx array
         # In order retrieval of the data will be more efficient because we can use
