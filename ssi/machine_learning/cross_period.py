@@ -301,9 +301,13 @@ class TrainModelOnPeriod(TrainModelTask):
             Events.COMPLETED, model_checkpoint, {"model": model})
 
         print("Training model")
-        progress_bar = ProgressBar()
-        progress_bar.attach(
+        training_progress_bar = ProgressBar()
+        training_progress_bar.attach(
             train_engine, output_transform=lambda x: {"loss": x})
+
+        val_progress_bar = ProgressBar()
+        val_progress_bar.attach(
+            val_evaluator, output_transform=lambda x: x)
 
         with profiler.profile(activities=[
             profiler.ProfilerActivity.CPU,
