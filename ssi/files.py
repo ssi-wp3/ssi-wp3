@@ -88,4 +88,4 @@ def batched_writer(filename: str,
 def get_batch(dataframe, batch_size, i) -> Union[pd.DataFrame, Tuple[torch.Tensor, torch.Tensor]]:
     if isinstance(dataframe, pd.DataFrame):
         return dataframe.iloc[i:i+batch_size]
-    return dataframe[i:i+batch_size]
+    return dataframe.__getitems__(list(range(i, i+batch_size)))
