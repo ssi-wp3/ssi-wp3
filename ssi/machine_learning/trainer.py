@@ -1,8 +1,9 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Union, Tuple
 from sklearn.metrics import confusion_matrix
 from collections import defaultdict
 from ..files import batched_writer
 from .evaluate import ModelEvaluator
+import pytorch
 import pandas as pd
 import json
 import joblib
@@ -134,16 +135,14 @@ class ModelTrainer:
         return evaluation_function(batch_statistics)
 
     def __predict(self,
-                  batch_dataframe: pd.DataFrame,
+                  batch_dataframe: Union[pd.DataFrame, Tuple[pytorch.Tensor, pytorch.Tensor]],
                   progress_bar: tqdm.tqdm,
                   pipeline,
                   feature_column: str,
                   probability_column_prefix: str = "y_proba",
                   prediction_column: str = "y_pred") -> pd.DataFrame:
 
-        batch_dataframe = batch_dataframe.copy()
-
-        X = batch_dataframe[feature_column]
+        batch_dataframe, X = self.get_features(batch_dataframe, feature_column)
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X.values.tolist())
@@ -160,6 +159,18 @@ class ModelTrainer:
         batch_dataframe[prediction_column] = pipeline.predict(
             X.values.tolist())
         return batch_dataframe
+
+    def get_features(self, batch_dataframe, feature_column) -> Tuple[pd.DataFrame, pd.Series]:
+        if isinstance(batch_dataframe, tuple):
+            X = batch_dataframe[0]
+            dataframe = pd.DataFrame({
+                feature_column: X.tolist()
+            })
+            return dataframe, X
+
+        batch_dataframe = batch_dataframe.copy()
+        X = batch_dataframe[feature_column]
+        return batch_dataframe, X
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)

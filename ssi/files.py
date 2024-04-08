@@ -1,8 +1,9 @@
-from typing import List, Optional, Callable, Any
+from typing import List, Optional, Callable, Any, Union, Tuple
 import os
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pandas as pd
+import pytorch
 from tqdm import tqdm
 
 
@@ -63,7 +64,7 @@ def batched_writer(filename: str,
     batch_statistics_results = []
     with tqdm(total=len(dataframe)) as progress_bar:
         for i in range(0, len(dataframe), batch_size):
-            batch_df = dataframe.iloc[i:i+batch_size].copy()
+            batch_df = get_batch(dataframe, batch_size, i)
             processed_batch_df = process_batch(
                 batch_df, progress_bar=progress_bar, **process_batch_kwargs)
 
@@ -82,3 +83,9 @@ def batched_writer(filename: str,
         pq_writer.close()
 
     return batch_statistics_results
+
+
+def get_batch(dataframe, batch_size, i) -> Union[pd.DataFrame, Tuple[pytorch.Tensor, pytorch.Tensor]]:
+    if isinstance(dataframe, pd.DataFrame):
+        return dataframe.iloc[i:i+batch_size]
+    return dataframe[i:i+batch_size]
