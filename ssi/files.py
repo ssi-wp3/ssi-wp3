@@ -49,7 +49,7 @@ def batched_writer(filename: str,
         A function that processes a batch of the DataFrame. This function should return a DataFrame.
 
     batch_statistics: Optional[Callable[[pd.DataFrame], None]]
-        A function that can be used to calculate statistics for each batch. 
+        A function that can be used to calculate statistics for each batch.
 
     **process_batch_kwargs
         Additional keyword arguments to pass to the process_batch function.
@@ -88,4 +88,5 @@ def batched_writer(filename: str,
 def get_batch(dataframe, batch_size, i) -> Union[pd.DataFrame, Tuple[torch.Tensor, torch.Tensor]]:
     if isinstance(dataframe, pd.DataFrame):
         return dataframe.iloc[i:i+batch_size]
+    print(f"get_batch, get items from {i} to {i+batch_size}")
     return dataframe.__getitems__(list(range(i, i+batch_size)))
