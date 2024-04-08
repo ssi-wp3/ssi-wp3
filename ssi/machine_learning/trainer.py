@@ -167,8 +167,10 @@ class ModelTrainer:
             return batch_dataframe, X
 
         X = batch_dataframe[0]
+        y = batch_dataframe[1]
         dataframe = pd.DataFrame({
-            feature_column: X.numpy().tolist()
+            feature_column: X.numpy().tolist(),
+            self.label_column: y.numpy().tolist()
         })
         return dataframe, X
 
