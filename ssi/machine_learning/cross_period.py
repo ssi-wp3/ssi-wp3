@@ -222,8 +222,8 @@ class TrainModelOnPeriod(TrainModelTask):
         # TODO pass as argument
         val_metrics = {
             "accuracy": Accuracy(label_transform),
-            "precision": Precision(label_transform),
-            "recall": Recall(label_transform),
+            "precision": Precision(label_transform, average="weighted"),
+            "recall": Recall(label_transform, average="weighted"),
             "loss": Loss(criterion)
         }
         train_evaluator = create_supervised_evaluator(
