@@ -166,6 +166,7 @@ class ModelTrainer:
             X = batch_dataframe[feature_column]
             return batch_dataframe, X
 
+        print(f"Batch dataframe {batch_dataframe}")
         X = batch_dataframe[0]
         y = batch_dataframe[1]
         dataframe = pd.DataFrame({
