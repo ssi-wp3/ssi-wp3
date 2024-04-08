@@ -36,6 +36,7 @@ class TrainModelOnPeriod(TrainModelTask):
     gpu_device = luigi.Parameter(default="cuda:0")
     learning_rate = luigi.FloatParameter(default=0.001)
     batch_size = luigi.IntParameter(default=1000)
+    number_of_epochs = luigi.IntParameter(default=10)
 
     number_of_workers = luigi.IntParameter(default=1)
     prefetch_factor = luigi.IntParameter(default=2)
@@ -322,7 +323,7 @@ class TrainModelOnPeriod(TrainModelTask):
                                training_predictions_file,
                                device=device,
                                learning_rate=self.learning_rate,
-                               num_epochs=10,
+                               num_epochs=self.number_of_epochs,
                                batch_size=self.batch_size,
                                early_stopping_patience=3
                                )
@@ -348,6 +349,7 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
     receipt_text_column = luigi.Parameter()
     features_column = luigi.Parameter(default="features")
     batch_size = luigi.IntParameter(default=30000)
+    number_of_epochs = luigi.IntParameter(default=10)
     parquet_engine = luigi.Parameter()
     verbose = luigi.BoolParameter(default=False)
     period_columns = luigi.ListParameter()
