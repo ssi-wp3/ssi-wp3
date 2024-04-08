@@ -89,5 +89,6 @@ def batched_writer(filename: str,
 def get_batch(dataframe, batch_size, i) -> Union[pd.DataFrame, Tuple[torch.Tensor, torch.Tensor]]:
     if isinstance(dataframe, pd.DataFrame):
         return dataframe.iloc[i:i+batch_size]
-    print(f"get_batch, get items from {i} to {i+batch_size}")
-    return dataframe[list(range(i, i+batch_size))]
+    # Dataframe is a subset of a ParquetDataset, indices may not be contiguous
+    max_index = min(i+batch_size, len(dataframe))
+    return [next(dataframe) for _ in range(i, max_index)]
