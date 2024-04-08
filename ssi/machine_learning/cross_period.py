@@ -244,8 +244,11 @@ class TrainModelOnPeriod(TrainModelTask):
 
             # for metric, value in metrics.items():
             #    experiment.log_metric(f"train_{metric}", value)
+
+            metrics = " ".join([f"Avg {metric}: {value:.2f}" for metric,
+                                value in metrics.items()])
             print(
-                f"Training Results - Epoch[{trainer.state.epoch}] Avg loss: {metrics['loss']:.2f}")
+                f"Training Results - Epoch[{trainer.state.epoch}] {metrics}")
 
         @ train_engine.on(Events.EPOCH_COMPLETED)
         def log_validation_results(trainer):
@@ -254,8 +257,11 @@ class TrainModelOnPeriod(TrainModelTask):
 
             # for metric, value in metrics.items():
             #    experiment.log_metric(f"val_{metric}", value)
+
+            metrics = " ".join([f"Avg {metric}: {value:.2f}" for metric,
+                                value in metrics.items()])
             print(
-                f"Validation Results - Epoch[{trainer.state.epoch}] Avg loss: {metrics['loss']:.2f}")
+                f"Validation Results - Epoch[{trainer.state.epoch}] {metrics}")
 
         # Score function to return current value of any metric we defined above in val_metrics
         def score_function(engine):
