@@ -166,6 +166,7 @@ class ModelTrainer:
             X = batch_dataframe[feature_column]
             return batch_dataframe, X
 
+        # TODO check why X is a tuple instead of a tensor?
         X = batch_dataframe[0]
         y = batch_dataframe[1]
         print(f"X {X.shape} y {y.shape}")
