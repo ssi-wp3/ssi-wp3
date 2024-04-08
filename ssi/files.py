@@ -91,4 +91,4 @@ def get_batch(dataframe, batch_size, i) -> Union[pd.DataFrame, Tuple[torch.Tenso
         return dataframe.iloc[i:i+batch_size]
     # Dataframe is a subset of a ParquetDataset, indices may not be contiguous
     max_index = min(i+batch_size, len(dataframe))
-    return dataframe[i:max_index]
+    return dataframe[list(range(i, max_index))]
