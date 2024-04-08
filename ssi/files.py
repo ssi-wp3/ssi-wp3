@@ -3,7 +3,7 @@ import os
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pandas as pd
-import pytorch
+import torch
 from tqdm import tqdm
 
 
@@ -85,7 +85,7 @@ def batched_writer(filename: str,
     return batch_statistics_results
 
 
-def get_batch(dataframe, batch_size, i) -> Union[pd.DataFrame, Tuple[pytorch.Tensor, pytorch.Tensor]]:
+def get_batch(dataframe, batch_size, i) -> Union[pd.DataFrame, Tuple[torch.Tensor, torch.Tensor]]:
     if isinstance(dataframe, pd.DataFrame):
         return dataframe.iloc[i:i+batch_size]
     return dataframe[i:i+batch_size]

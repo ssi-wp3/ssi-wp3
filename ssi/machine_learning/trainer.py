@@ -3,7 +3,7 @@ from sklearn.metrics import confusion_matrix
 from collections import defaultdict
 from ..files import batched_writer
 from .evaluate import ModelEvaluator
-import pytorch
+import torch
 import pandas as pd
 import json
 import joblib
@@ -135,7 +135,7 @@ class ModelTrainer:
         return evaluation_function(batch_statistics)
 
     def __predict(self,
-                  batch_dataframe: Union[pd.DataFrame, Tuple[pytorch.Tensor, pytorch.Tensor]],
+                  batch_dataframe: Union[pd.DataFrame, Tuple[torch.Tensor, torch.Tensor]],
                   progress_bar: tqdm.tqdm,
                   pipeline,
                   feature_column: str,

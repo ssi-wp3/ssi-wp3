@@ -19,7 +19,6 @@ import pandas as pd
 import pyarrow as pa
 import luigi
 import os
-import torch
 
 
 # TODO add an evaluation that trains a model on one supermarket and evaluates it on another.
