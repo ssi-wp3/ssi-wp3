@@ -265,6 +265,9 @@ class ParquetDataset(torch.utils.data.Dataset):
     def __getitems__(self, indices):
         # TODO training is really slow, see if PyTorch has some profiling
         # TODO see if selection of period makes training already faster
+        # Return indices smaller than max index
+        indices = [index for index in indices if index < len(self)]
+
         # Get the sort order of the idx array
         # In order retrieval of the data will be more efficient because we can use
         # the cache of the row group
