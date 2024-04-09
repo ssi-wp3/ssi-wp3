@@ -169,7 +169,7 @@ class ModelTrainer:
             X)
         return batch_dataframe
 
-    def get_features(self, batch_dataframe, feature_column) -> Tuple[pd.DataFrame, pd.Series]:
+    def get_features(self, batch_dataframe: pd.DataFrame, feature_column: str) -> Tuple[pd.DataFrame, pd.Series]:
         if isinstance(batch_dataframe, pd.DataFrame):
             batch_dataframe = batch_dataframe.copy()
             X = batch_dataframe[feature_column]
