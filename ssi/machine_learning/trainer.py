@@ -155,7 +155,6 @@ class ModelTrainer:
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X)
-        print("X shape:", X.shape, "probabilities shape:", probabilities.shape)
 
         probability_dict = defaultdict(list)
         for probability_vector in probabilities:
