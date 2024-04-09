@@ -173,7 +173,6 @@ class ModelTrainer:
         X = [batch[0].numpy() for batch in batch_dataframe]
         y = [batch[1].numpy() for batch in batch_dataframe]
 
-        print("X shape", X.shape, "y shape", y.shape)
         dataframe = pd.DataFrame({
             feature_column: X,
             self.label_column: y
