@@ -31,10 +31,10 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
         confusion_matrix = ConfusionMatrix(dataframe)
 
         return {"confusion_matrix": confusion_matrix.to_dict(),
-                "precision": confusion_matrix.precision_score,
-                "recall": confusion_matrix.recall_score,
-                "f1_score": confusion_matrix.f1_score,
-                "accuracy": confusion_matrix.accuracy_score
+                "precision": confusion_matrix.precision_score.tolist(),
+                "recall": confusion_matrix.recall_score.tolist(),
+                "f1_score": confusion_matrix.f1_score.tolist(),
+                "accuracy": confusion_matrix.accuracy_score.tolist()
                 }
 
 
