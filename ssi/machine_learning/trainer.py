@@ -151,7 +151,8 @@ class ModelTrainer:
                   probability_column_prefix: str = "y_proba",
                   prediction_column: str = "y_pred") -> pd.DataFrame:
 
-        batch_dataframe, X = self.get_features(batch_dataframe, feature_column)
+        batch_dataframe, X = self.get_features(
+            batch_dataframe, feature_column, classes=classes)
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X)
@@ -169,7 +170,7 @@ class ModelTrainer:
             X)  # .tolist()
         return batch_dataframe
 
-    def get_features(self, batch_dataframe, feature_column: str) -> Tuple[pd.DataFrame, pd.Series]:
+    def get_features(self, batch_dataframe, feature_column: str, classes: List[str]) -> Tuple[pd.DataFrame, pd.Series]:
         if isinstance(batch_dataframe, pd.DataFrame):
             batch_dataframe = batch_dataframe.copy()
             X = batch_dataframe[feature_column]
@@ -181,7 +182,8 @@ class ModelTrainer:
 
         dataframe = pd.DataFrame({
             feature_column: X,
-            self.label_column: y
+            f"{self.label_column}_index": y,
+            self.label_column: classes[y]
         })
         return dataframe, np.vstack(X)
 
