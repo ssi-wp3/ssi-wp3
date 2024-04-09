@@ -165,7 +165,7 @@ class ModelTrainer:
             batch_dataframe[column] = values
 
         batch_dataframe[prediction_column] = pipeline.predict(
-            X.values.tolist())
+            X)
         return batch_dataframe
 
     def get_features(self, batch_dataframe, feature_column) -> Tuple[pd.DataFrame, pd.Series]:
