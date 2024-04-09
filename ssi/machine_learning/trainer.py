@@ -145,7 +145,7 @@ class ModelTrainer:
         batch_dataframe, X = self.get_features(batch_dataframe, feature_column)
 
         progress_bar.set_description("Predicting probabilities")
-        probabilities = pipeline.predict_proba(X.values.tolist())
+        probabilities = pipeline.predict_proba(X)
 
         probability_dict = defaultdict(list)
         for probability_vector in probabilities:
@@ -164,7 +164,7 @@ class ModelTrainer:
         if isinstance(batch_dataframe, pd.DataFrame):
             batch_dataframe = batch_dataframe.copy()
             X = batch_dataframe[feature_column]
-            return batch_dataframe, X
+            return batch_dataframe, X.values.tolist()
 
         # TODO check why X is a tuple instead of a tensor?
         X = [batch[0].numpy() for batch in batch_dataframe]
