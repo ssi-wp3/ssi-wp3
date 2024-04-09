@@ -81,6 +81,10 @@ class TrainModelTask(luigi.Task, ABC):
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
         pass
 
+    @abstractmethod
+    def predict(self, dataframe: pd.DataFrame, predictions_file):
+        pass
+
     def output(self):
         return {
             self.model_key: luigi.LocalTarget(self.model_filename, format=luigi.format.Nop),
@@ -104,8 +108,8 @@ class TrainModelTask(luigi.Task, ABC):
 
         print("Writing test predictions to disk")
         with self.output()[self.predictions_key].open("w") as predictions_file:
-            self.model_trainer.predict(test_dataframe,
-                                       predictions_file)
+            self.predict(test_dataframe,
+                         predictions_file)
 
         print("Writing model to disk")
         with self.output()[self.model_key].open("w") as model_file:
