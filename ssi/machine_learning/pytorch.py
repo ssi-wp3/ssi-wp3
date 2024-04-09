@@ -298,14 +298,14 @@ class TorchLogisticRegression(nn.Module):
         return prediction
 
     def predict_proba(self, x):
-        return F.softmax(self.forward(torch.from_numpy(x), dim=1)
+        return F.softmax(self.forward(torch.from_numpy(x)), dim=1)
 
 
 class PytorchModel(Model):
     def __init__(self,
                  model):
         super().__init__(model)
-        self.__classifier=None
+        self.__classifier = None
 
     @ property
     def classifier(self):
@@ -313,7 +313,7 @@ class PytorchModel(Model):
 
     @ classifier.setter
     def classifier(self, value):
-        self.__classifier=value
+        self.__classifier = value
 
     # TODO: this should use fit(dataset) instead of fit(X, y)
     # See: https://skorch.readthedocs.io/en/stable/user/FAQ.html#faq-how-do-i-use-a-pytorch-dataset-with-skorch
@@ -322,9 +322,9 @@ class PytorchModel(Model):
             batch_size: int,
             lr: float,
             test_size: float,
-            iterator_train__shuffle: bool=True,
+            iterator_train__shuffle: bool = True,
             **kwargs):
-        self.classifier=NeuralNetClassifier(
+        self.classifier = NeuralNetClassifier(
             self.model,
             max_epochs=max_epochs,
             batch_size=batch_size,
@@ -342,9 +342,9 @@ class PytorchModel(Model):
             batch_size: int,
             lr: float,
             test_size: float,
-            iterator_train__shuffle: bool=True,
+            iterator_train__shuffle: bool = True,
             **kwargs):
-        self.classifier=NeuralNetClassifier(
+        self.classifier = NeuralNetClassifier(
             self.model,
             max_epochs=max_epochs,
             batch_size=batch_size,
