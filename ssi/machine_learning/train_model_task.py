@@ -109,7 +109,7 @@ class TrainModelTask(luigi.Task, ABC):
         return {
             self.model_key: luigi.LocalTarget(self.model_filename, format=luigi.format.Nop),
             self.training_predictions_key: luigi.LocalTarget(self.training_predictions_filename, format=luigi.format.Nop),
-            self.training_evaluation_key: luigi.LocalTarget(self.training_evaluation_filename, format=luigi.format.Nop),
+            self.training_evaluation_key: luigi.LocalTarget(self.training_evaluation_filename),
             self.predictions_key: luigi.LocalTarget(self.predictions_filename, format=luigi.format.Nop),
             self.evaluation_key: luigi.LocalTarget(
                 self.evaluation_filename)
