@@ -155,6 +155,7 @@ class ModelTrainer:
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X)
+        print("X shape:", X.shape, "probabilities shape:", probabilities.shape)
 
         probability_dict = defaultdict(list)
         for probability_vector in probabilities:
@@ -175,8 +176,6 @@ class ModelTrainer:
             X = batch_dataframe[feature_column]
             return batch_dataframe, X.values.tolist()
 
-        print("batch_dataframe feature tensor shape:",
-              batch_dataframe[0][0].numpy().shape)
         # TODO check why X is a tuple instead of a tensor?
         X = [batch[0].numpy() for batch in batch_dataframe]
         y = [batch[1].numpy() for batch in batch_dataframe]
