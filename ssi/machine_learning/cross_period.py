@@ -129,6 +129,7 @@ class TrainModelOnPeriod(TrainModelTask):
             self.input().open(), self.features_column, self.label_column, memory_map=True)
         self.feature_vector_size = parquet_dataset.feature_vector_size
         self.number_of_categories = parquet_dataset.number_of_classes
+        self.classes = parquet_dataset.label_encoder.classes_
         print(f"Feature vector size: {self.feature_vector_size}")
 
         training_dataset = torch.utils.data.Subset(
@@ -168,7 +169,9 @@ class TrainModelOnPeriod(TrainModelTask):
 
         print(f"Training model on {device} with learning rate {learning_rate}, num_epochs {num_epochs}, batch_size {batch_size}, number of epochs {num_epochs}, and early stopping patience {early_stopping_patience}")
         model = TorchLogisticRegression(
-            input_dim=self.feature_vector_size, output_dim=self.number_of_categories)
+            input_dim=self.feature_vector_size,
+            output_dim=self.number_of_categories
+        )
 
         model = model.to(device)
         print(f"Model moved to {device}: {next(model.parameters()).is_cuda}")
@@ -328,6 +331,7 @@ class TrainModelOnPeriod(TrainModelTask):
         self.model_trainer.fit(train_dataframe,
                                self.fit_model,
                                training_predictions_file,
+                               classes=self.classes,
                                device=device,
                                learning_rate=self.learning_rate,
                                num_epochs=self.number_of_epochs,

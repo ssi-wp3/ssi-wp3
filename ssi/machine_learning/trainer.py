@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Union, Tuple
+from typing import Any, Callable, Dict, Union, Tuple, List
 from sklearn.metrics import confusion_matrix
 from collections import defaultdict
 from ..files import batched_writer
@@ -88,24 +88,28 @@ class ModelTrainer:
             training_data: pd.DataFrame,
             training_function: Callable[[pd.DataFrame, str, str, str], Any],
             training_predictions_file: str,
-            **training_kwargs
+            classes: List[str],
+            ** training_kwargs
             ):
         self.pipeline = training_function(
             training_data, **training_kwargs)
         self.train_evaluation_dict = self.batch_predict(training_data,
                                                         training_predictions_file,
                                                         self.batch_predict_size,
+                                                        classes,
                                                         lambda dataframe: self.model_evaluator.evaluate_training(
                                                             dataframe)
                                                         )
 
     def predict(self,
                 predictions_data: pd.DataFrame,
-                predictions_file: str
+                predictions_file: str,
+                classes: List[str]
                 ):
         self.batch_predict(predictions_data,
                            predictions_file,
                            self.batch_predict_size,
+                           classes,
                            lambda dataframe: self.model_evaluator.evaluate(
                                dataframe)
                            )
@@ -119,6 +123,7 @@ class ModelTrainer:
                       predictions_data: pd.DataFrame,
                       predictions_file: str,
                       batch_size: int,
+                      classes: List[str],
                       evaluation_function: Callable[[
                           pd.DataFrame], Dict[str, Any]]
                       ) -> Dict[str, Any]:
@@ -132,6 +137,7 @@ class ModelTrainer:
                                               predicted_label_column=self._prediction_column),
                                           pipeline=self.pipeline,
                                           feature_column=self.features_column,
+                                          classes=classes,
                                           prediction_column=self.prediction_column)
         return evaluation_function(batch_statistics)
 
@@ -140,6 +146,7 @@ class ModelTrainer:
                   progress_bar: tqdm.tqdm,
                   pipeline,
                   feature_column: str,
+                  classes: List[str],
                   probability_column_prefix: str = "y_proba",
                   prediction_column: str = "y_pred") -> pd.DataFrame:
 
@@ -150,7 +157,7 @@ class ModelTrainer:
 
         probability_dict = defaultdict(list)
         for probability_vector in probabilities:
-            for class_label, probability_value in zip(pipeline.classes_, probability_vector):
+            for class_label, probability_value in zip(classes, probability_vector):
                 probability_dict[f"{probability_column_prefix}_{class_label}"].append(
                     probability_value)
 
