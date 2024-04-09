@@ -115,7 +115,7 @@ class ModelTrainer:
                            )
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
-        y_true = dataframe[label_column]
+        y_true = dataframe[label_column].idxmax(axis=1)
         y_pred = dataframe[predicted_label_column]
         print("y_true:", y_true[0], "y_pred:", y_pred[0])
         return pd.DataFrame(confusion_matrix(y_true, y_pred))
@@ -166,7 +166,7 @@ class ModelTrainer:
             batch_dataframe[column] = values
 
         batch_dataframe[prediction_column] = pipeline.predict(
-            X).tolist()
+            X)  # .tolist()
         return batch_dataframe
 
     def get_features(self, batch_dataframe, feature_column: str) -> Tuple[pd.DataFrame, pd.Series]:
