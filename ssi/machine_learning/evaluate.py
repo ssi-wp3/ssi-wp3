@@ -40,6 +40,7 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
 
 class ConfusionMatrix:
     def __init__(self, confusion_matrix: np.array):
+        # TODO: we have to seem N+1 classes, why?
         self.__true_positives, self.__false_positives, self.__true_negatives, self.__false_negatives = self._calculate_confusion_matrix_statistics(
             confusion_matrix)
 
