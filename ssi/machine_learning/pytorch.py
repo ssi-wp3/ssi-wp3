@@ -297,6 +297,9 @@ class TorchLogisticRegression(nn.Module):
         prediction = self.linear(x)
         return prediction
 
+    def predict_proba(self, x):
+        return F.softmax(self.forward(x), dim=1)
+
 
 class PytorchModel(Model):
     def __init__(self,
