@@ -49,6 +49,10 @@ class TrainModelTask(luigi.Task, ABC):
         return "training_predictions"
 
     @property
+    def training_evaluation_key(self) -> str:
+        return "training_evaluation"
+
+    @property
     def predictions_key(self) -> str:
         return "predictions"
 
@@ -68,6 +72,10 @@ class TrainModelTask(luigi.Task, ABC):
 
     @abstractproperty
     def training_predictions_filename(self) -> str:
+        pass
+
+    @abstractproperty
+    def training_evaluations_filename(self) -> str:
         pass
 
     @abstractproperty
@@ -101,6 +109,7 @@ class TrainModelTask(luigi.Task, ABC):
         return {
             self.model_key: luigi.LocalTarget(self.model_filename, format=luigi.format.Nop),
             self.training_predictions_key: luigi.LocalTarget(self.training_predictions_filename, format=luigi.format.Nop),
+            self.training_evaluation_key: luigi.LocalTarget(self.training_evaluations_filename, format=luigi.format.Nop),
             self.predictions_key: luigi.LocalTarget(self.predictions_filename, format=luigi.format.Nop),
             self.evaluation_key: luigi.LocalTarget(
                 self.evaluation_filename)
@@ -117,6 +126,10 @@ class TrainModelTask(luigi.Task, ABC):
         print("Training model & writing training predictions to disk")
         with self.output()[self.training_predictions_key].open("w") as training_predictions_file:
             self.train_model(train_dataframe, training_predictions_file)
+
+        print("Writing training evaluation to disk")
+        with self.output()[self.training_evaluation_key].open("w") as evaluation_file:
+            self.model_trainer.write_training_evaluation(evaluation_file)
 
         print("Writing test predictions to disk")
         with self.output()[self.predictions_key].open("w") as predictions_file:

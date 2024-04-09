@@ -69,6 +69,10 @@ class TrainModelOnPeriod(TrainModelTask):
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_predictions.parquet")
 
     @property
+    def training_evaluation_filename(self) -> str:
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_evaluation.json")
+
+    @property
     def predictions_filename(self) -> str:
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
 

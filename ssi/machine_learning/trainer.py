@@ -106,13 +106,13 @@ class ModelTrainer:
                 predictions_file: str,
                 classes: List[str]
                 ):
-        self.batch_predict(predictions_data,
-                           predictions_file,
-                           self.batch_predict_size,
-                           classes,
-                           lambda dataframe: self.model_evaluator.evaluate(
-                               dataframe)
-                           )
+        self.evaluation_dict = self.batch_predict(predictions_data,
+                                                  predictions_file,
+                                                  self.batch_predict_size,
+                                                  classes,
+                                                  lambda dataframe: self.model_evaluator.evaluate(
+                                                      dataframe)
+                                                  )
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
         y_true = dataframe[f"{label_column}_index"].apply(
