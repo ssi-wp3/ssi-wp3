@@ -298,7 +298,7 @@ class TorchLogisticRegression(nn.Module):
         return prediction
 
     def predict_proba(self, x):
-        return F.softmax(self.forward(torch.from_numpy(x).to("cuda:0")), dim=1).cpu()
+        return F.softmax(self.forward(torch.from_numpy(x).to("cuda:0")), dim=1).cpu().detach()
 
 
 class PytorchModel(Model):
