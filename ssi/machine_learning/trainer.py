@@ -116,9 +116,8 @@ class ModelTrainer:
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
         y_true = dataframe[label_column].apply(
-            lambda cell: cell.argmax())  # .idxmax(axis=1)
+            lambda cell: cell.argmax())
         y_pred = dataframe[predicted_label_column]
-        print("y_true:", y_true[0], "y_pred:", y_pred[0])
         return pd.DataFrame(confusion_matrix(y_true, y_pred))
 
     def batch_predict(self,
