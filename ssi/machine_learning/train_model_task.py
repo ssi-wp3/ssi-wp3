@@ -6,6 +6,7 @@ from .trainer import ModelTrainer
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 import pandas as pd
 import luigi
+import os
 
 
 class TrainModelTask(luigi.Task, ABC):
@@ -53,6 +54,13 @@ class TrainModelTask(luigi.Task, ABC):
     @property
     def evaluation_key(self) -> str:
         return "evaluation"
+
+    @property
+    def model_directory(self) -> str:
+        # Create directory for our models
+        model_directory = os.path.join(self.output_directory, self.model_type)
+        date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        return os.path.join(model_directory, date_time)
 
     @abstractproperty
     def training_predictions_filename(self) -> str:

@@ -66,19 +66,19 @@ class TrainModelOnPeriod(TrainModelTask):
 
     @property
     def training_predictions_filename(self) -> str:
-        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_predictions.parquet")
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_predictions.parquet")
 
     @property
     def predictions_filename(self) -> str:
-        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
 
     @property
     def model_filename(self) -> str:
-        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
 
     @property
     def evaluation_filename(self) -> str:
-        return os.path.join(self.output_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
 
     def get_data_for_period(self, input_file) -> pd.DataFrame:
         print(
@@ -164,6 +164,12 @@ class TrainModelOnPeriod(TrainModelTask):
                   num_epochs: int,
                   batch_size: int,
                   early_stopping_patience: int) -> Any:
+
+        # Create directory for our models
+        date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        model_directory = os.path.join(self.output_directory, date_time)
+        if not os.path.exists(model_directory):
+            os.makedirs(model_directory)
 
         # experiment = Experiment()
 
@@ -271,13 +277,6 @@ class TrainModelOnPeriod(TrainModelTask):
         # Score function to return current value of any metric we defined above in val_metrics
         def score_function(engine):
             return engine.state.metrics["accuracy"]
-
-        # Checkpoint to store n_saved best models wrt score function
-        model_directory = os.path.join(self.output_directory, "models")
-        date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
-        model_directory = os.path.join(model_directory, date_time)
-        if not os.path.exists(model_directory):
-            os.makedirs(model_directory)
 
         model_checkpoint = ModelCheckpoint(
             model_directory,
