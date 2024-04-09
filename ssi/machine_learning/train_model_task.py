@@ -75,7 +75,7 @@ class TrainModelTask(luigi.Task, ABC):
         pass
 
     @abstractproperty
-    def training_evaluations_filename(self) -> str:
+    def training_evaluation_filename(self) -> str:
         pass
 
     @abstractproperty
