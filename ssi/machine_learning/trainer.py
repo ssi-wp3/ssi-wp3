@@ -170,15 +170,15 @@ class ModelTrainer:
         print("batch_dataframe feature tensor shape:",
               batch_dataframe[0][0].numpy().shape)
         # TODO check why X is a tuple instead of a tensor?
-        X = np.vstack([batch[0].numpy() for batch in batch_dataframe])
-        y = np.vstack([batch[1].numpy() for batch in batch_dataframe])
+        X = [batch[0].numpy() for batch in batch_dataframe]
+        y = [batch[1].numpy() for batch in batch_dataframe]
 
         print("X shape", X.shape, "y shape", y.shape)
         dataframe = pd.DataFrame({
             feature_column: X,
             self.label_column: y
         })
-        return dataframe, X
+        return dataframe, np.vstack(X)
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)
