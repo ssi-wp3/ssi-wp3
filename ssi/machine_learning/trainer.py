@@ -170,6 +170,8 @@ class ModelTrainer:
         # TODO check why X is a tuple instead of a tensor?
         X = np.concatenate([batch[0].numpy() for batch in batch_dataframe])
         y = np.concatenate([batch[1].numpy() for batch in batch_dataframe])
+
+        print("X shape", X.shape, "y shape", y.shape)
         dataframe = pd.DataFrame({
             feature_column: X,
             self.label_column: y
