@@ -183,8 +183,8 @@ class ModelTrainer:
         dataframe = pd.DataFrame({
             feature_column: X,
             f"{self.label_column}_index": y,
-            self.label_column: [
-                classes[class_index.argmax(axis=1)] for class_index in y]
+            self.label_column: [classes[class_index.argmax()]
+                                for class_index in y]
         })
         return dataframe, np.vstack(X)
 
