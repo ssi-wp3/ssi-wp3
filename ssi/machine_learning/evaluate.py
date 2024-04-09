@@ -30,7 +30,7 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
 
         confusion_matrix = ConfusionMatrix(dataframe)
 
-        return {"confusion_matrix": confusion_matrix,
+        return {"confusion_matrix": confusion_matrix.to_dict(),
                 "precision": confusion_matrix.precision_score,
                 "recall": confusion_matrix.recall_score,
                 "f1_score": confusion_matrix.f1_score,
@@ -143,6 +143,14 @@ class ConfusionMatrix:
         TN = np.array(TN)
 
         return (TP, FP, TN, FN)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "true_positive": self.true_positive,
+            "false_positive": self.false_positive,
+            "true_negative": self.true_negative,
+            "false_negative": self.false_negative,
+        }
 
 
 def get_labels_and_predictions(dataframe: pd.DataFrame, label_column: str, column_prefix: str = "predict_") -> pd.DataFrame:
