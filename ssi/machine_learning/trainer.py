@@ -5,7 +5,7 @@ from ..files import batched_writer
 from .evaluate import ModelEvaluator
 import torch
 import pandas as pd
-import json
+import simplejson
 import joblib
 import tqdm
 import numpy as np
@@ -192,7 +192,9 @@ class ModelTrainer:
         joblib.dump(self.pipeline, model_file)
 
     def write_training_evaluation(self, evaluation_file):
-        json.dump(self.train_evaluation_dict, evaluation_file)
+        simplejson.dump(self.train_evaluation_dict,
+                        evaluation_file, indent=4, sort_keys=True, ignore_nan=True)
 
     def write_evaluation(self, evaluation_file):
-        json.dump(self.evaluation_dict, evaluation_file)
+        simplejson.dump(self.evaluation_dict, evaluation_file,
+                        indent=4, sort_keys=True, ignore_nan=True)
