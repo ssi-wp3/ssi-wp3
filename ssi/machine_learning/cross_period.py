@@ -345,11 +345,6 @@ class TrainModelOnPeriod(TrainModelTask):
         self.model_trainer.predict(predictions_dataframe,
                                    predictions_file,
                                    classes=self.classes,
-                                   device=device,
-                                   learning_rate=self.learning_rate,
-                                   num_epochs=self.number_of_epochs,
-                                   batch_size=self.batch_size,
-                                   early_stopping_patience=3
                                    )
 
     def run(self):
