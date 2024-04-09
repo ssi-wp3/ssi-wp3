@@ -25,6 +25,7 @@ class TrainModelTask(luigi.Task, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__model_trainer = None
+        self.__start_date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
 
     @property
     def model_trainer(self) -> ModelTrainer:
@@ -38,6 +39,10 @@ class TrainModelTask(luigi.Task, ABC):
                 parquet_engine=self.parquet_engine
             )
         return self.__model_trainer
+
+    @property
+    def start_date_time(self) -> str:
+        return self.__start_date_time
 
     @property
     def training_predictions_key(self) -> str:
@@ -59,8 +64,7 @@ class TrainModelTask(luigi.Task, ABC):
     def model_directory(self) -> str:
         # Create directory for our models
         model_directory = os.path.join(self.output_directory, self.model_type)
-        date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
-        return os.path.join(model_directory, date_time)
+        return os.path.join(model_directory, self.start_date_time)
 
     @abstractproperty
     def training_predictions_filename(self) -> str:

@@ -165,12 +165,6 @@ class TrainModelOnPeriod(TrainModelTask):
                   batch_size: int,
                   early_stopping_patience: int) -> Any:
 
-        # Create directory for our models
-        date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
-        model_directory = os.path.join(self.output_directory, date_time)
-        if not os.path.exists(model_directory):
-            os.makedirs(model_directory)
-
         # experiment = Experiment()
 
         print(f"Training model on {device} with learning rate {learning_rate}, num_epochs {num_epochs}, batch_size {batch_size}, number of epochs {num_epochs}, and early stopping patience {early_stopping_patience}")
@@ -279,7 +273,7 @@ class TrainModelOnPeriod(TrainModelTask):
             return engine.state.metrics["accuracy"]
 
         model_checkpoint = ModelCheckpoint(
-            model_directory,
+            self.model_directory,
             n_saved=2,
             filename_prefix="best",
             score_function=score_function,
