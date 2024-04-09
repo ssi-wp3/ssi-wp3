@@ -170,8 +170,8 @@ class ModelTrainer:
         print("batch_dataframe feature tensor shape:",
               batch_dataframe[0][0].numpy().shape)
         # TODO check why X is a tuple instead of a tensor?
-        X = np.concatenate([batch[0].numpy() for batch in batch_dataframe])
-        y = np.concatenate([batch[1].numpy() for batch in batch_dataframe])
+        X = np.vstack([batch[0].numpy() for batch in batch_dataframe])
+        y = np.vstack([batch[1].numpy() for batch in batch_dataframe])
 
         print("X shape", X.shape, "y shape", y.shape)
         dataframe = pd.DataFrame({
