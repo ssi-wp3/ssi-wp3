@@ -96,7 +96,7 @@ class ParquetDataset(torch.utils.data.Dataset):
     def label_encoder(self) -> LabelEncoder:
         """ Returns the label encoder used to encode the target column.
         The labels are string values and need to be converted into integer
-         labels that can be used by the machine learning algorithms. We use 
+         labels that can be used by the machine learning algorithms. We use
         the LabelEncoder class from scikit-learn to perform this encoding.
 
         Labels are encoded when the ParquetDataset is created.
@@ -127,7 +127,7 @@ class ParquetDataset(torch.utils.data.Dataset):
     @property
     def number_of_classes(self) -> int:
         """ Returns the number of classes in the target column.
-        The number of classes is determined by the number of 
+        The number of classes is determined by the number of
         unique classes determined by the LabelEncoder.
 
         Returns
@@ -159,7 +159,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         return label_encoder
 
     def number_of_rows_in_row_group(self, row_group_index: int) -> int:
-        """ Get the number of rows in a row group. The number of rows 
+        """ Get the number of rows in a row group. The number of rows
         in a row group is determined from the metadata of the Parquet file.
 
         Parameters
@@ -176,12 +176,12 @@ class ParquetDataset(torch.utils.data.Dataset):
 
     def get_row_group_for_index(self, index: int) -> Tuple[int, int]:
         """ Get the row group index and the index within the row group for a given index.
-        To get the row group index, we first create a cumulative row index list in the 
+        To get the row group index, we first create a cumulative row index list in the
         cumulative_row_index property. This list is created only once and then cached.
         After that, we use a binary search to find the row group index for a given index.
         The binary search is performed by using the bisect_right function from the bisect module.
-        The bisect_right function returns the row group index for the given index. The index within 
-        the row group is calculated by subtracting the cumulative number of rows in the 
+        The bisect_right function returns the row group index for the given index. The index within
+        the row group is calculated by subtracting the cumulative number of rows in the
         previous row groups from the index passed as parameter.
 
         Parameters
@@ -231,7 +231,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         """ Process a sample of rows from the Parquet file. The process_sample method
         takes the feature_column and the label_column from the sample and converts them
         into PyTorch tensors. The feature_column is converted into a PyTorch tensor of
-        type float32. The label_column is one-hot encoded. 
+        type float32. The label_column is one-hot encoded.
 
         Parameters
         ----------
@@ -298,22 +298,22 @@ class TorchLogisticRegression(nn.Module):
         return prediction
 
     def predict_proba(self, x):
-        return F.softmax(self.forward(x), dim=1)
+        return F.softmax(self.forward(torch.from_numpy(x), dim=1)
 
 
 class PytorchModel(Model):
     def __init__(self,
                  model):
         super().__init__(model)
-        self.__classifier = None
+        self.__classifier=None
 
-    @property
+    @ property
     def classifier(self):
         return self.__classifier
 
-    @classifier.setter
+    @ classifier.setter
     def classifier(self, value):
-        self.__classifier = value
+        self.__classifier=value
 
     # TODO: this should use fit(dataset) instead of fit(X, y)
     # See: https://skorch.readthedocs.io/en/stable/user/FAQ.html#faq-how-do-i-use-a-pytorch-dataset-with-skorch
@@ -322,9 +322,9 @@ class PytorchModel(Model):
             batch_size: int,
             lr: float,
             test_size: float,
-            iterator_train__shuffle: bool = True,
+            iterator_train__shuffle: bool=True,
             **kwargs):
-        self.classifier = NeuralNetClassifier(
+        self.classifier=NeuralNetClassifier(
             self.model,
             max_epochs=max_epochs,
             batch_size=batch_size,
@@ -342,9 +342,9 @@ class PytorchModel(Model):
             batch_size: int,
             lr: float,
             test_size: float,
-            iterator_train__shuffle: bool = True,
+            iterator_train__shuffle: bool=True,
             **kwargs):
-        self.classifier = NeuralNetClassifier(
+        self.classifier=NeuralNetClassifier(
             self.model,
             max_epochs=max_epochs,
             batch_size=batch_size,
