@@ -224,11 +224,11 @@ class ParquetDataset(torch.utils.data.Dataset):
         feature_tensor = torch.tensor(
             sample[self.feature_column], dtype=torch.float32)
 
-        label_vector = sample[self.target_column].values.tolist()
-        mapped_label_vector = [self.label_mapping[label]
-                               for label in label_vector]
+        label_vector = sample[self.target_column]
+        mapped_label = self.label_mapping[label_vector]
+
         label_tensor = torch.tensor(
-            mapped_label_vector, dtype=torch.long)
+            mapped_label, dtype=torch.long)
 
         one_hot_label = F.one_hot(
             label_tensor, num_classes=self.number_of_classes).float()
