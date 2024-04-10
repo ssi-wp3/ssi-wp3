@@ -301,7 +301,7 @@ class TrainModelOnPeriod(TrainModelTask):
         model_checkpoint = ModelCheckpoint(
             self.model_directory,
             n_saved=2,
-            filename_prefix="best",
+            filename_prefix=f"{self.model_type}_{self.label_column}_{self.train_period}_",
             score_function=score_function,
             score_name="accuracy",
             global_step_transform=global_step_from_engine(
