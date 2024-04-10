@@ -227,7 +227,7 @@ class ParquetDataset(torch.utils.data.Dataset):
 
         additional_columns = sample.drop(
             columns=[self.feature_column, self.target_column])
-        print("Additional columns:", additional_columns)
+        print("feature column:", self.feature_column)
 
         return feature_tensor, label_tensor, additional_columns
 
