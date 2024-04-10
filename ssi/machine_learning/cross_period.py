@@ -125,9 +125,13 @@ class TrainModelOnPeriod(TrainModelTask):
             [self.receipt_text_column, self.label_column])
         self.number_of_categories = training_dataframe[self.label_column].nunique(
         )
+        print(
+            f"Number of categories in training data: {self.number_of_categories}")
 
         testing_dataframe = dataframe[dataframe[self.period_column] != self.train_period].drop_duplicates(
             [self.receipt_text_column, self.label_column])
+        print(
+            f"Number of categories in testing data: {testing_dataframe[self.label_column].nunique()}")
 
         parquet_dataset = ParquetDataset(
             self.input().open(), self.features_column, self.label_column, memory_map=True)
