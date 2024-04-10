@@ -184,8 +184,7 @@ class ModelTrainer:
         dataframe = pd.DataFrame({
             feature_column: X,
             f"{self.label_column}_index": y,
-            self.label_column: [label_encoder.inverse_transform(class_index.argmax())
-                                for class_index in y]
+            self.label_column: label_encoder.inverse_transform(y)
         })
         return dataframe, np.vstack(X)
 
