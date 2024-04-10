@@ -250,10 +250,11 @@ class ParquetDataset(torch.utils.data.Dataset):
         label_tensor = torch.tensor(
             self.label_encoder.transform(label_vector), dtype=torch.long)
 
-        one_hot_label = F.one_hot(label_tensor[0], num_classes=len(
-            self.label_encoder.classes_)).float()
+        one_hot_label = F.one_hot(
+            label_tensor[0], num_classes=5).float()  # len(
+        #  self.label_encoder.classes_)).float()
 
-        return feature_tensor, label_tensor[0].long()  # one_hot_label
+        return feature_tensor, one_hot_label
 
     def __getitem__(self, index):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
