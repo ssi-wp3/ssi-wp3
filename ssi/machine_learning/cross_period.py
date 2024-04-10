@@ -192,7 +192,7 @@ class TrainModelOnPeriod(TrainModelTask):
             train_dataframe, [training_size, val_size])
 
         def collate_fn(batch):
-            print(batch)
+            print(len(batch))
             return batch
 
         print("Creating DataLoaders")
