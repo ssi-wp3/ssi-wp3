@@ -243,11 +243,6 @@ class TrainModelOnPeriod(TrainModelTask):
             device=device
         )
 
-        def label_transform(output):
-            y_pred, y = output
-            return y_pred, y
-
-        # TODO pass as argument
         val_metrics = {
             "accuracy": Accuracy(),
             "precision": Precision(average="weighted"),
