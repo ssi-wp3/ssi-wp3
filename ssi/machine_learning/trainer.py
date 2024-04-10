@@ -183,7 +183,7 @@ class ModelTrainer:
 
         # TODO this concats the series into the wrong direction, fix this
         addition_columns_df = pd.concat(
-            [batch[2].to_frame().transpose() for batch in batch_dataframe])
+            [batch[2].to_frame().transpose() for batch in batch_dataframe]).reset_index(drop=True)
 
         print("Addition columns df:", addition_columns_df.columns)
         print("Additional columns:", addition_columns_df.head())
