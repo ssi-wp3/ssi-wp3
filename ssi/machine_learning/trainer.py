@@ -179,13 +179,13 @@ class ModelTrainer:
 
         # TODO check why X is a tuple instead of a tensor?
         X = [batch[0].numpy() for batch in batch_dataframe]
-        y = [batch[1].numpy() for batch in batch_dataframe]
+        y = [batch[1].numpy().argmax(axis=1) for batch in batch_dataframe]
 
         dataframe = pd.DataFrame({
             feature_column: X,
             f"{self.label_column}_index": y,
             self.label_column: label_encoder.inverse_transform(
-                y.argmax(axis=1))
+                y)
         })
         return dataframe, np.vstack(X)
 
