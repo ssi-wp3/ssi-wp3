@@ -161,6 +161,17 @@ class TrainModelOnPeriod(TrainModelTask):
 
         return training_dataset, testing_dataset
 
+    def loss_with_regularization(y_pred, y, model, lambda_reg, order=2, criterion=F.cross_entropy):
+        loss = criterion(y_pred, y)
+
+        # Add L2 regularization
+        lx_norm_reg = 0.0
+        for param in model.parameters():
+            lx_norm_reg += torch.norm(param, ord=order)
+        loss += lambda_reg * lx_norm_reg
+
+        return loss
+
     def fit_model(self,
                   train_dataframe: pd.DataFrame,
                   device: str,
