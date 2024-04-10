@@ -191,7 +191,8 @@ class ModelTrainer:
         return dataframe, np.vstack(X)
 
     def inverse_transform(self, labels: np.ndarray, label_mapping: Dict[str, int]) -> np.ndarray:
-        return np.array([list(label_mapping.keys())[label] for label in labels])
+        keys = list(label_mapping.keys())
+        return [keys[label] for label in labels]
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)
