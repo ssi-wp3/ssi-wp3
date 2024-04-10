@@ -302,6 +302,7 @@ class TorchLogisticRegression(nn.Module):
         return y_proba.argmax(axis=1)  # dim=1, keepdim=True)
 
     def predict_proba(self, x):
+        print("predict proba")
         return F.softmax(self.forward(torch.from_numpy(x).to("cuda:0")), dim=1).cpu().detach().numpy()
 
 
