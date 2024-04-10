@@ -6,6 +6,7 @@ from ..parquet_file import ParquetFile
 from .train_model_task import TrainModelTask
 from .pytorch import ParquetDataset, TorchLogisticRegression
 from collections import OrderedDict
+from functools import partial
 import torch
 import torch.optim as optim
 from torch.nn import functional as F
@@ -233,13 +234,13 @@ class TrainModelOnPeriod(TrainModelTask):
 
         print("Creating trainers and evaluators")
 
-        def loss_function(y_pred, y):
-            return criterion(y_pred, y)
+        loss_function = partial(
+            self.loss_with_regularization, order=2, lambda_reg=0.01)
 
         train_engine = create_supervised_trainer(
             model,
             optimizer=optimizer,
-            loss_fn=criterion,
+            loss_fn=loss_function,
             device=device
         )
 
