@@ -192,8 +192,11 @@ class TrainModelOnPeriod(TrainModelTask):
             train_dataframe, [training_size, val_size])
 
         def collate_fn(batch):
-            print(len(batch))
-            return batch
+            features, labels, _ = zip(*batch)
+
+            features = torch.stack(features)
+            labels = torch.tensor(labels)
+            return features, labels
 
         print("Creating DataLoaders")
         train_loader = DataLoader(
