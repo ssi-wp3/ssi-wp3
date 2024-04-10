@@ -235,7 +235,7 @@ class TrainModelOnPeriod(TrainModelTask):
             return loss
 
         loss_function = partial(
-            loss_with_regularization, model=model, lambda_reg=0.01, order=2)
+            loss_with_regularization, model=model, lambda_reg=0.001, order=2)
 
         train_engine = create_supervised_trainer(
             model,
