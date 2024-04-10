@@ -147,9 +147,9 @@ class ConfusionMatrix:
 
         For more info see: https://stackoverflow.com/questions/48100173/how-to-get-precision-recall-and-f-measure-from-confusion-matrix-in-python
         """
-        TP = np.diag(confusion_matrix)
-        FP = np.sum(confusion_matrix, axis=0) - TP
-        FN = np.sum(confusion_matrix, axis=1) - TP
+        TP = np.nan_to_num(np.diag(confusion_matrix))
+        FP = np.nan_to_num(np.sum(confusion_matrix, axis=0) - TP)
+        FN = np.nan_to_num(np.sum(confusion_matrix, axis=1) - TP)
 
         # True negatives
         num_classes = confusion_matrix.shape[0]
@@ -159,7 +159,7 @@ class ConfusionMatrix:
             temp = np.delete(confusion_matrix, i, axis=0)    # delete ith row
             temp = np.delete(temp, i, axis=1)
             TN.append(sum(sum(temp)))
-        TN = np.array(TN)
+        TN = np.nan_to_num(np.array(TN))
 
         return (TP, FP, TN, FN)
 
