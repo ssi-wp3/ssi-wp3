@@ -226,7 +226,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
         def label_transform(output):
             y_pred, y = output
-            return y_pred, torch.argmax(y, dim=1)
+            return y_pred, y
 
         # TODO pass as argument
         val_metrics = {

@@ -230,11 +230,6 @@ class ParquetDataset(torch.utils.data.Dataset):
         label_tensor = torch.tensor(
             mapped_label, dtype=torch.long)
 
-        one_hot_label = F.one_hot(
-            label_tensor, num_classes=self.number_of_classes).float()
-
-        print("one_hot_label: ", one_hot_label.shape)
-
         return feature_tensor, label_tensor
 
     def __getitem__(self, index):
