@@ -169,8 +169,9 @@ class ModelTrainer:
         for column, values in probability_dict.items():
             batch_dataframe[column] = values
 
-        batch_dataframe[prediction_column] = pipeline.predict(
-            X)
+        y_pred = pipeline.predict(X)
+        print("Prediction size: ", len(y_pred))
+        batch_dataframe[prediction_column] = y_pred
         return batch_dataframe
 
     def get_features(self, batch_dataframe, feature_column: str, label_encoder: LabelEncoder) -> Tuple[pd.DataFrame, pd.Series]:
