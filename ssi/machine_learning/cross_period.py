@@ -148,13 +148,13 @@ class TrainModelOnPeriod(TrainModelTask):
 
         # Test dataset can have more categories than the training dataset, add them add the end of the mapping
         # In this way, we preserve the original label->index mapping for the training dataset
-        test_label_mapping = self.train_label_mapping
+        self.test_label_mapping = self.train_label_mapping
         for label in testing_dataframe[self.label_column].unique():
-            if label not in test_label_mapping:
-                test_label_mapping[label] = len(test_label_mapping)
+            if label not in self.test_label_mapping:
+                self.test_label_mapping[label] = len(self.test_label_mapping)
 
         test_dataset = ParquetDataset(self.input().open(
-        ), self.features_column, self.label_column, label_mapping=test_label_mapping, memory_map=True)
+        ), self.features_column, self.label_column, label_mapping=self.test_label_mapping, memory_map=True)
 
         testing_dataset = torch.utils.data.Subset(
             test_dataset, testing_dataframe.index)
