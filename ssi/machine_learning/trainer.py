@@ -183,6 +183,8 @@ class ModelTrainer:
         X = [batch[0].numpy() for batch in batch_dataframe]
         y = [batch[1].numpy() for batch in batch_dataframe]
 
+        print("y_true", y)
+
         dataframe = pd.DataFrame({
             feature_column: X,
             f"{self.label_column}_index": y,
