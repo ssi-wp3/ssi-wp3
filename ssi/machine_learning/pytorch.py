@@ -251,8 +251,7 @@ class ParquetDataset(torch.utils.data.Dataset):
             self.label_encoder.transform(label_vector), dtype=torch.long)
 
         one_hot_label = F.one_hot(
-            label_tensor[0], num_classes=5).float()  # len(
-        #  self.label_encoder.classes_)).float()
+            label_tensor[0], num_classes=len(self.label_encoder.classes_)).float()
 
         return feature_tensor, one_hot_label
 
