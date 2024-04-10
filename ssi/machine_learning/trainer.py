@@ -119,8 +119,8 @@ class ModelTrainer:
         y_true = dataframe[f"{label_column}_index"]
         y_pred = dataframe[predicted_label_column]
 
-        print(f"y_true: {y_true.nunique()}")
-        print(f"y_pred: {y_pred.nunique()}")
+        print(f"y_true: {y_true.unique()}")
+        print(f"y_pred: {y_pred.unique()}")
         return pd.DataFrame(confusion_matrix(y_true, y_pred))
 
     def batch_predict(self,
@@ -182,8 +182,6 @@ class ModelTrainer:
 
         X = [batch[0].numpy() for batch in batch_dataframe]
         y = [batch[1].int() for batch in batch_dataframe]
-
-        print("len y: ", len(y))
 
         dataframe = pd.DataFrame({
             feature_column: X,
