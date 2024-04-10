@@ -181,6 +181,7 @@ class ModelTrainer:
         X = [batch[0].numpy() for batch in batch_dataframe]
         y = [batch[1].item() for batch in batch_dataframe]
 
+        # TODO this concats the series into the wrong direction, fix this
         addition_columns_df = pd.concat(
             [batch[2].to_frame() for batch in batch_dataframe])
 
