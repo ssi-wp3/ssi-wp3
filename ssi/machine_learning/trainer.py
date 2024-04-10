@@ -194,6 +194,9 @@ class ModelTrainer:
 
         # merge dataframes
         dataframe = pd.concat([dataframe, addition_columns_df], axis=1)
+
+        print("legnth of batch_dataframe:", len(batch_dataframe))
+        print("length of y:", len(y))
         dataframe[f"{self.label_column}_index"] = y
         dataframe[self.label_column] = self.inverse_transform(y, label_mapping)
         return dataframe, np.vstack(X)
