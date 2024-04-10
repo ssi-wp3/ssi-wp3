@@ -279,8 +279,28 @@ class TorchLogisticRegression(nn.Module):
 
     def predict(self, x):
         y_proba = self.predict_proba(x)
-        print("y_proba: ", y_proba.shape)
         return y_proba.argmax(axis=1)  # dim=1, keepdim=True)
+
+    def predict_proba(self, x):
+        return F.softmax(self.forward(torch.from_numpy(x).to("cuda:0")), dim=1).cpu().detach().numpy()
+
+
+class TorchMLP(nn.Module):
+    def __init__(self, input_dim: int, output_dim: int, hidden_dim: int = 100):
+        super().__init__()
+        self.linear1 = nn.Linear(
+            in_features=input_dim, out_features=hidden_dim)
+        self.linear2 = nn.Linear(
+            in_features=hidden_dim, out_features=output_dim)
+
+    def forward(self, x):
+        x = F.relu(self.linear1(x))
+        x = self.linear2(x)
+        return x
+
+    def predict(self, x):
+        y_proba = self.predict_proba(x)
+        return y_proba.argmax(axis=1)
 
     def predict_proba(self, x):
         return F.softmax(self.forward(torch.from_numpy(x).to("cuda:0")), dim=1).cpu().detach().numpy()
