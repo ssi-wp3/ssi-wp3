@@ -109,8 +109,11 @@ class ConfusionMatrix:
         np.array
             An array of F1 scores for each class.
         """
-        f1_values = 2 * (self.precision_score * self.recall_score) / \
-            (self.precision_score + self.recall_score)
+        precision_scores = np.array(list(self.precision_score.values()))
+        recall_scores = np.array(list(self.recall_score.values()))
+
+        f1_values = 2 * (precision_scores * recall_scores) / \
+            (precision_scores + recall_scores)
         return self.__add_labels(f1_values)
 
     @property
