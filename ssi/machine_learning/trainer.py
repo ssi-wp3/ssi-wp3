@@ -117,7 +117,7 @@ class ModelTrainer:
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
         y_true = dataframe[f"{label_column}_index"]
-        y_pred = dataframe[predicted_label_column]
+        y_pred = dataframe[f"{predicted_label_column}_index"]
 
         print(f"y_true: {y_true.unique()}")
         print(f"y_pred: {y_pred.unique()}")
@@ -170,8 +170,9 @@ class ModelTrainer:
             batch_dataframe[column] = values
 
         y_pred = pipeline.predict(X)
-        print("Prediction size: ", np.unique(y_pred))
-        batch_dataframe[prediction_column] = y_pred
+        batch_dataframe[f"{prediction_column}_index"] = y_pred
+        batch_dataframe[prediction_column] = self.inverse_transform(
+            y_pred, label_mapping)
         return batch_dataframe
 
     def get_features(self, batch_dataframe, feature_column: str, label_mapping: Dict[str, int]) -> Tuple[pd.DataFrame, pd.Series]:
