@@ -184,6 +184,7 @@ class ModelTrainer:
         addition_columns_df = pd.concat(
             [batch[2] for batch in batch_dataframe])
 
+        print("Addition columns df:", addition_columns_df.columns)
         dataframe = pd.DataFrame({
             feature_column: X,
         })
