@@ -1,4 +1,5 @@
 from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.preprocessing import LabelEncoder
 from typing import List, Dict, Any, Union, Tuple
 from abc import ABC, abstractmethod
 from functools import reduce
@@ -12,37 +13,42 @@ import numpy as np
 
 class ModelEvaluator(ABC):
     @abstractmethod
-    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
+    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder: LabelEncoder) -> Dict[str, Any]:
         pass
 
     @abstractmethod
-    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
+    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder: LabelEncoder) -> Dict[str, Any]:
         pass
 
 
 class ConfusionMatrixEvaluator(ModelEvaluator):
-    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
-        return self.evaluate(dataframe)
+    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder: LabelEncoder) -> Dict[str, Any]:
+        return self.evaluate(dataframe, label_encoder)
 
-    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame]) -> Dict[str, Any]:
+    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder) -> Dict[str, Any]:
         if isinstance(dataframe, list):
             dataframe = reduce(lambda x, y: x.add(y), dataframe)
 
-        confusion_matrix = ConfusionMatrix(dataframe)
+        confusion_matrix = ConfusionMatrix(dataframe, label_encoder)
 
         return {"confusion_matrix": confusion_matrix.to_dict(),
-                "precision": confusion_matrix.precision_score.tolist(),
-                "recall": confusion_matrix.recall_score.tolist(),
-                "f1_score": confusion_matrix.f1_score.tolist(),
-                "accuracy": confusion_matrix.accuracy_score.tolist()
+                "precision": confusion_matrix.precision_score,
+                "recall": confusion_matrix.recall_score,
+                "f1_score": confusion_matrix.f1_score,
+                "accuracy": confusion_matrix.accuracy_score
                 }
 
 
 class ConfusionMatrix:
-    def __init__(self, confusion_matrix: np.array):
+    def __init__(self, confusion_matrix: np.array, label_encoder: LabelEncoder):
         # TODO: we have to seem N+1 classes, why?
+        self.__label_encoder = label_encoder
         self.__true_positives, self.__false_positives, self.__true_negatives, self.__false_negatives = self._calculate_confusion_matrix_statistics(
             confusion_matrix)
+
+    @property
+    def label_encoder(self) -> LabelEncoder:
+        return self.__label_encoder
 
     @property
     def true_positive(self) -> np.array:
@@ -61,7 +67,7 @@ class ConfusionMatrix:
         return self.__false_negatives
 
     @property
-    def precision_score(self) -> np.array:
+    def precision_score(self) -> Dict[str, float]:
         """ Calculate the precision score for each class. The precision is calculated
         as the number of true positives divided by the sum of true positives and false positives:
 
@@ -70,12 +76,14 @@ class ConfusionMatrix:
         Returns:
         --------
         np.array
-            An array of precision scores for each class. 
+            An array of precision scores for each class.
         """
-        return self.true_positive / (self.true_positive + self.false_positive)
+        precision_values = self.true_positive / \
+            (self.true_positive + self.false_positive)
+        return self.__add_labels(precision_values)
 
     @property
-    def recall_score(self) -> np.array:
+    def recall_score(self) -> Dict[str, float]:
         """ Calculate the recall score for each class. The recall
         is calculated as the number of true positives divided by the sum of true positives and false negatives:
 
@@ -84,12 +92,14 @@ class ConfusionMatrix:
         Returns:
         --------
         np.array
-            An array of recall scores for each class.   
+            An array of recall scores for each class.
         """
-        return self.true_positive / (self.true_positive + self.false_negative)
+        recall_values = self.true_positive / \
+            (self.true_positive + self.false_negative)
+        return self.__add_labels(recall_values)
 
     @property
-    def f1_score(self) -> np.array:
+    def f1_score(self) -> Dict[str, float]:
         """ Calculate the F1 score for each class. The F1 score is the harmonic mean of the precision and recall:
 
         F1 = 2 * (precision * recall) / (precision + recall)
@@ -99,10 +109,12 @@ class ConfusionMatrix:
         np.array
             An array of F1 scores for each class.
         """
-        return 2 * (self.precision_score * self.recall_score) / (self.precision_score + self.recall_score)
+        f1_values = 2 * (self.precision_score * self.recall_score) / \
+            (self.precision_score + self.recall_score)
+        return self.__add_labels(f1_values)
 
     @property
-    def accuracy_score(self) -> np.array:
+    def accuracy_score(self) -> Dict[str, float]:
         """ Calculate the accuracy score for each class. The accuracy score is calculated as the sum of true positives and true negatives divided by the sum of true positives, true negatives, false positives, and false negatives:
 
         accuracy = (TP + TN) / (TP + TN + FP + FN)
@@ -112,10 +124,12 @@ class ConfusionMatrix:
         np.array
             An array of accuracy scores for each class.
         """
-        return (self.true_positive + self.true_negative) / (self.true_positive + self.true_negative + self.false_positive + self.false_negative)
+        accuracy_values = (self.true_positive + self.true_negative) / (
+            self.true_positive + self.true_negative + self.false_positive + self.false_negative)
+        return self.__add_labels(accuracy_values)
 
     def _calculate_confusion_matrix_statistics(self, confusion_matrix: np.array) -> Tuple[np.array, np.array, np.array, np.array]:
-        """ Takes a multi-class confusion matrix and returns the statistics for each class. 
+        """ Takes a multi-class confusion matrix and returns the statistics for each class.
 
         Parameters:
         -----------
@@ -147,11 +161,15 @@ class ConfusionMatrix:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "true_positive": self.true_positive.tolist(),
+            "true_positive":  self.true_positive.tolist(),
             "false_positive": self.false_positive.tolist(),
             "true_negative": self.true_negative.tolist(),
             "false_negative": self.false_negative.tolist(),
         }
+
+    def __add_labels(self, precision_values):
+        labels = self.label_encoder.inverse_transform(precision_values)
+        return {label: value for label, value in zip(labels, precision_values)}
 
 
 def get_labels_and_predictions(dataframe: pd.DataFrame, label_column: str, column_prefix: str = "predict_") -> pd.DataFrame:

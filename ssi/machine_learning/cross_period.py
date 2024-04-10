@@ -133,31 +133,12 @@ class TrainModelOnPeriod(TrainModelTask):
             self.input().open(), self.features_column, self.label_column, memory_map=True)
         self.feature_vector_size = parquet_dataset.feature_vector_size
         self.number_of_categories = parquet_dataset.number_of_classes
-        self.classes = parquet_dataset.label_encoder.classes_
-        print(f"Feature vector size: {self.feature_vector_size}")
+        self.label_encoder = parquet_dataset.label_encoder
 
         training_dataset = torch.utils.data.Subset(
             parquet_dataset, training_dataframe.index)
         testing_dataset = torch.utils.data.Subset(
             parquet_dataset, testing_dataframe.index)
-
-        # training_dataset = ParquetDataset(self.input().open(),
-        #                                   self.features_column,
-        #                                   self.label_column,
-        #                                   batch_size=self.batch_size,
-        #                                   filters=[
-        #                                       (self.period_column, "=", self.train_period)],
-        #                                   memory_map=True)
-        # print(
-        #     f"Feature vector size: {self.feature_vector_size}, labels: {self.number_of_categories}")
-
-        # testing_dataset = ParquetDataset(self.input().open(),
-        #                                  self.features_column,
-        #                                  self.label_column,
-        #                                  batch_size=self.batch_size,
-        #                                  filters=[
-        #                                      (self.period_column, "!=", self.train_period)],
-        #                                  memory_map=True)
 
         return training_dataset, testing_dataset
 
@@ -328,7 +309,7 @@ class TrainModelOnPeriod(TrainModelTask):
         self.model_trainer.fit(train_dataframe,
                                self.fit_model,
                                training_predictions_file,
-                               classes=self.classes,
+                               label_encoder=self.label_encoder,
                                device=device,
                                learning_rate=self.learning_rate,
                                num_epochs=self.number_of_epochs,
@@ -341,7 +322,7 @@ class TrainModelOnPeriod(TrainModelTask):
             self.gpu_device if torch.cuda.is_available() else "cpu")
         self.model_trainer.predict(predictions_dataframe,
                                    predictions_file,
-                                   classes=self.classes,
+                                   label_encoder=self.label_encoder,
                                    )
 
     def run(self):

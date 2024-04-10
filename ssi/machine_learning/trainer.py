@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict, Union, Tuple, List
 from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import LabelEncoder
 from collections import defaultdict
 from ..files import batched_writer
 from .evaluate import ModelEvaluator
@@ -88,7 +89,7 @@ class ModelTrainer:
             training_data: pd.DataFrame,
             training_function: Callable[[pd.DataFrame, str, str, str], Any],
             training_predictions_file: str,
-            classes: List[str],
+            label_encoder: LabelEncoder,
             ** training_kwargs
             ):
         self.pipeline = training_function(
@@ -96,22 +97,22 @@ class ModelTrainer:
         self.train_evaluation_dict = self.batch_predict(training_data,
                                                         training_predictions_file,
                                                         self.batch_predict_size,
-                                                        classes,
-                                                        lambda dataframe: self.model_evaluator.evaluate_training(
-                                                            dataframe)
+                                                        label_encoder,
+                                                        lambda dataframe, label_encoder: self.model_evaluator.evaluate_training(
+                                                            dataframe, label_encoder)
                                                         )
 
     def predict(self,
                 predictions_data: pd.DataFrame,
                 predictions_file: str,
-                classes: List[str]
+                label_encoder: LabelEncoder
                 ):
         self.evaluation_dict = self.batch_predict(predictions_data,
                                                   predictions_file,
                                                   self.batch_predict_size,
-                                                  classes,
-                                                  lambda dataframe: self.model_evaluator.evaluate(
-                                                      dataframe)
+                                                  label_encoder,
+                                                  lambda dataframe, label_encoder: self.model_evaluator.evaluate(
+                                                      dataframe, label_encoder)
                                                   )
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
@@ -124,7 +125,7 @@ class ModelTrainer:
                       predictions_data: pd.DataFrame,
                       predictions_file: str,
                       batch_size: int,
-                      classes: List[str],
+                      label_encoder: LabelEncoder,
                       evaluation_function: Callable[[
                           pd.DataFrame], Dict[str, Any]]
                       ) -> Dict[str, Any]:
@@ -138,28 +139,28 @@ class ModelTrainer:
                                               predicted_label_column=self._prediction_column),
                                           pipeline=self.pipeline,
                                           feature_column=self.features_column,
-                                          classes=classes,
+                                          label_encoder=label_encoder,
                                           prediction_column=self.prediction_column)
-        return evaluation_function(batch_statistics)
+        return evaluation_function(batch_statistics, label_encoder)
 
     def __predict(self,
                   batch_dataframe: Union[pd.DataFrame, Tuple[torch.Tensor, torch.Tensor]],
                   progress_bar: tqdm.tqdm,
                   pipeline,
                   feature_column: str,
-                  classes: List[str],
+                  label_encoder: LabelEncoder,
                   probability_column_prefix: str = "y_proba",
                   prediction_column: str = "y_pred") -> pd.DataFrame:
 
         batch_dataframe, X = self.get_features(
-            batch_dataframe, feature_column, classes=classes)
+            batch_dataframe, feature_column, label_encoder=label_encoder)
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X)
 
         probability_dict = defaultdict(list)
         for probability_vector in probabilities:
-            for class_label, probability_value in zip(classes, probability_vector):
+            for class_label, probability_value in zip(label_encoder.classes_, probability_vector):
                 probability_dict[f"{probability_column_prefix}_{class_label}"].append(
                     probability_value)
 
@@ -170,7 +171,7 @@ class ModelTrainer:
             X)
         return batch_dataframe
 
-    def get_features(self, batch_dataframe, feature_column: str, classes: List[str]) -> Tuple[pd.DataFrame, pd.Series]:
+    def get_features(self, batch_dataframe, feature_column: str, label_encoder: LabelEncoder) -> Tuple[pd.DataFrame, pd.Series]:
         if isinstance(batch_dataframe, pd.DataFrame):
             batch_dataframe = batch_dataframe.copy()
             X = batch_dataframe[feature_column]
@@ -183,7 +184,7 @@ class ModelTrainer:
         dataframe = pd.DataFrame({
             feature_column: X,
             f"{self.label_column}_index": y,
-            self.label_column: [classes[class_index.argmax()]
+            self.label_column: [label_encoder.inverse_transform(class_index.argmax())
                                 for class_index in y]
         })
         return dataframe, np.vstack(X)
