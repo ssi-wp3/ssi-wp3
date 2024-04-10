@@ -203,7 +203,7 @@ class TrainModelOnPeriod(TrainModelTask):
         train_loader = DataLoader(
             train_set,
             batch_size=batch_size,
-            shuffle=False,
+            shuffle=True,
             prefetch_factor=self.prefetch_factor,
             pin_memory=True,
             num_workers=self.number_of_workers,
