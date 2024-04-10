@@ -170,7 +170,8 @@ class ConfusionMatrix:
 
     def __add_labels(self, metric_values):
         print("Metric values: ", metric_values)
-        labels = self.label_encoder.inverse_transform(metric_values)
+        labels = self.label_encoder.inverse_transform(
+            range(len(metric_values)))
         return {label: value for label, value in zip(labels, metric_values)}
 
 
