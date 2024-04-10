@@ -171,10 +171,10 @@ class ConfusionMatrix:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "true_positive":  self.true_positive.tolist(),
-            "false_positive": self.false_positive.tolist(),
-            "true_negative": self.true_negative.tolist(),
-            "false_negative": self.false_negative.tolist(),
+            "true_positive":  self.__add_labels(self.true_positive.tolist()),
+            "false_positive": self.__add_labels(self.false_positive.tolist()),
+            "true_negative": self.__add_labels(self.true_negative.tolist()),
+            "false_negative": self.__add_labels(self.false_negative.tolist()),
         }
 
     def __add_labels(self, metric_values):
