@@ -170,7 +170,7 @@ class ModelTrainer:
             batch_dataframe[column] = values
 
         y_pred = pipeline.predict(X)
-        print("Prediction size: ", len(y_pred))
+        print("Prediction size: ", y_pred.shape)
         batch_dataframe[prediction_column] = y_pred
         return batch_dataframe
 
