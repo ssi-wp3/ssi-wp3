@@ -235,7 +235,7 @@ class ParquetDataset(torch.utils.data.Dataset):
 
         print("one_hot_label: ", one_hot_label.shape)
 
-        return feature_tensor, one_hot_label
+        return feature_tensor, label_tensor
 
     def __getitem__(self, index):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
