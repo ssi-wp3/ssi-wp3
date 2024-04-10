@@ -226,8 +226,7 @@ class ParquetDataset(torch.utils.data.Dataset):
             mapped_label, dtype=torch.long)
 
         additional_columns = sample.drop(
-            columns=[self.feature_column, self.target_column])
-        print("feature column:", self.feature_column)
+            labels=[self.feature_column, self.target_column])
 
         return feature_tensor, label_tensor, additional_columns
 
