@@ -185,6 +185,7 @@ class ModelTrainer:
             [batch[2] for batch in batch_dataframe])
 
         print("Addition columns df:", addition_columns_df.columns)
+        print("Additional columns:", addition_columns_df.head())
         dataframe = pd.DataFrame({
             feature_column: X,
         })
