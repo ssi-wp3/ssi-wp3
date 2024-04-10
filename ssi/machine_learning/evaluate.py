@@ -38,6 +38,8 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
                 "accuracy": confusion_matrix.accuracy_score
                 }
 
+# TODO: there is a bug in the code, the confusion matrix is not calculated correctly!!!
+
 
 class ConfusionMatrix:
     def __init__(self, confusion_matrix: np.array, label_mapping: Dict[str, int]):
