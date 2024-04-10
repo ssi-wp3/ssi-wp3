@@ -209,7 +209,8 @@ class ParquetDataset(torch.utils.data.Dataset):
         """ Process a sample of rows from the Parquet file. The process_sample method
         takes the feature_column and the label_column from the sample and converts them
         into PyTorch tensors. The feature_column is converted into a PyTorch tensor of
-        type float32. The label_column is one-hot encoded.
+        type float32. The label_column is mapped into an integer index using the set 
+        label_mapping.
 
         Parameters
         ----------
@@ -218,8 +219,8 @@ class ParquetDataset(torch.utils.data.Dataset):
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
-            A tuple containing the feature tensor and the one-hot encoded label tensor.
+        Tuple[torch.Tensor, torch.Tensor, pd.DataFrame]
+            A tuple containing the feature tensor, the label tensor, and the additional columns.
         """
         feature_tensor = torch.tensor(
             sample[self.feature_column], dtype=torch.float32)
@@ -230,7 +231,10 @@ class ParquetDataset(torch.utils.data.Dataset):
         label_tensor = torch.tensor(
             mapped_label, dtype=torch.long)
 
-        return feature_tensor, label_tensor
+        additional_columns = sample.drop(
+            columns=[self.feature_column, self.target_column])
+
+        return feature_tensor, label_tensor, additional_columns
 
     def __getitem__(self, index):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
