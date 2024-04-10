@@ -185,9 +185,6 @@ class ModelTrainer:
         addition_columns_df = pd.concat(
             [batch[2].to_frame().transpose() for batch in batch_dataframe]).reset_index(drop=True)
 
-        print("Addition columns df:", addition_columns_df.columns)
-        print("Additional columns:", addition_columns_df.head())
-        print("Length of Addition columns df:", len(addition_columns_df))
         dataframe = pd.DataFrame({
             feature_column: X,
         })
@@ -195,8 +192,6 @@ class ModelTrainer:
         # merge dataframes
         dataframe = pd.concat([dataframe, addition_columns_df], axis=1)
 
-        print("legnth of batch_dataframe:", len(batch_dataframe))
-        print("length of y:", len(y))
         dataframe[f"{self.label_column}_index"] = y
         dataframe[self.label_column] = self.inverse_transform(y, label_mapping)
         return dataframe, np.vstack(X)
