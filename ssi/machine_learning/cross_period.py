@@ -162,6 +162,7 @@ class TrainModelOnPeriod(TrainModelTask):
         LabelEncoder
             The label encoder fitted to the target column.
         """
+        # TODO: https://stackoverflow.com/questions/21057621/sklearn-labelencoder-with-never-seen-before-values
         label_encoder = LabelEncoder()
         label_encoder.fit(label_df[self.label_column])
         return label_encoder
