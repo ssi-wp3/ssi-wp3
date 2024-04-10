@@ -187,6 +187,7 @@ class ModelTrainer:
 
         print("Addition columns df:", addition_columns_df.columns)
         print("Additional columns:", addition_columns_df.head())
+        print("Length of Addition columns df:", len(addition_columns_df))
         dataframe = pd.DataFrame({
             feature_column: X,
         })
