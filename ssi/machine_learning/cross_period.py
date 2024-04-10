@@ -229,7 +229,7 @@ class TrainModelOnPeriod(TrainModelTask):
             # Add L2 regularization
             lx_norm_reg = 0.0
             for param in model.parameters():
-                lx_norm_reg += torch.norm(param, ord=order)
+                lx_norm_reg += torch.linalg.norm(param, ord=order)
             loss += lambda_reg * lx_norm_reg
 
             return loss
