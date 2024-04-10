@@ -181,7 +181,7 @@ class ModelTrainer:
             return batch_dataframe, X.values.tolist()
 
         X = [batch[0].numpy() for batch in batch_dataframe]
-        y = [batch[1].int() for batch in batch_dataframe]
+        y = [batch[1].item() for batch in batch_dataframe]
 
         dataframe = pd.DataFrame({
             feature_column: X,
