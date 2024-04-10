@@ -181,7 +181,7 @@ class ModelTrainer:
             return batch_dataframe, X.values.tolist()
 
         X = [batch[0].numpy() for batch in batch_dataframe]
-        y = [batch[1].float() for batch in batch_dataframe]
+        y = [batch[1].int() for batch in batch_dataframe]
 
         print("y_true", y)
 
