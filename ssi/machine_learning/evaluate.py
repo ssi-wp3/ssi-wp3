@@ -151,19 +151,12 @@ class ConfusionMatrix:
         # True negatives
         num_classes = confusion_matrix.shape[0]
 
-        print("Confusion matrix,  num classes: ", num_classes)
-
         TN = []
         for i in range(num_classes):
             temp = np.delete(confusion_matrix, i, axis=0)    # delete ith row
             temp = np.delete(temp, i, axis=1)
             TN.append(sum(sum(temp)))
         TN = np.array(TN)
-
-        print("TP: ", TP)
-        print("FP: ", FP)
-        print("TN: ", TN)
-        print("FN: ", FN)
 
         return (TP, FP, TN, FN)
 
@@ -175,9 +168,10 @@ class ConfusionMatrix:
             "false_negative": self.false_negative.tolist(),
         }
 
-    def __add_labels(self, precision_values):
-        labels = self.label_encoder.inverse_transform(precision_values)
-        return {label: value for label, value in zip(labels, precision_values)}
+    def __add_labels(self, metric_values):
+        print("Metric values: ", metric_values)
+        labels = self.label_encoder.inverse_transform(metric_values)
+        return {label: value for label, value in zip(labels, metric_values)}
 
 
 def get_labels_and_predictions(dataframe: pd.DataFrame, label_column: str, column_prefix: str = "predict_") -> pd.DataFrame:
