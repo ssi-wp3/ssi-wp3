@@ -1,4 +1,5 @@
 from typing import List, Dict, Any, Tuple
+from sklearn.preprocessing import LabelEncoder
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..files import get_features_files_in_directory
 from ..parquet_file import ParquetFile
@@ -125,6 +126,7 @@ class TrainModelOnPeriod(TrainModelTask):
             [self.receipt_text_column, self.label_column])
         self.number_of_categories = training_dataframe[self.label_column].nunique(
         )
+        self.label_encoder = self.fit_label_encoder(training_dataframe)
         print(
             f"Number of categories in training data: {self.number_of_categories}")
 
@@ -134,10 +136,9 @@ class TrainModelOnPeriod(TrainModelTask):
             f"Number of categories in testing data: {testing_dataframe[self.label_column].nunique()}")
 
         parquet_dataset = ParquetDataset(
-            self.input().open(), self.features_column, self.label_column, memory_map=True)
+            self.input().open(), self.features_column, self.label_column, label_encoder=self.label_encoder, memory_map=True)
         self.feature_vector_size = parquet_dataset.feature_vector_size
         # self.number_of_categories = parquet_dataset.number_of_classes
-        self.label_encoder = parquet_dataset.label_encoder
 
         training_dataset = torch.utils.data.Subset(
             parquet_dataset, training_dataframe.index)
@@ -145,6 +146,25 @@ class TrainModelOnPeriod(TrainModelTask):
             parquet_dataset, testing_dataframe.index)
 
         return training_dataset, testing_dataset
+
+    def fit_label_encoder(self, label_df: pd.DataFrame) -> LabelEncoder:
+        """ Fit a label encoder to the target column in the dataframe.
+        The label encoder is used to encode the target column into integer labels.
+        Only the label column is read by this function.
+
+        Parameters
+        ----------
+        label_df: pd.DataFrame
+            The dataframe containing the label column.
+
+        Returns
+        -------
+        LabelEncoder
+            The label encoder fitted to the target column.
+        """
+        label_encoder = LabelEncoder()
+        label_encoder.fit(label_df[self.target_column])
+        return label_encoder
 
     def fit_model(self,
                   train_dataframe: pd.DataFrame,

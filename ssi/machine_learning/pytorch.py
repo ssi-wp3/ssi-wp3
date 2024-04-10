@@ -20,6 +20,7 @@ class ParquetDataset(torch.utils.data.Dataset):
     def __init__(self, filename: str,
                  feature_column: str,
                  target_column: str,
+                 label_encoder: LabelEncoder,
                  memory_map: bool = False):
         super().__init__()
         self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
@@ -30,7 +31,8 @@ class ParquetDataset(torch.utils.data.Dataset):
         #     filters=filters)
         self.__feature_column = feature_column
         self.__target_column = target_column
-        self.__label_encoder = self._fit_label_encoder(self.parquet_file)
+        # self._fit_label_encoder(self.parquet_file)
+        self.__label_encoder = label_encoder
         self.__current_row_group_index = 0
         self.__current_row_group = None
         self.__cumulative_row_index = None
