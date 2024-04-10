@@ -163,7 +163,7 @@ class TrainModelOnPeriod(TrainModelTask):
             The label encoder fitted to the target column.
         """
         label_encoder = LabelEncoder()
-        label_encoder.fit(label_df[self.target_column])
+        label_encoder.fit(label_df[self.label_column])
         return label_encoder
 
     def fit_model(self,
