@@ -155,7 +155,7 @@ class ModelTrainer:
                   prediction_column: str = "y_pred") -> pd.DataFrame:
 
         batch_dataframe, X = self.get_features(
-            batch_dataframe, feature_column, label_encoder=label_mapping)
+            batch_dataframe, feature_column, label_mapping=label_mapping)
 
         progress_bar.set_description("Predicting probabilities")
         probabilities = pipeline.predict_proba(X)
@@ -174,23 +174,24 @@ class ModelTrainer:
         batch_dataframe[prediction_column] = y_pred
         return batch_dataframe
 
-    def get_features(self, batch_dataframe, feature_column: str, label_encoder: LabelEncoder) -> Tuple[pd.DataFrame, pd.Series]:
+    def get_features(self, batch_dataframe, feature_column: str, label_mapping: Dict[str, int]) -> Tuple[pd.DataFrame, pd.Series]:
         if isinstance(batch_dataframe, pd.DataFrame):
             batch_dataframe = batch_dataframe.copy()
             X = batch_dataframe[feature_column]
             return batch_dataframe, X.values.tolist()
 
-        # TODO check why X is a tuple instead of a tensor?
         X = [batch[0].numpy() for batch in batch_dataframe]
-        y = [batch[1].numpy().argmax() for batch in batch_dataframe]
+        y = [batch[1].numpy() for batch in batch_dataframe]
 
         dataframe = pd.DataFrame({
             feature_column: X,
             f"{self.label_column}_index": y,
-            self.label_column: label_encoder.inverse_transform(
-                y)
+            self.label_column: self.inverse_transform(y, label_mapping)
         })
         return dataframe, np.vstack(X)
+
+    def inverse_transform(self, labels: np.ndarray, label_mapping: Dict[str, int]) -> np.ndarray:
+        return np.array([list(label_mapping.keys())[label] for label in labels])
 
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)
