@@ -161,26 +161,6 @@ class TrainModelOnPeriod(TrainModelTask):
 
         return training_dataset, testing_dataset
 
-    def fit_label_encoder(self, label_df: pd.DataFrame) -> LabelEncoder:
-        """ Fit a label encoder to the target column in the dataframe.
-        The label encoder is used to encode the target column into integer labels.
-        Only the label column is read by this function.
-
-        Parameters
-        ----------
-        label_df: pd.DataFrame
-            The dataframe containing the label column.
-
-        Returns
-        -------
-        LabelEncoder
-            The label encoder fitted to the target column.
-        """
-        # TODO: https://stackoverflow.com/questions/21057621/sklearn-labelencoder-with-never-seen-before-values
-        label_encoder = LabelEncoder()
-        label_encoder.fit(label_df[self.label_column])
-        return label_encoder
-
     def fit_model(self,
                   train_dataframe: pd.DataFrame,
                   device: str,
@@ -350,7 +330,7 @@ class TrainModelOnPeriod(TrainModelTask):
         self.model_trainer.fit(train_dataframe,
                                self.fit_model,
                                training_predictions_file,
-                               label_encoder=self.label_encoder,
+                               label_mapping=self.train_label_mapping,
                                device=device,
                                learning_rate=self.learning_rate,
                                num_epochs=self.number_of_epochs,
@@ -363,7 +343,7 @@ class TrainModelOnPeriod(TrainModelTask):
             self.gpu_device if torch.cuda.is_available() else "cpu")
         self.model_trainer.predict(predictions_dataframe,
                                    predictions_file,
-                                   label_encoder=self.label_encoder,
+                                   label_mapping=self.test_label_mapping,
                                    )
 
     def run(self):

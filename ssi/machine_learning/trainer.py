@@ -89,7 +89,7 @@ class ModelTrainer:
             training_data: pd.DataFrame,
             training_function: Callable[[pd.DataFrame, str, str, str], Any],
             training_predictions_file: str,
-            label_encoder: LabelEncoder,
+            label_mapping: Dict[str, int],
             ** training_kwargs
             ):
         self.pipeline = training_function(
@@ -97,22 +97,22 @@ class ModelTrainer:
         self.train_evaluation_dict = self.batch_predict(training_data,
                                                         training_predictions_file,
                                                         self.batch_predict_size,
-                                                        label_encoder,
-                                                        lambda dataframe, label_encoder: self.model_evaluator.evaluate_training(
-                                                            dataframe, label_encoder)
+                                                        label_mapping,
+                                                        lambda dataframe, label_mapping: self.model_evaluator.evaluate_training(
+                                                            dataframe, label_mapping)
                                                         )
 
     def predict(self,
                 predictions_data: pd.DataFrame,
-                predictions_file: str,
-                label_encoder: LabelEncoder
+                predictions_file: Dict[str, int],
+                label_mapping: LabelEncoder
                 ):
         self.evaluation_dict = self.batch_predict(predictions_data,
                                                   predictions_file,
                                                   self.batch_predict_size,
-                                                  label_encoder,
-                                                  lambda dataframe, label_encoder: self.model_evaluator.evaluate(
-                                                      dataframe, label_encoder)
+                                                  label_mapping,
+                                                  lambda dataframe, label_mapping: self.model_evaluator.evaluate(
+                                                      dataframe, label_mapping)
                                                   )
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
