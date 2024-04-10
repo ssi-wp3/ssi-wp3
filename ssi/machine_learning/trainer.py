@@ -181,11 +181,13 @@ class ModelTrainer:
         X = [batch[0].numpy() for batch in batch_dataframe]
         y = [batch[1].item() for batch in batch_dataframe]
 
-        dataframe = pd.DataFrame({
-            feature_column: X,
-            f"{self.label_column}_index": y,
-            self.label_column: self.inverse_transform(y, label_mapping)
-        })
+        dataframe = pd.concat(
+            [batch[2] for batch in batch_dataframe])
+
+        dataframe[feature_column] = X
+        dataframe[f"{self.label_column}_index"] = y
+        dataframe[self.label_column] = self.inverse_transform(y, label_mapping)
+
         return dataframe, np.vstack(X)
 
     def inverse_transform(self, labels: np.ndarray, label_mapping: Dict[str, int]) -> np.ndarray:
