@@ -153,6 +153,7 @@ class ConfusionMatrix:
 
         # True negatives
         num_classes = confusion_matrix.shape[0]
+        print("Num classes: ", num_classes)
 
         TN = []
         for i in range(num_classes):
@@ -160,6 +161,11 @@ class ConfusionMatrix:
             temp = np.delete(temp, i, axis=1)
             TN.append(sum(sum(temp)))
         TN = np.array(TN)
+
+        print("TP: ", TP.shape)
+        print("FP: ", FP.shape)
+        print("TN: ", TN.shape)
+        print("FN: ", FN.shape)
 
         return (TP, FP, TN, FN)
 
