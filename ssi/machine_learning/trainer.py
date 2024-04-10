@@ -182,7 +182,7 @@ class ModelTrainer:
         y = [batch[1].item() for batch in batch_dataframe]
 
         addition_columns_df = pd.concat(
-            [batch[2] for batch in batch_dataframe]).to_frame()
+            [batch[2].to_frame() for batch in batch_dataframe])
 
         print("Addition columns df:", addition_columns_df.columns)
         print("Additional columns:", addition_columns_df.head())
