@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from bisect import bisect_right
 import torch.nn as nn
 import torch
@@ -20,7 +20,7 @@ class ParquetDataset(torch.utils.data.Dataset):
     def __init__(self, filename: str,
                  feature_column: str,
                  target_column: str,
-                 label_encoder: LabelEncoder,
+                 label_mapping: Dict[str, int],
                  memory_map: bool = False):
         super().__init__()
         self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
@@ -32,7 +32,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         self.__feature_column = feature_column
         self.__target_column = target_column
         # self._fit_label_encoder(self.parquet_file)
-        self.__label_encoder = label_encoder
+        self.__label_mapping = label_mapping
         self.__current_row_group_index = 0
         self.__current_row_group = None
         self.__cumulative_row_index = None
@@ -95,20 +95,17 @@ class ParquetDataset(torch.utils.data.Dataset):
         return self.__target_column
 
     @property
-    def label_encoder(self) -> LabelEncoder:
-        """ Returns the label encoder used to encode the target column.
+    def label_mapping(self) -> Dict[str, int]:
+        """ Returns a label mapping used to encode the target column.
         The labels are string values and need to be converted into integer
-         labels that can be used by the machine learning algorithms. We use
-        the LabelEncoder class from scikit-learn to perform this encoding.
-
-        Labels are encoded when the ParquetDataset is created.
+         labels that can be used by the machine learning algorithms. 
 
         Returns
         -------
-        LabelEncoder
-            The label encoder used to encode the target column.
+        Dict[str, int]
+            The label mapping used to encode the target column.
         """
-        return self.__label_encoder
+        return self.__label_mapping
 
     @property
     def feature_vector_size(self) -> int:
@@ -137,28 +134,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         int
             The number of classes in the target column.
         """
-        return len(self.label_encoder.classes_)
-
-    def _fit_label_encoder(self, parquet_file: pq.ParquetFile) -> LabelEncoder:
-        """ Fit a label encoder to the target column in the Parquet file.
-        The label encoder is used to encode the target column into integer labels.
-        Only the label column is read by this function.
-
-        Parameters
-        ----------
-        parquet_file : pq.ParquetFile
-            The Parquet file to read the target column from.
-
-        Returns
-        -------
-        LabelEncoder
-            The label encoder fitted to the target column.
-        """
-        label_df = parquet_file.read(
-            columns=[self.target_column]).to_pandas()
-        label_encoder = LabelEncoder()
-        label_encoder.fit(label_df[self.target_column])
-        return label_encoder
+        return len(self.label_mapping)
 
     def number_of_rows_in_row_group(self, row_group_index: int) -> int:
         """ Get the number of rows in a row group. The number of rows
@@ -249,11 +225,13 @@ class ParquetDataset(torch.utils.data.Dataset):
             sample[self.feature_column], dtype=torch.float32)
 
         label_vector = [sample[self.target_column]]
+        mapped_label_vector = label_vector.map(
+            lambda label: self.label_mapping[label])
         label_tensor = torch.tensor(
-            self.label_encoder.transform(label_vector), dtype=torch.long)
+            mapped_label_vector, dtype=torch.long)
 
         one_hot_label = F.one_hot(
-            label_tensor[0], num_classes=len(self.label_encoder.classes_)).float()
+            label_tensor[0], num_classes=len(self.number_of_classes)).float()
 
         return feature_tensor, one_hot_label
 

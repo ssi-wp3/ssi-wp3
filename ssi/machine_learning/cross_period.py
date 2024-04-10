@@ -5,6 +5,7 @@ from ..files import get_features_files_in_directory
 from ..parquet_file import ParquetFile
 from .train_model_task import TrainModelTask
 from .pytorch import ParquetDataset, TorchLogisticRegression
+from collections import OrderedDict
 import torch
 import torch.optim as optim
 from torch.nn import functional as F
@@ -126,7 +127,9 @@ class TrainModelOnPeriod(TrainModelTask):
             [self.receipt_text_column, self.label_column])
         self.number_of_categories = training_dataframe[self.label_column].nunique(
         )
-        self.label_encoder = self.fit_label_encoder(training_dataframe)
+        self.train_label_mapping = OrderedDict([(original_label, index)
+                                                for index, original_label in enumerate(training_dataframe[self.label_column].unique())])
+
         print(
             f"Number of categories in training data: {self.number_of_categories}")
 
@@ -136,14 +139,25 @@ class TrainModelOnPeriod(TrainModelTask):
             f"Number of categories in testing data: {testing_dataframe[self.label_column].nunique()}")
 
         parquet_dataset = ParquetDataset(
-            self.input().open(), self.features_column, self.label_column, label_encoder=self.label_encoder, memory_map=True)
+            self.input().open(), self.features_column, self.label_column, label_mapping=self.train_label_mapping, memory_map=True)
         self.feature_vector_size = parquet_dataset.feature_vector_size
         # self.number_of_categories = parquet_dataset.number_of_classes
 
         training_dataset = torch.utils.data.Subset(
             parquet_dataset, training_dataframe.index)
+
+        # Test dataset can have more categories than the training dataset, add them add the end of the mapping
+        # In this way, we preserve the original label->index mapping for the training dataset
+        test_label_mapping = self.train_label_mapping
+        for label in testing_dataframe[self.label_column].unique():
+            if label not in test_label_mapping:
+                test_label_mapping[label] = len(test_label_mapping)
+
+        test_dataset = ParquetDataset(self.input().open(
+        ), self.features_column, self.label_column, label_mapping=test_label_mapping, memory_map=True)
+
         testing_dataset = torch.utils.data.Subset(
-            parquet_dataset, testing_dataframe.index)
+            test_dataset, testing_dataframe.index)
 
         return training_dataset, testing_dataset
 
