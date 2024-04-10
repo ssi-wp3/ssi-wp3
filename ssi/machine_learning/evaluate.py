@@ -26,12 +26,8 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
         return self.evaluate(dataframe, label_encoder)
 
     def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder) -> Dict[str, Any]:
-        for df in dataframe:
-            print("Confusion matrix to be reduced:\n", df)
-
         if isinstance(dataframe, list):
             dataframe = reduce(lambda x, y: x.add(y), dataframe)
-        print("Reduced confusion matrix:\n", dataframe)
 
         confusion_matrix = ConfusionMatrix(dataframe, label_encoder)
 
