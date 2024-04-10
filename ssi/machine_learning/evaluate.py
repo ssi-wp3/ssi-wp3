@@ -22,14 +22,14 @@ class ModelEvaluator(ABC):
 
 
 class ConfusionMatrixEvaluator(ModelEvaluator):
-    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder: LabelEncoder) -> Dict[str, Any]:
-        return self.evaluate(dataframe, label_encoder)
+    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_mapping: Dict[str, int]) -> Dict[str, Any]:
+        return self.evaluate(dataframe, label_mapping)
 
-    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder) -> Dict[str, Any]:
+    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_mapping: Dict[str, int]) -> Dict[str, Any]:
         if isinstance(dataframe, list):
             dataframe = reduce(lambda x, y: x.add(y), dataframe)
 
-        confusion_matrix = ConfusionMatrix(dataframe, label_encoder)
+        confusion_matrix = ConfusionMatrix(dataframe, label_mapping)
 
         return {"confusion_matrix": confusion_matrix.to_dict(),
                 "precision": confusion_matrix.precision_score,
@@ -40,15 +40,15 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
 
 
 class ConfusionMatrix:
-    def __init__(self, confusion_matrix: np.array, label_encoder: LabelEncoder):
+    def __init__(self, confusion_matrix: np.array, label_mapping: Dict[str, int]):
         # TODO: we have to seem N+1 classes, why?
-        self.__label_encoder = label_encoder
+        self.__label_mapping = label_mapping
         self.__true_positives, self.__false_positives, self.__true_negatives, self.__false_negatives = self._calculate_confusion_matrix_statistics(
             confusion_matrix)
 
     @property
-    def label_encoder(self) -> LabelEncoder:
-        return self.__label_encoder
+    def label_mapping(self) -> Dict[str, int]:
+        return self.__label_mapping
 
     @property
     def true_positive(self) -> np.array:
@@ -178,10 +178,7 @@ class ConfusionMatrix:
         }
 
     def __add_labels(self, metric_values):
-        print("Metric values: ", metric_values)
-        labels = self.label_encoder.inverse_transform(
-            range(len(metric_values)))
-        return {label: value for label, value in zip(labels, metric_values)}
+        return {label: value for label, value in zip(self.label_mapping.keys(), metric_values)}
 
 
 def get_labels_and_predictions(dataframe: pd.DataFrame, label_column: str, column_prefix: str = "predict_") -> pd.DataFrame:
