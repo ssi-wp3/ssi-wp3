@@ -253,7 +253,7 @@ class ParquetDataset(torch.utils.data.Dataset):
         one_hot_label = F.one_hot(label_tensor[0], num_classes=len(
             self.label_encoder.classes_)).float()
 
-        return feature_tensor, label_tensor[0].float()  # one_hot_label
+        return feature_tensor, label_tensor[0].long()  # one_hot_label
 
     def __getitem__(self, index):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
