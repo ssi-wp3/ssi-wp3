@@ -225,8 +225,8 @@ class ParquetDataset(torch.utils.data.Dataset):
             sample[self.feature_column], dtype=torch.float32)
 
         label_vector = [sample[self.target_column]]
-        mapped_label_vector = label_vector.map(
-            lambda label: self.label_mapping[label])
+        mapped_label_vector = [self.label_mapping[label]
+                               for label in label_vector]
         label_tensor = torch.tensor(
             mapped_label_vector, dtype=torch.long)
 
