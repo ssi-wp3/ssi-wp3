@@ -191,6 +191,10 @@ class TrainModelOnPeriod(TrainModelTask):
         train_set, val_set = torch.utils.data.random_split(
             train_dataframe, [training_size, val_size])
 
+        def collate_fn(batch):
+            print(batch)
+            return batch
+
         print("Creating DataLoaders")
         train_loader = DataLoader(
             train_set,
@@ -199,6 +203,7 @@ class TrainModelOnPeriod(TrainModelTask):
             prefetch_factor=self.prefetch_factor,
             pin_memory=True,
             num_workers=self.number_of_workers,
+            collate_fn=collate_fn
             # pin_memory_device=device
         )
 
@@ -208,6 +213,7 @@ class TrainModelOnPeriod(TrainModelTask):
             prefetch_factor=self.prefetch_factor,
             pin_memory=True,
             num_workers=self.number_of_workers,
+            collate_fn=collate_fn
             # pin_memory_device=device
         )
 
@@ -338,7 +344,7 @@ class TrainModelOnPeriod(TrainModelTask):
                                early_stopping_patience=3
                                )
 
-    def predict(self, predictions_dataframe: pd.DataFrame, predictions_file: str):
+    def predict(self, predictions_dataframe: torch.utils.data.Subset, predictions_file: str):
         device = torch.device(
             self.gpu_device if torch.cuda.is_available() else "cpu")
         self.model_trainer.predict(predictions_dataframe,
