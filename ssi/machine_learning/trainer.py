@@ -100,7 +100,7 @@ class ModelTrainer:
                                                         label_mapping
                                                         )
         self.model_evaluator.evaluate_training(
-            training_predictions_file.path, label_mapping, self.label_column, self.prediction_column)
+            training_predictions_file, label_mapping, self.label_column, self.prediction_column)
 
     def predict(self,
                 predictions_data: pd.DataFrame,
@@ -112,7 +112,7 @@ class ModelTrainer:
                                                   self.batch_predict_size,
                                                   label_mapping
                                                   )
-        self.model_evaluator.evaluate(predictions_file.path, label_mapping,
+        self.model_evaluator.evaluate(predictions_file, label_mapping,
                                       self.label_column, self.prediction_column)
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
