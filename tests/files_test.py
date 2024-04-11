@@ -28,7 +28,7 @@ class FilesTest(unittest.TestCase):
                     f.write("")
 
         revenue_files_ah = get_revenue_files_in_folder(data_directory, "AH")
-        self.assertTrue(len(revenue_files_ah) == 2)
+        self.assertEqual(2, len(revenue_files_ah))
         self.assertTrue(all([os.path.isfile(revenue_file)
                         for revenue_file in revenue_files_ah]))
         self.assertEqual(set([
@@ -38,7 +38,7 @@ class FilesTest(unittest.TestCase):
 
         revenue_files_jumbo = get_revenue_files_in_folder(
             data_directory, "Jumbo")
-        self.assertTrue(len(revenue_files_jumbo) == 4)
+        self.assertEqual(4, len(revenue_files_jumbo))
         self.assertTrue(all([os.path.isfile(revenue_file)
                         for revenue_file in revenue_files_jumbo]))
         self.assertEqual(set([
@@ -50,7 +50,7 @@ class FilesTest(unittest.TestCase):
 
         revenue_files_lidl = get_revenue_files_in_folder(
             data_directory, "Lidl")
-        self.assertTrue(len(revenue_files_lidl) == 1)
+        self.assertEqual(1, len(revenue_files_lidl))
         self.assertTrue(all([os.path.isfile(revenue_file)
                         for revenue_file in revenue_files_lidl]))
         self.assertEqual(os.path.join(
@@ -58,7 +58,7 @@ class FilesTest(unittest.TestCase):
 
         revenue_files_plus = get_revenue_files_in_folder(
             data_directory, "Plus")
-        self.assertTrue(len(revenue_files_plus) == 3)
+        self.assertEqual(3, len(revenue_files_plus))
         self.assertTrue(all([os.path.isfile(revenue_file)
                         for revenue_file in revenue_files_plus]))
         self.assertEqual(set([
