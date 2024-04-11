@@ -33,10 +33,10 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
         y_pred = dataframe[y_pred_column]
 
         return {"confusion_matrix": confusion_matrix(y_true, y_pred),
-                "precision": precision_score(y_true, y_pred),
-                "recall": recall_score(y_true, y_pred),
-                "f1_score": f1_score(y_true, y_pred),
-                "accuracy": accuracy_score(y_true, y_pred),
+                "precision": precision_score(y_true, y_pred, average='weighted'),
+                "recall": recall_score(y_true, y_pred, average='weighted'),
+                "f1_score": f1_score(y_true, y_pred, average='weighted'),
+                "accuracy": accuracy_score(y_true, y_pred, average='weighted'),
                 "classification_report": classification_report(y_true, y_pred, output_dict=True),
                 }
 
