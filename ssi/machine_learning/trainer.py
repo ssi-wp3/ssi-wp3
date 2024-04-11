@@ -97,10 +97,10 @@ class ModelTrainer:
         self.train_evaluation_dict = self.batch_predict(training_data,
                                                         training_predictions_file,
                                                         self.batch_predict_size,
-                                                        label_mapping,
-                                                        lambda dataframe, label_mapping: self.model_evaluator.evaluate_training(
-                                                            dataframe, label_mapping)
+                                                        label_mapping
                                                         )
+        self.model_evaluator.evaluate_training(
+            training_predictions_file, label_mapping, self.label_column, self.prediction_column)
 
     def predict(self,
                 predictions_data: pd.DataFrame,
@@ -110,10 +110,10 @@ class ModelTrainer:
         self.evaluation_dict = self.batch_predict(predictions_data,
                                                   predictions_file,
                                                   self.batch_predict_size,
-                                                  label_mapping,
-                                                  lambda dataframe, label_mapping: self.model_evaluator.evaluate(
-                                                      dataframe, label_mapping)
+                                                  label_mapping
                                                   )
+        self.model_evaluator.evaluate(predictions_file, label_mapping,
+                                      self.label_column, self.prediction_column)
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
         y_true = dataframe[f"{label_column}_index"]
@@ -124,10 +124,8 @@ class ModelTrainer:
                       predictions_data: pd.DataFrame,
                       predictions_file: str,
                       batch_size: int,
-                      label_mapping: Dict[str, int],
-                      evaluation_function: Callable[[
-                          pd.DataFrame], Dict[str, Any]]
-                      ) -> Dict[str, Any]:
+                      label_mapping: Dict[str, int]
+                      ) -> List[pd.DataFrame]:
         batch_statistics = batched_writer(predictions_file,
                                           predictions_data,
                                           batch_size,
@@ -140,7 +138,7 @@ class ModelTrainer:
                                           feature_column=self.features_column,
                                           label_mapping=label_mapping,
                                           prediction_column=self.prediction_column)
-        return evaluation_function(batch_statistics, label_mapping)
+        return batch_statistics
 
     def __predict(self,
                   batch_dataframe: Union[pd.DataFrame, Tuple[torch.Tensor, torch.Tensor]],

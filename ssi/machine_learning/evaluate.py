@@ -1,4 +1,4 @@
-from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report
 from sklearn.preprocessing import LabelEncoder
 from typing import List, Dict, Any, Union, Tuple
 from abc import ABC, abstractmethod
@@ -13,29 +13,31 @@ import numpy as np
 
 class ModelEvaluator(ABC):
     @abstractmethod
-    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder: LabelEncoder) -> Dict[str, Any]:
+    def evaluate_training(self, filename: str, label_encoder: Dict[str, int], y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
         pass
 
     @abstractmethod
-    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_encoder: LabelEncoder) -> Dict[str, Any]:
+    def evaluate(self, filename: str, label_encoder: Dict[str, int], y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
         pass
 
 
 class ConfusionMatrixEvaluator(ModelEvaluator):
-    def evaluate_training(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_mapping: Dict[str, int]) -> Dict[str, Any]:
-        return self.evaluate(dataframe, label_mapping)
+    def evaluate_training(self, filename: str, label_mapping: Dict[str, int], y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
+        return self.evaluate(filename, label_mapping, y_true_column, y_pred_column)
 
-    def evaluate(self, dataframe: Union[List[pd.DataFrame], pd.DataFrame], label_mapping: Dict[str, int]) -> Dict[str, Any]:
-        if isinstance(dataframe, list):
-            dataframe = reduce(lambda x, y: x.add(y), dataframe)
+    def evaluate(self, filename: str, label_mapping: Dict[str, int], y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
+        dataframe = pd.read_parquet(
+            filename, engine="pyarrow", columns=[y_true_column, y_pred_column])
 
-        confusion_matrix = ConfusionMatrix(dataframe, label_mapping)
+        y_true = dataframe[y_true_column]
+        y_pred = dataframe[y_pred_column]
 
-        return {"confusion_matrix": confusion_matrix.to_dict(),
-                "precision": confusion_matrix.precision_score,
-                "recall": confusion_matrix.recall_score,
-                "f1_score": confusion_matrix.f1_score,
-                "accuracy": confusion_matrix.accuracy_score
+        return {"confusion_matrix": confusion_matrix(y_true, y_pred),
+                "precision": precision_score(y_true, y_pred),
+                "recall": recall_score(y_true, y_pred),
+                "f1_score": f1_score(y_true, y_pred),
+                "accuracy": accuracy_score(y_true, y_pred),
+                "classification_report": classification_report(y_true, y_pred, output_dict=True),
                 }
 
 # TODO: there is a bug in the code, the confusion matrix is not calculated correctly!!!
