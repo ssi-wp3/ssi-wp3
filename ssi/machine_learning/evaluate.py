@@ -36,7 +36,7 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
                 "precision": precision_score(y_true, y_pred, average='weighted'),
                 "recall": recall_score(y_true, y_pred, average='weighted'),
                 "f1_score": f1_score(y_true, y_pred, average='weighted'),
-                "accuracy": accuracy_score(y_true, y_pred, average='weighted'),
+                "accuracy": accuracy_score(y_true, y_pred),
                 "classification_report": classification_report(y_true, y_pred, output_dict=True),
                 }
 
