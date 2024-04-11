@@ -215,6 +215,7 @@ class TrainModelOnPeriod(TrainModelTask):
         data_size = len(train_dataframe)
         training_size = int(data_size * 0.8)
         val_size = data_size - training_size
+        # TODO implement test set!!
         train_set, val_set = torch.utils.data.random_split(
             train_dataframe, [training_size, val_size])
 
