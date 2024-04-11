@@ -4,7 +4,7 @@ from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..files import get_features_files_in_directory
 from ..parquet_file import ParquetFile
 from .train_model_task import TrainModelTask
-from .pytorch import ParquetDataset, TorchLogisticRegression
+from .pytorch import ParquetDataset, TorchLogisticRegression, TorchMLP
 from .evaluate import calculate_metrics_per_group
 from collections import OrderedDict
 from functools import partial
@@ -200,7 +200,8 @@ class TrainModelOnPeriod(TrainModelTask):
         print(f"Training model on {device} with learning rate {learning_rate}, num_epochs {num_epochs}, batch_size {batch_size}, number of epochs {num_epochs}, and early stopping patience {early_stopping_patience}")
         print(
             f"Model input dim: {self.feature_vector_size}, output dim: {self.number_of_categories}")
-        model = TorchLogisticRegression(
+        # model = TorchLogisticRegression(
+        model = TorchMLP(
             input_dim=self.feature_vector_size,
             output_dim=self.number_of_categories
         )
