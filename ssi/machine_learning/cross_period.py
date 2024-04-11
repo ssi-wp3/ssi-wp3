@@ -204,7 +204,7 @@ class TrainModelOnPeriod(TrainModelTask):
             train_set,
             batch_size=batch_size,
             shuffle=True,
-            prefetch_facto=self.prefetch_factor,
+            prefetch_factor=self.prefetch_factor,
             pin_memory=True,
             num_workers=self.number_of_workers,
             collate_fn=collate_fn
