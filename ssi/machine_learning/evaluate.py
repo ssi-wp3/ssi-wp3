@@ -209,7 +209,6 @@ def calculate_metrics_per_group(dataframe: pd.DataFrame, group_columns: List[str
         "f1_macro": f1_score(x[label_column], x[prediction_column], average="macro"),
         "f1_weighted": f1_score(x[label_column], x[prediction_column], average="weighted"),
 
-        "auc_roc": roc_auc_score(x[label_column], x[prediction_column])
     })).reset_index()
 
 
