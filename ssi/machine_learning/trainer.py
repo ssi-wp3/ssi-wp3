@@ -2,6 +2,7 @@ from typing import Any, Callable, Dict, Union, Tuple, List
 from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 from collections import defaultdict
+from time import sleep
 from ..files import batched_writer
 from .evaluate import ModelEvaluator
 import torch
@@ -99,6 +100,7 @@ class ModelTrainer:
                                                         self.batch_predict_size,
                                                         label_mapping
                                                         )
+        sleep(1)
         self.model_evaluator.evaluate_training(
             training_predictions_file, label_mapping, self.label_column, self.prediction_column)
 
@@ -112,6 +114,7 @@ class ModelTrainer:
                                                   self.batch_predict_size,
                                                   label_mapping
                                                   )
+        sleep(1)
         self.model_evaluator.evaluate(predictions_file, label_mapping,
                                       self.label_column, self.prediction_column)
 
