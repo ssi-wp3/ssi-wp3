@@ -1,4 +1,4 @@
-from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report
+from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report, balanced_accuracy_score
 from sklearn.preprocessing import LabelEncoder
 from typing import List, Dict, Any, Union, Tuple
 from abc import ABC, abstractmethod
@@ -32,13 +32,20 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
         y_true = dataframe[y_true_column]
         y_pred = dataframe[y_pred_column]
 
-        return {"confusion_matrix": confusion_matrix(y_true, y_pred).tolist(),
-                "precision": precision_score(y_true, y_pred, average='weighted'),
-                "recall": recall_score(y_true, y_pred, average='weighted'),
-                "f1_score": f1_score(y_true, y_pred, average='weighted'),
-                "accuracy": accuracy_score(y_true, y_pred),
-                "classification_report": classification_report(y_true, y_pred, output_dict=True),
-                }
+        evaluation_dict = {"confusion_matrix": confusion_matrix(y_true, y_pred).tolist(),
+                           "accuracy": accuracy_score(y_true, y_pred),
+                           "balanced_accuracy": balanced_accuracy_score(y_true, y_pred),
+                           "classification_report": classification_report(y_true, y_pred, output_dict=True),
+                           }
+        for average_method in ['micro', 'macro', 'weighted']:
+            evaluation_dict[f"precision_{average_method}"] = precision_score(
+                y_true, y_pred, average=average_method)
+            evaluation_dict[f"recall_{average_method}"] = recall_score(
+                y_true, y_pred, average=average_method)
+            evaluation_dict[f"f1_score_{average_method}"] = f1_score(
+                y_true, y_pred, average=average_method)
+
+        return evaluation_dict
 
 # TODO: there is a bug in the code, the confusion matrix is not calculated correctly!!!
 
