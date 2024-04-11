@@ -11,9 +11,9 @@ class FeatureExtractionTest(unittest.TestCase):
         self.assertEqual("count_vectorizer",
                          f"{FeatureExtractorType.count_vectorizer.value}")
 
-    def test_feature_extractor_typess_property_returns_all_but_test_extractor(self):
+    def test_feature_extractor_types_property_returns_all_but_test_extractor(self):
         factory = FeatureExtractorFactory()
-        self.assertEqual(8, len(factory.feature_extractor_types))
+        self.assertEqual(10, len(factory.feature_extractor_types))
         self.assertFalse(
             FeatureExtractorType.test_extractor in factory.feature_extractor_types)
         self.assertEqual(set([FeatureExtractorType.count_vectorizer,
@@ -23,7 +23,9 @@ class FeatureExtractionTest(unittest.TestCase):
                               FeatureExtractorType.count_char,
                               FeatureExtractorType.spacy_nl_sm,
                               FeatureExtractorType.spacy_nl_md,
-                              FeatureExtractorType.spacy_nl_lg]),
+                              FeatureExtractorType.spacy_nl_lg,
+                              FeatureExtractorType.hf_all_mini_lm,
+                              FeatureExtractorType.hf_labse]),
                          set(factory.feature_extractor_types))
 
     def test_create_feature_extractor(self):
