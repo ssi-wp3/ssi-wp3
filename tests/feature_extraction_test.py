@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from test_utils import get_test_path
 import unittest
 import pandas as pd
+import os
 
 
 class FeatureExtractionTest(unittest.TestCase):
@@ -54,8 +55,19 @@ class FeatureExtractionTest(unittest.TestCase):
     def test_add_feature_vectors(self):
         dataframe = generate_fake_revenue_data(100, 2018, 2021)
         factory = FeatureExtractorFactory()
-        feature_df = factory.add_feature_vectors(
-            dataframe, "coicop_name", "cv_features", FeatureExtractorType.count_vectorizer).reset_index(drop=True)
+
+        features_filename = get_test_path("feature_test.parquet")
+        if os.path.exists(features_filename):
+            os.remove(features_filename)
+
+        factory.add_feature_vectors(dataframe,
+                                    source_column="coicop_name",
+                                    destination_column="cv_features",
+                                    filename=features_filename,
+                                    batch_size=10,
+                                    feature_extractor_type=FeatureExtractorType.count_vectorizer)
+
+        feature_df = pd.read_parquet(features_filename, engine="pyarrow")
         self.assertTrue("cv_features" in feature_df.columns)
         self.assertEqual(100, len(feature_df))
 
