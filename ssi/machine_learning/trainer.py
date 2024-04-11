@@ -20,8 +20,6 @@ class ModelTrainer:
                  prediction_column: str = "y_pred",
                  batch_predict_size: int = 1000,
                  parquet_engine: str = "pyarrow"):
-        self._train_evaluation_dict = {}
-        self._evaluation_dict = {}
         self._pipeline = None
         self._model_evaluator = model_evaluator
         self._features_column = features_column
@@ -66,22 +64,6 @@ class ModelTrainer:
     def parquet_engine(self) -> str:
         return self._parquet_engine
 
-    @property
-    def train_evaluation_dict(self) -> Dict[str, Any]:
-        return self._train_evaluation_dict
-
-    @train_evaluation_dict.setter
-    def train_evaluation_dict(self, value: Dict[str, Any]):
-        self._train_evaluation_dict = value
-
-    @property
-    def evaluation_dict(self) -> Dict[str, Any]:
-        return self._evaluation_dict
-
-    @evaluation_dict.setter
-    def evaluation_dict(self, value: Dict[str, Any]):
-        self._evaluation_dict = value
-
     def get_kwargs_with_prefix(self, prefix: str, **kwargs) -> Dict[str, Any]:
         return {key: value for key, value in kwargs.items() if key.startswith(prefix)}
 
@@ -99,9 +81,6 @@ class ModelTrainer:
                            self.batch_predict_size,
                            label_mapping
                            )
-        self.train_evaluation_dict = dict()
-        # self.train_evaluation_dict = self.model_evaluator.evaluate_training(
-        #    training_predictions_file, label_mapping, self.label_column, self.prediction_column)
 
     def predict(self,
                 predictions_data: pd.DataFrame,
@@ -113,9 +92,6 @@ class ModelTrainer:
                            self.batch_predict_size,
                            label_mapping
                            )
-        self.evaluation_dict = dict()
-        # self.evaluation_dict = self.model_evaluator.evaluate(predictions_file, label_mapping,
-        #                              self.label_column, self.prediction_column)
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
         y_true = dataframe[f"{label_column}_index"]
@@ -203,10 +179,15 @@ class ModelTrainer:
     def write_model(self, model_file):
         joblib.dump(self.pipeline, model_file)
 
-    def write_training_evaluation(self, evaluation_file):
-        simplejson.dump(self.train_evaluation_dict,
+    def write_training_evaluation(self, training_predictions_file, evaluation_file):
+        train_evaluation_dict = self.model_evaluator.evaluate_training(
+            training_predictions_file, self.label_column, self.prediction_column)
+        simplejson.dump(train_evaluation_dict,
                         evaluation_file, indent=4, sort_keys=True, ignore_nan=True)
 
-    def write_evaluation(self, evaluation_file):
-        simplejson.dump(self.evaluation_dict, evaluation_file,
+    def write_evaluation(self, predictions_file, evaluation_file):
+        evaluation_dict = self.model_evaluator.evaluate(predictions_file,
+                                                        self.label_column, self.prediction_column)
+
+        simplejson.dump(evaluation_dict, evaluation_file,
                         indent=4, sort_keys=True, ignore_nan=True)

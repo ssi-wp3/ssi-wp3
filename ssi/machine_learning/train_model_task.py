@@ -129,7 +129,8 @@ class TrainModelTask(luigi.Task, ABC):
 
         print("Writing training evaluation to disk")
         with self.output()[self.training_evaluation_key].open("w") as evaluation_file:
-            self.model_trainer.write_training_evaluation(evaluation_file)
+            self.model_trainer.write_training_evaluation(
+                training_predictions_file, evaluation_file)
 
         print("Writing test predictions to disk")
         with self.output()[self.predictions_key].open("w") as predictions_file:
@@ -142,4 +143,5 @@ class TrainModelTask(luigi.Task, ABC):
 
         print("Writing evaluation to disk")
         with self.output()[self.evaluation_key].open("w") as evaluation_file:
-            self.model_trainer.write_evaluation(evaluation_file)
+            self.model_trainer.write_evaluation(
+                predictions_file, evaluation_file)

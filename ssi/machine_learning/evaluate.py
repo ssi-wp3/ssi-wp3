@@ -13,19 +13,19 @@ import numpy as np
 
 class ModelEvaluator(ABC):
     @abstractmethod
-    def evaluate_training(self, filename: str, label_encoder: Dict[str, int], y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
+    def evaluate_training(self, filename: str, y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
         pass
 
     @abstractmethod
-    def evaluate(self, filename: str, label_encoder: Dict[str, int], y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
+    def evaluate(self, filename: str, y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
         pass
 
 
 class ConfusionMatrixEvaluator(ModelEvaluator):
-    def evaluate_training(self, filename: str, label_mapping: Dict[str, int], y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
-        return self.evaluate(filename, label_mapping, y_true_column, y_pred_column)
+    def evaluate_training(self, filename: str,  y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
+        return self.evaluate(filename, y_true_column, y_pred_column)
 
-    def evaluate(self, filename: str, label_mapping: Dict[str, int], y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
+    def evaluate(self, filename: str, y_true_column: str, y_pred_column: str) -> Dict[str, Any]:
         dataframe = pd.read_parquet(
             filename, engine="pyarrow", columns=[y_true_column, y_pred_column])
 
