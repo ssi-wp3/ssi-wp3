@@ -27,7 +27,8 @@ class FilesTest(unittest.TestCase):
                 with open(os.path.join(data_directory, filename), "w") as f:
                     f.write("")
 
-        revenue_files_ah = get_revenue_files_in_folder(data_directory, "AH")
+        revenue_files_ah = get_revenue_files_in_folder(
+            data_directory, "AH")
         self.assertEqual(2, len(revenue_files_ah))
         self.assertTrue(all([os.path.isfile(revenue_file)
                         for revenue_file in revenue_files_ah]))

@@ -13,7 +13,7 @@ def get_store_name_from_combined_filename(filename: str) -> str:
 def get_revenue_files_in_folder(data_directory: str, store_name: str, filename_prefix: str = "Omzet", file_type: Optional[str] = None) -> List[str]:
     return [os.path.join(data_directory, filename)
             for filename in os.listdir(data_directory)
-            if filename.lower().startswith(filename_prefix.lower()) and store_name in filename.lower() and (not file_type or filename.endswith(file_type))]
+            if filename.lower().startswith(filename_prefix.lower()) and store_name.lower() in filename.lower() and (not file_type or filename.endswith(file_type))]
 
 
 def get_combined_revenue_files_in_folder(data_directory: str, filename_prefix: str, file_type: str = ".parquet") -> List[str]:
