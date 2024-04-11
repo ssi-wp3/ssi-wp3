@@ -175,7 +175,6 @@ class TestPreprocessData(unittest.TestCase):
             columns=["bg_number", "month",
                      "coicop_number", "ean_number", "ean_name"],
             coicop_column="coicop_number",
-            product_id_column="product_id",
             product_description_column="receipt_text",
             column_mapping={"bg_number": "supermarket_id",
                             "month": "year_month", "ean_name": "receipt_text"},
@@ -185,8 +184,8 @@ class TestPreprocessData(unittest.TestCase):
                          processed_dataframe["coicop_number"].str.len().tolist())
         self.assertEqual(["supermarket_id", "year_month", "coicop_number", "ean_number", "receipt_text",
                           "year", "month",
-                         "product_id", "coicop_level_1", "coicop_level_2",
-                          "coicop_level_3", "coicop_level_4", "count"],
+                          "coicop_level_1", "coicop_level_2",
+                          "coicop_level_3", "coicop_level_4"],
                          processed_dataframe.columns.tolist())
         self.assertEqual([1 for _ in range(15)],
                          processed_dataframe["supermarket_id"].tolist())
@@ -206,8 +205,7 @@ class TestPreprocessData(unittest.TestCase):
                           "123423", "054534", "054534", "054534", "054534",
                           "065645", "065645", "065645", "065645", "065645"],
                          processed_dataframe["coicop_number"].tolist())
-        self.assertEqual([hash(f"ean_{i}") for i in range(
-            15)], processed_dataframe["product_id"].tolist())
+
         self.assertEqual(["01", "01", "02", "02", "02",
                           "12", "05", "05", "05", "05",
                           "06", "06", "06", "06", "06"], processed_dataframe["coicop_level_1"].tolist())
@@ -220,9 +218,6 @@ class TestPreprocessData(unittest.TestCase):
         self.assertEqual(["01120", "01120", "02231", "02231", "02231",
                           "12342", "05453", "05453", "05453", "05453",
                           "06564", "06564", "06564", "06564", "06564"], processed_dataframe["coicop_level_4"].tolist())
-        self.assertEqual([2, 2, 3, 3, 3,
-                          1, 4, 4, 4, 4,
-                          5, 5, 5, 5, 5], processed_dataframe["count"].tolist())
 
     def test_combine_revenue_files(self):
         data_directory = os.path.join(os.getcwd(), "tests", "data")
