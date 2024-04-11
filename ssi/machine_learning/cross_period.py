@@ -391,9 +391,9 @@ class TrainModelOnPeriod(TrainModelTask):
         print(
             f"Training model: {self.model_type} on period: {self.train_period}")
 
-        if self.feature_extractor in self.train_from_scratch:
-            raise NotImplementedError(
-                "Training feature extractor from scratch not implemented")
+        # if self.feature_extractor in self.train_from_scratch:
+        #     raise NotImplementedError(
+        #         "Training feature extractor from scratch not implemented")
         super().run()
 
         self.write_per_period_evaluations()
