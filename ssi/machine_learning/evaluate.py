@@ -32,7 +32,7 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
         y_true = dataframe[y_true_column]
         y_pred = dataframe[y_pred_column]
 
-        return {"confusion_matrix": confusion_matrix(y_true, y_pred),
+        return {"confusion_matrix": confusion_matrix(y_true, y_pred).tolist(),
                 "precision": precision_score(y_true, y_pred, average='weighted'),
                 "recall": recall_score(y_true, y_pred, average='weighted'),
                 "f1_score": f1_score(y_true, y_pred, average='weighted'),
