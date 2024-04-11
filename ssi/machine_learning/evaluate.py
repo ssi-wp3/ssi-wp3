@@ -192,8 +192,8 @@ def get_labels_and_predictions(dataframe: pd.DataFrame, label_column: str, colum
     return y_true, y_pred
 
 
-def calculate_metrics_per_period(dataframe: pd.DataFrame, label_column: str, prediction_column: str, period_column: str) -> pd.DataFrame:
-    return dataframe.groupby(period_column).apply(lambda x: pd.Series({
+def calculate_metrics_per_group(dataframe: pd.DataFrame, group_columns: List[str], label_column: str, prediction_column: str) -> pd.DataFrame:
+    return dataframe.groupby(by=group_columns).apply(lambda x: pd.Series({
         "accuracy": accuracy_score(x[label_column], x[prediction_column]),
         "balanced_accuracy": balanced_accuracy_score(x[label_column], x[prediction_column]),
 
