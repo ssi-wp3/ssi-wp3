@@ -5,6 +5,7 @@ from ..files import get_features_files_in_directory
 from ..parquet_file import ParquetFile
 from .train_model_task import TrainModelTask
 from .pytorch import ParquetDataset, TorchLogisticRegression
+from .evaluate import calculate_metrics_per_group
 from collections import OrderedDict
 from functools import partial
 import torch
@@ -86,6 +87,30 @@ class TrainModelOnPeriod(TrainModelTask):
     @property
     def evaluation_filename(self) -> str:
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
+
+    @property
+    def per_period_evaluation_key(self) -> str:
+        return f"evaluation_per_period"
+
+    @property
+    def per_period_evaluation_filename(self) -> str:
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.per_period_evaluation.json")
+
+    @property
+    def per_period_coicop_evaluation_key(self) -> str:
+        return f"evaluation_per_coicop_period"
+
+    @property
+    def per_period_coicop_evaluation_filename(self) -> str:
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.per_period_coicop_evaluation.json")
+
+    def output(self):
+        output_dict = super().output()
+        output_dict[self.per_period_evaluation_key] = luigi.LocalTarget(
+            self.per_period_evaluation_filename, format=luigi.format.Nop)
+        output_dict[self.per_period_coicop_evaluation_key] = luigi.LocalTarget(
+            self.per_period_coicop_evaluation_filename, format=luigi.format.Nop)
+        return output_dict
 
     def get_data_for_period(self, input_file) -> pd.DataFrame:
         print(
@@ -369,6 +394,25 @@ class TrainModelOnPeriod(TrainModelTask):
             raise NotImplementedError(
                 "Training feature extractor from scratch not implemented")
         super().run()
+
+        self.write_per_period_evaluations()
+
+    def write_per_period_evaluations(self):
+        evaluation_df = pd.read_parquet(
+            self.training_evaluation_filename, engine=self.parquet_engine)
+        self.write_grouped_results(evaluation_df, group_columns=[
+                                   self.period_column], results_key=self.per_period_evaluation_key)
+        self.write_grouped_results(evaluation_df, group_columns=[
+                                   self.period_column, self.label_column], results_key=self.per_period_coicop_evaluation_key)
+
+    def write_grouped_results(self, evaluation_df, group_columns, results_key):
+        per_group_evaluations = calculate_metrics_per_group(dataframe=evaluation_df,
+                                                            group_columns=group_columns,
+                                                            label_column=self.label_column,
+                                                            prediction_column="y_pred")
+        with self.output()[results_key].open("w") as per_group_evaluation_file:
+            per_group_evaluations.to_parquet(
+                per_group_evaluation_file, engine=self.parquet_engine)
 
 
 class TrainModelOnAllPeriods(luigi.WrapperTask):
