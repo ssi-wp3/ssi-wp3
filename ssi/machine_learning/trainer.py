@@ -94,12 +94,13 @@ class ModelTrainer:
             ):
         self.pipeline = training_function(
             training_data, **training_kwargs)
-        self.train_evaluation_dict = self.batch_predict(training_data,
-                                                        training_predictions_file,
-                                                        self.batch_predict_size,
-                                                        label_mapping
-                                                        )
-        # self.model_evaluator.evaluate_training(
+        self.batch_predict(training_data,
+                           training_predictions_file,
+                           self.batch_predict_size,
+                           label_mapping
+                           )
+        self.train_evaluation_dict = dict()
+        # self.train_evaluation_dict = self.model_evaluator.evaluate_training(
         #    training_predictions_file, label_mapping, self.label_column, self.prediction_column)
 
     def predict(self,
@@ -107,12 +108,13 @@ class ModelTrainer:
                 predictions_file: Dict[str, int],
                 label_mapping: LabelEncoder
                 ):
-        self.evaluation_dict = self.batch_predict(predictions_data,
-                                                  predictions_file,
-                                                  self.batch_predict_size,
-                                                  label_mapping
-                                                  )
-        # self.model_evaluator.evaluate(predictions_file, label_mapping,
+        self.batch_predict(predictions_data,
+                           predictions_file,
+                           self.batch_predict_size,
+                           label_mapping
+                           )
+        self.evaluation_dict = dict()
+        # self.evaluation_dict = self.model_evaluator.evaluate(predictions_file, label_mapping,
         #                              self.label_column, self.prediction_column)
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
