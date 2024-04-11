@@ -192,6 +192,27 @@ def get_labels_and_predictions(dataframe: pd.DataFrame, label_column: str, colum
     return y_true, y_pred
 
 
+def calculate_metrics_per_period(dataframe: pd.DataFrame, label_column: str, prediction_column: str, period_column: str) -> pd.DataFrame:
+    return dataframe.groupby(period_column).apply(lambda x: pd.Series({
+        "accuracy": accuracy_score(x[label_column], x[prediction_column]),
+        "balanced_accuracy": balanced_accuracy_score(x[label_column], x[prediction_column]),
+
+        "precision_micro": precision_score(x[label_column], x[prediction_column], average="micro"),
+        "precision_macro": precision_score(x[label_column], x[prediction_column], average="macro"),
+        "precision_weighted": precision_score(x[label_column], x[prediction_column], average="weighted"),
+
+        "recall_micro": recall_score(x[label_column], x[prediction_column], average="micro"),
+        "recall_macro": recall_score(x[label_column], x[prediction_column], average="macro"),
+        "recall_weighted": recall_score(x[label_column], x[prediction_column], average="weighted"),
+
+        "f1_micro": f1_score(x[label_column], x[prediction_column], average="micro"),
+        "f1_macro": f1_score(x[label_column], x[prediction_column], average="macro"),
+        "f1_weighted": f1_score(x[label_column], x[prediction_column], average="weighted"),
+
+        "auc_roc": roc_auc_score(x[label_column], x[prediction_column])
+    })).reset_index()
+
+
 def calculate_metrics(y_true, y_pred):
     # Calculate metrics
     accuracy = accuracy_score(y_true, y_pred)
