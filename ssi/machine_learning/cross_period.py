@@ -94,7 +94,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
     @property
     def per_period_evaluation_filename(self) -> str:
-        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.per_period_evaluation.json")
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.per_period_evaluation.parquet")
 
     @property
     def per_period_coicop_evaluation_key(self) -> str:
@@ -102,7 +102,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
     @property
     def per_period_coicop_evaluation_filename(self) -> str:
-        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.per_period_coicop_evaluation.json")
+        return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.per_period_coicop_evaluation.parquet")
 
     def output(self):
         output_dict = super().output()
