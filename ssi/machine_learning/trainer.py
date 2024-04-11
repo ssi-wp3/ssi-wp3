@@ -2,7 +2,6 @@ from typing import Any, Callable, Dict, Union, Tuple, List
 from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 from collections import defaultdict
-from time import sleep
 from ..files import batched_writer
 from .evaluate import ModelEvaluator
 import torch
@@ -100,9 +99,8 @@ class ModelTrainer:
                                                         self.batch_predict_size,
                                                         label_mapping
                                                         )
-        sleep(1)
-        self.model_evaluator.evaluate_training(
-            training_predictions_file, label_mapping, self.label_column, self.prediction_column)
+        # self.model_evaluator.evaluate_training(
+        #    training_predictions_file, label_mapping, self.label_column, self.prediction_column)
 
     def predict(self,
                 predictions_data: pd.DataFrame,
@@ -114,9 +112,8 @@ class ModelTrainer:
                                                   self.batch_predict_size,
                                                   label_mapping
                                                   )
-        sleep(1)
-        self.model_evaluator.evaluate(predictions_file, label_mapping,
-                                      self.label_column, self.prediction_column)
+        # self.model_evaluator.evaluate(predictions_file, label_mapping,
+        #                              self.label_column, self.prediction_column)
 
     def batch_statistics(self, dataframe: pd.DataFrame, label_column: str, predicted_label_column: str) -> pd.DataFrame:
         y_true = dataframe[f"{label_column}_index"]
