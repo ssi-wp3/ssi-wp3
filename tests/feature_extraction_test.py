@@ -1,4 +1,4 @@
-from ssi.feature_extraction.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor
+from ssi.feature_extraction.feature_extraction import FeatureExtractorFactory, FeatureExtractorType, SpacyFeatureExtractor, HuggingFaceFeatureExtractor
 from ssi.synthetic_data import generate_fake_revenue_data
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from test_utils import get_test_path
@@ -46,6 +46,10 @@ class FeatureExtractionTest(unittest.TestCase):
                                    SpacyFeatureExtractor))
         self.assertTrue(isinstance(factory.create_feature_extractor(FeatureExtractorType.spacy_nl_lg),
                                    SpacyFeatureExtractor))
+        self.assertTrue(isinstance(factory.create_feature_extractor(FeatureExtractorType.hf_all_mini_lm),
+                                   HuggingFaceFeatureExtractor))
+        self.assertTrue(isinstance(factory.create_feature_extractor(FeatureExtractorType.hf_labse),
+                                   HuggingFaceFeatureExtractor))
 
     def test_add_feature_vectors(self):
         dataframe = generate_fake_revenue_data(100, 2018, 2021)
