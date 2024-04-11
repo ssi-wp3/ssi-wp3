@@ -399,7 +399,7 @@ class TrainModelOnPeriod(TrainModelTask):
 
     def write_per_period_evaluations(self):
         evaluation_df = pd.read_parquet(
-            self.training_evaluation_filename, engine=self.parquet_engine)
+            self.predictions_filename, engine=self.parquet_engine)
         self.write_grouped_results(evaluation_df, group_columns=[
                                    self.period_column], results_key=self.per_period_evaluation_key)
         self.write_grouped_results(evaluation_df, group_columns=[
