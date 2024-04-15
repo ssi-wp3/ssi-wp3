@@ -68,7 +68,9 @@ class CrossStoreEvaluation(luigi.Task):
         return read_unique_rows(store_file,
                                 group_columns=[
                                     self.receipt_text_column, self.label_column],
-                                value_columns=[self.receipt_text_column, self.features_column, self.label_column])
+                                value_columns=[
+                                    self.receipt_text_column, self.features_column, self.label_column]
+                                )
 
     def get_all_store_data(self, store1_file, store2_file) -> Tuple[pd.DataFrame, pd.DataFrame]:
         store1_dataframe = self.get_store_data(store1_file)
