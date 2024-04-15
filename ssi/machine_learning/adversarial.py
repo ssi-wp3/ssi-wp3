@@ -9,6 +9,7 @@ from ..parquet_file import ParquetFile
 from .train_model import train_model, train_and_evaluate_model, drop_labels_with_few_samples
 from .train_model_task import TrainModelTask
 from .utils import store_combinations
+from pyarrow import parquet as pq
 import pandas as pd
 import numpy as np
 import luigi
@@ -251,11 +252,20 @@ class TrainAdversarialModelTask(TrainModelTask):
     def requires(self):
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
 
+    def read_minimized_parquet(self, store_file, indices):
+        parquet = pq.ParquetFile(store_file, columns=[
+                                 self.receipt_text_column, self.features_column, self.store_id_column])
+        for batch in parquet.iter_batches():
+            yield batch.to_pandas().iloc[indices]
+
     def get_adversarial_data(self, store_file, store_name: str) -> pd.DataFrame:
         store_dataframe = pd.read_parquet(
             store_file, engine=self.parquet_engine, columns=[self.receipt_text_column, self.store_id_column])
         store_dataframe = store_dataframe.drop_duplicates(
             [self.receipt_text_column, self.store_id_column])
+
+        store_dataframe = self.read_minimized_parquet(
+            store_file, store_dataframe.index)
         store_dataframe[self.store_id_column] = store_name
         return store_dataframe
 
