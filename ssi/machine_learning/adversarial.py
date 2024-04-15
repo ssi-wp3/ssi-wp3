@@ -253,7 +253,7 @@ class TrainAdversarialModelTask(TrainModelTask):
 
     def get_adversarial_data(self, store_file, store_name: str) -> pd.DataFrame:
         store_dataframe = pd.read_parquet(
-            store_file, engine=self.parquet_engine, columns=[self.receipt_text_column, self.features_column, self.store_id_column])
+            store_file, engine=self.parquet_engine, columns=[self.receipt_text_column, self.store_id_column])
         store_dataframe = store_dataframe.drop_duplicates(
             [self.receipt_text_column, self.store_id_column])
         store_dataframe[self.store_id_column] = store_name
