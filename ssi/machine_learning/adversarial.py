@@ -6,7 +6,7 @@ from ..preprocessing.files import get_store_name_from_combined_filename
 from ..files import get_features_files_in_directory
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..parquet_file import ParquetFile
-from .train_model import train_and_evaluate_model
+from .train_model import train_model, train_and_evaluate_model, drop_labels_with_few_samples
 from .train_model_task import TrainModelTask
 from .utils import store_combinations
 import pandas as pd
@@ -305,29 +305,39 @@ class TrainAdversarialModelTask(TrainModelTask):
         Tuple[Pipeline, Dict[str, Any]]
             The trained pipeline and the evaluation dictionary
         """
-        return train_and_evaluate_model(adversarial_dataframe,
-                                        features_column,
-                                        store_id_column,
-                                        model_type,
-                                        test_size=test_size,
-                                        evaluation_function=evaluate_adversarial_pipeline,
-                                        verbose=verbose)
+        return train_model(adversarial_dataframe,
+                           features_column,
+                           store_id_column,
+                           model_type,
+                           test_size=test_size,
+                           evaluation_function=evaluate_adversarial_pipeline,
+                           verbose=verbose)
 
     def prepare_data(self) -> pd.DataFrame:
         with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
             print("Reading parquet files")
-            return self.get_all_adversarial_data(
+            combined_dataframe = self.get_all_adversarial_data(
                 self.store1, self.store2, store1_file, store2_file)
+            self.label_mapping = {self.store1: 0, self.store2: 1}
+            return drop_labels_with_few_samples(
+                combined_dataframe, self.label_column, min_samples=10)
 
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
-        self.model_trainer.fit(lambda: train_dataframe,
+        self.model_trainer.fit(train_dataframe,
                                self.train_adversarial_model,
                                training_predictions_file,
+                               label_mapping=self.label_mapping,
                                features_column=self.features_column,
                                store_id_column=self.store_id_column,
                                model_type=self.model_type,
                                test_size=self.test_size,
                                verbose=self.verbose)
+
+    def predict(self, dataframe: pd.DataFrame, predictions_file):
+        self.model_trainer.predict(dataframe,
+                                   predictions_file,
+                                   label_mapping=self.label_mapping
+                                   )
 
     def run(self):
         print(
