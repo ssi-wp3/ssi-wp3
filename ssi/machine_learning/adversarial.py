@@ -331,6 +331,8 @@ class TrainAdversarialModelTask(TrainModelTask):
             combined_dataframe = self.get_all_adversarial_data(
                 self.store1, self.store2, store1_file, store2_file)
             self.label_mapping = {self.store1: 0, self.store2: 1}
+            combined_dataframe[f"{self.label_column}_index"] = combined_dataframe[self.label_column].map(
+                self.label_mapping)
             return drop_labels_with_few_samples(
                 combined_dataframe, self.label_column, min_samples=10)
 
