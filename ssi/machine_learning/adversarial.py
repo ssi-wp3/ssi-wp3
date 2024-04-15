@@ -323,7 +323,6 @@ class TrainAdversarialModelTask(TrainModelTask):
                            features_column,
                            store_id_column,
                            model_type,
-                           evaluation_function=evaluate_adversarial_pipeline,
                            verbose=verbose)
 
     def prepare_data(self) -> pd.DataFrame:
