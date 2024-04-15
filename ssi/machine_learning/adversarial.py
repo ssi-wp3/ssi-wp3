@@ -38,7 +38,7 @@ def create_combined_dataframe(store1_dataframe: pd.DataFrame,
         The column name containing the store id
 
     receipt_text_column : str
-        The column name containing the receipt text    
+        The column name containing the receipt text
     """
     return pd.concat([
         store1_dataframe[[store_id_column,
@@ -64,7 +64,7 @@ def filter_unique_combinations(dataframe: pd.DataFrame,
         The column name containing the store id
 
     receipt_text_column : str
-        The column name containing the receipt text   
+        The column name containing the receipt text
 
     features_column : str
         The column name containing the features
@@ -253,11 +253,11 @@ class TrainAdversarialModelTask(TrainModelTask):
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
 
     def read_minimized_parquet(self, store_file, indices) -> pd.DataFrame:
-        parquet = pq.ParquetFile(store_file, columns=[
-                                 self.receipt_text_column, self.features_column, self.store_id_column])
+        parquet = pq.ParquetFile(store_file, memory_map=True)
 
         data = [batch.to_pandas().iloc[indices]
-                for batch in parquet.iter_batches()]
+                for batch in parquet.iter_batches(columns=[
+                    self.receipt_text_column, self.features_column, self.store_id_column])]
         return pd.concat(data)
 
     def get_adversarial_data(self, store_file, store_name: str) -> pd.DataFrame:
