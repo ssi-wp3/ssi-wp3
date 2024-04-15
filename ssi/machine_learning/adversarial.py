@@ -320,9 +320,9 @@ class TrainAdversarialModelTask(TrainModelTask):
             The trained pipeline and the evaluation dictionary
         """
         return train_model(adversarial_dataframe,
-                           features_column,
-                           store_id_column,
-                           model_type,
+                           model_type=model_type,
+                           feature_column=features_column,
+                           label_column=store_id_column,
                            verbose=verbose)
 
     def prepare_data(self) -> pd.DataFrame:
