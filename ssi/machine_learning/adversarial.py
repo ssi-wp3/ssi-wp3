@@ -255,9 +255,13 @@ class TrainAdversarialModelTask(TrainModelTask):
     def read_minimized_parquet(self, store_file, indices) -> pd.DataFrame:
         parquet = pq.ParquetFile(store_file, memory_map=True)
 
-        data = [batch.to_pandas().iloc[indices]
-                for batch in parquet.iter_batches(columns=[
-                    self.receipt_text_column, self.features_column, self.store_id_column])]
+        batch_start = 0
+        data = []
+        for batch in parquet.iter_batches(columns=[
+                self.receipt_text_column, self.features_column, self.store_id_column]):
+            batch_indices = indices - batch_start
+            data.append(batch.to_pandas().iloc[batch_indices])
+            batch_start += batch.num_rows
         return pd.concat(data)
 
     def get_adversarial_data(self, store_file, store_name: str) -> pd.DataFrame:
