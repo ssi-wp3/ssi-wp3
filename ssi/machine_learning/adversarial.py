@@ -319,6 +319,7 @@ class TrainAdversarialModelTask(TrainModelTask):
         Tuple[Pipeline, Dict[str, Any]]
             The trained pipeline and the evaluation dictionary
         """
+        print(f"Training adversarial model: {model_type}")
         return train_model(adversarial_dataframe,
                            model_type=model_type,
                            feature_column=features_column,
