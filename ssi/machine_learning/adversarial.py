@@ -348,6 +348,7 @@ class TrainAdversarialModelTask(TrainModelTask):
                                verbose=self.verbose)
 
     def predict(self, dataframe: pd.DataFrame, predictions_file):
+        # TODO does not calculate ROC-AUC
         self.model_trainer.predict(dataframe,
                                    predictions_file,
                                    label_mapping=self.label_mapping
