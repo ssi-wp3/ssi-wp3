@@ -4,7 +4,7 @@ from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..parquet_file import ParquetFile
 from ..files import get_features_files_in_directory
 from .train_model import train_and_evaluate_model, evaluate_model, evaluate
-from .utils import store_combinations
+from .utils import store_combinations, read_parquet_indices, read_unique_rows
 import pandas as pd
 import luigi
 import joblib
@@ -65,12 +65,10 @@ class CrossStoreEvaluation(luigi.Task):
         ]
 
     def get_store_data(self, store_file) -> pd.DataFrame:
-        store_dataframe = pd.read_parquet(
-            store_file, engine=self.parquet_engine)
-        store_dataframe = store_dataframe.drop_duplicates(
-            [self.receipt_text_column, self.label_column])
-
-        return store_dataframe
+        return read_unique_rows(store_file,
+                                group_columns=[
+                                    self.receipt_text_column, self.label_column],
+                                value_columns=[self.receipt_text_column, self.features_column, self.label_column])
 
     def get_all_store_data(self, store1_file, store2_file) -> Tuple[pd.DataFrame, pd.DataFrame]:
         store1_dataframe = self.get_store_data(store1_file)

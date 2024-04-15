@@ -55,3 +55,39 @@ def read_parquet_indices(store_file: str,
         data.append(batch.to_pandas().iloc[batch_indices])
         batch_start += batch.num_rows
     return pd.concat(data)
+
+
+def read_unique_rows(
+        filename: str,
+        group_columns: List[str],
+        value_columns: List[str] = None,
+        engine: str = "pyarrow"
+) -> pd.DataFrame:
+    """Read only the unique rows from a file. The unique files are determined
+    by the columns specified. The file is read in batches to reduce memory usage.
+
+    Parameters
+    ----------
+    filename : str
+        The filename of the parquet file
+
+    group_columns : List[str]
+        The columns to use to determine the unique rows
+
+    value_columns : List[str]
+        The columns to read from the parquet file. If None the group_columns are used.
+
+    engine : str
+        The engine to use to read the parquet file
+
+    Returns
+    -------
+    pd.DataFrame
+        A pandas DataFrame with the unique rows
+    """
+    dataframe = pd.read_parquet(filename, columns=group_columns, engine=engine)
+    unique_rows = dataframe.drop_duplicates(group_columns)
+    unique_indices = unique_rows.index
+
+    value_columns = group_columns if not value_columns else value_columns
+    return read_parquet_indices(dataframe, unique_indices, value_columns)
