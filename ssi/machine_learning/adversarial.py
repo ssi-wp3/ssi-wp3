@@ -252,7 +252,7 @@ class TrainAdversarialModelTask(TrainModelTask):
     def requires(self):
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
 
-    def read_minimized_parquet(self, store_file, indices) -> pd.DataFrame:
+    def read_parquet_indices(self, store_file, indices) -> pd.DataFrame:
         parquet = pq.ParquetFile(store_file, memory_map=True)
 
         batch_start = 0
@@ -272,7 +272,7 @@ class TrainAdversarialModelTask(TrainModelTask):
         store_dataframe = store_dataframe.drop_duplicates(
             [self.receipt_text_column, self.store_id_column])
 
-        store_dataframe = self.read_minimized_parquet(
+        store_dataframe = self.read_parquet_indices(
             store_file, store_dataframe.index)
         store_dataframe[self.store_id_column] = store_name
         return store_dataframe
