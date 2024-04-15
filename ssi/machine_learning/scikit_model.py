@@ -29,6 +29,13 @@ class SklearnModel(Model):
         return self
 
     def predict(self, X):
+        # Scikit returns label strings if the labels are strings
+        # However in our trainer we assume that we get label indices from the predict function
+        # Therefore we convert the labels to indices
+        if isinstance(self.classes_[0], str):
+            y = self.model.predict(X)
+            return [list(self.classes_).index(label) for label in y]
+
         return self.model.predict(X)
 
     def predict_proba(self, X):

@@ -174,7 +174,6 @@ class ModelTrainer:
 
     def inverse_transform(self, labels: np.ndarray, label_mapping: Dict[str, int]) -> np.ndarray:
         keys = list(label_mapping.keys())
-        print("y_pred", labels)
         return [keys[label] for label in labels]
 
     def write_model(self, model_file):
