@@ -216,19 +216,24 @@ class TrainAdversarialModelTask(TrainModelTask):
     store_id_column = luigi.Parameter()
 
     @property
-    def model_filename(self) -> str:
-        return os.path.join(
-            self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
-
-    @property
     def training_predictions_filename(self) -> str:
         return os.path.join(
             self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_training_predictions.parquet")
 
     @property
+    def training_evaluation_filename(self) -> str:
+        return os.path.join(
+            self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_training.evaluation.json")
+
+    @property
     def predictions_filename(self) -> str:
         return os.path.join(
             self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_predictions.parquet")
+
+    @property
+    def model_filename(self) -> str:
+        return os.path.join(
+            self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
 
     @property
     def evaluation_filename(self) -> str:
