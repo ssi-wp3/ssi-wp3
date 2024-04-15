@@ -260,6 +260,8 @@ class TrainAdversarialModelTask(TrainModelTask):
         for batch in parquet.iter_batches(columns=[
                 self.receipt_text_column, self.features_column, self.store_id_column]):
             batch_indices = indices - batch_start
+            print(
+                f"Batch indices: {batch_indices}, batch start: {batch_start}, indices: {indices}")
             data.append(batch.to_pandas().iloc[batch_indices])
             batch_start += batch.num_rows
         return pd.concat(data)
