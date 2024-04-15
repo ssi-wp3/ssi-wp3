@@ -51,7 +51,7 @@ class ModelFactory:
         if model_type in self.models:
             return self.models[model_type]  # (**model_kwargs)
         else:
-            raise ValueError("Invalid model type: {model_type}")
+            raise ValueError(f"Invalid model type: {model_type}")
 
     @staticmethod
     def model_for(model_type: str, **model_kwargs) -> Model:
