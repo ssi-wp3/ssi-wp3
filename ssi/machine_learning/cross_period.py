@@ -6,6 +6,7 @@ from ..parquet_file import ParquetFile
 from .train_model_task import TrainModelTask
 from .pytorch import ParquetDataset, TorchLogisticRegression, TorchMLP
 from .evaluate import calculate_metrics_per_group
+from ..analysis.products import compare_products_per_period
 from collections import OrderedDict
 from functools import partial
 import torch
@@ -415,6 +416,41 @@ class TrainModelOnPeriod(TrainModelTask):
         with self.output()[results_key].open("w") as per_group_evaluation_file:
             per_group_evaluations.to_parquet(
                 per_group_evaluation_file, engine=self.parquet_engine)
+
+    def write_product_evaluations(self):
+        evaluation_df = pd.read_parquet(
+            self.predictions_filename, engine=self.parquet_engine)
+        products_df = compare_products_per_period(
+            evaluation_df, self.period_column, product_columns=[self.receipt_text_column])
+
+        evaluation_df = evaluation_df.merge(products_df, on=self.period_column)
+        evaluation_df["is_new_product"] = evaluation_df.apply(
+            lambda row: row[self.receipt_text_column] in row["{self.receipt_text}_introduced"], axis=1)
+        evaluation_df["is_discontinued_product"] = evaluation_df.apply(
+            lambda row: row[self.receipt_text_column] in row["{self.receipt_text}_removed"], axis=1)
+        evaluation_df["unchanged_product"] = evaluation_df.apply(
+            lambda row: row[self.receipt_text_column] in row["{self.receipt_text}_same"], axis=1)
+
+        new_product_evaluations = calculate_metrics_per_group(dataframe=evaluation_df,
+                                                              group_columns=[
+                                                                  self.period_column, "is_new_product"],
+                                                              label_column=self.label_column,
+                                                              prediction_column="y_pred")
+        discontinued_product_evaluations = calculate_metrics_per_group(dataframe=evaluation_df,
+                                                                       group_columns=[
+                                                                           self.period_column, "is_discontinued_product"],
+                                                                       label_column=self.label_column,
+                                                                       prediction_column="y_pred")
+        unchanged_product_evaluations = calculate_metrics_per_group(dataframe=evaluation_df,
+                                                                    group_columns=[
+                                                                        self.period_column, "unchanged_product"],
+                                                                    label_column=self.label_column,
+                                                                    prediction_column="y_pred")
+        total_product_evaluations = calculate_metrics_per_group(dataframe=evaluation_df,
+                                                                group_columns=[
+                                                                    self.period_column],
+                                                                label_column=self.label_column,
+                                                                prediction_column="y_pred")
 
 
 class TrainModelOnAllPeriods(luigi.WrapperTask):
