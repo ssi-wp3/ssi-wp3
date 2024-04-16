@@ -64,7 +64,7 @@ class ConvertJumboReceipts(luigi.Task):
         return CsvFile(input_filename=self.input_filename)
 
     def output(self):
-        return luigi.LocalTarget(self.output_filename)
+        return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
         with self.input().open('r') as input_file:
