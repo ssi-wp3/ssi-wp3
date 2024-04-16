@@ -40,6 +40,9 @@ class AddReceiptTextsWithDate(luigi.Task):
 
             receipt_text_table = f"{self.store_name}_receipts"
             revenue_table = f"{self.store_name}_revenue"
+
+            # TODO Jumbo does not have start_date and end_date columns. We will need to add them.
+            # Most probably when creating the parquet file.
             con.sql(
                 f"""drop table if exists {receipt_text_table};
                     create table {receipt_text_table} as select * from read_parquet('{self.receipt_text_filename}')
