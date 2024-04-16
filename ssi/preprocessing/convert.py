@@ -99,7 +99,7 @@ class ConvertAllJumboReceipts(luigi.Task):
                 ]
 
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.output_directory, self.output_filename))
+        return luigi.LocalTarget(os.path.join(self.output_directory, self.output_filename), format=luigi.format.Nop)
 
     def run(self):
         for input_receipts in self.input():
