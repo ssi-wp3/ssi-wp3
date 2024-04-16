@@ -1,4 +1,5 @@
 from typing import Tuple
+from sklearn.preprocessing import LabelEncoder
 from ..preprocessing.files import get_store_name_from_combined_filename
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..parquet_file import ParquetFile
@@ -92,10 +93,23 @@ class CrossStoreEvaluation(luigi.Task):
                 print("Reading parquet files")
                 store1_dataframe, store2_dataframe = self.get_all_store_data(
                     store1_file, store2_file)
+
+                print("Encoding labels")
+                label_encoder = LabelEncoder()
+                all_labels = pd.concat(
+                    [store1_dataframe[self.label_column], store2_dataframe[self.label_column]])
+                label_encoder.fit(all_labels)
+
+                encoded_label_column = f"{self.label_column}_index"
+                store1_dataframe[encoded_label_column] = label_encoder.transform(
+                    store1_dataframe[self.label_column])
+                store2_dataframe[encoded_label_column] = label_encoder.transform(
+                    store2_dataframe[self.label_column])
+
                 print(f"Training model on {store1}")
                 pipeline, train_evaluation_dict = train_and_evaluate_model(store1_dataframe,
                                                                            self.features_column,
-                                                                           self.label_column,
+                                                                           encoded_label_column,
                                                                            self.model_type,
                                                                            test_size=self.test_size,
                                                                            verbose=self.verbose)
@@ -103,7 +117,7 @@ class CrossStoreEvaluation(luigi.Task):
                 evaluation_dict = evaluate_model(pipeline,
                                                  store2_dataframe,
                                                  self.features_column,
-                                                 self.label_column,
+                                                 encoded_label_column,
                                                  evaluation_function=evaluate,
                                                  )
 
