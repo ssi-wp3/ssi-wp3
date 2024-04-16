@@ -87,7 +87,6 @@ def read_unique_rows(
     """
     dataframe = pd.read_parquet(filename, columns=group_columns, engine=engine)
     unique_rows = dataframe.drop_duplicates(group_columns)
-    unique_indices = unique_rows.index
 
     value_columns = group_columns if not value_columns else value_columns
-    return read_parquet_indices(dataframe, unique_indices, value_columns)
+    return read_parquet_indices(filename, unique_rows.index, value_columns)
