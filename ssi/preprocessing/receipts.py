@@ -17,6 +17,8 @@ class AddReceiptTextsWithDate(luigi.Task):
     store_name = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
 
+    key_column = luigi.Parameter(default="rep_id")
+
     def requires(self):
         return [ParquetFile(input_filename=self.input_filename),
                 ParquetFile(input_filename=self.receipt_text_filename)]
@@ -49,16 +51,16 @@ class AddReceiptTextsWithDate(luigi.Task):
                     from read_parquet('{self.input_filename}');
                     """)
             con.sql(
-                f"create index {revenue_table}_rep_idx on {revenue_table}(rep_id)")
+                f"create index {revenue_table}_{self.key_column}_idx on {revenue_table}({self.key_column})")
             con.sql(
-                f"create index {receipt_text_table}_rep_idx on {receipt_text_table}(rep_id)")
+                f"create index {receipt_text_table}_{self.key_column}_idx on {receipt_text_table}({self.key_column})")
 
             with self.output().temporary_path() as output_path:
                 receipt_revenue_table = f"{self.store_name}_revenue_receipts"
                 con.sql(f"""drop table if exists {receipt_revenue_table};
                         create table {receipt_revenue_table} as
                         select pr.*, pc.{self.receipt_text_column} from {revenue_table} as pr 
-                        inner join {receipt_text_table} as pc on pr.rep_id = pc.rep_id 
+                        inner join {receipt_text_table} as pc on pr.{self.key_column} = pc.{self.key_column} 
                         where pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
                     """)
                 con.sql(
