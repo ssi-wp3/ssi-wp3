@@ -38,9 +38,11 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
 
 def convert_jumbo_receipts(input_file,
                            delimiter: str = "|",
-                           year_month_column: str = "year_month"
+                           year_month_column: str = "year_month",
+                           encoding: str = "latin1"
                            ) -> pd.DataFrame:
-    jumbo_receipts_df = pd.read_csv(input_file, sep=delimiter)
+    jumbo_receipts_df = pd.read_csv(
+        input_file, sep=delimiter, encoding=encoding)
     jumbo_receipts_df = jumbo_receipts_df.rename(columns={'NUM_ISO_JAARWEEK': 'year_week',
                                                           'NUM_VESTIGING': 'branch_id',
                                                           'NUM_EAN': 'ean_number',
