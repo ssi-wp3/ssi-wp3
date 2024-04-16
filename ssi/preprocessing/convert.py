@@ -109,7 +109,9 @@ class ConvertAllJumboReceipts(luigi.Task):
                     input_file, engine=self.parquet_engine))
 
             with self.output().open('w') as output_file:
-                pd.concat(receipts_dfs).to_parquet(
+                all_receipts_df = pd.concat(receipts_dfs)
+                all_receipts_df.sort_values(by=['year_month'], inplace=True)
+                all_receipts_df.to_parquet(
                     output_file, engine=self.parquet_engine)
 
     def _is_correct_receipt_file(self, input_filename: str) -> bool:
