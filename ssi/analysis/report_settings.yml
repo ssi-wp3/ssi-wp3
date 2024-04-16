@@ -118,7 +118,17 @@ report_settings:
           y_column: value
           group_column: group
           title: Number of products introduced/removed per {{period_column}} for {{store_name}}
+    - type: plot
+      pivot: false 
+      value_columns:
+        - {{period_column}}
+        - jaccard_index_{{receipt_text_column}}_{{period_column}}
+      output_filename: "overlap_{{store_name}}_{{period_column}}_jaccard_index_{{receipt_text_column}}.png"
+      settings:
+          plot_type: line_chart
+          x_column: {{period_column}}
+          y_column: jaccard_index_{{receipt_text_column}}_{{period_column}}
+          title: Jaccard index of {{receipt_text_column}} overlap per {{period_column}} for {{store_name}}
   
-      
   # Analysis per period and coicop
   
