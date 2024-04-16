@@ -268,5 +268,6 @@ class AddAllReceiptTexts(luigi.WrapperTask):
                                               receipt_text_filename=receipt_text_filename,
                                               output_filename=output_filename,
                                               store_name=store_name,
-                                              receipt_text_column=self.receipt_text_column
+                                              receipt_text_column=self.receipt_text_column,
+                                              key_column="ean_number" if store_name.lower() == "jumbo" else "rep_id"
                                               )
