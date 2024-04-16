@@ -58,6 +58,7 @@ class ConvertJumboReceipts(luigi.Task):
     year_month_column = luigi.Parameter(default='year_month')
 
     parquet_engine = luigi.Parameter(default="pyarrow")
+    csv_encoding = luigi.Parameter(default="latin1")
 
     def requires(self):
         return CsvFile(input_filename=self.input_filename)
@@ -66,7 +67,7 @@ class ConvertJumboReceipts(luigi.Task):
         with self.input().open('r') as input_file:
             with self.output().open('w') as output_file:
                 jumbo_receipts_df = convert_jumbo_receipts(
-                    input_file, self.delimiter, self.year_month_column)
+                    input_file, self.delimiter, self.year_month_column, self.csv_encoding)
                 jumbo_receipts_df.to_parquet(
                     output_file, engine=self.parquet_engine)
 
@@ -77,7 +78,9 @@ class ConvertAllJumboReceipts(luigi.Task):
     output_filename = luigi.Parameter(default='jumbo_receipts.parquet')
     delimiter = luigi.Parameter(default='|')
     year_month_column = luigi.Parameter(default='year_month')
+
     parquet_engine = luigi.Parameter(default="pyarrow")
+    csv_encoding = luigi.Parameter(default='latin1')
 
     def requires(self):
         return [ConvertJumboReceipts(input_filename=os.path.join(self.input_directory, input_filename),
@@ -85,7 +88,8 @@ class ConvertAllJumboReceipts(luigi.Task):
                                          self.output_directory, input_filename.replace('.csv', '.parquet')),
                                      delimiter=self.delimiter,
                                      year_month_column=self.year_month_column,
-                                     parquet_engine=self.parquet_engine)
+                                     parquet_engine=self.parquet_engine,
+                                     csv_encoding=self.csv_encoding)
                 for input_filename in os.listdir(self.input_directory)
                 if input_filename.endswith('.csv')
                 and self._is_correct_receipt_file(input_filename)
@@ -99,7 +103,7 @@ class ConvertAllJumboReceipts(luigi.Task):
             receipts_dfs = []
             with input_receipts.open('r') as input_file:
                 receipts_dfs.append(pd.read_parquet(
-                    input_file, engine=self.parquet_engine))
+                    input_file, engine=self.parquet_engine, encoding=self.csv_encoding))
 
             with self.output().open('w') as output_file:
                 pd.concat(receipts_dfs).to_parquet(
