@@ -16,6 +16,8 @@ that delivers output files with the same columns.
 
 # TODO describe output file structure in more detail
 
+## Preprocessing for Statistic Netherlands
+
 For Statistics Netherlands, the preprocessing stage consists of the following
 steps:
 
