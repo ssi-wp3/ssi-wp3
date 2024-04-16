@@ -8,7 +8,7 @@ from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..parquet_file import ParquetFile
 from .train_model import train_model, train_and_evaluate_model, drop_labels_with_few_samples
 from .train_model_task import TrainModelTask
-from .utils import store_combinations
+from .utils import store_combinations, read_parquet_indices
 from pyarrow import parquet as pq
 import pandas as pd
 import numpy as np
@@ -252,28 +252,15 @@ class TrainAdversarialModelTask(TrainModelTask):
     def requires(self):
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
 
-    def read_minimized_parquet(self, store_file, indices) -> pd.DataFrame:
-        parquet = pq.ParquetFile(store_file, memory_map=True)
-
-        batch_start = 0
-        data = []
-        for batch in parquet.iter_batches(columns=[
-                self.receipt_text_column, self.features_column, self.store_id_column]):
-            batch_indices = indices[(indices >= batch_start) & (
-                indices < batch_start + batch.num_rows)]
-            batch_indices -= batch_start
-            data.append(batch.to_pandas().iloc[batch_indices])
-            batch_start += batch.num_rows
-        return pd.concat(data)
-
     def get_adversarial_data(self, store_file, store_name: str) -> pd.DataFrame:
         store_dataframe = pd.read_parquet(
             store_file, engine=self.parquet_engine, columns=[self.receipt_text_column, self.store_id_column])
         store_dataframe = store_dataframe.drop_duplicates(
             [self.receipt_text_column, self.store_id_column])
 
-        store_dataframe = self.read_minimized_parquet(
-            store_file, store_dataframe.index)
+        store_dataframe = read_parquet_indices(
+            store_file, store_dataframe.index, columns=[
+                self.receipt_text_column, self.features_column, self.store_id_column])
         store_dataframe[self.store_id_column] = store_name
         return store_dataframe
 
@@ -319,6 +306,7 @@ class TrainAdversarialModelTask(TrainModelTask):
         Tuple[Pipeline, Dict[str, Any]]
             The trained pipeline and the evaluation dictionary
         """
+        print(f"Training adversarial model: {model_type}")
         return train_model(adversarial_dataframe,
                            model_type=model_type,
                            feature_column=features_column,
@@ -347,6 +335,7 @@ class TrainAdversarialModelTask(TrainModelTask):
                                verbose=self.verbose)
 
     def predict(self, dataframe: pd.DataFrame, predictions_file):
+        # TODO does not calculate ROC-AUC
         self.model_trainer.predict(dataframe,
                                    predictions_file,
                                    label_mapping=self.label_mapping
