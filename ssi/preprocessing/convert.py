@@ -92,7 +92,7 @@ class ConvertAllJumboReceipts(luigi.Task):
                 ]
 
     def output(self):
-        return ParquetFile(os.path.join(self.output_directory, self.output_filename))
+        return luigi.LocalTarget(os.path.join(self.output_directory, self.output_filename))
 
     def run(self):
         for input_receipts in self.input():
