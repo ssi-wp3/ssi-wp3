@@ -103,7 +103,7 @@ class ConvertAllJumboReceipts(luigi.Task):
             receipts_dfs = []
             with input_receipts.open('r') as input_file:
                 receipts_dfs.append(pd.read_parquet(
-                    input_file, engine=self.parquet_engine, encoding=self.csv_encoding))
+                    input_file, engine=self.parquet_engine))
 
             with self.output().open('w') as output_file:
                 pd.concat(receipts_dfs).to_parquet(
@@ -111,7 +111,7 @@ class ConvertAllJumboReceipts(luigi.Task):
 
     def _is_correct_receipt_file(self, input_filename: str) -> bool:
         df = pd.read_csv(os.path.join(self.input_directory,
-                         input_filename), delimiter=self.delimiter, nrows=1)
+                         input_filename), delimiter=self.delimiter, nrows=1, encoding=self.csv_encoding)
         jumbo_columns = ["NUM_ISO_JAARWEEK",
                          "NUM_VESTIGING", "NUM_ARTIKEL", "NAM_ARTIKEL"]
         return set(df.columns.values).intersection(set(jumbo_columns)) == set(jumbo_columns)
