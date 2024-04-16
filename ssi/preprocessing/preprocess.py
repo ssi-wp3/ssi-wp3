@@ -56,7 +56,7 @@ class PreprocessFile(luigi.Task):
                                        store_name=self.store_name,
                                        parquet_engine=self.parquet_engine
                                        )
-        return ParquetFile(input_filename=self.input_filename)
+        return ParquetFile(self.input_filename)
 
     def run(self):
         with self.input().open("r") as input_file:
