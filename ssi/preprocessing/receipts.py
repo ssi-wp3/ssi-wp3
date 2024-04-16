@@ -20,8 +20,8 @@ class AddReceiptTextsWithDate(luigi.Task):
     key_column = luigi.Parameter(default="rep_id")
 
     def requires(self):
-        return [ParquetFile(input_filename=self.input_filename),
-                ParquetFile(input_filename=self.receipt_text_filename)]
+        return [ParquetFile(self.input_filename),
+                ParquetFile(self.receipt_text_filename)]
 
     def output(self):
         return luigi.LocalTarget(self.output_filename)
@@ -97,7 +97,7 @@ class AddReceiptTextFromColumn(luigi.Task):
     parquet_engine = luigi.Parameter()
 
     def requires(self):
-        return [ParquetFile(input_filename=self.input_filename)]
+        return [ParquetFile(self.input_filename)]
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
@@ -158,8 +158,8 @@ class AddReceiptTexts(luigi.Task):
     parquet_engine = luigi.Parameter()
 
     def requires(self):
-        return [ParquetFile(input_filename=self.input_filename),
-                ParquetFile(input_filename=self.receipt_texts_filename)]
+        return [ParquetFile(self.input_filename),
+                ParquetFile(self.receipt_texts_filename)]
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
