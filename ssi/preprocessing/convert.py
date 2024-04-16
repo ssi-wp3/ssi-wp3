@@ -1,6 +1,8 @@
+from ..parquet_file import ParquetFile
 from .parquet import convert_to_parquet
 from .preprocess_data import convert_ah_receipts, convert_jumbo_receipts
 from .clean import CleanCPIFile
+import pandas as pd
 import luigi
 import os
 
@@ -67,6 +69,48 @@ class ConvertJumboReceipts(luigi.Task):
                     input_file, self.delimiter, self.year_month_column)
                 jumbo_receipts_df.to_parquet(
                     output_file, engine=self.parquet_engine)
+
+
+class ConvertAllJumboReceipts(luigi.Task):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    output_filename = luigi.Parameter(default='jumbo_receipts.parquet')
+    delimiter = luigi.Parameter(default='|')
+    year_month_column = luigi.Parameter(default='year_month')
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    def requires(self):
+        return [ConvertJumboReceipts(input_filename=os.path.join(self.input_directory, input_filename),
+                                     output_filename=os.path.join(
+                                         self.output_directory, input_filename.replace('.csv', '.parquet')),
+                                     delimiter=self.delimiter,
+                                     year_month_column=self.year_month_column,
+                                     parquet_engine=self.parquet_engine)
+                for input_filename in os.listdir(self.input_directory)
+                if input_filename.endswith('.csv')
+                and self._is_correct_receipt_file(input_filename)
+                ]
+
+    def output(self):
+        return ParquetFile(os.path.join(self.output_directory, self.output_filename))
+
+    def run(self):
+        for input_receipts in self.input():
+            receipts_dfs = []
+            with input_receipts.open('r') as input_file:
+                receipts_dfs.append(pd.read_parquet(
+                    input_file, engine=self.parquet_engine))
+
+            with self.output().open('w') as output_file:
+                pd.concat(receipts_dfs).to_parquet(
+                    output_file, engine=self.parquet_engine)
+
+    def _is_correct_receipt_file(self, input_filename: str) -> bool:
+        df = pd.read_csv(os.path.join(self.input_directory,
+                         input_filename), delimiter=self.delimiter, nrows=1)
+        jumbo_columns = ["NUM_ISO_JAARWEEK",
+                         "NUM_VESTIGING", "NUM_ARTIKEL", "NAM_ARTIKEL"]
+        return set(df.columns.values).intersection(set(jumbo_columns)) == set(jumbo_columns)
 
 
 class ConvertCSVToParquet(luigi.Task):
