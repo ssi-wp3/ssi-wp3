@@ -36,6 +36,25 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
     return all_receipts_df
 
 
+def convert_jumbo_receipts(input_file,
+                           delimiter: str = "|",
+                           year_month_column: str = "year_month"
+                           ) -> pd.DataFrame:
+    jumbo_receipts_df = pd.read_csv(input_file, sep=delimiter)
+    jumbo_receipts_df = jumbo_receipts_df.rename(columns={'NUM_ISO_JAARWEEK': 'year_week',
+                                                          'NUM_VESTIGING': 'branch_id',
+                                                          'NUM_EAN': 'ean_number',
+                                                          'CBS_EAN': 'ean_number',
+                                                          'NUM_ARTIKEL': 'article_number',
+                                                          'NAM_ARTIKEL': 'receipt_text',
+                                                          })
+    # Convert year-week to year-month
+    jumbo_receipts_df[year_month_column] = pd.to_datetime(
+        jumbo_receipts_df.str + '0', format="%Y%W%w").strftime('%Y%m')
+
+    return jumbo_receipts_df
+
+
 def split_coicop(coicop_column: pd.Series) -> pd.DataFrame:
     return pd.DataFrame({column: coicop_column.str[:index + 2]
                         for index, column in enumerate(Constants.COICOP_LEVELS_COLUMNS)
