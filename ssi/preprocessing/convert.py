@@ -1,5 +1,5 @@
 from .parquet import convert_to_parquet
-from .preprocess_data import convert_ah_receipts
+from .preprocess_data import convert_ah_receipts, convert_jumbo_receipts
 from .clean import CleanCPIFile
 import luigi
 import os
@@ -47,6 +47,26 @@ class ConvertAHReceipts(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
+
+
+class ConvertJumboReceipts(luigi.Task):
+    input_filename = luigi.PathParameter()
+    output_filename = luigi.PathParameter()
+    delimiter = luigi.Parameter(default='|')
+    year_month_column = luigi.Parameter(default='year_month')
+
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    def requires(self):
+        return CsvFile(input_filename=self.input_filename)
+
+    def run(self):
+        with self.input().open('r') as input_file:
+            with self.output().open('w') as output_file:
+                jumbo_receipts_df = convert_jumbo_receipts(
+                    input_file, self.delimiter, self.year_month_column)
+                jumbo_receipts_df.to_parquet(
+                    output_file, engine=self.parquet_engine)
 
 
 class ConvertCSVToParquet(luigi.Task):

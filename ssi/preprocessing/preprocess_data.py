@@ -50,7 +50,7 @@ def convert_jumbo_receipts(input_file,
                                                           })
     # Convert year-week to year-month
     jumbo_receipts_df[year_month_column] = pd.to_datetime(
-        jumbo_receipts_df.str + '0', format="%Y%W%w").strftime('%Y%m')
+        jumbo_receipts_df["year_week"].str + '0', format="%Y%W%w").strftime('%Y%m')
 
     return jumbo_receipts_df
 
