@@ -343,7 +343,7 @@ class CrossStoreAnalysis(luigi.Task):
 
     def run(self):
         store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
-                            for store_name, input_file in self.input()]
+                            for store_name, input_file in self.input().items()]
 
         for product_id_column in self.product_id_columns:
             for overlap_function, function in self.overlap_functions.items():
