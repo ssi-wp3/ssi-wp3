@@ -388,17 +388,21 @@ class CrossStoreAnalysis(luigi.Task):
 
         for product_id_column in self.product_id_columns:
             for overlap_function_name, overlap_function in self.overlap_functions.items():
-                with tqdm.tqdm(total=len(store_dataframes) * (len(store_dataframes) - 1) // 2) as progress_bar:
-                    overlap_matrix_df = calculate_overlap_for_stores(
-                        store_dataframes,
-                        store_id_column=self.store_name_column,
-                        product_id_column=product_id_column,
-                        overlap_function=overlap_function,
-                        progress_bar=progress_bar)
+                for preprocessing_function_name, preprocessing_function in self.overlap_preprocessing_functions[product_id_column].items():
+                    with tqdm.tqdm(total=len(store_dataframes) * (len(store_dataframes) - 1) // 2) as progress_bar:
+                        overlap_matrix_df = calculate_overlap_for_stores(
+                            store_dataframes,
+                            store_id_column=self.store_name_column,
+                            product_id_column=product_id_column,
+                            overlap_function=overlap_function,
+                            preprocess_function=preprocessing_function,
+                            progress_bar=progress_bar)
 
-                    with self.output()[self.get_output_key(product_id_column, overlap_function_name)].open("w") as output_file:
-                        overlap_matrix_df.to_parquet(
-                            output_file, engine=self.parquet_engine)
+                        output_key = self.get_output_key(
+                            product_id_column, preprocessing_function_name, overlap_function_name)
+                        with self.output()[output_key].open("w") as output_file:
+                            overlap_matrix_df.to_parquet(
+                                output_file, engine=self.parquet_engine)
 
     def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
         with input_file.open("r") as input_parquet_file:
