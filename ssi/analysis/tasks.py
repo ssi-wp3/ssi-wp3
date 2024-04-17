@@ -333,7 +333,7 @@ class CrossStoreAnalysis(luigi.Task):
 
     def requires(self):
         return {store_name: StoreFile(filename)
-                for store_name, filename in self.combined_revenue_files}
+                for store_name, filename in self.combined_revenue_files.items()}
 
     def output(self):
         overlap_directory = os.path.join(self.output_directory, "overlap")
@@ -359,7 +359,7 @@ class CrossStoreAnalysis(luigi.Task):
                             output_file, engine=self.parquet_engine)
 
     def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
-        return self.__add_store_name_column(pd.read_parquet(input_file, engine=self.parquet_engine), store_name, store_name_column)
+        return self.__add_store_name_column(pd.read_parquet(input_file, engine=self.parquet_engine, columns=self.product_id_columns), store_name, store_name_column)
 
     def __add_store_name_column(self,
                                 store_dataframe: pd.DataFrame,
