@@ -79,7 +79,7 @@ class ConvertJumboReceipts(luigi.Task):
                     output_file, engine=self.parquet_engine)
 
     def get_start_date(self, date_column: pd.Series) -> pd.Series:
-        return year_week_to_date(date_column)
+        return year_week_to_date(date_column).dt
 
 
 class ConvertAllJumboReceipts(luigi.Task):
