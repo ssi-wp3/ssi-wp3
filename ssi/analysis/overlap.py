@@ -1,7 +1,8 @@
 
-from typing import Tuple, Callable, List
+from typing import Tuple, Callable, List, Optional
 import pandas as pd
 import numpy as np
+import tqdm
 
 
 def handle_missing_sets(left_set: set, right_set: set) -> Tuple[set, set]:
@@ -196,7 +197,9 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
                                  product_id_column: str,
                                  overlap_function: Callable[[
                                      set, set], float] = jaccard_index,
-                                 preprocess_function: Callable[[pd.Series], pd.Series] = lambda series: series) -> pd.DataFrame:
+                                 preprocess_function: Callable[[
+                                     pd.Series], pd.Series] = lambda series: series,
+                                 progress_bar: Optional[tqdm.tqdm] = None) -> pd.DataFrame:
     """ Calculate the overlap between the products of a list of stores.
 
     Parameters
@@ -227,10 +230,17 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
         symmetric, so the overlap between store A and store B is the same as the overlap between store B and store A.
     """
     number_of_stores = len(store_data)
+    store_names = [store[store_id_column].values[0] for store in store_data]
     store_overlap = np.empty(
         (number_of_stores, number_of_stores), dtype=np.float64)
     for row_index in range(len(store_data)):
         for column_index in range(row_index + 1, len(store_data)):
+            if progress_bar is not None:
+                store_name1 = store_names[row_index]
+                store_name2 = store_names[column_index]
+                progress_bar.set_description(
+                    f"Calculating overlap for store {store_name1} and store {store_name2}")
+
             store1 = store_data[row_index]
             store2 = store_data[column_index]
 
@@ -243,5 +253,7 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
             store_overlap[row_index, column_index] = overlap
             store_overlap[column_index, row_index] = overlap
 
-    store_names = [store[store_id_column].values[0] for store in store_data]
+            if progress_bar is not None:
+                progress_bar.update(1)
+
     return pd.DataFrame(store_overlap, columns=store_names, index=store_names)

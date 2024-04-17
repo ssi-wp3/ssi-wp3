@@ -13,6 +13,7 @@ from ..settings import Settings
 import pandas as pd
 import luigi
 import os
+import tqdm
 
 
 class StoreFile(luigi.ExternalTask):
@@ -346,14 +347,16 @@ class CrossStoreAnalysis(luigi.Task):
 
         for product_id_column in self.product_id_columns:
             for overlap_function, function in self.overlap_functions.items():
-                overlap_matrix_df = calculate_overlap_for_stores(
-                    store_dataframes,
-                    store_id_column=self.store_name_column,
-                    product_id_column=product_id_column,
-                    overlap_function=function)
-                with self.output()[overlap_function].open("w") as output_file:
-                    overlap_matrix_df.to_parquet(
-                        output_file, engine=self.parquet_engine)
+                with tqdm.tqdm(total=len(store_dataframes) * (len(store_dataframes) - 1) // 2) as progress_bar:
+                    overlap_matrix_df = calculate_overlap_for_stores(
+                        store_dataframes,
+                        store_id_column=self.store_name_column,
+                        product_id_column=product_id_column,
+                        overlap_function=function,
+                        progress_bar=progress_bar)
+                    with self.output()[overlap_function].open("w") as output_file:
+                        overlap_matrix_df.to_parquet(
+                            output_file, engine=self.parquet_engine)
 
     def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
         return self.__add_store_name_column(pd.read_parquet(input_file, engine=self.parquet_engine), store_name, store_name_column)
