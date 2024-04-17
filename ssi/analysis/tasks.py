@@ -348,13 +348,21 @@ class CrossStoreAnalysis(luigi.Task):
             }
         }
 
-    def target_for(self, overlap_directory: str, product_id_column: str, overlap_name: str):
-        return luigi.LocalTarget(os.path.join(overlap_directory, f"overlap_{product_id_column}_{overlap_name}.parquet"),
+    def target_for(self,
+                   overlap_directory: str,
+                   product_id_column: str,
+                   preprocessing_function_name: str,
+                   overlap_name: str) -> luigi.LocalTarget:
+        return luigi.LocalTarget(os.path.join(overlap_directory,
+                                              f"overlap_{product_id_column}_{preprocessing_function_name}_{overlap_name}.parquet"),
                                  format=luigi.format.Nop
                                  )
 
-    def get_output_key(self, product_id_column: str, overlap_name: str) -> str:
-        return f"{product_id_column}_{overlap_name}"
+    def get_output_key(self,
+                       product_id_column: str,
+                       preprocessing_function_name: str,
+                       overlap_name: str) -> str:
+        return f"{product_id_column}_{preprocessing_function_name}_{overlap_name}"
 
     def requires(self):
         return {store_name: StoreFile(filename)
@@ -362,9 +370,15 @@ class CrossStoreAnalysis(luigi.Task):
 
     def output(self):
         overlap_directory = os.path.join(self.output_directory, "overlap")
-        return {self.get_output_key(product_id_column, overlap_name): self.target_for(overlap_directory, product_id_column, overlap_name)
-                for overlap_name in self.overlap_functions.keys()
+        return {self.get_output_key(product_id_column, preprocessing_function, overlap_name):
+                self.target_for(overlap_directory,
+                                product_id_column,
+                                preprocessing_function,
+                                overlap_name)
+
                 for product_id_column in self.product_id_columns
+                for overlap_name in self.overlap_functions.keys()
+                for preprocessing_function in self.overlap_preprocessing_functions[product_id_column].keys()
                 }
 
     def run(self):
