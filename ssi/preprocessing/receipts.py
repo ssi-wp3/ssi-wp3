@@ -45,7 +45,8 @@ class AddReceiptTextsWithDate(luigi.Task):
             # Most probably when creating the parquet file.
             con.sql(
                 f"""drop table if exists {receipt_text_table};
-                    create table {receipt_text_table} as select * from read_parquet('{self.receipt_text_filename}')
+                    create table {receipt_text_table} as select *
+                    from read_parquet('{self.receipt_text_filename}')
                     """)
             con.sql(f"""drop table if exists {revenue_table};
                     create table {revenue_table} as select 
