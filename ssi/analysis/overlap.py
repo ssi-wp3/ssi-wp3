@@ -189,7 +189,7 @@ def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
     pd.Series
         A series with the split strings.
     """
-    return string_column.str.split(separator)
+    return string_column.str.split(separator).explode()
 
 
 def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
