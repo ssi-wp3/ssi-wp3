@@ -1,6 +1,6 @@
 from ..parquet_file import ParquetFile
 from .parquet import convert_to_parquet
-from .preprocess_data import convert_ah_receipts, convert_jumbo_receipts
+from .preprocess_data import convert_ah_receipts, convert_jumbo_receipts, year_week_to_date
 from .clean import CleanCPIFile
 import pandas as pd
 import luigi
@@ -74,13 +74,12 @@ class ConvertJumboReceipts(luigi.Task):
                     input_file, self.delimiter, self.year_month_column, self.csv_encoding)
                 if self.add_start_date:
                     jumbo_receipts_df['start_date'] = self.get_start_date(
-                        jumbo_receipts_df['year_month'])
+                        jumbo_receipts_df['year_week'])
                 jumbo_receipts_df.to_parquet(
                     output_file, engine=self.parquet_engine)
 
     def get_start_date(self, date_column: pd.Series) -> pd.Series:
-        start_date = pd.to_datetime(date_column, format='%Y%m')
-        return start_date.dt.strftime('%Y-%m-%d')
+        return year_week_to_date(date_column).dt.strftime('%Y-%m-%d')
 
 
 class ConvertAllJumboReceipts(luigi.Task):

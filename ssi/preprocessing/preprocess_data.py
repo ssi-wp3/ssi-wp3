@@ -36,6 +36,10 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
     return all_receipts_df
 
 
+def year_week_to_date(year_week_column: pd.Series) -> pd.Series:
+    return pd.to_datetime(year_week_column.astype(str) + '0', format="%Y%W%w")
+
+
 def convert_jumbo_receipts(input_file,
                            delimiter: str = "|",
                            year_month_column: str = "year_month",
@@ -51,8 +55,8 @@ def convert_jumbo_receipts(input_file,
                                                           'NAM_ARTIKEL': 'receipt_text',
                                                           })
     # Convert year-week to year-month
-    jumbo_receipts_df[year_month_column] = pd.to_datetime(
-        jumbo_receipts_df["year_week"].astype(str) + '0', format="%Y%W%w").dt.strftime('%Y%m')
+    jumbo_receipts_df[year_month_column] = year_week_to_date(
+        jumbo_receipts_df["year_week"]).dt.strftime('%Y%m')
 
     return jumbo_receipts_df
 
