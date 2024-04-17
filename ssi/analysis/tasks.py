@@ -322,8 +322,10 @@ class CrossStoreAnalysis(luigi.Task):
 
     @property
     def combined_revenue_files(self) -> Dict[str, str]:
-        return {get_store_name_from_combined_filename(filename): filename
-                for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)}
+        return {
+            get_store_name_from_combined_filename(filename): filename
+            for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)
+        }
 
     @property
     def overlap_functions(self) -> Dict[str, Callable]:
@@ -342,6 +344,7 @@ class CrossStoreAnalysis(luigi.Task):
                 }
 
     def run(self):
+        print(self.input())
         store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
                             for store_name, input_file in self.input().items()]
 
