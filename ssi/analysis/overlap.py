@@ -175,7 +175,9 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
 def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
                                  store_id_column: str,
                                  product_id_column: str,
-                                 overlap_function: Callable[[set, set], float] = jaccard_index) -> pd.DataFrame:
+                                 overlap_function: Callable[[
+                                     set, set], float] = jaccard_index,
+                                 preprocess_function: Callable[[pd.Series], pd.Series] = lambda series: series) -> pd.DataFrame:
     """ Calculate the overlap between the products of a list of stores.
 
     Parameters
@@ -193,6 +195,11 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
     overlap_function : Callable[[set, set], float]
         The overlap function to use to calculate the overlap between the stores.
 
+    preprocess_function : Callable[[pd.Series], pd.Series]
+        A function to preprocess the data before calculating the overlap. This function can be used to filter out
+        duplicate products, or return tokens for the product texts. By default, a lambda function is used that returns
+        the series as is.
+
     Returns
     -------
     pd.DataFrame
@@ -208,8 +215,10 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
             store1 = store_data[row_index]
             store2 = store_data[column_index]
 
-            store1_set = set(store1[product_id_column].dropna().values)
-            store2_set = set(store2[product_id_column].dropna().values)
+            store1_set = set(preprocess_function(
+                store1[product_id_column]).values)
+            store2_set = set(preprocess_function(
+                store2[product_id_column]).values)
             overlap = overlap_function(
                 store1_set, store2_set)
             store_overlap[row_index, column_index] = overlap
