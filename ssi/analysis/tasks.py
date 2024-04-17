@@ -333,7 +333,7 @@ class CrossStoreAnalysis(luigi.Task):
 
     def requires(self):
         return {store_name: StoreFile(filename)
-                for store_name, filename in self.combined_revenue_files}
+                for store_name, filename in self.combined_revenue_files.items()}
 
     def output(self):
         overlap_directory = os.path.join(self.output_directory, "overlap")
