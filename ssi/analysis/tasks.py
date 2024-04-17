@@ -336,6 +336,13 @@ class CrossStoreAnalysis(luigi.Task):
             "overlap_coefficient": overlap_coefficient
         }
 
+    @property
+    def overlap_preprocessing_functions(self) -> Dict[str, Callable]:
+        return {
+            "raw": lambda x: x,
+            "lower": lambda x: x.str.lower(),
+        }
+
     def requires(self):
         return {store_name: StoreFile(filename)
                 for store_name, filename in self.combined_revenue_files.items()}
