@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
 from .files import get_combined_revenue_files_in_directory
+from .overlap import calculate_overlap_for_stores, jaccard_index
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
@@ -314,21 +315,55 @@ class CrossStoreAnalysis(luigi.Task):
     project_prefix = luigi.Parameter(default="ssi")
     parquet_engine = luigi.Parameter(default="pyarrow")
 
+    product_id_columns = luigi.ListParameter(
+        default=["ean_number", "receipt_text"])
+    store_name_column = luigi.Parameter(default="store_name")
+
     @property
-    def combined_revenue_files(self) -> List[str]:
-        return [filename
-                for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)]
+    def combined_revenue_files(self) -> Dict[str, str]:
+        return {get_store_name_from_combined_filename(filename): filename
+                for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)}
+
+    @property
+    def overlap_functions(self) -> Dict[str, Callable]:
+        return {
+            "jaccard_index": jaccard_index
+        }
 
     def requires(self):
-        return [StoreFile(filename)
-                for filename in self.combined_revenue_files]
+        return {store_name: StoreFile(filename)
+                for store_name, filename in self.combined_revenue_files}
 
     def output(self):
-        return luigi.LocalTarget(self.output_directory, format=luigi.format.Nop)
+        overlap_directory = os.path.join(self.output_directory, "overlap")
+        return {overlap_name: luigi.LocalTarget(os.path.join(overlap_directory, f"overlap_{overlap_name}.parquet"), format=luigi.format.Nop)
+                for overlap_name in self.overlap_functions.keys()
+                }
 
     def run(self):
-        # TODO create list with file combinations
-        return super().run()
+        store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
+                            for store_name, input_file in self.input()]
+
+        for product_id_column in self.product_id_columns:
+            for overlap_function, function in self.overlap_functions.items():
+                overlap_matrix_df = calculate_overlap_for_stores(
+                    store_dataframes,
+                    store_id_column=self.store_name_column,
+                    product_id_column=product_id_column,
+                    overlap_function=function)
+                with self.output()[overlap_function].open("w") as output_file:
+                    overlap_matrix_df.to_parquet(
+                        output_file, engine=self.parquet_engine)
+
+    def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
+        return self.__add_store_name_column(pd.read_parquet(input_file, engine=self.parquet_engine), store_name, store_name_column)
+
+    def __add_store_name_column(self,
+                                store_dataframe: pd.DataFrame,
+                                store_name: str,
+                                store_name_column: str = "store_name") -> pd.DataFrame:
+        store_dataframe[store_name_column] = store_name
+        return store_dataframe
 
 
 class AllStoresAnalysis(luigi.WrapperTask):
