@@ -347,7 +347,8 @@ class CrossStoreAnalysis(luigi.Task):
                 "raw": lambda x: x,
                 "lower": lambda x: x.str.lower(),
                 "lower_split_words": lambda x: split_strings(x.str.lower()),
-                "stripped": lambda x: x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower()
+                "stripped": lambda x: x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower(),
+                "stripped_split_words": lambda x: split_strings(x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower())
             }
         }
 
