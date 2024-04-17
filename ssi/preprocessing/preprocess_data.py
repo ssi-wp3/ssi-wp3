@@ -57,6 +57,7 @@ def convert_jumbo_receipts(input_file,
     # Convert year-week to year-month
     jumbo_receipts_df[year_month_column] = year_week_to_date(
         jumbo_receipts_df["year_week"]).dt.strftime('%Y%m')
+    jumbo_receipts_df.ean_number = jumbo_receipts_df.ean_number.astype(str)
 
     return jumbo_receipts_df
 
