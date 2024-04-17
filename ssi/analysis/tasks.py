@@ -339,9 +339,13 @@ class CrossStoreAnalysis(luigi.Task):
 
     def output(self):
         overlap_directory = os.path.join(self.output_directory, "overlap")
-        return {overlap_name: luigi.LocalTarget(os.path.join(overlap_directory, f"overlap_{overlap_name}.parquet"), format=luigi.format.Nop)
+        return {self.get_output_key(product_id_column, overlap_name): luigi.LocalTarget(os.path.join(overlap_directory, f"overlap_{product_id_column}_{overlap_name}.parquet"), format=luigi.format.Nop)
                 for overlap_name in self.overlap_functions.keys()
+                for product_id_column in self.product_id_columns
                 }
+
+    def get_output_key(self, product_id_column: str, overlap_name: str) -> str:
+        return f"{product_id_column}_{overlap_name}"
 
     def run(self):
         print("Input", self.input())
@@ -357,7 +361,8 @@ class CrossStoreAnalysis(luigi.Task):
                         product_id_column=product_id_column,
                         overlap_function=function,
                         progress_bar=progress_bar)
-                    with self.output()[overlap_function].open("w") as output_file:
+
+                    with self.output()[self.get_output_key(product_id_column, overlap_function)].open("w") as output_file:
                         overlap_matrix_df.to_parquet(
                             output_file, engine=self.parquet_engine)
 
