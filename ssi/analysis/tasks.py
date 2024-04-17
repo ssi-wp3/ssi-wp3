@@ -332,7 +332,7 @@ class CrossStoreAnalysis(luigi.Task):
         }
 
     def requires(self):
-        return {store_name: StoreFile(filename)
+        return {store_name: luigi.LocalTarget(filename, format=luigi.format.Nop)
                 for store_name, filename in self.combined_revenue_files.items()}
 
     def output(self):
