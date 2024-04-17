@@ -362,7 +362,10 @@ class CrossStoreAnalysis(luigi.Task):
                             output_file, engine=self.parquet_engine)
 
     def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
-        return self.__add_store_name_column(pd.read_parquet(input_file, engine=self.parquet_engine, columns=self.product_id_columns), store_name, store_name_column)
+        with input_file.open("r") as input_parquet_file:
+            dataframe = pd.read_parquet(
+                input_parquet_file, engine=self.parquet_engine, columns=self.product_id_columns)
+            return self.__add_store_name_column(dataframe, store_name, store_name_column)
 
     def __add_store_name_column(self,
                                 store_dataframe: pd.DataFrame,
