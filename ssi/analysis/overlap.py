@@ -1,5 +1,7 @@
 
-from typing import Tuple, Callable
+from typing import Tuple, Callable, List
+import pandas as pd
+import numpy as np
 
 
 def handle_missing_sets(left_set: set, right_set: set) -> Tuple[set, set]:
@@ -168,3 +170,50 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
         return intersection / min_length
     return __handle_zero_length_sets(left_set, right_set,
                                      overlap_function=overlap_function)
+
+
+def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
+                                 store_id_column: str,
+                                 product_id_column: str,
+                                 overlap_function: Callable[[set, set], float] = jaccard_index) -> pd.DataFrame:
+    """ Calculate the overlap between the products of a list of stores.
+
+    Parameters
+    ----------
+    store_data : List[pd.DataFrame]
+        A list of dataframes, where each dataframe contains a column with the store name and a column with the store items.
+
+    store_id_column : str
+        The name of the column containing the store identifiers. Stores can be identified by their name or ID for example.
+
+    product_id_column : str
+        The name of the column containing the product identifiers. Products can be identified by their EAN number
+        of receipt text for example.    
+
+    overlap_function : Callable[[set, set], float]
+        The overlap function to use to calculate the overlap between the stores.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe with the overlap between the stores. The dataframe contains a matrix where the rows and columns
+        represent the store names and the values represent the overlap between the stores. The overlap matrix is
+        symmetric, so the overlap between store A and store B is the same as the overlap between store B and store A.
+    """
+    number_of_stores = len(store_data)
+    store_overlap = np.empty(
+        (number_of_stores, number_of_stores), dtype=np.float64)
+    for row_index in range(len(store_data)):
+        for column_index in range(row_index + 1, len(store_data)):
+            store1 = store_data[row_index]
+            store2 = store_data[column_index]
+
+            store1_set = set(store1[product_id_column].dropna().values)
+            store2_set = set(store2[product_id_column].dropna().values)
+            overlap = overlap_function(
+                store1_set, store2_set)
+            store_overlap[row_index, column_index] = overlap
+            store_overlap[column_index, row_index] = overlap
+
+    store_names = [store[store_id_column].values[0] for store in store_data]
+    return pd.DataFrame(store_overlap, columns=store_names, index=store_names)
