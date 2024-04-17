@@ -344,6 +344,7 @@ class CrossStoreAnalysis(luigi.Task):
                 }
 
     def run(self):
+        print(self.input())
         store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
                             for store_name, input_file in self.input().items()]
 
