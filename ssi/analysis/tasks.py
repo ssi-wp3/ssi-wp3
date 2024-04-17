@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
 from .files import get_combined_revenue_files_in_directory
-from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient
+from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, split_strings
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
@@ -333,7 +333,8 @@ class CrossStoreAnalysis(luigi.Task):
             "jaccard_similarity": jaccard_similarity,
             "jaccard_index": jaccard_index,
             "dice_coefficient": dice_coefficient,
-            "overlap_coefficient": overlap_coefficient
+            "overlap_coefficient": overlap_coefficient,
+            "percentage_overlap": percentage_overlap
         }
 
     @property
@@ -344,7 +345,8 @@ class CrossStoreAnalysis(luigi.Task):
             },
             "receipt_text": {
                 "raw": lambda x: x,
-                "lower": lambda x: x.str.lower()
+                "lower": lambda x: x.str.lower(),
+                "lower_split_words": lambda x: split_strings(x.str.lower()),
             }
         }
 
