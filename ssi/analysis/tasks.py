@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
 from .files import get_combined_revenue_files_in_directory
-from .overlap import calculate_overlap_for_stores, jaccard_index
+from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
@@ -330,8 +330,39 @@ class CrossStoreAnalysis(luigi.Task):
     @property
     def overlap_functions(self) -> Dict[str, Callable]:
         return {
-            "jaccard_index": jaccard_index
+            "jaccard_similarity": jaccard_similarity,
+            "jaccard_index": jaccard_index,
+            "dice_coefficient": dice_coefficient,
+            "overlap_coefficient": overlap_coefficient
         }
+
+    @property
+    def overlap_preprocessing_functions(self) -> Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]:
+        return {
+            "ean_number": {
+                "raw": lambda x: x
+            },
+            "receipt_text": {
+                "raw": lambda x: x,
+                "lower": lambda x: x.str.lower()
+            }
+        }
+
+    def target_for(self,
+                   overlap_directory: str,
+                   product_id_column: str,
+                   preprocessing_function_name: str,
+                   overlap_name: str) -> luigi.LocalTarget:
+        return luigi.LocalTarget(os.path.join(overlap_directory,
+                                              f"overlap_{product_id_column}_{preprocessing_function_name}_{overlap_name}.parquet"),
+                                 format=luigi.format.Nop
+                                 )
+
+    def get_output_key(self,
+                       product_id_column: str,
+                       preprocessing_function_name: str,
+                       overlap_name: str) -> str:
+        return f"{product_id_column}_{preprocessing_function_name}_{overlap_name}"
 
     def requires(self):
         return {store_name: StoreFile(filename)
@@ -339,13 +370,16 @@ class CrossStoreAnalysis(luigi.Task):
 
     def output(self):
         overlap_directory = os.path.join(self.output_directory, "overlap")
-        return {self.get_output_key(product_id_column, overlap_name): luigi.LocalTarget(os.path.join(overlap_directory, f"overlap_{product_id_column}_{overlap_name}.parquet"), format=luigi.format.Nop)
-                for overlap_name in self.overlap_functions.keys()
-                for product_id_column in self.product_id_columns
-                }
+        return {self.get_output_key(product_id_column, preprocessing_function, overlap_name):
+                self.target_for(overlap_directory,
+                                product_id_column,
+                                preprocessing_function,
+                                overlap_name)
 
-    def get_output_key(self, product_id_column: str, overlap_name: str) -> str:
-        return f"{product_id_column}_{overlap_name}"
+                for product_id_column in self.product_id_columns
+                for overlap_name in self.overlap_functions.keys()
+                for preprocessing_function in self.overlap_preprocessing_functions[product_id_column].keys()
+                }
 
     def run(self):
         print("Input", self.input())
@@ -354,17 +388,21 @@ class CrossStoreAnalysis(luigi.Task):
 
         for product_id_column in self.product_id_columns:
             for overlap_function_name, overlap_function in self.overlap_functions.items():
-                with tqdm.tqdm(total=len(store_dataframes) * (len(store_dataframes) - 1) // 2) as progress_bar:
-                    overlap_matrix_df = calculate_overlap_for_stores(
-                        store_dataframes,
-                        store_id_column=self.store_name_column,
-                        product_id_column=product_id_column,
-                        overlap_function=overlap_function,
-                        progress_bar=progress_bar)
+                for preprocessing_function_name, preprocessing_function in self.overlap_preprocessing_functions[product_id_column].items():
+                    with tqdm.tqdm(total=len(store_dataframes) * (len(store_dataframes) - 1) // 2) as progress_bar:
+                        overlap_matrix_df = calculate_overlap_for_stores(
+                            store_dataframes,
+                            store_id_column=self.store_name_column,
+                            product_id_column=product_id_column,
+                            overlap_function=overlap_function,
+                            preprocess_function=preprocessing_function,
+                            progress_bar=progress_bar)
 
-                    with self.output()[self.get_output_key(product_id_column, overlap_function_name)].open("w") as output_file:
-                        overlap_matrix_df.to_parquet(
-                            output_file, engine=self.parquet_engine)
+                        output_key = self.get_output_key(
+                            product_id_column, preprocessing_function_name, overlap_function_name)
+                        with self.output()[output_key].open("w") as output_file:
+                            overlap_matrix_df.to_parquet(
+                                output_file, engine=self.parquet_engine)
 
     def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
         with input_file.open("r") as input_parquet_file:
