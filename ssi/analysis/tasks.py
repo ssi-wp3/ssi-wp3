@@ -353,16 +353,16 @@ class CrossStoreAnalysis(luigi.Task):
                             for store_name, input_file in self.input().items()]
 
         for product_id_column in self.product_id_columns:
-            for overlap_function, function in self.overlap_functions.items():
+            for overlap_function_name, overlap_function in self.overlap_functions.items():
                 with tqdm.tqdm(total=len(store_dataframes) * (len(store_dataframes) - 1) // 2) as progress_bar:
                     overlap_matrix_df = calculate_overlap_for_stores(
                         store_dataframes,
                         store_id_column=self.store_name_column,
                         product_id_column=product_id_column,
-                        overlap_function=function,
+                        overlap_function=overlap_function,
                         progress_bar=progress_bar)
 
-                    with self.output()[self.get_output_key(product_id_column, overlap_function)].open("w") as output_file:
+                    with self.output()[self.get_output_key(product_id_column, overlap_function_name)].open("w") as output_file:
                         overlap_matrix_df.to_parquet(
                             output_file, engine=self.parquet_engine)
 
