@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
 from .files import get_combined_revenue_files_in_directory
-from .overlap import calculate_overlap_for_stores, jaccard_index
+from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
@@ -330,6 +330,7 @@ class CrossStoreAnalysis(luigi.Task):
     @property
     def overlap_functions(self) -> Dict[str, Callable]:
         return {
+            "jaccard_similarity": jaccard_similarity,
             "jaccard_index": jaccard_index
         }
 
