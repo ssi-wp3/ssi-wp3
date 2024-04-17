@@ -216,7 +216,7 @@ def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
     pd.Series
         A series with the unique split strings.
     """
-    return string_column.str.split(separator).explode().unique()
+    return string_column.str.split(separator).explode()
 
 
 def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[str]]) -> pd.Series:
@@ -235,7 +235,7 @@ def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[s
     pd.Series
         A series with the unique tokens.
     """
-    return string_column.apply(tokenizer).explode().unique()
+    return string_column.apply(tokenizer).explode()
 
 
 def huggingface_tokenizer(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
