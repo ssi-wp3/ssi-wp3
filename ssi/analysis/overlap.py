@@ -172,6 +172,25 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
                                      overlap_function=overlap_function)
 
 
+def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
+    """ Split strings in a column into separate words.
+
+    Parameters
+    ----------
+    string_column : pd.Series
+        The column containing the strings to split.
+
+    separator : str
+        The separator to use to split the strings. By default, the separator is a space.
+
+    Returns
+    -------
+    pd.Series
+        A series with the split strings.
+    """
+    return string_column.str.split(separator)
+
+
 def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
                                  store_id_column: str,
                                  product_id_column: str,
