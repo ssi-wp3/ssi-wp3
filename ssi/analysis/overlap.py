@@ -195,9 +195,9 @@ def percentage_overlap(left_set: set, right_set: set) -> float:
     """
     def overlap_function(left_set: set, right_set: set):
         intersection = len(left_set.intersection(right_set))
-        return (intersection / (len(left_set) + len(right_set))) * 100
+        return (intersection / (len(left_set) + len(right_set)))
     return __handle_zero_length_sets(left_set, right_set,
-                                     overlap_function=overlap_function)
+                                     overlap_function=overlap_function) * 100
 
 
 def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
