@@ -1,5 +1,6 @@
 
 from typing import Tuple, Callable, List, Optional
+from transformers import AutoTokenizer
 import pandas as pd
 import numpy as np
 import tqdm
@@ -213,9 +214,33 @@ def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
     Returns
     -------
     pd.Series
-        A series with the split strings.
+        A series with the unique split strings.
     """
-    return string_column.str.split(separator).explode()
+    return string_column.str.split(separator).explode().unique()
+
+
+def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[str]]) -> pd.Series:
+    """ Tokenize strings in a column using a custom tokenizer.
+
+    Parameters
+    ----------
+    string_column : pd.Series
+        The column containing the strings to tokenize.
+
+    tokenizer : Callable[[str], List[str]]
+        A function that takes a string as input and returns a list of tokens.
+
+    Returns
+    -------
+    pd.Series
+        A series with the unique tokens.
+    """
+    return string_column.apply(tokenizer).explode().unique()
+
+
+def huggingface_tokenizer(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+    return tokenize_strings(string_column, tokenizer.tokenize)
 
 
 def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
