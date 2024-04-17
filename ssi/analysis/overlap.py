@@ -83,8 +83,8 @@ def jaccard_similarity(left_set: set, right_set: set) -> float:
     -------
     float: The function will return a value between 0 and 1, where 0 means no overlap and 1 means complete overlap.
     """
-    def overlap_function(left_set: set, right_set: set): return len(
-        left_set.intersection(right_set)) / len(left_set.union(right_set))
+    def overlap_function(left_set: set, right_set: set):
+        return len(left_set.intersection(right_set)) / len(left_set.union(right_set))
     return __handle_zero_length_sets(left_set, right_set,
                                      overlap_function=overlap_function
                                      )
@@ -169,6 +169,32 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
         intersection = len(left_set.intersection(right_set))
         min_length = min(len(left_set), len(right_set))
         return intersection / min_length
+    return __handle_zero_length_sets(left_set, right_set,
+                                     overlap_function=overlap_function)
+
+
+def percentage_overlap(left_set: set, right_set: set) -> float:
+    """ Computes the percentage overlap between two sets
+
+    Defined as |X ∩ Y| / |X| + |Y|. 
+    It ranges from 0 (no overlap) to 1 (complete overlap).
+
+    Parameters
+    ----------
+
+    left_set : set
+        The first set to compare
+
+    right_set : set
+        The second set to compare
+
+    Returns
+    -------
+    float: The percentage overlap between the two sets.
+    """
+    def overlap_function(left_set: set, right_set: set):
+        intersection = len(left_set.intersection(right_set))
+        return (intersection / (len(left_set) + len(right_set))) * 100
     return __handle_zero_length_sets(left_set, right_set,
                                      overlap_function=overlap_function)
 
