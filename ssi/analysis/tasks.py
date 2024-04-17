@@ -389,7 +389,7 @@ class CrossStoreAnalysis(luigi.Task):
         print("Input", self.input())
         store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
                             for store_name, input_file in self.input().items()]
-
+        # TODO calculations give different values then those from the notebook
         for product_id_column in self.product_id_columns:
             for overlap_function_name, overlap_function in self.overlap_functions.items():
                 for preprocessing_function_name, preprocessing_function in self.overlap_preprocessing_functions[product_id_column].items():
