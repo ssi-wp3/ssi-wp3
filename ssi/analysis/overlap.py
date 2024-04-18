@@ -239,6 +239,21 @@ def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[s
 
 
 def huggingface_tokenizer(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
+    """ Tokenize strings in a column using a Hugging Face tokenizer.
+
+    Parameters
+    ----------
+    string_column : pd.Series
+        The column containing the strings to tokenize.
+
+    tokenizer_name : str
+        The name of the Hugging Face tokenizer to use. By default, the GPT-2 tokenizer is used.
+
+    Returns
+    -------
+    pd.Series
+        A series with the unique tokens.
+    """
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
     return tokenize_strings(string_column, tokenizer.tokenize)
 
