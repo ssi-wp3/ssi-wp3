@@ -350,6 +350,8 @@ class CrossStoreAnalysis(luigi.Task):
                 "stripped": lambda x: x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower(),
                 "stripped_split_words": lambda x: split_strings(x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower()),
                 "raw_tokenized_gpt2": lambda x: huggingface_tokenize_strings(x, "gpt2"),
+                "raw_tokenized_mini_lm": lambda x: huggingface_tokenize_strings(x, "sentence-transformers/all-MiniLM-L6-v2"),
+                "raw_tokenized_labse": lambda x: huggingface_tokenize_strings(x, "sentence-transformers/LaBSE"),
             }
         }
 
