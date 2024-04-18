@@ -238,7 +238,7 @@ def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[s
     return string_column.apply(tokenizer).explode()
 
 
-def huggingface_tokenizer(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
+def huggingface_tokenize_strings(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
     """ Tokenize strings in a column using a Hugging Face tokenizer.
 
     Parameters

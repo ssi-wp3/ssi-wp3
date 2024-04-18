@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
 from .files import get_combined_revenue_files_in_directory
-from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, split_strings
+from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, split_strings, huggingface_tokenize_strings
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
@@ -348,7 +348,8 @@ class CrossStoreAnalysis(luigi.Task):
                 "lower": lambda x: x.str.lower(),
                 "lower_split_words": lambda x: split_strings(x.str.lower()),
                 "stripped": lambda x: x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower(),
-                "stripped_split_words": lambda x: split_strings(x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower())
+                "stripped_split_words": lambda x: split_strings(x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower()),
+                "raw_tokenized_gpt2": lambda x: huggingface_tokenize_strings(x, "gpt2"),
             }
         }
 
