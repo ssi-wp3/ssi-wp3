@@ -195,9 +195,9 @@ def percentage_overlap(left_set: set, right_set: set) -> float:
     """
     def overlap_function(left_set: set, right_set: set):
         intersection = len(left_set.intersection(right_set))
-        return (intersection / (len(left_set) + len(right_set))) * 100
+        return (intersection / (len(left_set) + len(right_set)))
     return __handle_zero_length_sets(left_set, right_set,
-                                     overlap_function=overlap_function)
+                                     overlap_function=overlap_function) * 100
 
 
 def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
@@ -238,7 +238,22 @@ def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[s
     return string_column.apply(tokenizer).explode()
 
 
-def huggingface_tokenizer(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
+def huggingface_tokenize_strings(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
+    """ Tokenize strings in a column using a Hugging Face tokenizer.
+
+    Parameters
+    ----------
+    string_column : pd.Series
+        The column containing the strings to tokenize.
+
+    tokenizer_name : str
+        The name of the Hugging Face tokenizer to use. By default, the GPT-2 tokenizer is used.
+
+    Returns
+    -------
+    pd.Series
+        A series with the unique tokens.
+    """
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
     return tokenize_strings(string_column, tokenizer.tokenize)
 
