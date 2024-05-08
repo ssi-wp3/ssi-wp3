@@ -1,6 +1,8 @@
+from ..parquet_file import ParquetFile
 from .parquet import convert_to_parquet
-from .preprocess_data import convert_ah_receipts
+from .preprocess_data import convert_ah_receipts, convert_jumbo_receipts, year_week_to_date
 from .clean import CleanCPIFile
+import pandas as pd
 import luigi
 import os
 
@@ -47,6 +49,84 @@ class ConvertAHReceipts(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
+
+
+class ConvertJumboReceipts(luigi.Task):
+    input_filename = luigi.PathParameter()
+    output_filename = luigi.PathParameter()
+    delimiter = luigi.Parameter(default='|')
+    year_month_column = luigi.Parameter(default='year_month')
+    add_start_date = luigi.BoolParameter(default=True)
+
+    parquet_engine = luigi.Parameter(default="pyarrow")
+    csv_encoding = luigi.Parameter(default="latin1")
+
+    def requires(self):
+        return CsvFile(input_filename=self.input_filename)
+
+    def output(self):
+        return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
+
+    def run(self):
+        with self.input().open('r') as input_file:
+            with self.output().open('w') as output_file:
+                jumbo_receipts_df = convert_jumbo_receipts(
+                    input_file, self.delimiter, self.year_month_column, self.csv_encoding)
+                if self.add_start_date:
+                    jumbo_receipts_df['start_date'] = self.get_start_date(
+                        jumbo_receipts_df['year_week'])
+                jumbo_receipts_df.to_parquet(
+                    output_file, engine=self.parquet_engine)
+
+    def get_start_date(self, date_column: pd.Series) -> pd.Series:
+        return year_week_to_date(date_column)
+
+
+class ConvertAllJumboReceipts(luigi.Task):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    output_filename = luigi.Parameter(default='jumbo_receipts.parquet')
+    delimiter = luigi.Parameter(default='|')
+    year_month_column = luigi.Parameter(default='year_month')
+
+    parquet_engine = luigi.Parameter(default="pyarrow")
+    csv_encoding = luigi.Parameter(default='latin1')
+
+    def requires(self):
+        return [ConvertJumboReceipts(input_filename=os.path.join(self.input_directory, input_filename),
+                                     output_filename=os.path.join(
+                                         self.output_directory, input_filename.replace('.csv', '.parquet')),
+                                     delimiter=self.delimiter,
+                                     year_month_column=self.year_month_column,
+                                     parquet_engine=self.parquet_engine,
+                                     csv_encoding=self.csv_encoding)
+                for input_filename in os.listdir(self.input_directory)
+                if input_filename.endswith('.csv')
+                and self._is_correct_receipt_file(input_filename)
+                ]
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.output_directory, self.output_filename), format=luigi.format.Nop)
+
+    def run(self):
+        for input_receipts in self.input():
+            receipts_dfs = []
+            with input_receipts.open('r') as input_file:
+                receipts_dfs.append(pd.read_parquet(
+                    input_file, engine=self.parquet_engine))
+
+            with self.output().open('w') as output_file:
+                all_receipts_df = pd.concat(receipts_dfs)
+                all_receipts_df.sort_values(by=['year_month'], inplace=True)
+                all_receipts_df.to_parquet(
+                    output_file, engine=self.parquet_engine)
+
+    def _is_correct_receipt_file(self, input_filename: str) -> bool:
+        df = pd.read_csv(os.path.join(self.input_directory,
+                         input_filename), delimiter=self.delimiter, nrows=1, encoding=self.csv_encoding)
+        jumbo_columns = ["NUM_ISO_JAARWEEK",
+                         "NUM_VESTIGING", "NUM_ARTIKEL", "NAM_ARTIKEL"]
+        return set(df.columns.values).intersection(set(jumbo_columns)) == set(jumbo_columns)
 
 
 class ConvertCSVToParquet(luigi.Task):

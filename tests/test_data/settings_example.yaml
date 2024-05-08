@@ -1,0 +1,7 @@
+settings_example:
+  first_setting: true
+  second_setting: 1
+  third_setting: 3
+  fourth_setting: 
+    coicop_name: test
+    coicop_label: 1

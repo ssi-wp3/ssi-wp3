@@ -1,4 +1,4 @@
-from .utils import ParquetFile
+from ..parquet_file import ParquetFile
 from .files import get_combined_revenue_files_in_folder, get_store_name_from_combined_filename, get_receipt_texts_for_store
 import pandas as pd
 import luigi
@@ -17,9 +17,11 @@ class AddReceiptTextsWithDate(luigi.Task):
     store_name = luigi.Parameter()
     receipt_text_column = luigi.Parameter()
 
+    key_column = luigi.Parameter(default="rep_id")
+
     def requires(self):
-        return [ParquetFile(input_filename=self.input_filename),
-                ParquetFile(input_filename=self.receipt_text_filename)]
+        return [ParquetFile(self.input_filename),
+                ParquetFile(self.receipt_text_filename)]
 
     def output(self):
         return luigi.LocalTarget(self.output_filename)
@@ -38,9 +40,13 @@ class AddReceiptTextsWithDate(luigi.Task):
 
             receipt_text_table = f"{self.store_name}_receipts"
             revenue_table = f"{self.store_name}_revenue"
+
+            # TODO Jumbo does not have start_date and end_date columns. We will need to add them.
+            # Most probably when creating the parquet file.
             con.sql(
                 f"""drop table if exists {receipt_text_table};
-                    create table {receipt_text_table} as select * from read_parquet('{self.receipt_text_filename}')
+                    create table {receipt_text_table} as select *
+                    from read_parquet('{self.receipt_text_filename}')
                     """)
             con.sql(f"""drop table if exists {revenue_table};
                     create table {revenue_table} as select 
@@ -49,16 +55,16 @@ class AddReceiptTextsWithDate(luigi.Task):
                     from read_parquet('{self.input_filename}');
                     """)
             con.sql(
-                f"create index {revenue_table}_rep_idx on {revenue_table}(rep_id)")
+                f"create index {revenue_table}_{self.key_column}_idx on {revenue_table}({self.key_column})")
             con.sql(
-                f"create index {receipt_text_table}_rep_idx on {receipt_text_table}(rep_id)")
+                f"create index {receipt_text_table}_{self.key_column}_idx on {receipt_text_table}({self.key_column})")
 
             with self.output().temporary_path() as output_path:
                 receipt_revenue_table = f"{self.store_name}_revenue_receipts"
                 con.sql(f"""drop table if exists {receipt_revenue_table};
                         create table {receipt_revenue_table} as
                         select pr.*, pc.{self.receipt_text_column} from {revenue_table} as pr 
-                        inner join {receipt_text_table} as pc on pr.rep_id = pc.rep_id 
+                        inner join {receipt_text_table} as pc on pr.{self.key_column} = pc.{self.key_column} 
                         where pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
                     """)
                 con.sql(
@@ -95,7 +101,7 @@ class AddReceiptTextFromColumn(luigi.Task):
     parquet_engine = luigi.Parameter()
 
     def requires(self):
-        return [ParquetFile(input_filename=self.input_filename)]
+        return [ParquetFile(self.input_filename)]
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
@@ -156,8 +162,8 @@ class AddReceiptTexts(luigi.Task):
     parquet_engine = luigi.Parameter()
 
     def requires(self):
-        return [ParquetFile(input_filename=self.input_filename),
-                ParquetFile(input_filename=self.receipt_texts_filename)]
+        return [ParquetFile(self.input_filename),
+                ParquetFile(self.receipt_texts_filename)]
 
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
@@ -183,6 +189,10 @@ class AddReceiptTexts(luigi.Task):
         parquet_engine : str
             The parquet engine to use to write the data to disk.
         """
+        # TODO merge uses inner join by default; however there are more EANs that receipt texts, that can not
+        # be the case when using inner join. Check which files are used for analysis. And check if there are EANs
+        # with missing receipt texts.
+        # Looks like there is more than one EAN per receipt text; only one receipt text per EAN?
         with self.input()[1].open("r") as receipt_texts_file:
             receipt_texts = pd.read_parquet(
                 receipt_texts_file, engine=parquet_engine)
@@ -262,5 +272,6 @@ class AddAllReceiptTexts(luigi.WrapperTask):
                                               receipt_text_filename=receipt_text_filename,
                                               output_filename=output_filename,
                                               store_name=store_name,
-                                              receipt_text_column=self.receipt_text_column
+                                              receipt_text_column=self.receipt_text_column,
+                                              key_column="ean_number" if store_name.lower() == "jumbo" else "rep_id"
                                               )

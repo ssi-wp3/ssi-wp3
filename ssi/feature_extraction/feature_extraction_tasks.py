@@ -1,18 +1,10 @@
 from .feature_extraction import FeatureExtractorFactory, FeatureExtractorType
 from .files import get_combined_revenue_files_in_directory
+from ..parquet_file import ParquetFile
 import luigi
 import pandas as pd
 import os
 import tqdm
-
-# TODO duplicate code
-
-
-class ParquetFile(luigi.ExternalTask):
-    input_filename = luigi.Parameter()
-
-    def output(self):
-        return luigi.LocalTarget(self.input_filename, format=luigi.format.Nop)
 
 
 class FeatureExtractionTask(luigi.Task):
