@@ -334,7 +334,8 @@ class CrossStoreAnalysis(luigi.Task):
             "jaccard_index": jaccard_index,
             "dice_coefficient": dice_coefficient,
             "overlap_coefficient": overlap_coefficient,
-            "percentage_overlap": percentage_overlap
+            "percentage_overlap": percentage_overlap,
+            "asymmetrical_overlap": asymmetrical_overlap,
         }
 
     @property
@@ -347,8 +348,9 @@ class CrossStoreAnalysis(luigi.Task):
                 "raw": lambda x: x,
                 "lower": lambda x: x.str.lower(),
                 "lower_split_words": lambda x: split_strings(x.str.lower()),
-                "stripped": lambda x: x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower(),
-                "stripped_split_words": lambda x: split_strings(x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.rstrip().str.lower()),
+                "stripped": lambda x: x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.lower(),
+                "stripped_split_words": lambda x: split_strings(x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.strip().str.lower()),
+                "stripped_split_alpha_drop_short": lambda x: drop_short_strings(split_strings(x.str.replace('[^a-z\s]', '', regex=True).str.strip().str.lower()), drop_less_than=3),
                 "raw_tokenized_gpt2": lambda x: huggingface_tokenize_strings(x, "gpt2"),
                 "raw_tokenized_mini_lm": lambda x: huggingface_tokenize_strings(x, "sentence-transformers/all-MiniLM-L6-v2"),
                 "raw_tokenized_labse": lambda x: huggingface_tokenize_strings(x, "sentence-transformers/LaBSE"),

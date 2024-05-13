@@ -199,6 +199,34 @@ def percentage_overlap(left_set: set, right_set: set) -> float:
     return __handle_zero_length_sets(left_set, right_set,
                                      overlap_function=overlap_function) * 100
 
+def asymmetrical_overlap(left_set: set, right_set: set) -> float:
+    """ Computes the overlap between two sets,
+        divided by set X. Intuitively, it describes
+        the portion of the elements of X also found in
+        Y.
+
+
+    Defined as |X ∩ Y| / |X|. 
+    It ranges from 0 (no overlap) to 1 (complete overlap).
+
+    Parameters
+    ----------
+
+    left_set : set
+        The first set to compare
+
+    right_set : set
+        The second set to compare
+
+    Returns
+    -------
+    float: The percentage overlap between the two sets.
+    """
+    
+    overlap = left_set.intersection(right_set)
+    return len(overlap) / len(left_set)
+
+
 
 def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
     """ Split strings in a column into separate words.
@@ -236,6 +264,25 @@ def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[s
         A series with the unique tokens.
     """
     return string_column.apply(tokenizer).explode()
+
+def drop_short_strings(string_column: pd.Series, drop_less_than: int = 3):
+    """ 
+    Remove all entries with strings shorter than "drop_less_than".
+
+    Parameters
+    ----------
+    string_column : pd.Series
+        The column containing the strings to tokenize.
+
+    Returns
+    -------
+    pd.Series
+        A series with the unique tokens.
+    """
+    if min_str_len < 1:
+        print("WARNING: Minimum string length less than 1.")
+
+    return string_column[string_column.str.len() >= drop_shorter_than]
 
 
 def huggingface_tokenize_strings(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
