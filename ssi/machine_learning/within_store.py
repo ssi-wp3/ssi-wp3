@@ -62,12 +62,6 @@ class TrainWithinStoreModel(TrainModelTask):
             label_column=self.label_column
         )
 
-    def predict(self, dataframe: DataFrame, predictions_file):
-        self.model_trainer.predict(dataframe,
-                                   predictions_file,
-                                   label_mapping=self.label_mapping
-                                   )
-
 
 class TrainAllWithinStoreModels(luigi.WrapperTask):
     input_directory = luigi.PathParameter()

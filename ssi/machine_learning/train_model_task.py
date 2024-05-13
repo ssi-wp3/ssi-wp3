@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 from sklearn.model_selection import train_test_split
+from collections import OrderedDict
 from .evaluate import ConfusionMatrixEvaluator
 from .trainer import ModelTrainer
 from ..feature_extraction.feature_extraction import FeatureExtractorType
@@ -73,19 +74,19 @@ class TrainModelTask(luigi.Task, ABC):
         return os.path.join(model_directory, self.start_date_time)
 
     @property
-    def train_label_mapping(self) -> dict:
+    def train_label_mapping(self) -> OrderedDict[str, int]:
         return self.__train_label_mapping
 
     @train_label_mapping.setter
-    def train_label_mapping(self, value: dict):
+    def train_label_mapping(self, value: OrderedDict[str, int]):
         self.__train_label_mapping = value
 
     @property
-    def test_label_mapping(self) -> dict:
+    def test_label_mapping(self) -> OrderedDict[str, int]:
         return self.__test_label_mapping
 
     @test_label_mapping.setter
-    def test_label_mapping(self, value: dict):
+    def test_label_mapping(self, value: OrderedDict[str, int]):
         self.__test_label_mapping = value
 
     @property
@@ -117,8 +118,18 @@ class TrainModelTask(luigi.Task, ABC):
     def prepare_data(self) -> pd.DataFrame:
         pass
 
+    def retrieve_label_mappings(self, train_dataframe: pd.DataFrame, test_dataframe: pd.DataFrame, label_column: str):
+        self.train_label_mapping = OrderedDict([(original_label, index)
+                                                for index, original_label in enumerate(training_dataframe[self.label_column].unique())])
+        self.test_label_mapping = self.train_label_mapping
+        for label in test_dataframe[label_column].unique():
+            if label not in self.test_label_mapping:
+                self.test_label_mapping[label] = len(self.test_label_mapping)
+
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        return train_test_split(dataframe, test_size=test_size)
+        train_df, test_df = train_test_split(dataframe, test_size=test_size)
+        self.retrieve_label_mappings(train_df, test_df, self.label_column)
+        return train_df, test_df
 
     @abstractmethod
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
