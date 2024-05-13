@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from typing import Tuple
 from sklearn.model_selection import train_test_split
 from .evaluate import ConfusionMatrixEvaluator
@@ -88,23 +88,28 @@ class TrainModelTask(luigi.Task, ABC):
     def test_label_mapping(self, value: dict):
         self.__test_label_mapping = value
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def training_predictions_filename(self) -> str:
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def training_evaluation_filename(self) -> str:
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def predictions_filename(self) -> str:
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def model_filename(self) -> str:
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def evaluation_filename(self) -> str:
         pass
 
