@@ -121,6 +121,9 @@ class TrainModelTask(luigi.Task, ABC):
     def retrieve_label_mappings(self, train_dataframe: pd.DataFrame, test_dataframe: pd.DataFrame, label_column: str):
         self.train_label_mapping = OrderedDict([(original_label, index)
                                                 for index, original_label in enumerate(train_dataframe[self.label_column].unique())])
+
+        # Test dataset can have more categories than the training dataset, add them add the end of the mapping
+        # In this way, we preserve the original label->index mapping for the training dataset
         self.test_label_mapping = self.train_label_mapping
         for label in test_dataframe[label_column].unique():
             if label not in self.test_label_mapping:
