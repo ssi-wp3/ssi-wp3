@@ -381,14 +381,6 @@ class TrainModelOnPeriod(TrainModelTask):
                                early_stopping_patience=3
                                )
 
-    def predict(self, predictions_dataframe: torch.utils.data.Subset, predictions_file: str):
-        device = torch.device(
-            self.gpu_device if torch.cuda.is_available() else "cpu")
-        self.model_trainer.predict(predictions_dataframe,
-                                   predictions_file,
-                                   label_mapping=self.test_label_mapping,
-                                   )
-
     def run(self):
         print(
             f"Training model: {self.model_type} on period: {self.train_period}")

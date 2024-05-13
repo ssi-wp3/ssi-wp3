@@ -26,6 +26,8 @@ class TrainModelTask(luigi.Task, ABC):
         super().__init__(*args, **kwargs)
         self.__model_trainer = None
         self.__start_date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        self.__train_label_mapping = None
+        self.__test_label_mapping = None
 
     @property
     def model_trainer(self) -> ModelTrainer:
@@ -70,6 +72,22 @@ class TrainModelTask(luigi.Task, ABC):
         model_directory = os.path.join(self.output_directory, self.model_type)
         return os.path.join(model_directory, self.start_date_time)
 
+    @property
+    def train_label_mapping(self) -> dict:
+        return self.__train_label_mapping
+
+    @train_label_mapping.setter
+    def train_label_mapping(self, value: dict):
+        self.__train_label_mapping = value
+
+    @property
+    def test_label_mapping(self) -> dict:
+        return self.__test_label_mapping
+
+    @test_label_mapping.setter
+    def test_label_mapping(self, value: dict):
+        self.__test_label_mapping = value
+
     @abstractproperty
     def training_predictions_filename(self) -> str:
         pass
@@ -101,9 +119,11 @@ class TrainModelTask(luigi.Task, ABC):
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
         pass
 
-    @abstractmethod
-    def predict(self, dataframe: pd.DataFrame, predictions_file):
-        pass
+    def predict(self, predictions_dataframe: pd.DataFrame, predictions_file):
+        self.model_trainer.predict(predictions_dataframe,
+                                   predictions_file,
+                                   label_mapping=self.test_label_mapping,
+                                   )
 
     def output(self):
         return {
