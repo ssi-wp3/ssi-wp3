@@ -312,7 +312,8 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
                                      set, set], float] = jaccard_index,
                                  preprocess_function: Callable[[
                                      pd.Series], pd.Series] = lambda series: series,
-                                 progress_bar: Optional[tqdm.tqdm] = None) -> pd.DataFrame:
+                                 progress_bar: Optional[tqdm.tqdm] = None,
+                                 calculate_all_cells: bool = False) -> pd.DataFrame:
     """ Calculate the overlap between the products of a list of stores.
 
     Parameters
@@ -335,6 +336,13 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
         duplicate products, or return tokens for the product texts. By default, a lambda function is used that returns
         the series as is.
 
+    progress_bar : Optional[tqdm.tqdm]
+        A progress bar to show the progress of the calculation. By default, no progress bar is shown.
+
+    calculate_all_cells : bool
+        A flag to indicate if all cells in the overlap matrix should be calculated. By default, only the upper triangle
+        of the matrix is calculated, as the matrix is symmetric.
+
     Returns
     -------
     pd.DataFrame
@@ -347,7 +355,8 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
     store_overlap = np.empty(
         (number_of_stores, number_of_stores), dtype=np.float64)
     for row_index in range(len(store_data)):
-        for column_index in range(row_index, len(store_data)):
+        column_start_index = row_index if not calculate_all_cells else 0
+        for column_index in range(column_start_index, len(store_data)):
             if progress_bar is not None:
                 store_name1 = store_names[row_index]
                 store_name2 = store_names[column_index]
