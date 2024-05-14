@@ -177,8 +177,8 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
 def percentage_overlap(left_set: set, right_set: set) -> float:
     """ Computes the percentage overlap between two sets
 
-    Defined as |X ∩ Y| / |X| + |Y|. 
-    It ranges from 0 (no overlap) to 1 (complete overlap).
+    Defined as (|X ∩ Y| / |X| + |Y|) * 100. 
+    It ranges from 0 (no overlap) to 100 (complete overlap).
 
     Parameters
     ----------
