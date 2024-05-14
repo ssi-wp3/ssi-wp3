@@ -199,6 +199,7 @@ def percentage_overlap(left_set: set, right_set: set) -> float:
     return __handle_zero_length_sets(left_set, right_set,
                                      overlap_function=overlap_function) * 100
 
+
 def asymmetrical_overlap(left_set: set, right_set: set) -> float:
     """ Computes the overlap between two sets,
         divided by set X. Intuitively, it describes
@@ -222,10 +223,9 @@ def asymmetrical_overlap(left_set: set, right_set: set) -> float:
     -------
     float: The percentage overlap between the two sets.
     """
-    
+
     overlap = left_set.intersection(right_set)
     return len(overlap) / len(left_set)
-
 
 
 def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
@@ -265,6 +265,7 @@ def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[s
     """
     return string_column.apply(tokenizer).explode()
 
+
 def drop_short_strings(string_column: pd.Series, drop_less_than: int = 3):
     """ 
     Remove all entries with strings shorter than "drop_less_than".
@@ -279,10 +280,10 @@ def drop_short_strings(string_column: pd.Series, drop_less_than: int = 3):
     pd.Series
         A series with the unique tokens.
     """
-    if min_str_len < 1:
+    if drop_less_than < 1:
         print("WARNING: Minimum string length less than 1.")
 
-    return string_column[string_column.str.len() >= drop_shorter_than]
+    return string_column[string_column.str.len() >= drop_less_than]
 
 
 def huggingface_tokenize_strings(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
