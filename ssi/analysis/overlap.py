@@ -177,8 +177,8 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
 def percentage_overlap(left_set: set, right_set: set) -> float:
     """ Computes the percentage overlap between two sets
 
-    Defined as |X ∩ Y| / |X| + |Y|. 
-    It ranges from 0 (no overlap) to 1 (complete overlap).
+    Defined as (|X ∩ Y| / |X| + |Y|) * 100. 
+    It ranges from 0 (no overlap) to 100 (complete overlap).
 
     Parameters
     ----------
@@ -198,6 +198,34 @@ def percentage_overlap(left_set: set, right_set: set) -> float:
         return (intersection / (len(left_set) + len(right_set)))
     return __handle_zero_length_sets(left_set, right_set,
                                      overlap_function=overlap_function) * 100
+
+
+def asymmetrical_overlap(left_set: set, right_set: set) -> float:
+    """ Computes the overlap between two sets,
+        divided by set X. Intuitively, it describes
+        the portion of the elements of X also found in
+        Y.
+
+
+    Defined as |X ∩ Y| / |X|. 
+    It ranges from 0 (no overlap) to 1 (complete overlap).
+
+    Parameters
+    ----------
+
+    left_set : set
+        The first set to compare
+
+    right_set : set
+        The second set to compare
+
+    Returns
+    -------
+    float: The percentage overlap between the two sets.
+    """
+
+    overlap = left_set.intersection(right_set)
+    return len(overlap) / len(left_set)
 
 
 def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
@@ -238,6 +266,26 @@ def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[s
     return string_column.apply(tokenizer).explode()
 
 
+def drop_short_strings(string_column: pd.Series, drop_less_than: int = 3):
+    """ 
+    Remove all entries with strings shorter than "drop_less_than".
+
+    Parameters
+    ----------
+    string_column : pd.Series
+        The column containing the strings to tokenize.
+
+    Returns
+    -------
+    pd.Series
+        A series with the unique tokens.
+    """
+    if drop_less_than < 1:
+        print("WARNING: Minimum string length less than 1.")
+
+    return string_column[string_column.str.len() >= drop_less_than]
+
+
 def huggingface_tokenize_strings(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
     """ Tokenize strings in a column using a Hugging Face tokenizer.
 
@@ -265,7 +313,8 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
                                      set, set], float] = jaccard_index,
                                  preprocess_function: Callable[[
                                      pd.Series], pd.Series] = lambda series: series,
-                                 progress_bar: Optional[tqdm.tqdm] = None) -> pd.DataFrame:
+                                 progress_bar: Optional[tqdm.tqdm] = None,
+                                 calculate_all_cells: bool = False) -> pd.DataFrame:
     """ Calculate the overlap between the products of a list of stores.
 
     Parameters
@@ -288,6 +337,13 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
         duplicate products, or return tokens for the product texts. By default, a lambda function is used that returns
         the series as is.
 
+    progress_bar : Optional[tqdm.tqdm]
+        A progress bar to show the progress of the calculation. By default, no progress bar is shown.
+
+    calculate_all_cells : bool
+        A flag to indicate if all cells in the overlap matrix should be calculated. By default, only the upper triangle
+        of the matrix is calculated, as the matrix is symmetric.
+
     Returns
     -------
     pd.DataFrame
@@ -300,7 +356,8 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
     store_overlap = np.empty(
         (number_of_stores, number_of_stores), dtype=np.float64)
     for row_index in range(len(store_data)):
-        for column_index in range(row_index, len(store_data)):
+        column_start_index = row_index if not calculate_all_cells else 0
+        for column_index in range(column_start_index, len(store_data)):
             if progress_bar is not None:
                 store_name1 = store_names[row_index]
                 store_name2 = store_names[column_index]

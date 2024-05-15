@@ -154,9 +154,6 @@ class TrainModelOnPeriod(TrainModelTask):
             [self.receipt_text_column, self.label_column])
         self.number_of_categories = training_dataframe[self.label_column].nunique(
         )
-        self.train_label_mapping = OrderedDict([(original_label, index)
-                                                for index, original_label in enumerate(training_dataframe[self.label_column].unique())])
-
         print(
             f"Number of categories in training data: {self.number_of_categories}")
 
@@ -165,6 +162,8 @@ class TrainModelOnPeriod(TrainModelTask):
         print(
             f"Number of categories in testing data: {testing_dataframe[self.label_column].nunique()}")
 
+        self.retrieve_label_mappings(training_dataframe, testing_dataframe)
+
         parquet_dataset = ParquetDataset(
             self.input().open(), self.features_column, self.label_column, label_mapping=self.train_label_mapping, memory_map=True)
         self.feature_vector_size = parquet_dataset.feature_vector_size
@@ -172,13 +171,6 @@ class TrainModelOnPeriod(TrainModelTask):
 
         training_dataset = torch.utils.data.Subset(
             parquet_dataset, training_dataframe.index)
-
-        # Test dataset can have more categories than the training dataset, add them add the end of the mapping
-        # In this way, we preserve the original label->index mapping for the training dataset
-        self.test_label_mapping = self.train_label_mapping
-        for label in testing_dataframe[self.label_column].unique():
-            if label not in self.test_label_mapping:
-                self.test_label_mapping[label] = len(self.test_label_mapping)
 
         test_dataset = ParquetDataset(self.input().open(
         ), self.features_column, self.label_column, label_mapping=self.test_label_mapping, memory_map=True)
@@ -380,14 +372,6 @@ class TrainModelOnPeriod(TrainModelTask):
                                batch_size=self.batch_size,
                                early_stopping_patience=3
                                )
-
-    def predict(self, predictions_dataframe: torch.utils.data.Subset, predictions_file: str):
-        device = torch.device(
-            self.gpu_device if torch.cuda.is_available() else "cpu")
-        self.model_trainer.predict(predictions_dataframe,
-                                   predictions_file,
-                                   label_mapping=self.test_label_mapping,
-                                   )
 
     def run(self):
         print(
