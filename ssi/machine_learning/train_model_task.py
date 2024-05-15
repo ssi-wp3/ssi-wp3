@@ -122,12 +122,15 @@ class TrainModelTask(luigi.Task, ABC):
         self.train_label_mapping = OrderedDict([(original_label, index)
                                                 for index, original_label in enumerate(train_dataframe[self.label_column].unique())])
 
+        print(f"Training label mapping: {self.train_label_mapping}")
         # Test dataset can have more categories than the training dataset, add them add the end of the mapping
         # In this way, we preserve the original label->index mapping for the training dataset
         self.test_label_mapping = self.train_label_mapping
         for label in test_dataframe[label_column].unique():
             if label not in self.test_label_mapping:
                 self.test_label_mapping[label] = len(self.test_label_mapping)
+
+        print(f"Test label mapping: {self.test_label_mapping}")
 
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
         train_df, test_df = train_test_split(dataframe, test_size=test_size)
