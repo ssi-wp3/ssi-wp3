@@ -2,6 +2,7 @@ from typing import Tuple
 from abc import ABC, abstractmethod
 from sklearn.model_selection import train_test_split
 from collections import OrderedDict
+from .pytorch import ParquetDataset
 import pandas as pd
 
 
@@ -164,6 +165,8 @@ class DataframeDataProvider(DataProvider):
         return pd.read_parquet(filename, engine=self.parquet_engine)
 
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        # TODO split off to DataSplitter.
+
         train_df, test_df = train_test_split(
             dataframe, test_size=test_size, stratify=dataframe[self.label_column])
 
@@ -177,7 +180,3 @@ class DataframeDataProvider(DataProvider):
         test_df[f"{self.label_column}_index"] = test_df[self.label_column].map(
             self.test_label_encoder.transform)
         return train_df, test_df
-
-
-class PyTorchDataProvider(DataProvider):
-    pass
