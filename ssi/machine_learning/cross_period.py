@@ -162,7 +162,8 @@ class TrainModelOnPeriod(TrainModelTask):
         print(
             f"Number of categories in testing data: {testing_dataframe[self.label_column].nunique()}")
 
-        self.retrieve_label_mappings(training_dataframe, testing_dataframe)
+        self.retrieve_label_mappings(
+            training_dataframe, testing_dataframe, self.label_column)
 
         parquet_dataset = ParquetDataset(
             self.input().open(), self.features_column, self.label_column, label_mapping=self.train_label_mapping, memory_map=True)
