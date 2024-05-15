@@ -78,7 +78,10 @@ class ModelPipeline:
         model_training_evaluations = []
 
         model_evaluation_score = -1
-        for train_indices, test_indices in self.cross_validator.split(train_data_loader.X, train_data_loader.y, train_data_loader.groups):
+        # TODO Split needs X, y, and sometimes groups, how to provide them?
+        for train_indices, test_indices in self.cross_validator.split(train_data_loader.X,
+                                                                      train_data_loader.y,
+                                                                      train_data_loader.groups):
             train_data = train_data_loader.get_subset(train_indices)
             test_data = train_data_loader.get_subset(test_indices)
 
