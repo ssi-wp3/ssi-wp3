@@ -318,8 +318,7 @@ class TrainAdversarialModelTask(TrainModelTask):
             print("Reading parquet files")
             combined_dataframe = self.get_all_adversarial_data(
                 self.store1, self.store2, store1_file, store2_file)
-            combined_dataframe[f"{self.label_column}_index"] = combined_dataframe[self.label_column].map(
-                self.train_label_mapping)
+
             return drop_labels_with_few_samples(
                 combined_dataframe, self.label_column, min_samples=10)
 
