@@ -41,6 +41,10 @@ class DataProvider:
         self.__label_encoder = value
 
     @abstractmethod
+    def __len__(self) -> int:
+        pass
+
+    @abstractmethod
     def load(self, filename: str):
         pass
 
@@ -58,13 +62,22 @@ class DataframeDataProvider(DataProvider):
              ):
         super().init(features_column, label_column, label_encoder)
         self.__parquet_engine = parquet_engine
+        self.__dataframe = None
 
     @property
     def parquet_engine(self) -> str:
         return self.__parquet_engine
 
-    def load(self, filename: str) -> pd.DataFrame:
-        return pd.read_parquet(filename, engine=self.parquet_engine)
+    @property
+    def dataframe(self) -> pd.DataFrame:
+        return self.__dataframe
+
+    def __len__(self) -> int:
+        return len(self.dataframe)
+
+    def load(self, filename: str):
+        self.__dataframe = pd.read_parquet(
+            filename, engine=self.parquet_engine)
 
     def get_subset(self, indices: pd.Series) -> pd.DataFrame:
         return self.dataframe.loc[indices]
