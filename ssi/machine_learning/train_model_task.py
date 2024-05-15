@@ -133,7 +133,8 @@ class TrainModelTask(luigi.Task, ABC):
         print(f"Test label mapping: {self.test_label_mapping}")
 
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        train_df, test_df = train_test_split(dataframe, test_size=test_size)
+        train_df, test_df = train_test_split(
+            dataframe, test_size=test_size, stratify=dataframe[self.label_column])
         self.retrieve_label_mappings(train_df, test_df, self.label_column)
 
         train_df[f"{self.label_column}_index"] = train_df[self.label_column].map(
