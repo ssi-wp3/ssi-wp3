@@ -109,7 +109,8 @@ class DataProvider:
                  ):
         self.__features_column = features_column
         self.__label_column = label_column
-        self.__label_encoder = label_encoder
+        self.__train_label_encoder = label_encoder
+        self.__test_label_encoder = None
 
     @property
     def features_column(self) -> str:
@@ -120,8 +121,20 @@ class DataProvider:
         return self.__label_column
 
     @property
-    def label_encoder(self) -> DataLabelEncoder:
-        return self.__label_encoder
+    def train_label_encoder(self) -> DataLabelEncoder:
+        return self.__train_label_encoder
+
+    @train_label_encoder.setter
+    def train_label_encoder(self, value: DataLabelEncoder):
+        self.__train_label_encoder = value
+
+    @property
+    def test_label_encoder(self) -> DataLabelEncoder:
+        return self.__test_label_encoder
+
+    @test_label_encoder.setter
+    def test_label_encoder(self, value: DataLabelEncoder):
+        self.__test_label_encoder = value
 
     def load(self, filename: str):
         pass
@@ -129,10 +142,14 @@ class DataProvider:
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
         train_df, test_df = train_test_split(
             dataframe, test_size=test_size, stratify=dataframe[self.label_column])
-        self.retrieve_label_mappings(train_df, test_df, self.label_column)
+
+        self.train_label_encoder.fit(train_df[self.label_column])
+
+        self.test_label_encoder = self.train_label_encoder.refit(
+            test_df[self.label_column])
 
         train_df[f"{self.label_column}_index"] = train_df[self.label_column].map(
-            self.train_label_mapping)
+            self.train_label_encoder.transform)
         test_df[f"{self.label_column}_index"] = test_df[self.label_column].map(
-            self.test_label_mapping)
+            self.test_label_encoder.transform)
         return train_df, test_df
