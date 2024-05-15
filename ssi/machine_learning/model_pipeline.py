@@ -63,13 +63,24 @@ class ModelPipeline:
     def best_model(self, value: Model):
         self.__best_model = value
 
-    def fit(self, data_loader: DataProvider) -> List[Dict[str, Any]]:
+    def train_model(self,
+                    data_loader: DataProvider,
+                    model_file: str,
+                    training_predictions_file: str,
+                    training_evaluation_file: str,
+                    test_predictions_file: str,
+                    test_evaluation_file: str
+                    ):
+        # TODO do train test split here?
+        pass
+
+    def fit(self, train_data_loader: DataProvider) -> List[Dict[str, Any]]:
         model_training_evaluations = []
 
         model_evaluation_score = -1
-        for train_indices, test_indices in self.cross_validator.split(data_loader.X, data_loader.y, data_loader.groups):
-            train_data = data_loader.get_subset(train_indices)
-            test_data = data_loader.get_subset(test_indices)
+        for train_indices, test_indices in self.cross_validator.split(train_data_loader.X, train_data_loader.y, train_data_loader.groups):
+            train_data = train_data_loader.get_subset(train_indices)
+            test_data = train_data_loader.get_subset(test_indices)
 
             self.model.fit(train_data[self.features_column],
                            train_data[self.label_column])
@@ -89,3 +100,6 @@ class ModelPipeline:
                 self.best_model = self.model
 
             model_training_evaluations.append(model_evaluation)
+
+    def predict(self, test_data_loader: DataProvider) -> Dict[str, Any]:
+        pass
