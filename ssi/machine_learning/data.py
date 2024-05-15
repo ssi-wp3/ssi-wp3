@@ -1,4 +1,5 @@
 from typing import Tuple
+from abc import ABC, abstractmethod
 from sklearn.model_selection import train_test_split
 from collections import OrderedDict
 import pandas as pd
@@ -136,8 +137,31 @@ class DataProvider:
     def test_label_encoder(self, value: DataLabelEncoder):
         self.__test_label_encoder = value
 
+    @abstractmethod
     def load(self, filename: str):
         pass
+
+    @abstractmethod
+    def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        pass
+
+
+class DataframeDataProvider(DataProvider):
+    def init(self,
+             features_column: str,
+             label_column: str,
+             label_encoder: DataLabelEncoder,
+             parquet_engine: str = "pyarrow"
+             ):
+        super().init(features_column, label_column, label_encoder)
+        self.__parquet_engine = parquet_engine
+
+    @property
+    def parquet_engine(self) -> str:
+        return self.__parquet_engine
+
+    def load(self, filename: str) -> pd.DataFrame:
+        return pd.read_parquet(filename, engine=self.parquet_engine)
 
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
         train_df, test_df = train_test_split(
@@ -153,3 +177,7 @@ class DataProvider:
         test_df[f"{self.label_column}_index"] = test_df[self.label_column].map(
             self.test_label_encoder.transform)
         return train_df, test_df
+
+
+class PyTorchDataProvider(DataProvider):
+    pass
