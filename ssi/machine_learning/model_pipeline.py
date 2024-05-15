@@ -72,6 +72,7 @@ class ModelPipeline:
                     test_evaluation_file: str
                     ):
         # TODO do train test split here?
+        # TODO where to fit the label encoder?
         pass
 
     def fit(self, train_data_loader: DataProvider) -> List[Dict[str, Any]]:
