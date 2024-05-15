@@ -150,7 +150,7 @@ class DataframeDataProvider(DataProvider):
     def init(self,
              features_column: str,
              label_column: str,
-             label_encoder: DataLabelEncoder,
+             label_encoder: DataLabelEncoder = DataLabelEncoder(),
              parquet_engine: str = "pyarrow"
              ):
         super().init(features_column, label_column, label_encoder)
