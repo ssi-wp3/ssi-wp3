@@ -405,7 +405,8 @@ class CrossStoreAnalysis(luigi.Task):
                             product_id_column=product_id_column,
                             overlap_function=overlap_function,
                             preprocess_function=preprocessing_function,
-                            progress_bar=progress_bar)
+                            progress_bar=progress_bar,
+                            calculate_all_cells=True if overlap_function_name == "asymmetrical_overlap" else False)
 
                         output_key = self.get_output_key(
                             product_id_column, preprocessing_function_name, overlap_function_name)
