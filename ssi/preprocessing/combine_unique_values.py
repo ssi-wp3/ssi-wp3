@@ -71,7 +71,7 @@ def combine_unique_column_values(filenames: List[str],
 
             # write last rows (if any)
             if current_batch is not None:
-                pq_writer.write_table(current_batch)
+                pq_writer.write_table(batch_table)
 
             if pq_writer:
                 pq_writer.close()
