@@ -52,7 +52,7 @@ def combine_unique_column_values(filenames: List[str],
                 batch_table = pa.Table.from_pandas(batch_rows)
                 if number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
-                        filename, batch_table.schema)
+                        output_filename, batch_table.schema)
 
                 pq_writer.write_table(batch_table)
                 number_of_rows_read += len(batch)
