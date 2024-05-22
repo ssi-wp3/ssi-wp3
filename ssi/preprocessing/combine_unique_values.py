@@ -32,6 +32,7 @@ def combine_unique_column_values(filenames: List[str],
     for filename in filenames:
         row_indices = combined_df[combined_df["filename"]
                                   == filename]["row_index"]
+        print("row indices: ", row_indices)
 
         number_of_rows_read = 0
         pq_writer = None
