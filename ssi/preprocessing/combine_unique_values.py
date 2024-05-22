@@ -18,8 +18,8 @@ def combine_unique_column_values(filenames: List[str],
     for filename in filenames:
         df = pd.read_parquet(
             filename, columns=key_columns, engine=parquet_engine)
+        df["filename"] = filename.path
         df = df.drop_duplicates(subset=key_columns)
-        df["filename"] = filename
         df.index.name = "row_index"
         df = df.reset_index()
         unique_column_values.append(df)
