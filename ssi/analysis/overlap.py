@@ -326,9 +326,11 @@ def compare_overlap_between_preprocessing_functions(
             product_id_column=product_id_column,
             overlap_function=overlap_function,
             preprocess_function=preprocess_function,
-            progress_bar=progress_bar,
+            progress_bar=None,
             calculate_all_cells=calculate_all_cells
         )
+        progress_bar.set_description(
+            f"Calculating mean overlap for preprocessing function {preprocess_function_name}")
         mean_overlap_per_function.append({
             "preprocessing_function": preprocess_function_name,
             "mean_overlap": overlap_matrix.mean(),
@@ -336,4 +338,5 @@ def compare_overlap_between_preprocessing_functions(
             "min_overlap": overlap_matrix.min(),
             "max_overlap": overlap_matrix.max()
         })
+        progress_bar.update(1)
     return pd.DataFrame(mean_overlap_per_function)
