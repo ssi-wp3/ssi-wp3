@@ -53,7 +53,7 @@ def combine_unique_column_values(filenames: List[str],
                 print(batch_rows.head())
 
                 batch_table = pa.Table.from_pandas(
-                    batch_rows.drop(columns=["file_index", "features"]))
+                    batch_rows.drop(columns=["features"]))
                 if number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
                         output_filename, batch_table.schema)
