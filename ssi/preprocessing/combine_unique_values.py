@@ -47,9 +47,6 @@ def combine_unique_column_values(filenames: List[str],
                                             (row_indices < number_of_rows_read + len(batch_df))]
                 batch_indices = batch_indices - number_of_rows_read
 
-                print(
-                    f"Batch indices: {batch_indices}, number_of_rows_read: {number_of_rows_read}, len(batch_df): {len(batch_df)}")
-
                 # Retrieve the rows in the range of this batch
                 batch_rows = batch_df.loc[batch_indices]
                 progress_bar.set_description(f"Wrote {len(batch_rows)} rows")
