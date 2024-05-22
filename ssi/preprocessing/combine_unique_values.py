@@ -35,28 +35,31 @@ def combine_unique_column_values(filenames: List[str],
 
         number_of_rows_read = 0
         pq_writer = None
-        with pq.ParquetDataset(filename, memory_map=True) as read_dataset:
+        read_dataset = pq.ParquetDataset(filename, memory_map=True)
 
-            with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
-                progress_bar.set_description(
-                    f"Writing unique values from {filename}")
-                for batch in read_dataset.iter_batches(row_indices):
-                    batch_df = batch.to_pandas()
-                    # Retrieve the row indices in the range of this batch
-                    batch_indices = row_indices[row_indices >= number_of_rows_read &
-                                                row_indices < number_of_rows_read + len(batch_df)]
+        with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
+            progress_bar.set_description(
+                f"Writing unique values from {filename}")
+            for batch in read_dataset.iter_batches(row_indices):
+                batch_df = batch.to_pandas()
+                # Retrieve the row indices in the range of this batch
+                batch_indices = row_indices[row_indices >= number_of_rows_read &
+                                            row_indices < number_of_rows_read + len(batch_df)]
 
-                    # Retrieve the rows in the range of this batch
-                    batch_rows = combined_df.loc[batch_indices]
+                # Retrieve the rows in the range of this batch
+                batch_rows = combined_df.loc[batch_indices]
 
-                    batch_table = pa.Table.from_pandas(batch_rows)
-                    if number_of_rows_read == 0:
-                        pq_writer = pq.ParquetWriter(
-                            filename, batch_table.schema)
+                batch_table = pa.Table.from_pandas(batch_rows)
+                if number_of_rows_read == 0:
+                    pq_writer = pq.ParquetWriter(
+                        filename, batch_table.schema)
 
-                    pq_writer.write_table(batch_table)
-                    number_of_rows_read += len(batch)
-                    progress_bar.update(len(batch))
+                pq_writer.write_table(batch_table)
+                number_of_rows_read += len(batch)
+                progress_bar.update(len(batch))
 
-            if pq_writer is not None:
-                pq_writer.close()
+        if read_dataset is not None:
+            read_dataset.close()
+
+        if pq_writer is not None:
+            pq_writer.close()
