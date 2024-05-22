@@ -61,9 +61,8 @@ def combine_unique_column_values(filenames: List[str],
                 pq_writer.write_table(batch_table)
                 number_of_rows_read += len(batch)
                 progress_bar.update(len(batch))
+            if pq_writer:
+                pq_writer.close()
 
-        if read_dataset is not None:
-            read_dataset.close()
-
-        if pq_writer is not None:
-            pq_writer.close()
+            if read_dataset:
+                read_dataset.close()
