@@ -37,7 +37,9 @@ def combine_unique_column_values(filenames: List[str],
         pq_writer = None
         read_dataset = pq.ParquetDataset(filename, memory_map=True)
 
-        with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
+        total_number_of_rows = sum([
+            p.get_metadata().num_rows for p in read_dataset.pieces])
+        with tqdm.tqdm(total=total_number_of_rows) as progress_bar:
             progress_bar.set_description(
                 f"Writing unique values from {filename}")
             for batch in read_dataset.iter_batches(row_indices):
