@@ -186,7 +186,7 @@ class CombineUniqueValues(luigi.Task):
                 for store_filename in store_filenames]
 
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.output_directory, f"{self.filename_prefix}_unique_values.parquet"), format=luigi.format.Nop)
+        return luigi.LocalTarget(os.path.join(self.output_directory, f"{self.filename_prefix}_{self.feature_extractor.value}_unique_values.parquet"), format=luigi.format.Nop)
 
     def run(self):
         with self.output().open('w') as output_file:
