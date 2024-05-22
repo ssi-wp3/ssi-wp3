@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
 from .files import get_combined_revenue_files_in_directory
 from .preprocessing import Preprocessing
-from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, asymmetrical_overlap
+from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, asymmetrical_overlap, compare_overlap_between_preprocessing_functions
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
@@ -431,6 +431,10 @@ class OverlapPerPreprocessing(luigi.Task):
             for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)
         }
 
+    @property
+    def preprocessing_functions(self) -> Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]:
+        return Preprocessing().receipt_text_preprocessing_functions
+
     def requires(self):
         return {store_name: StoreFile(filename)
                 for store_name, filename in self.combined_revenue_files.items()}
@@ -445,6 +449,12 @@ class OverlapPerPreprocessing(luigi.Task):
         print("Input", self.input())
         store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
                             for store_name, input_file in self.input().items()]
+        dataframe = compare_overlap_between_preprocessing_functions(store_dataframes,
+                                                                    self.store_name_column,
+                                                                    self.product_id_column, self.preprocessing_functions)
+        with self.output().open("w") as output_file:
+            dataframe.to_parquet(
+                output_file, engine=self.parquet_engine)
 
 
 class AllStoresAnalysis(luigi.WrapperTask):
