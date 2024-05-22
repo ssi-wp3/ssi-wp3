@@ -50,9 +50,7 @@ def combine_unique_column_values(filenames: List[str],
                 # Retrieve the rows in the range of this batch
                 batch_rows = batch_df.loc[batch_indices]
                 progress_bar.set_description(f"Wrote {len(batch_rows)} rows")
-                print(batch_rows.head())
 
-                batch_rows = batch_rows.drop(columns=["features"])
                 batch_table = pa.Table.from_pandas(
                     batch_rows)
 
@@ -63,9 +61,8 @@ def combine_unique_column_values(filenames: List[str],
                 pq_writer.write_table(batch_table)
                 number_of_rows_read += len(batch)
                 progress_bar.update(len(batch))
+            if pq_writer:
+                pq_writer.close()
 
-        if read_dataset is not None:
-            read_dataset.close()
-
-        if pq_writer is not None:
-            pq_writer.close()
+            if read_dataset:
+                read_dataset.close()
