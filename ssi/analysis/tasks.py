@@ -414,6 +414,39 @@ class CrossStoreAnalysis(luigi.Task):
         return store_dataframe
 
 
+class OverlapPerPreprocessing(luigi.Task):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    project_prefix = luigi.Parameter(default="ssi")
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    product_id_column = luigi.Parameter(
+        default="receipt_text")
+    store_name_column = luigi.Parameter(default="store_name")
+
+    @property
+    def combined_revenue_files(self) -> Dict[str, str]:
+        return {
+            get_store_name_from_combined_filename(filename): filename
+            for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)
+        }
+
+    def requires(self):
+        return {store_name: StoreFile(filename)
+                for store_name, filename in self.combined_revenue_files.items()}
+
+    def output(self):
+        overlap_directory = os.path.join(self.output_directory, "overlap")
+        return luigi.LocalTarget(os.path.join(overlap_directory, "mean_overlap_per_preprocessing_function.parquet"),
+                                 format=luigi.format.Nop
+                                 )
+
+    def run(self):
+        print("Input", self.input())
+        store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
+                            for store_name, input_file in self.input().items()]
+
+
 class AllStoresAnalysis(luigi.WrapperTask):
     """ This task analyses the product inventory and dynamics for all stores in a certain
     directory.

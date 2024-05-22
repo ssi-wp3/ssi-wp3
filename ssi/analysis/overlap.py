@@ -318,7 +318,7 @@ def compare_overlap_between_preprocessing_functions(
 ) -> pd.DataFrame:
     """ Compare the overlap between stores for different preprocessing functions.
     """
-    mean_overlap_per_function = dict()
+    mean_overlap_per_function = []
     for preprocess_function in preprocess_functions:
         overlap_matrix = calculate_overlap_for_stores(
             store_data=store_data,
@@ -329,6 +329,11 @@ def compare_overlap_between_preprocessing_functions(
             progress_bar=progress_bar,
             calculate_all_cells=calculate_all_cells
         )
-        mean_overlap_per_function[preprocess_function.__name__] = overlap_matrix.mean(
-        ).mean()
+        mean_overlap_per_function.append({
+            "preprocessing_function": preprocess_function.__name__,
+            "mean_overlap": overlap_matrix.mean(),
+            "std_overlap": overlap_matrix.std(),
+            "min_overlap": overlap_matrix.min(),
+            "max_overlap": overlap_matrix.max()
+        })
     return pd.DataFrame(mean_overlap_per_function)
