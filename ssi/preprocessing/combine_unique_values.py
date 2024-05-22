@@ -62,12 +62,17 @@ def combine_unique_column_values(filenames: List[str],
                     pq_writer = pq.ParquetWriter(
                         output_filename, batch_table.schema)
 
-                if len(current_batch) == batch_size:
+                if len(current_batch) % batch_size == 0:
                     pq_writer.write_table(current_batch)
                     current_batch = None
 
                 number_of_rows_read += len(batch)
                 progress_bar.update(len(batch))
+
+            # write last rows (if any)
+            if current_batch is not None:
+                pq_writer.write_table(current_batch)
+
             if pq_writer:
                 pq_writer.close()
 
