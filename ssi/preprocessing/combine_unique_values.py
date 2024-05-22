@@ -52,12 +52,13 @@ def combine_unique_column_values(filenames: List[str],
                 progress_bar.set_description(f"Wrote {len(batch_rows)} rows")
                 print(batch_rows.head())
 
-                batch_table = pa.Table.from_pandas(batch_rows)
+                batch_table = pa.Table.from_pandas(
+                    batch_rows.drop(columns=["file_index", "features"]))
                 if number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
                         output_filename, batch_table.schema)
 
-                pq_writer.write_table(batch_table)
+                pq_writer.write_table(batch_table.drop)
                 number_of_rows_read += len(batch)
                 progress_bar.update(len(batch))
 
