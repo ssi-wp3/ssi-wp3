@@ -1,5 +1,7 @@
 from .feature_extraction import FeatureExtractorFactory, FeatureExtractorType
 from .files import get_combined_revenue_files_in_directory
+from ..files import get_features_files_in_directory
+from ..preprocessing.combine_unique_values import combine_unique_column_values
 from ..parquet_file import ParquetFile
 import luigi
 import pandas as pd
@@ -164,3 +166,32 @@ class ExtractAllFeatures(luigi.WrapperTask):
                 destination_column=self.destination_column,
                 filename_prefix=self.filename_prefix
             )
+
+
+class CombineUniqueValues(luigi.Task):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    filename_prefix = luigi.Parameter()
+    key_columns = luigi.ListParameter(["receipt_text", "coicop_number"])
+    feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
+    parquet_engine = luigi.Parameter()
+
+    def requires(self):
+        store_filenames = [os.path.join(self.input_directory, filename)
+                           for filename in get_features_files_in_directory(
+                               self.input_directory, self.filename_prefix)
+                           if f"{self.feature_extractor.value}.parquet" in filename]
+
+        return [ParquetFile(store_filename)
+                for store_filename in store_filenames]
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.output_directory, f"{self.filename_prefix}_unique_values.parquet"), format=luigi.format.Nop)
+
+    def run(self):
+        with self.output().open('w') as output_file:
+            input_files = [input_file.open("r") for input_file in self.input()]
+            combine_unique_column_values(input_files, output_file,
+                                         key_columns=self.key_columns,
+                                         parquet_engine=self.parquet_engine
+                                         )
