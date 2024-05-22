@@ -333,10 +333,10 @@ def compare_overlap_between_preprocessing_functions(
             f"Calculating mean overlap for preprocessing function {preprocess_function_name}")
         mean_overlap_per_function.append({
             "preprocessing_function": preprocess_function_name,
-            "mean_overlap": overlap_matrix.mean(),
-            "std_overlap": overlap_matrix.std(),
-            "min_overlap": overlap_matrix.min(),
-            "max_overlap": overlap_matrix.max()
+            "mean_overlap": overlap_matrix.values.mean(),
+            "std_overlap": overlap_matrix.values.std(),
+            "min_overlap": overlap_matrix.values.min(),
+            "max_overlap": overlap_matrix.values.max()
         })
         progress_bar.update(1)
     return pd.DataFrame(mean_overlap_per_function)
