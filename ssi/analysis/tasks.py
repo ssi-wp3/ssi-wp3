@@ -456,6 +456,19 @@ class OverlapPerPreprocessing(luigi.Task):
             dataframe.to_parquet(
                 output_file, engine=self.parquet_engine)
 
+    def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
+        with input_file.open("r") as input_parquet_file:
+            dataframe = pd.read_parquet(
+                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns))
+            return self.__add_store_name_column(dataframe, store_name, store_name_column)
+
+    def __add_store_name_column(self,
+                                store_dataframe: pd.DataFrame,
+                                store_name: str,
+                                store_name_column: str = "store_name") -> pd.DataFrame:
+        store_dataframe[store_name_column] = store_name
+        return store_dataframe
+
 
 class AllStoresAnalysis(luigi.WrapperTask):
     """ This task analyses the product inventory and dynamics for all stores in a certain
