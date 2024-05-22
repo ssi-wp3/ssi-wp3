@@ -447,14 +447,17 @@ class OverlapPerPreprocessing(luigi.Task):
 
     def run(self):
         print("Input", self.input())
-        store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
-                            for store_name, input_file in self.input().items()]
-        dataframe = compare_overlap_between_preprocessing_functions(store_dataframes,
-                                                                    self.store_name_column,
-                                                                    self.product_id_column, self.preprocessing_functions)
-        with self.output().open("w") as output_file:
-            dataframe.to_parquet(
-                output_file, engine=self.parquet_engine)
+        with tqdm.tqdm(total=len(self.preprocessing_functions)) as progress_bar:
+            store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
+                                for store_name, input_file in self.input().items()]
+            dataframe = compare_overlap_between_preprocessing_functions(store_dataframes,
+                                                                        self.store_name_column,
+                                                                        self.product_id_column,
+                                                                        self.preprocessing_functions,
+                                                                        progress_bar=progress_bar)
+            with self.output().open("w") as output_file:
+                dataframe.to_parquet(
+                    output_file, engine=self.parquet_engine)
 
     def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
         with input_file.open("r") as input_parquet_file:
