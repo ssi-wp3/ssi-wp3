@@ -1,5 +1,5 @@
 
-from typing import Tuple, Callable, List, Optional
+from typing import Dict, Tuple, Callable, List, Optional
 import pandas as pd
 import numpy as np
 import tqdm
@@ -309,7 +309,7 @@ def compare_overlap_between_preprocessing_functions(
     store_data: List[pd.DataFrame],
         store_id_column: str,
         product_id_column: str,
-        preprocess_functions: List[Callable[[
+        preprocess_functions: Dict[str, Callable[[
             pd.Series], pd.Series]],
         overlap_function: Callable[[
             set, set], float] = jaccard_index,
@@ -319,7 +319,7 @@ def compare_overlap_between_preprocessing_functions(
     """ Compare the overlap between stores for different preprocessing functions.
     """
     mean_overlap_per_function = []
-    for preprocess_function in preprocess_functions:
+    for preprocess_function_name, preprocess_function in preprocess_functions.items():
         overlap_matrix = calculate_overlap_for_stores(
             store_data=store_data,
             store_id_column=store_id_column,
@@ -330,7 +330,7 @@ def compare_overlap_between_preprocessing_functions(
             calculate_all_cells=calculate_all_cells
         )
         mean_overlap_per_function.append({
-            "preprocessing_function": preprocess_function.__name__,
+            "preprocessing_function": preprocess_function_name,
             "mean_overlap": overlap_matrix.mean(),
             "std_overlap": overlap_matrix.std(),
             "min_overlap": overlap_matrix.min(),
