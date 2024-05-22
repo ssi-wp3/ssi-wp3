@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
 from .files import get_combined_revenue_files_in_directory
-from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, split_strings, huggingface_tokenize_strings, drop_short_strings, asymmetrical_overlap
+from .preprocessing import Preprocessing
+from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, asymmetrical_overlap
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
@@ -340,22 +341,7 @@ class CrossStoreAnalysis(luigi.Task):
 
     @property
     def overlap_preprocessing_functions(self) -> Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]:
-        return {
-            "ean_number": {
-                "raw": lambda x: x
-            },
-            "receipt_text": {
-                "raw": lambda x: x,
-                "lower": lambda x: x.str.lower(),
-                "lower_split_words": lambda x: split_strings(x.str.lower()),
-                "stripped": lambda x: x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.lower(),
-                "stripped_split_words": lambda x: split_strings(x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.strip().str.lower()),
-                "stripped_split_alpha_drop_short": lambda x: drop_short_strings(split_strings(x.str.replace('[^a-z\s]', '', regex=True).str.strip().str.lower()), drop_less_than=3),
-                "raw_tokenized_gpt2": lambda x: huggingface_tokenize_strings(x, "gpt2"),
-                "raw_tokenized_mini_lm": lambda x: huggingface_tokenize_strings(x, "sentence-transformers/all-MiniLM-L6-v2"),
-                "raw_tokenized_labse": lambda x: huggingface_tokenize_strings(x, "sentence-transformers/LaBSE"),
-            }
-        }
+        return Preprocessing().all_preprocessing_functions
 
     def target_for(self,
                    overlap_directory: str,

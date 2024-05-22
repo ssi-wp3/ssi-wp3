@@ -1,6 +1,5 @@
 
 from typing import Tuple, Callable, List, Optional
-from transformers import AutoTokenizer
 import pandas as pd
 import numpy as np
 import tqdm
@@ -228,84 +227,6 @@ def asymmetrical_overlap(left_set: set, right_set: set) -> float:
     return len(overlap) / len(left_set)
 
 
-def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
-    """ Split strings in a column into separate words.
-
-    Parameters
-    ----------
-    string_column : pd.Series
-        The column containing the strings to split.
-
-    separator : str
-        The separator to use to split the strings. By default, the separator is a space.
-
-    Returns
-    -------
-    pd.Series
-        A series with the unique split strings.
-    """
-    return string_column.str.split(separator).explode()
-
-
-def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[str]]) -> pd.Series:
-    """ Tokenize strings in a column using a custom tokenizer.
-
-    Parameters
-    ----------
-    string_column : pd.Series
-        The column containing the strings to tokenize.
-
-    tokenizer : Callable[[str], List[str]]
-        A function that takes a string as input and returns a list of tokens.
-
-    Returns
-    -------
-    pd.Series
-        A series with the unique tokens.
-    """
-    return string_column.apply(tokenizer).explode()
-
-
-def drop_short_strings(string_column: pd.Series, drop_less_than: int = 3):
-    """ 
-    Remove all entries with strings shorter than "drop_less_than".
-
-    Parameters
-    ----------
-    string_column : pd.Series
-        The column containing the strings to tokenize.
-
-    Returns
-    -------
-    pd.Series
-        A series with the unique tokens.
-    """
-    if drop_less_than < 1:
-        print("WARNING: Minimum string length less than 1.")
-
-    return string_column[string_column.str.len() >= drop_less_than]
-
-
-def huggingface_tokenize_strings(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
-    """ Tokenize strings in a column using a Hugging Face tokenizer.
-
-    Parameters
-    ----------
-    string_column : pd.Series
-        The column containing the strings to tokenize.
-
-    tokenizer_name : str
-        The name of the Hugging Face tokenizer to use. By default, the GPT-2 tokenizer is used.
-
-    Returns
-    -------
-    pd.Series
-        A series with the unique tokens.
-    """
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-    return tokenize_strings(string_column, tokenizer.tokenize)
-
-
 def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
                                  store_id_column: str,
                                  product_id_column: str,
@@ -382,3 +303,32 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
                 progress_bar.update(1)
 
     return pd.DataFrame(store_overlap, columns=store_names, index=store_names)
+
+
+def compare_overlap_between_preprocessing_functions(
+    store_data: List[pd.DataFrame],
+        store_id_column: str,
+        product_id_column: str,
+        preprocess_functions: List[Callable[[
+            pd.Series], pd.Series]],
+        overlap_function: Callable[[
+            set, set], float] = jaccard_index,
+        progress_bar: Optional[tqdm.tqdm] = None,
+        calculate_all_cells: bool = False
+) -> pd.DataFrame:
+    """ Compare the overlap between stores for different preprocessing functions.
+    """
+    mean_overlap_per_function = dict()
+    for preprocess_function in preprocess_functions:
+        overlap_matrix = calculate_overlap_for_stores(
+            store_data=store_data,
+            store_id_column=store_id_column,
+            product_id_column=product_id_column,
+            overlap_function=overlap_function,
+            preprocess_function=preprocess_function,
+            progress_bar=progress_bar,
+            calculate_all_cells=calculate_all_cells
+        )
+        mean_overlap_per_function[preprocess_function.__name__] = overlap_matrix.mean(
+        ).mean()
+    return pd.DataFrame(mean_overlap_per_function)
