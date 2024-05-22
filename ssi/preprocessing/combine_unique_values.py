@@ -43,8 +43,8 @@ def combine_unique_column_values(filenames: List[str],
             for batch in read_dataset.iter_batches():
                 batch_df = batch.to_pandas()
                 # Retrieve the row indices in the range of this batch
-                batch_indices = row_indices[row_indices >= number_of_rows_read &
-                                            row_indices < number_of_rows_read + len(batch_df)]
+                batch_indices = row_indices[(row_indices >= number_of_rows_read) &
+                                            (row_indices < number_of_rows_read + len(batch_df))]
 
                 # Retrieve the rows in the range of this batch
                 batch_rows = combined_df.loc[batch_indices]
