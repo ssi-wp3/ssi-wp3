@@ -1,9 +1,10 @@
 
 from .files import get_revenue_files_in_folder, get_store_name
+from .combine_unique_values import combine_unique_column_values
+from ..parquet_file import ParquetFile
 from .convert import ConvertCSVToParquet
 import pandas as pd
 import luigi
-
 import os
 
 
@@ -69,7 +70,7 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
         The directory where the revenue files are stored.
 
     output_directory : luigi.Parameter
-        The output directory for the combined revenue files.    
+        The output directory for the combined revenue files.
     """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
@@ -92,3 +93,33 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
                                     filename_prefix=self.input_filename_prefix,
                                     parquet_engine=self.parquet_engine)
                 for store_name in self.store_names]
+
+
+class CombineUniqueValues(luigi.Task):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    input_filename_prefix = luigi.Parameter()
+    key_columns = luigi.ListParameter(["receipt_text", "coicop_number"])
+    parquet_engine = luigi.Parameter()
+
+    @property
+    def store_names(self):
+        return set([get_store_name(filename)
+                    for filename in os.listdir(self.input_directory)
+                    if self.input_filename_prefix.lower() in filename.lower()]
+                   )
+
+    def requires(self):
+        return [ParquetFile(os.path.join(self.input_directory, f"{self.input_filename_prefix}_{store_name}_revenue.parquet"))
+                for store_name in self.store_names]
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.output_directory, f"{self.input_filename_prefix}_unique_values.parquet"), format=luigi.format.Nop)
+
+    def run(self):
+        with self.output().open('w') as output_file:
+            input_files = [input_file.open("r") for input_file in self.input()]
+            combine_unique_column_values(input_files, output_file,
+                                         key_columns=self.key_columns,
+                                         parquet_engine=self.parquet_engine
+                                         )
