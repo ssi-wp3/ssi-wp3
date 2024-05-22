@@ -35,14 +35,12 @@ def combine_unique_column_values(filenames: List[str],
 
         number_of_rows_read = 0
         pq_writer = None
-        read_dataset = pq.ParquetDataset(filename, memory_map=True)
+        read_dataset = pq.ParquetFile(filename, memory_map=True)
 
-        total_number_of_rows = sum([
-            fragment.count_rows() for fragment in read_dataset.fragments])
-        with tqdm.tqdm(total=total_number_of_rows) as progress_bar:
+        with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
             progress_bar.set_description(
                 f"Writing unique values from {filename}")
-            for batch in read_dataset.iter_batches(row_indices):
+            for batch in read_dataset.iter_batches():
                 batch_df = batch.to_pandas()
                 # Retrieve the row indices in the range of this batch
                 batch_indices = row_indices[row_indices >= number_of_rows_read &
