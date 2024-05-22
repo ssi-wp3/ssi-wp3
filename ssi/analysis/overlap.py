@@ -371,14 +371,12 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
                 store1[product_id_column]).values)
             store2_set = set(preprocess_function(
                 store2[product_id_column]).values)
-            # Swap the sets for the set combinations passed the diagonal
-            if column_index > row_index:
-                store1_set, store2_set = store2_set, store1_set
 
             overlap = overlap_function(
                 store1_set, store2_set)
             store_overlap[row_index, column_index] = overlap
-            store_overlap[column_index, row_index] = overlap
+            if not calculate_all_cells:
+                store_overlap[column_index, row_index] = overlap
 
             if progress_bar is not None:
                 progress_bar.update(1)
