@@ -15,10 +15,10 @@ def combine_unique_column_values(filenames: List[str],
     """
     unique_column_values = []
     # Read the files and remove duplicates per file
-    for filename in filenames:
+    for file_index, filename in enumerate(filenames):
         df = pd.read_parquet(
             filename, columns=key_columns, engine=parquet_engine)
-        df["filename"] = filename.path
+        df["filename"] = file_index
         df = df.drop_duplicates(subset=key_columns)
         df.index.name = "row_index"
         df = df.reset_index()
