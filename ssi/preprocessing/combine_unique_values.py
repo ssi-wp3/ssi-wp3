@@ -18,7 +18,7 @@ def combine_unique_column_values(filenames: List[str],
     for file_index, filename in enumerate(filenames):
         df = pd.read_parquet(
             filename, columns=key_columns, engine=parquet_engine)
-        df["filename"] = file_index
+        df["file_index"] = file_index
         df = df.drop_duplicates(subset=key_columns)
         df.index.name = "row_index"
         df = df.reset_index()
@@ -29,10 +29,9 @@ def combine_unique_column_values(filenames: List[str],
     combined_df = combined_df.drop_duplicates(subset=key_columns)
 
     # Write the combined DataFrame to a new file
-    for filename in filenames:
-        row_indices = combined_df[combined_df["filename"]
-                                  == filename]["row_index"]
-        print("row indices: ", row_indices)
+    for file_index, filename in enumerate(filenames):
+        row_indices = combined_df[combined_df["file_index"]
+                                  == file_index]["row_index"]
 
         number_of_rows_read = 0
         pq_writer = None
