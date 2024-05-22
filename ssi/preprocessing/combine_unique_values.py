@@ -48,6 +48,7 @@ def combine_unique_column_values(filenames: List[str],
 
                 # Retrieve the rows in the range of this batch
                 batch_rows = combined_df.loc[batch_indices]
+                progress_bar.set_description(f"Wrote {len(batch_rows)} rows")
 
                 batch_table = pa.Table.from_pandas(batch_rows)
                 if number_of_rows_read == 0:
