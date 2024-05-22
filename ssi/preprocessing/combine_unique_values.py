@@ -16,8 +16,6 @@ def combine_unique_column_values(filenames: List[str],
     unique_column_values = []
     # Read the files and remove duplicates per file
     for filename in filenames:
-        if not os.path.exists(filename):
-            raise FileNotFoundError(f"File {filename} not found.")
         df = pd.read_parquet(
             filename, columns=key_columns, engine=parquet_engine)
         df = df.drop_duplicates(subset=key_columns)
