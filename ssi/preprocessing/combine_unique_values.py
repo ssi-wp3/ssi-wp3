@@ -67,7 +67,7 @@ def combine_unique_column_values(filenames: List[str],
                         output_filename, batch_table.schema, write_batch_size=batch_size)
 
                 if len(current_batch) % batch_size == 0:
-                    print(current_batch.head())
+                    print("Writing batch...")
                     pq_writer.write_table(batch_table)
                     number_of_rows_written += len(current_batch)
                     current_batch = None
