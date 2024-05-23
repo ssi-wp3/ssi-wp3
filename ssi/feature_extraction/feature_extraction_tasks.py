@@ -204,4 +204,4 @@ class CombineUniqueValues(luigi.Task):
             with open(self.output_filename + ".tmp", "rb") as tmp_file:
                 output_file.write(tmp_file.read())
 
-        # os.remove(self.output_filename + ".tmp")
+        os.remove(self.output_filename + ".tmp")

@@ -29,6 +29,8 @@ def combine_unique_column_values(filenames: List[str],
     combined_df = pd.concat(unique_column_values)
     combined_df = combined_df.drop_duplicates(subset=key_columns)
 
+    print("Number of unique values for all files:", len(combined_df))
+
     # Write the combined DataFrame to a new file
     for file_index, filename in enumerate(filenames):
         row_indices = combined_df[combined_df["file_index"]
