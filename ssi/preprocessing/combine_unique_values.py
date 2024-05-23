@@ -32,6 +32,7 @@ def combine_unique_column_values(filenames: List[str],
     print("Number of unique values for all files:", len(combined_df))
 
     # Write the combined DataFrame to a new file
+    number_of_rows_written = 0
     for file_index, filename in enumerate(filenames):
         row_indices = combined_df[combined_df["file_index"]
                                   == file_index]["row_index"]
@@ -67,6 +68,7 @@ def combine_unique_column_values(filenames: List[str],
 
                 if len(current_batch) % batch_size == 0:
                     pq_writer.write_table(batch_table)
+                    number_of_rows_written += len(current_batch)
                     current_batch = None
 
                 number_of_rows_read += len(batch)
@@ -81,3 +83,5 @@ def combine_unique_column_values(filenames: List[str],
 
             if read_dataset:
                 read_dataset.close()
+    print(
+        f"Number of rows written: {number_of_rows_written} out of {len(combined_df)} unique values")
