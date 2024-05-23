@@ -36,7 +36,7 @@ def combine_unique_column_values(filenames: List[str],
 
         number_of_rows_read = 0
         pq_writer = None
-        read_dataset = pq.ParquetFile(filename, memory_map=True)
+        read_dataset = pq.ParquetFile(filename)  # , memory_map=True)
 
         with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
             progress_bar.set_description(
