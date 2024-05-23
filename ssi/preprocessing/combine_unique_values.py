@@ -56,21 +56,17 @@ def combine_unique_column_values(filenames: List[str],
                 batch_rows = batch_df.loc[batch_indices]
                 progress_bar.set_description(
                     f"Wrote {len(batch_rows)} rows for {len(batch_indices)} unique values")
-                current_batch = pd.concat(
-                    [current_batch, batch_rows]) if current_batch is not None else batch_rows
 
                 batch_table = pa.Table.from_pandas(
-                    current_batch)
+                    batch_rows)
 
                 if number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
                         output_filename, batch_table.schema, write_batch_size=batch_size)
 
-                if len(current_batch) % batch_size == 0:
-                    print("Writing batch...")
-                    pq_writer.write_table(batch_table)
-                    number_of_rows_written += len(current_batch)
-                    current_batch = None
+                # if len(current_batch) % batch_size == 0:
+                pq_writer.write_table(batch_table)
+                number_of_rows_written += len(current_batch)
 
                 number_of_rows_read += len(batch)
                 progress_bar.update(len(batch))
