@@ -66,7 +66,7 @@ def combine_unique_column_values(filenames: List[str],
 
                 # if len(current_batch) % batch_size == 0:
                 pq_writer.write_table(batch_table)
-                number_of_rows_written += len(current_batch)
+                number_of_rows_written += len(batch_rows)
 
                 number_of_rows_read += len(batch)
                 progress_bar.update(len(batch))
