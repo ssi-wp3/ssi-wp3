@@ -60,7 +60,7 @@ def combine_unique_column_values(filenames: List[str],
 
                 if number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
-                        output_filename, batch_table.schema, version="1.0")
+                        output_filename, batch_table.schema)
 
                 if len(current_batch) % batch_size == 0:
                     pq_writer.write_table(batch_table)
