@@ -10,7 +10,7 @@ def combine_unique_column_values(filenames: List[str],
                                  output_filename: str,
                                  key_columns: List[str],
                                  parquet_engine: str = "pyarrow",
-                                 batch_size: int = 1000
+                                 batch_size: int = 1024
                                  ):
     """ Combine unique column values from multiple files into a single file.
     """
@@ -60,7 +60,7 @@ def combine_unique_column_values(filenames: List[str],
 
                 if number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
-                        output_filename, batch_table.schema)
+                        output_filename, batch_table.schema, write_batch_size=batch_size)
 
                 if len(current_batch) % batch_size == 0:
                     pq_writer.write_table(batch_table)
