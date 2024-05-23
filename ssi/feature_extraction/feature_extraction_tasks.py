@@ -193,10 +193,15 @@ class CombineUniqueValues(luigi.Task):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
-        with self.output().open('w') as output_file:
+        with open(self.output_filename + ".tmp", "wb") as output_file:
             input_files = [input_file.open("r") for input_file in self.input()]
             combine_unique_column_values(filenames=input_files,
                                          output_filename=output_file,
                                          key_columns=self.key_columns,
                                          parquet_engine=self.parquet_engine
                                          )
+
+        with self.output().open('w') as output_file:
+            with open(self.output_filename + ".tmp", "rb") as input_file:
+                output_file.write(input_file.read())
+            # os.remove(self.output_filename + ".tmp")
