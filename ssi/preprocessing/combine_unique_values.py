@@ -50,7 +50,7 @@ def combine_unique_column_values(filenames: List[str],
                 batch_indices = batch_indices - number_of_rows_read
 
                 # Retrieve the rows in the range of this batch
-                batch_rows = batch_df.loc[batch_indices].copy()
+                batch_rows = batch_df.loc[batch_indices]
                 progress_bar.set_description(f"Wrote {len(batch_rows)} rows")
                 current_batch = pd.concat(
                     [current_batch, batch_rows]) if current_batch is not None else batch_rows
