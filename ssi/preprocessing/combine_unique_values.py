@@ -70,6 +70,8 @@ def combine_unique_column_values(filenames: List[str],
                     f"Wrote {len(batch_rows)} rows for {len(batch_indices)} unique values")
                 batch_table = pa.Table.from_pandas(
                     batch_rows)
+                if pq_writer:
+                    batch_table = batch_table.cast(pq_writer.schema)
 
                 if number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
