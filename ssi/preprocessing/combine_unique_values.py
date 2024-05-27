@@ -44,7 +44,6 @@ def combine_unique_column_values(filenames: List[str],
         with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
             progress_bar.set_description(
                 f"Writing unique values from {filename}")
-            current_batch = None
             for batch in read_dataset.iter_batches():
                 batch_df = batch.to_pandas()
                 # Retrieve the row indices in the range of this batch
@@ -83,10 +82,6 @@ def combine_unique_column_values(filenames: List[str],
 
                 number_of_rows_read += len(batch)
                 progress_bar.update(len(batch))
-
-            # write last rows (if any)
-            if current_batch is not None:
-                pq_writer.write_table(batch_table)
 
             if read_dataset:
                 read_dataset.close()
