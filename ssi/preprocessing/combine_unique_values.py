@@ -33,17 +33,13 @@ def combine_unique_column_values(filenames: List[str],
 
     # Write the combined DataFrame to a new file
     number_of_rows_written = 0
+    number_of_rows_read = 0
     for file_index, filename in enumerate(filenames):
         row_indices = combined_df[combined_df["file_index"]
                                   == file_index]["row_index"]
 
-        number_of_rows_read = 0
         pq_writer = None
-        read_dataset = pq.ParquetFile(filename, memory_map=True)
-
-        if number_of_rows_read == 0:
-            pq_writer = pq.ParquetWriter(
-                output_filename, batch_table.schema, write_batch_size=batch_size)
+        read_dataset = pq.ParquetFile(filename)  # , memory_map=True)
 
         with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
             progress_bar.set_description(
@@ -63,6 +59,10 @@ def combine_unique_column_values(filenames: List[str],
 
                 batch_table = pa.Table.from_pandas(
                     batch_rows)
+
+                if number_of_rows_read == 0:
+                    pq_writer = pq.ParquetWriter(
+                        output_filename, batch_table.schema, write_batch_size=batch_size)
 
                 # if len(current_batch) % batch_size == 0:
                 pq_writer.write_table(batch_table)
