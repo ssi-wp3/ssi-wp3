@@ -54,8 +54,13 @@ def combine_unique_column_values(filenames: List[str],
 
                 # Retrieve the rows in the range of this batch
                 batch_rows = batch_df.loc[batch_indices]
-                batch_rows = batch_rows.drop(
-                    columns=["start_date", "end_date"])
+
+                if "start_date" in batch_rows.columns:
+                    batch_rows = batch_rows.drop(
+                        columns=["start_date"])
+                if "end_date" in batch_rows.columns:
+                    batch_rows = batch_rows.drop(
+                        columns=["end_date"])
 
                 progress_bar.set_description(
                     f"Wrote {len(batch_rows)} rows for {len(batch_indices)} unique values")
