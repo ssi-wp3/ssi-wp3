@@ -62,6 +62,10 @@ def combine_unique_column_values(filenames: List[str],
                     batch_rows = batch_rows.drop(
                         columns=["end_date"])
 
+                if "isba_description" in batch_rows.columns:
+                    batch_rows = batch_rows.drop(
+                        columns=["isba_description"])
+
                 progress_bar.set_description(
                     f"Wrote {len(batch_rows)} rows for {len(batch_indices)} unique values")
                 batch_table = pa.Table.from_pandas(
