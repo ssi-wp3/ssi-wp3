@@ -32,13 +32,13 @@ def combine_unique_column_values(filenames: List[str],
     print("Number of unique values for all files:", len(combined_df))
 
     # Write the combined DataFrame to a new file
+    pq_writer = None
     number_of_rows_written = 0
     number_of_rows_read = 0
     for file_index, filename in enumerate(filenames):
         row_indices = combined_df[combined_df["file_index"]
                                   == file_index]["row_index"]
 
-        pq_writer = None
         read_dataset = pq.ParquetFile(filename)  # , memory_map=True)
 
         with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
