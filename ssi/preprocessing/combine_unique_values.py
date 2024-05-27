@@ -33,23 +33,24 @@ def combine_unique_column_values(filenames: List[str],
 
     # Write the combined DataFrame to a new file
     pq_writer = None
-    number_of_rows_written = 0
-    number_of_rows_read = 0
+    total_number_of_rows_written = 0
+    total_number_of_rows_read = 0
     for file_index, filename in enumerate(filenames):
         row_indices = combined_df[combined_df["file_index"]
                                   == file_index]["row_index"]
 
         read_dataset = pq.ParquetFile(filename)  # , memory_map=True)
 
+        number_file_rows_read = 0
         with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
             progress_bar.set_description(
                 f"Writing unique values from {filename}")
             for batch in read_dataset.iter_batches():
                 batch_df = batch.to_pandas()
                 # Retrieve the row indices in the range of this batch
-                batch_indices = row_indices[(row_indices >= number_of_rows_read) &
-                                            (row_indices < number_of_rows_read + len(batch_df))]
-                batch_indices = batch_indices - number_of_rows_read
+                batch_indices = row_indices[(row_indices >= number_file_rows_read) &
+                                            (row_indices < number_file_rows_read + len(batch_df))]
+                batch_indices = batch_indices - number_file_rows_read
 
                 # Retrieve the rows in the range of this batch
                 batch_rows = batch_df.loc[batch_indices]
@@ -72,15 +73,17 @@ def combine_unique_column_values(filenames: List[str],
                 if pq_writer:
                     batch_table = batch_table.cast(pq_writer.schema)
 
-                if number_of_rows_read == 0:
+                if total_number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
                         output_filename, batch_table.schema, write_batch_size=batch_size)
 
                 # if len(current_batch) % batch_size == 0:
                 pq_writer.write_table(batch_table)
-                number_of_rows_written += len(batch_rows)
+                total_number_of_rows_written += len(batch_rows)
 
-                number_of_rows_read += len(batch)
+                number_file_rows_read += len(batch_df)
+                total_number_of_rows_read += len(batch)
+
                 progress_bar.update(len(batch))
 
             if read_dataset:
@@ -90,4 +93,4 @@ def combine_unique_column_values(filenames: List[str],
         pq_writer.close()
 
     print(
-        f"Number of rows written: {number_of_rows_written} out of {len(combined_df)} unique values")
+        f"Number of rows written: {total_number_of_rows_written} out of {len(combined_df)} unique values")
