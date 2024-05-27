@@ -75,10 +75,11 @@ def combine_unique_column_values(filenames: List[str],
             if current_batch is not None:
                 pq_writer.write_table(batch_table)
 
-            if pq_writer:
-                pq_writer.close()
-
             if read_dataset:
                 read_dataset.close()
+
+    if pq_writer:
+        pq_writer.close()
+
     print(
         f"Number of rows written: {number_of_rows_written} out of {len(combined_df)} unique values")
