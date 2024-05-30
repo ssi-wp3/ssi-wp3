@@ -120,7 +120,7 @@ def compute_metrics(eval_pred):
 # %%
 
 
-metric = evaluate.load(args.evaluation_function, )
+metric = evaluate.load(args.evaluation_function)
 
 # %%
 
