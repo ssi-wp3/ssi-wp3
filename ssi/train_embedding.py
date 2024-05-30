@@ -42,23 +42,29 @@ hf_labse_features.head()
 # From: https://huggingface.co/docs/transformers/training
 
 
-def split_data(dataframe: pd.DataFrame, coicop_level: str = "coicop_level_1", test_size: float = 0.2, random_state: int = 42) -> Tuple[Dataset, Dataset]:
-    train_dataframe, test_dataframe = train_test_split(
+def split_data(dataframe: pd.DataFrame, coicop_level: str = "coicop_level_1", val_size: float = 0.1, test_size: float = 0.2, random_state: int = 42) -> Tuple[Dataset, Dataset]:
+    train_val_dataframe, test_dataframe = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[coicop_level], random_state=random_state)
 
-    train_dataframe["label"] = train_dataframe[coicop_level]
+    train_val_dataframe["label"] = train_val_dataframe[coicop_level]
+    train_dataframe, val_dataframe = train_test_split(
+        train_val_dataframe, test_size=val_size, stratify=train_val_dataframe[coicop_level], random_state=random_state)
+
     train_df = Dataset.from_pandas(train_dataframe)
     train_df = train_df.class_encode_column("label")
+
+    val_df = Dataset.from_pandas(val_dataframe)
+    val_df = val_df.class_encode_column("label")
 
     test_dataframe["label"] = test_dataframe[coicop_level]
     test_df = Dataset.from_pandas(test_dataframe)
     test_df = test_df.class_encode_column("label")
 
-    return train_df, test_df
+    return train_df, val_df, test_df
 
 
 # %%
-train_df, test_df = split_data(
+train_df, val_df, test_df = split_data(
     hf_labse_features, coicop_level=args.label_column)
 
 # %%
@@ -77,17 +83,16 @@ def tokenize_function(data, text_column: str = "receipt_text", padding: str = "m
 map_function = partial(tokenize_function, text_column=args.input_column)
 
 train_df = train_df.map(map_function, batched=True)
+val_df = val_df.map(map_function, batched=True)
 test_df = test_df.map(map_function, batched=True)
 
 # %%
 train_df = train_df.remove_columns([args.input_column])
+val_df = val_df.remove_columns([args.input_column])
 test_df = test_df.remove_columns([args.input_column])
 
-# %%
-train_df
-
-# %%
-test_df
+print(
+    f"Train dataset length: {len(train_df)}, Val dataset length: {len(val_df)}, Test dataset length: {len(test_df)}")
 
 # %%
 number_of_categories = hf_labse_features[args.label_column].nunique()
@@ -128,9 +133,11 @@ trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=train_df,
-    eval_dataset=test_df,
+    eval_dataset=val_df,
     compute_metrics=compute_metrics
 )
 
 # %%
 trainer.train()
+
+trainer.evaluate(test_df)
