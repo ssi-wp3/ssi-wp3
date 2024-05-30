@@ -121,17 +121,17 @@ training_args = TrainingArguments(
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
-    print(classification_report(labels, predictions)
+    print(classification_report(labels, predictions))
     return metric.compute(predictions=predictions, references=labels, average="weighted")
 
 # %%
 
 
-metric=evaluate.load(args.evaluation_function)
+metric = evaluate.load(args.evaluation_function)
 
 # %%
 
-trainer=Trainer(
+trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=train_df,
