@@ -8,6 +8,7 @@ from functools import partial
 from transformers import AutoTokenizer
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 from typing import Tuple
 import pandas as pd
 import argparse
@@ -120,16 +121,17 @@ training_args = TrainingArguments(
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
+    print(classification_report(labels, predictions)
     return metric.compute(predictions=predictions, references=labels, average="weighted")
 
 # %%
 
 
-metric = evaluate.load(args.evaluation_function)
+metric=evaluate.load(args.evaluation_function)
 
 # %%
 
-trainer = Trainer(
+trainer=Trainer(
     model=model,
     args=training_args,
     train_dataset=train_df,
