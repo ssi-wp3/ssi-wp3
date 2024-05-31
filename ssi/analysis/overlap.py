@@ -413,7 +413,7 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
                                      store_id_column: str,
                                      product_id_column: str,
                                      coicop_column: str,
-                                     preprocess_functions: Dict[str, Callable[[pd.Series], pd.Series]],
+                                     preprocess_function: Callable[[pd.Series], pd.Series],
                                      overlap_function: Callable[[
                                          set, set], float] = jaccard_index,
                                      progress_bar: Optional[tqdm.tqdm] = None) -> pd.DataFrame:
@@ -435,8 +435,8 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
     coicop_column: str
         The name of the column containing the COICOP labels.
 
-    preprocess_functions: Dict[str, Callable[[pd.Series], pd.Series]]
-        A dictionary with the preprocessing functions to compare. The keys are the names of the preprocessing functions.
+    preprocess_function: Dict[str, Callable[[pd.Series], pd.Series]]
+        The preprocessing function to use to preprocess the data before calculating the overlap.
 
     overlap_function: Callable[[set, set], float]
         The overlap function to use to calculate the overlap between the stores. Note that this function assumes that
@@ -451,6 +451,7 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
     pd.DataFrame
         A dataframe with the overlap between the stores for each preprocessing function per COICOP label.
     """
+    all_overlap_dfs = []
     for store_left_index in range(len(store_data)):
         store_left = store_data[store_left_index]
         store_left_name = store_left[store_id_column].values[0]
@@ -461,19 +462,27 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
             coicop_levels = set(store_left[coicop_column].unique()) | set(
                 store_right[coicop_column].unique())
 
+            overlap_values = []
             for coicop_label in coicop_levels:
                 store_left_coicop = store_left[store_left[coicop_column]
                                                == coicop_label]
                 store_right_coicop = store_right[store_right[coicop_column]
                                                  == coicop_label]
-                for preprocess_function_name, preprocess_function in preprocess_functions.items():
-                    overlap = calculate_store_overlap(
-                        store_left_coicop,
-                        store_right_coicop,
-                        product_id_column,
-                        overlap_function,
-                        preprocess_function
-                    )
-                    progress_bar.set_description(
-                        f"Calculating overlap for preprocessing function {preprocess_function_name} between store {store_left_name} and store {store_right_name}")
-                    progress_bar.update(1)
+
+                overlap = calculate_store_overlap(
+                    store_left_coicop,
+                    store_right_coicop,
+                    product_id_column,
+                    overlap_function,
+                    preprocess_function
+                )
+                overlap_values.append(overlap)
+                progress_bar.set_description(
+                    f"Calculating overlap for preprocessing function {preprocess_function.__name__} between store {store_left_name} and store {store_right_name} and coicop {coicop_label}")
+                progress_bar.update(1)
+
+            overlap_df = pd.DataFrame(
+                overlap_values, columns=[f"{store_left_name}_{store_right_name}"], index=coicop_levels)
+            all_overlap_dfs.append(overlap_df)
+
+    return pd.concat(all_overlap_dfs, axis=1)
