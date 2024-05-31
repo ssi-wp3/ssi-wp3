@@ -305,18 +305,47 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
     return pd.DataFrame(store_overlap, columns=store_names, index=store_names)
 
 
-def compare_overlap_between_preprocessing_functions(
-    store_data: List[pd.DataFrame],
-        store_id_column: str,
-        product_id_column: str,
-        preprocess_functions: Dict[str, Callable[[
-            pd.Series], pd.Series]],
-        overlap_function: Callable[[
-            set, set], float] = jaccard_index,
-        progress_bar: Optional[tqdm.tqdm] = None,
-        calculate_all_cells: bool = False
-) -> pd.DataFrame:
+def compare_overlap_between_preprocessing_functions(store_data: List[pd.DataFrame],
+                                                    store_id_column: str,
+                                                    product_id_column: str,
+                                                    preprocess_functions: Dict[str, Callable[[pd.Series], pd.Series]],
+                                                    overlap_function: Callable[[
+                                                        set, set], float] = jaccard_index,
+                                                    progress_bar: Optional[tqdm.tqdm] = None,
+                                                    calculate_all_cells: bool = False
+                                                    ) -> pd.DataFrame:
     """ Compare the overlap between stores for different preprocessing functions.
+
+    Parameters
+    ----------
+    store_data : List[pd.DataFrame]
+        A list of dataframes, where each dataframe contains a column with the store name and a column with the store items.
+
+    store_id_column : str
+        The name of the column containing the store identifiers. Stores can be identified by their name or ID for example.
+
+    product_id_column : str
+        The name of the column containing the product identifiers. Products can be identified by their EAN number
+        or receipt text for example.
+
+    preprocess_functions : Dict[str, Callable[[pd.Series], pd.Series]]
+        A dictionary with the preprocessing functions to compare. The keys are the names of the preprocessing functions.
+
+    overlap_function : Callable[[set, set], float]
+        The overlap function to use to calculate the overlap between the stores.
+
+    progress_bar : Optional[tqdm.tqdm]
+        A progress bar to show the progress of the calculation. By default, no progress bar is shown.
+
+    calculate_all_cells : bool
+        A flag to indicate if all cells in the overlap matrix should be calculated. By default, only the upper triangle
+        of the matrix is calculated, as the matrix is symmetric.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe with the mean overlap between the stores for each preprocessing function. The dataframe contains the
+        mean overlap, the standard deviation, the minimum and maximum overlap for each preprocessing function.    
     """
     mean_overlap_per_function = []
     for preprocess_function_name, preprocess_function in preprocess_functions.items():
