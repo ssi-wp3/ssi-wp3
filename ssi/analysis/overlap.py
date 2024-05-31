@@ -412,6 +412,7 @@ def compare_overlap_between_preprocessing_functions(store_data: List[pd.DataFram
 def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
                                      store_id_column: str,
                                      product_id_column: str,
+                                     coicop_column: str,
                                      preprocess_functions: Dict[str, Callable[[pd.Series], pd.Series]],
                                      overlap_function: Callable[[
                                          set, set], float] = jaccard_index,
@@ -431,6 +432,9 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
         The name of the column containing the product identifiers. Products can be identified by their EAN number
         or receipt text for example.
 
+    coicop_column: str
+        The name of the column containing the COICOP labels.
+
     preprocess_functions: Dict[str, Callable[[pd.Series], pd.Series]]
         A dictionary with the preprocessing functions to compare. The keys are the names of the preprocessing functions.
 
@@ -447,7 +451,6 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
     pd.DataFrame
         A dataframe with the overlap between the stores for each preprocessing function per COICOP label.
     """
-
     for store_left_index in range(len(store_data)):
         store_left = store_data[store_left_index]
         store_left_name = store_left[store_id_column].values[0]
@@ -455,8 +458,22 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
             store_right = store_data[store_right_index]
             store_right_name = store_right[store_id_column].values[0]
 
-            for preprocess_function_name, preprocess_function in preprocess_functions.items():
+            coicop_levels = set(store_left[coicop_column].unique()) | set(
+                store_right[coicop_column].unique())
 
-                progress_bar.set_description(
-                    f"Calculating overlap for preprocessing function {preprocess_function_name} between store {store_left_name} and store {store_right_name}")
-                progress_bar.update(1)
+            for coicop_label in coicop_levels:
+                store_left_coicop = store_left[store_left[coicop_column]
+                                               == coicop_label]
+                store_right_coicop = store_right[store_right[coicop_column]
+                                                 == coicop_label]
+                for preprocess_function_name, preprocess_function in preprocess_functions.items():
+                    overlap = calculate_store_overlap(
+                        store_left_coicop,
+                        store_right_coicop,
+                        product_id_column,
+                        overlap_function,
+                        preprocess_function
+                    )
+                    progress_bar.set_description(
+                        f"Calculating overlap for preprocessing function {preprocess_function_name} between store {store_left_name} and store {store_right_name}")
+                    progress_bar.update(1)
