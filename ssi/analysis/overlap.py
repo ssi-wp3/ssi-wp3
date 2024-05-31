@@ -481,7 +481,7 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
                     f"Calculating overlap for preprocessing function {preprocess_function.__name__} between store {store_left_name} and store {store_right_name} and coicop {coicop_label}")
 
             overlap_df = pd.DataFrame(
-                overlap_values, columns=[f"{store_left_name}_{store_right_name}"], index=coicop_levels)
+                overlap_values, columns=[f"{store_left_name}_{store_right_name}"], index=list(coicop_levels))
             all_overlap_dfs.append(overlap_df)
 
     return pd.concat(all_overlap_dfs, axis=1)
