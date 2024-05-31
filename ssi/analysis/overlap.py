@@ -459,6 +459,8 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
             store_right = store_data[store_right_index]
             store_right_name = store_right[store_id_column].values[0]
 
+            print("Store left columns:", store_left.columns.to_list())
+            print("Store right columns:", store_right.columns.to_list())
             coicop_levels = set(store_left[coicop_column].unique()) | set(
                 store_right[coicop_column].unique())
 
