@@ -479,7 +479,6 @@ def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
                 overlap_values.append(overlap)
                 progress_bar.set_description(
                     f"Calculating overlap for preprocessing function {preprocess_function.__name__} between store {store_left_name} and store {store_right_name} and coicop {coicop_label}")
-                progress_bar.update(1)
 
             overlap_df = pd.DataFrame(
                 overlap_values, columns=[f"{store_left_name}_{store_right_name}"], index=coicop_levels)
