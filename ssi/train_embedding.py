@@ -20,6 +20,8 @@ parser.add_argument("-i", "--input-filename",
                     default="/netappdata/ssi_tdjg/data/ssi/feature_extraction/ssi_hf_labse_unique_values.parquet")
 parser.add_argument("-o", "--output-directory",
                     type=str, default="./hf_output")
+parser.add_argument("-m", "--model-name", type=str,
+                    default="sentence-transformers/LaBSE", help="Huggingface sentence transformers model name")
 parser.add_argument("-e", "--epochs", type=int, default=3)
 parser.add_argument("-b", "--batch-size", type=int, default=32)
 parser.add_argument("-ic", "--input-column", type=str, default="receipt_text")
@@ -29,17 +31,11 @@ parser.add_argument("-ef", "--evaluation-function", type=str, default="f1")
 parser.add_argument("-es", "--evaluation-strategy", type=str, default="epoch")
 args = parser.parse_args()
 
-
-# %%
-hf_labse_features_filename = args.input_filename
-
-# %%
 hf_labse_features = pd.read_parquet(
-    hf_labse_features_filename, engine="pyarrow")
+    args.input_filename, engine="pyarrow")
 hf_labse_features = hf_labse_features[[args.input_column, args.label_column]]
 hf_labse_features.head()
 
-# %%
 # From: https://huggingface.co/docs/transformers/training
 
 
@@ -64,22 +60,23 @@ def split_data(dataframe: pd.DataFrame, coicop_level: str = "coicop_level_1", va
     return train_df, val_df, test_df
 
 
-# %%
-train_df, val_df, test_df = split_data(
-    hf_labse_features, coicop_level=args.label_column)
-
-# %%
-
-model_name = "sentence-transformers/LaBSE"
-
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-
 def tokenize_function(data, text_column: str = "receipt_text", padding: str = "max_length", truncation=True):
     receipt_texts = data[text_column]
     tokens = tokenizer(receipt_texts, padding="max_length")
     return tokens
 
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    print(classification_report(labels, predictions))
+    return metric.compute(predictions=predictions, references=labels, average="weighted")
+
+
+train_df, val_df, test_df = split_data(
+    hf_labse_features, coicop_level=args.label_column)
+
+tokenizer = AutoTokenizer.from_pretrained(args.model_name)
 
 map_function = partial(tokenize_function, text_column=args.input_column)
 
@@ -87,25 +84,17 @@ train_df = train_df.map(map_function, batched=True)
 val_df = val_df.map(map_function, batched=True)
 test_df = test_df.map(map_function, batched=True)
 
-# %%
 train_df = train_df.remove_columns([args.input_column])
 val_df = val_df.remove_columns([args.input_column])
 test_df = test_df.remove_columns([args.input_column])
 
 print(
     f"Train dataset length: {len(train_df)}, Val dataset length: {len(val_df)}, Test dataset length: {len(test_df)}")
-
-# %%
 number_of_categories = hf_labse_features[args.label_column].nunique()
 number_of_categories
 
-# %%
-
 model = AutoModelForSequenceClassification.from_pretrained(
-    model_name, num_labels=number_of_categories)
-
-# %%
-
+    args.model_name, num_labels=number_of_categories)
 
 training_args = TrainingArguments(
     output_dir=args.output_directory,
@@ -115,21 +104,7 @@ training_args = TrainingArguments(
     per_device_eval_batch_size=args.batch_size
 )
 
-# %%
-
-
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-    print(classification_report(labels, predictions))
-    return metric.compute(predictions=predictions, references=labels, average="weighted")
-
-# %%
-
-
 metric = evaluate.load(args.evaluation_function)
-
-# %%
 
 trainer = Trainer(
     model=model,
@@ -139,7 +114,6 @@ trainer = Trainer(
     compute_metrics=compute_metrics
 )
 
-# %%
 trainer.train()
 
 trainer.evaluate(test_df)
