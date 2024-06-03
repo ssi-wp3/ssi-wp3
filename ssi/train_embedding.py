@@ -23,6 +23,8 @@ parser.add_argument("-o", "--output-directory",
                     type=str, default="./hf_output")
 parser.add_argument("-m", "--model-name", type=str,
                     default="sentence-transformers/LaBSE", help="Huggingface sentence transformers model name")
+parser.add_argument("-s", "--sample-size", type=int, default=None,
+                    help="Number of samples to use from the total dataset. These samples are split over train, validation and test datasets.")
 parser.add_argument("-e", "--epochs", type=int, default=3)
 parser.add_argument("-b", "--batch-size", type=int, default=32)
 parser.add_argument("-ic", "--input-column", type=str, default="receipt_text")
@@ -32,15 +34,15 @@ parser.add_argument("-ef", "--evaluation-function", type=str, default="f1")
 parser.add_argument("-es", "--evaluation-strategy", type=str, default="epoch")
 args = parser.parse_args()
 
-hf_labse_features = pd.read_parquet(
-    args.input_filename, engine="pyarrow")
-hf_labse_features = hf_labse_features[[args.input_column, args.label_column]]
-hf_labse_features.head()
 
 # From: https://huggingface.co/docs/transformers/training
 
 
-def split_data(dataframe: pd.DataFrame, coicop_level: str = "coicop_level_1", val_size: float = 0.1, test_size: float = 0.2, random_state: int = 42) -> Tuple[Dataset, Dataset]:
+def split_data(dataframe: pd.DataFrame,
+               coicop_level: str = "coicop_level_1",
+               val_size: float = 0.1,
+               test_size: float = 0.2,
+               random_state: int = 42) -> Tuple[Dataset, Dataset]:
     train_val_dataframe, test_dataframe = train_test_split(
         dataframe, test_size=test_size, stratify=dataframe[coicop_level], random_state=random_state)
 
@@ -72,6 +74,15 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(logits, axis=-1)
     return metric.compute(predictions=predictions, references=labels, average="weighted")
 
+
+hf_labse_features = pd.read_parquet(
+    args.input_filename, engine="pyarrow")
+hf_labse_features = hf_labse_features[[args.input_column, args.label_column]]
+hf_labse_features.head()
+
+sample_size = args.sample_size
+if sample_size is not None:
+    hf_labse_features = hf_labse_features.sample(sample_size)
 
 train_df, val_df, test_df = split_data(
     hf_labse_features, coicop_level=args.label_column)
