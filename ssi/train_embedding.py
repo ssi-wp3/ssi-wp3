@@ -145,14 +145,8 @@ trainer.save_state()
 
 y_pred, y_pred_labels, metrics = trainer.predict(test_df)
 
-
 y_pred = y_pred_labels  # np.argmax(y_pred, axis=1)
 y_true = np.array(test_df["label"])
-
-print("Number of same entries", np.sum(y_pred == y_true))
-print(len(y_true))
-print(y_true[:20])
-print(y_pred[:20])
 labels = test_df.features["label"].names
 
 print(classification_report(y_true, y_true, target_names=labels))
