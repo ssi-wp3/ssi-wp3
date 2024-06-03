@@ -146,6 +146,7 @@ trainer.save_state()
 y_pred, labels, metrics = trainer.predict(test_df)
 y_true = test_df["label"]
 
+print("y_pred: ", y_pred, "y_true: ", y_true)
 print(classification_report(y_true, y_pred, labels=labels))
 
 with open(os.path.join(final_result_directory, "classification_report.json"), "w") as json_file:
