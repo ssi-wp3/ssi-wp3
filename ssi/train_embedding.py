@@ -13,6 +13,7 @@ from typing import Tuple
 import pandas as pd
 import argparse
 import os
+import json
 
 # %%
 parser = argparse.ArgumentParser()
@@ -123,7 +124,19 @@ trainer = Trainer(
 
 trainer.train()
 
+final_result_directory = os.path.join(model_directory, "final")
+if not os.path.exists(final_result_directory):
+    os.makedirs(final_result_directory)
+
+trainer.save_metrics(os.path.join(final_result_directory, "metrics.json"))
+trainer.save_model(final_result_directory)
+trainer.save_state()
+
 y_pred, labels, metrics = trainer.predict(test_df)
 y_true = test_df["label"]
 
 print(classification_report(y_true, y_pred, labels=labels))
+
+with open(os.path.join(final_result_directory, "classification_report.json"), "w") as json_file:
+    json_file.write(classification_report(
+        y_true, y_pred, labels=labels, output_dict=True))
