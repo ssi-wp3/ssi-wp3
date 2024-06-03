@@ -155,7 +155,7 @@ labels = test_df.features["label"].names
 confusion_matrix_df = pd.DataFrame(confusion_matrix(y_true, y_pred))
 print(confusion_matrix_df)
 
-print(classification_report(y_true, y_true, target_names=labels))
+print(classification_report(y_true, y_pred, target_names=labels))
 
 confusion_matrix_df.to_csv(os.path.join(
     final_result_directory, "confusion_matrix.csv"), sep=";")
