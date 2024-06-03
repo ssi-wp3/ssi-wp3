@@ -153,5 +153,5 @@ print("y_pred: ", y_pred, "y_true: ", y_true)
 print(classification_report(y_true, y_pred, labels=labels))
 
 with open(os.path.join(final_result_directory, "classification_report.json"), "w") as json_file:
-    json_file.write(classification_report(
-        y_true, y_pred, labels=labels, output_dict=True))
+    json.dump(classification_report(
+        y_true, y_pred, labels=labels, output_dict=True), json_file)
