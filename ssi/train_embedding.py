@@ -151,6 +151,7 @@ print(y_pred.shape)
 y_true = test_df["label"]
 print(len(y_true))
 print(y_true[:10])
+print(y_pred[:10])
 labels = test_df.features["label"].names
 
 print(classification_report(y_true, y_pred, labels=labels))
