@@ -149,7 +149,8 @@ print(y_pred.shape)
 y_pred = np.argmax(y_pred, axis=1)
 print(y_pred.shape)
 y_true = test_df["label"]
-print(y_true.shape)
+print(len(y_true))
+print(y_true[:10])
 labels = test_df.features["label"].names
 
 print(classification_report(y_true, y_pred, labels=labels))
