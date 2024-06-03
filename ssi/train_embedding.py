@@ -146,7 +146,7 @@ trainer.save_state()
 y_pred, labels, metrics = trainer.predict(test_df)
 
 
-y_pred = labels  # np.argmax(y_pred, axis=1)
+y_pred = np.array(labels)  # np.argmax(y_pred, axis=1)
 y_true = test_df["label"]
 print(len(y_true))
 print(y_true[:10])
