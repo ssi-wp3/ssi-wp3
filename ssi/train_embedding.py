@@ -161,6 +161,7 @@ confusion_matrix_df.to_csv(os.path.join(
     final_result_directory, "confusion_matrix.csv"), sep=";")
 plt.figure(figsize=(10, 10))
 sns.heatmap(confusion_matrix_df, annot=True, fmt="d", cmap="Blues")
+plt.savefig(os.path.join(final_result_directory, "confusion_matrix.png"))
 
 with open(os.path.join(final_result_directory, "classification_report.json"), "w") as json_file:
     json.dump(classification_report(
