@@ -87,7 +87,7 @@ report_settings:
       value_columns: 
         - {{product_id_column}} 
         - {{receipt_text_column}}
-      output_filename: "{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column}.png"
+      output_filename: "{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column.png"
       settings: 
           plot_type: line_chart
           x_column: {{period_column}}

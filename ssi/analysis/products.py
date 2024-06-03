@@ -385,6 +385,8 @@ def compare_products_per_period(dataframe: pd.DataFrame,
         texts_per_period_df[f"overlap_coefficient_{column}_{period_column}"] = texts_per_period_df.apply(
             lambda row: overlap_coefficient(row[column], row[f"{column}_lagged"]), axis=1)
 
+        texts_per_period_df["total_{column}"] = texts_per_period_df[column].apply(
+            number_of_products)
         texts_per_period_df[f"number_{column}_same"] = texts_per_period_df[f"{column}_same"].apply(
             number_of_products)
         texts_per_period_df[f"number_{column}_introduced"] = texts_per_period_df[f"{column}_introduced"].apply(
@@ -539,6 +541,9 @@ def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
             lambda row: introduced_products(row[column], row[f"{column}_lagged"]), axis=1)
         texts_per_period_coicop_df[f"{column}_removed"] = texts_per_period_coicop_df.apply(
             lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
+
+        texts_per_period_coicop_df["total_{column}"] = texts_per_period_coicop_df[column].apply(
+            number_of_products)
 
         texts_per_period_coicop_df[f"number_{column}_same"] = texts_per_period_coicop_df[f"{column}_same"].apply(
             number_of_products)
