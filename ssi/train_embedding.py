@@ -155,7 +155,7 @@ print(y_true[:20])
 print(y_pred[:20])
 labels = test_df.features["label"].names
 
-print(classification_report(y_true, y_pred, labels=labels))
+print(classification_report(y_true, y_true, labels=labels))
 
 with open(os.path.join(final_result_directory, "classification_report.json"), "w") as json_file:
     json.dump(classification_report(
