@@ -147,7 +147,7 @@ y_pred, _, metrics = trainer.predict(test_df)
 
 y_pred = np.argmax(y_pred, axis=-1)
 y_true = test_df["label"]
-labels = test_df.features["label"].feature.names
+labels = test_df.features["label"].names
 
 print("y_pred: ", y_pred, "y_true: ", y_true)
 print(classification_report(y_true, y_pred, labels=labels))
