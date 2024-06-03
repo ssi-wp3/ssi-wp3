@@ -49,7 +49,6 @@ def split_data(dataframe: pd.DataFrame, coicop_level: str = "coicop_level_1", va
 
     train_df = Dataset.from_pandas(train_dataframe)
     train_df = train_df.class_encode_column("label")
-    print(train_df.features)
 
     val_df = Dataset.from_pandas(val_dataframe)
     val_df = val_df.class_encode_column("label")
