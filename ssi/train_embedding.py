@@ -96,8 +96,16 @@ number_of_categories
 model = AutoModelForSequenceClassification.from_pretrained(
     args.model_name, num_labels=number_of_categories)
 
+# Create output directory
+model_directory = os.path.join(args.output_directory, args.model_name)
+date = pd.Timestamp.now().strftime("%Y-%m-%d-%H-%M-%S")
+model_directory = os.path.join(model_directory, date)
+
+if not os.path.exists(model_directory):
+    os.makedirs(model_directory)
+
 training_args = TrainingArguments(
-    output_dir=args.output_directory,
+    output_dir=model_directory,
     evaluation_strategy=args.evaluation_strategy,
     num_train_epochs=args.epochs,
     per_device_train_batch_size=args.batch_size,
