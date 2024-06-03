@@ -8,12 +8,14 @@ from functools import partial
 from transformers import AutoTokenizer
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 from typing import Tuple
 import pandas as pd
+import seaborn as sns
 import argparse
 import os
 import json
+import matplotlib.pyplot as plt
 
 # %%
 parser = argparse.ArgumentParser()
@@ -149,7 +151,16 @@ y_pred = np.argmax(y_pred, axis=1)
 y_true = np.array(test_df["label"])
 labels = test_df.features["label"].names
 
+
+confusion_matrix_df = pd.DataFrame(confusion_matrix(y_true, y_pred))
+print(confusion_matrix_df)
+
 print(classification_report(y_true, y_true, target_names=labels))
+
+confusion_matrix_df.to_csv(os.path.join(
+    final_result_directory, "confusion_matrix.csv"), sep=";")
+plt.figure(figsize=(10, 10))
+sns.heatmap(confusion_matrix_df, annot=True, fmt="d", cmap="Blues")
 
 with open(os.path.join(final_result_directory, "classification_report.json"), "w") as json_file:
     json.dump(classification_report(
