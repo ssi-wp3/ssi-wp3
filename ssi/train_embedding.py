@@ -123,7 +123,7 @@ training_args = TrainingArguments(
     per_device_eval_batch_size=args.batch_size
 )
 
-metric = evaluate.load(["f1", "recall", "precision"])
+metric = evaluate.combine(["f1", "recall", "precision"])
 
 trainer = Trainer(
     model=model,
