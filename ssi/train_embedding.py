@@ -69,7 +69,6 @@ def tokenize_function(data, text_column: str = "receipt_text", padding: str = "m
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
-    print(classification_report(labels, predictions))
     return metric.compute(predictions=predictions, references=labels, average="weighted")
 
 
@@ -124,4 +123,7 @@ trainer = Trainer(
 
 trainer.train()
 
-trainer.evaluate(test_df)
+y_pred, labels, metrics = trainer.predict(test_df)
+y_true = test_df["label"]
+
+print(classification_report(y_true, y_pred, labels=labels))
