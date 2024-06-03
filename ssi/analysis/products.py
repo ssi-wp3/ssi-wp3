@@ -376,7 +376,7 @@ def compare_products_per_period(dataframe: pd.DataFrame,
         texts_per_period_df[f"{column}_removed"] = texts_per_period_df.apply(
             lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
 
-        texts_per_period_df[f"jacard_index_{column}_{period_column}"] = texts_per_period_df.apply(
+        texts_per_period_df[f"jaccard_index_{column}_{period_column}"] = texts_per_period_df.apply(
             lambda row: jaccard_index(row[column], row[f"{column}_lagged"]), axis=1)
 
         texts_per_period_df[f"dice_coefficient_{column}_{period_column}"] = texts_per_period_df.apply(
