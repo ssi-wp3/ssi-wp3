@@ -152,4 +152,17 @@ report_settings:
           y_column: total_{{period_column}}
           title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}}  
   # Analysis per period and coicop
-  
+  compare_products_per_period_coicop_level:
+    - type: plot
+      pivot: false 
+      value_columns:
+        - {{period_column}}
+        - {{coicop_column}}
+        - total_{{product_id_column}}
+      output_filename: "overlap_{{store_name}}_{{period_column}}_jaccard_index_{{product_id_column}}.png"
+      settings:
+          plot_type: bar_chart
+          x_column: {{period_column}}
+          y_column: total_{{period_column}}
+          group_column: {{coicop_column}}
+          title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}} 
