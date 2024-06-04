@@ -150,7 +150,7 @@ y_pred, y_true_labels, metrics = trainer.predict(test_df)
 
 y_pred = np.argmax(y_pred, axis=1)
 y_true = np.array(test_df["label"])
-labels = test_df.features["label"].names
+labels = train_df.features["label"].names
 
 
 confusion_matrix_df = pd.DataFrame(confusion_matrix(y_true, y_pred))
