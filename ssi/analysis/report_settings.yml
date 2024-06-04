@@ -142,6 +142,9 @@ report_settings:
           title: Jaccard index of {{product_id_column}} overlap per {{period_column}} for {{store_name}}      
     - type: plot
       pivot: false 
+      sort_values:
+        - {{period_column}}
+        - {{coicop_column}}
       value_columns:
         - {{period_column}}
         - total_{{product_id_column}}
@@ -156,6 +159,9 @@ report_settings:
   compare_products_per_period_coicop_level:
     - type: plot
       pivot: false 
+      sort_values:
+        - {{period_column}}
+        - {{coicop_column}}
       value_columns:
         - {{period_column}}
         - {{coicop_column}}
