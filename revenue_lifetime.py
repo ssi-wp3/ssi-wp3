@@ -6,13 +6,13 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-filename", type=str,
                     required=True, help="The input filename in parquet format")
-parser.add_argument("-p", "--period-column", default="year_month", type=str, required=True,
+parser.add_argument("-p", "--period-column", default="year_month", type=str,
                     help="The name of the period column")
-parser.add_argument("-e", "--product-id-column", default="ean_number", type=str, required=True,
+parser.add_argument("-e", "--product-id-column", default="ean_number", type=str,
                     help="The name of the product id column")
-parser.add_argument("-a", "--amount-column", default="amount", type=str, required=True,
+parser.add_argument("-a", "--amount-column", default="amount", type=str,
                     help="The name of the amount column")
-parser.add_argument("-r", "--revenue-column", default="revenue", type=str, required=True,
+parser.add_argument("-r", "--revenue-column", default="revenue", type=str,
                     help="The name of the revenue column")
 args = parser.parse_args()
 
