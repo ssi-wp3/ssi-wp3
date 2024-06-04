@@ -164,6 +164,45 @@ report_settings:
           y_column: total_{{product_id_column}}
           title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}}  
   # Analysis per period and coicop
+  total_revenue_per_coicop_and_period:
+    - type: plot 
+      pivot: false
+      sort_values:
+        columns:
+          - {{period_column}}
+          - {{coicop_column}}          
+        ascending: true 
+      value_columns:
+        - {{period_column}}
+        - {{coicop_column}}
+        - {{revenue_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_total_revenue_{{product_id_column}}.png"
+      settings:
+          plot_type: bar_chart
+          x_column: {{period_column}}
+          y_column: {{revenue_column}}
+          group_column: {{coicop_column}}
+          title: Bar chart of the total revenue per {{coicop_column}} and {{period_column}} for {{store_name}} 
+    - type: plot 
+      pivot: false
+      sort_values:
+        columns:
+          - {{period_column}}
+          - {{coicop_column}}          
+        ascending: true 
+      value_columns:
+        - {{period_column}}
+        - {{coicop_column}}
+        - {{amount_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_total_amount_{{product_id_column}}.png"
+      settings:
+          plot_type: bar_chart
+          x_column: {{period_column}}
+          y_column: {{amount_column}}
+          group_column: {{coicop_column}}
+          title: Bar chart of the total amount of products sold per {{coicop_column}} and {{period_column}} for {{store_name}}       
+
+
   compare_products_per_period_coicop_level:
     - type: plot
       pivot: false 
