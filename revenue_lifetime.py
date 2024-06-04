@@ -1,4 +1,5 @@
-from ssi.analysis.revenue import product_revenue_versus_lifetime, product_lifetime_in_periods, total_revenue_per_product
+from ssi.analysis.revenue import product_revenue_versus_lifetime, total_revenue_per_product
+from ssi.analysis.products import product_lifetime_in_periods
 import pandas as pd
 import os
 import argparse
