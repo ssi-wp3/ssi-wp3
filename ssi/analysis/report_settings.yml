@@ -202,7 +202,6 @@ report_settings:
           group_column: {{coicop_column}}
           title: Bar chart of the total amount of products sold per {{coicop_column}} and {{period_column}} for {{store_name}}       
 
-
   compare_products_per_period_coicop_level:
     - type: plot
       pivot: false 
