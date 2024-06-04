@@ -150,6 +150,7 @@ report_settings:
           plot_type: bar_chart
           x_column: {{period_column}}
           y_column: total_{{product_id_column}}
+          barmode: group
           title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}}  
   # Analysis per period and coicop
   compare_products_per_period_coicop_level:
@@ -165,4 +166,5 @@ report_settings:
           x_column: {{period_column}}
           y_column: total_{{product_id_column}}
           group_column: {{coicop_column}}
+          barmode: group
           title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}} 
