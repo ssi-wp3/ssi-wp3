@@ -61,7 +61,7 @@ report_settings:
           plot_type: scatter_plot
           x_column: {{period_column}}
           y_column: {{revenue_column}}
-          title: Product revenue versus lifetime for {{store_name}}
+          title: Product {{revenue_column}} versus lifetime for {{store_name}}
   
   # Analysis per COICOP
 
