@@ -143,7 +143,9 @@ report_settings:
     - type: plot
       pivot: false 
       sort_values:
-        - {{period_column}}
+        columns:
+          - {{period_column}}
+        ascending: true
       value_columns:
         - {{period_column}}
         - total_{{product_id_column}}
@@ -158,8 +160,10 @@ report_settings:
     - type: plot
       pivot: false 
       sort_values:
-        - {{period_column}}
-        - {{coicop_column}}
+        columns:
+          - {{period_column}}
+          - {{coicop_column}}
+        ascending: true
       value_columns:
         - {{period_column}}
         - {{coicop_column}}
