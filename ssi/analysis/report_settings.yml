@@ -59,7 +59,7 @@ report_settings:
       output_filename: "{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
       settings: 
           plot_type: scatter_plot
-          x_column: {{product_id_column}}
+          x_column: {{period_column}}
           y_column: {{revenue_column}}
           title: Product revenue versus lifetime for {{store_name}}
   
