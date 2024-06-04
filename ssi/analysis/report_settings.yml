@@ -144,7 +144,6 @@ report_settings:
       pivot: false 
       sort_values:
         - {{period_column}}
-        - {{coicop_column}}
       value_columns:
         - {{period_column}}
         - total_{{product_id_column}}
