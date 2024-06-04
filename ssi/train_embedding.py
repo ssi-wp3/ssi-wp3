@@ -145,9 +145,9 @@ if not os.path.exists(final_result_directory):
 trainer.save_model(final_result_directory)
 trainer.save_state()
 
-y_pred, y_pred_labels, metrics = trainer.predict(test_df)
+y_pred, y_true_labels, metrics = trainer.predict(test_df)
 
-y_pred = y_pred_labels  # np.argmax(y_pred, axis=1)
+y_pred = np.argmax(y_pred, axis=1)
 y_true = np.array(test_df["label"])
 labels = test_df.features["label"].names
 
