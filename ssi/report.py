@@ -182,6 +182,9 @@ class PlotReport(Report):
         if "pivot" in plot_settings and plot_settings["pivot"]:
             value_columns = plot_settings["value_columns"]
             dataframe = unpivot(dataframe, value_columns)
+        if "sort_values" in plot_settings:
+            dataframe = dataframe.sort_values(
+                by=plot_settings["sort_values"], ascending=False)
 
         plot_format = self.type_settings.get("format", "png")
 
