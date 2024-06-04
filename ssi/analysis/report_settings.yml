@@ -56,12 +56,20 @@ report_settings:
   product_revenue_versus_lifetime:
     - type: plot  
       pivot: false
-      output_filename: "{{store_name}}_{{period_column}}_product_{{revenue_colum}}_versus_lifetime.png"
+      output_filename: "{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
       settings: 
           plot_type: scatter_plot
           x_column: {{period_column}}
           y_column: {{revenue_column}}
-          title: Product {{revenue_column}} versus lifetime for {{store_name}}
+          title: Product revenue versus lifetime for {{store_name}}
+    - type: plot  
+      pivot: false
+      output_filename: "{{store_name}}_{{period_column}}_product_amount_versus_lifetime.png"
+      settings: 
+          plot_type: scatter_plot
+          x_column: {{period_column}}
+          y_column: {{amount_column}}
+          title: Product amount versus lifetime for {{store_name}}
   
   # Analysis per COICOP
 
