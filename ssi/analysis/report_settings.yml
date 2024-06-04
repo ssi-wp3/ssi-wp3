@@ -56,7 +56,7 @@ report_settings:
   product_revenue_versus_lifetime:
     - type: plot  
       pivot: false
-      output_filename: "{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
+      output_filename: "{{store_name}}_{{period_column}}_product_{{revenue_colum}}_versus_lifetime.png"
       settings: 
           plot_type: scatter_plot
           x_column: {{period_column}}
