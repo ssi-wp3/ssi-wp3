@@ -162,7 +162,7 @@ confusion_matrix_df.to_csv(os.path.join(
     final_result_directory, "confusion_matrix.csv"), sep=";")
 
 plot_confusion_matrix(y_true, y_pred, os.path.join(
-    final_result_directory, "confusion_matrix.png"))
+    final_result_directory, "confusion_matrix.png"), labels=labels)
 
 with open(os.path.join(final_result_directory, "classification_report.json"), "w") as json_file:
     json.dump(classification_report(
