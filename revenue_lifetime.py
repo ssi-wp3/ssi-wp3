@@ -27,7 +27,7 @@ product_lifetime_df[args.product_id_column] = product_lifetime_df[args.product_i
 print(product_lifetime_df.head())
 
 print(df.groupby(args.product_id_column)[
-      args.period_column].nunique().to_frame())
+      args.period_column].nunique().to_frame().reset_index())
 
 
 revenue_per_product_df = total_revenue_per_product(
