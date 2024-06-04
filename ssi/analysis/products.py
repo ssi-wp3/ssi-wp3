@@ -556,8 +556,8 @@ def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
 
 
 def product_lifetime_in_periods(dataframe: pd.DataFrame,
-                                product_id_column: str = "ean_number",
-                                period_column: str = "year_month"
+                                period_column: str = "year_month",
+                                product_id_column: str = "ean_number"
                                 ) -> pd.DataFrame:
     """ This function calculates the lifetime of a product. The lifetime is the number of periods a product is present in the dataframe.
 
