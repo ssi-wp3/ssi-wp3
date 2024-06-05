@@ -180,7 +180,7 @@ report_settings:
         ascending: true
       value_columns:
         - {{product_id_column}}
-      output_filename: "{{store_name}}_{{product_id_column}}_availability.png"
+      output_filename: "{{store_name}}_{{period_column}}_{{product_id_column}}_availability.png"
       settings:
           plot_type: heatmap
           title: Heatmap of {{product_id_column}} availability for {{store_name}}  
