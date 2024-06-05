@@ -611,4 +611,5 @@ def product_availability_in_period(dataframe: pd.DataFrame,
     pd.DataFrame
         A dataframe containing the availability of a product in a period.
     """
-    return dataframe.pivot_table(index=product_id_column, columns=period_column, aggfunc="size", fill_value=0).reset_index() > 0
+    return dataframe.pivot_table(
+        index=product_id_column, columns=period_column, aggfunc="size", fill_value=0) > 0
