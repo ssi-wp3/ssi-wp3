@@ -186,12 +186,6 @@ report_settings:
           title: Heatmap of {{product_id_column}} availability for {{store_name}}  
     - type: plot
       pivot: false 
-      sort_values:
-        columns:
-          - {{receipt_text_column}}
-        ascending: true
-      value_columns:
-        - {{receipt_text_column}}
       output_filename: "{{store_name}}_{{period_column}}_{{receipt_text_column}}_availability.png"
       settings:
           plot_type: heatmap
