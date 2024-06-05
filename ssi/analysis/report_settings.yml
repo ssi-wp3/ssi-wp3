@@ -196,6 +196,21 @@ report_settings:
       settings:
           plot_type: heatmap
           title: Heatmap of {{receipt_text_column}} availability for {{store_name}} 
+  product_lifetime_in_periods:
+    - type: plot
+      pivot: false 
+      sort_values:
+        columns:
+          - {{product_id_column}}
+          - {{period_column}}
+        ascending: true
+      value_columns:
+        - {{product_id_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{product_id_column}}_lifetime.png"
+      settings:
+          plot_type: histogram
+          x_column: {{period_column}}
+          title: Histogram of {{product_id_column}} lifetime for {{store_name}}  
 
   # Analysis per period and coicop
   total_revenue_per_coicop_and_period:
