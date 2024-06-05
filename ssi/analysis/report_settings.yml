@@ -184,7 +184,18 @@ report_settings:
       settings:
           plot_type: heatmap
           title: Heatmap of {{product_id_column}} availability for {{store_name}}  
-
+    - type: plot
+      pivot: false 
+      sort_values:
+        columns:
+          - {{receipt_text_column}}
+        ascending: true
+      value_columns:
+        - {{receipt_text_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{receipt_text_column}}_availability.png"
+      settings:
+          plot_type: heatmap
+          title: Heatmap of {{receipt_text_column}} availability for {{store_name}} 
 
   # Analysis per period and coicop
   total_revenue_per_coicop_and_period:
