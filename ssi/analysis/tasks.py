@@ -121,6 +121,7 @@ class PeriodAnalysis(BaseStoreAnalysisTask):
             "unique_column_values_per_period": lambda dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
             "product_revenue_versus_lifetime": lambda dataframe: product_revenue_versus_lifetime(dataframe, self.period_column, self.product_id_column, self.amount_column, self.revenue_column),
             "product_availability_in_period": lambda dataframe: product_availability_in_period(dataframe, self.product_id_column, self.period_column),
+            "product_lifetime_in_periods": lambda dataframe: product_lifetime_in_periods(dataframe, self.period_column, self.product_id_column),
         }
 
     def get_store_analysis_filename(self, function_name: str) -> str:
