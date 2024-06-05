@@ -111,6 +111,14 @@ report_settings:
           x_column: {{period_column}}
           y_column: {{revenue_column}}
           title: Total revenue per {{period_column}} for {{store_name}}
+    - type: plot  
+      pivot: false
+      output_filename: "{{store_name}}_{{period_column}}_total_amount_per_period.png"
+      settings: 
+          plot_type: line_chart
+          x_column: {{period_column}}
+          y_column: {{amount_column}}
+          title: Total amount per {{period_column}} for {{store_name}}
   compare_products_per_period: 
     - type: plot  
       pivot: true
