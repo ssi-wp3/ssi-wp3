@@ -104,8 +104,14 @@ class Processing:
         """
         self.__processing_tasks[processing_task.name] = processing_task
 
-    def run(self, processing_task: ProcessingTask, data: pd.DataFrame) -> pd.DataFrame:
-        return processing_task(data)
+    def run(self,
+            processing_task: ProcessingTask,
+            data: pd.DataFrame,
+            **kwargs) -> pd.DataFrame:
+        return processing_task(data, **kwargs)
 
-    def run_all(self, data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
-        return {name: self.run(task, data) for name, task in self.__processing_tasks.items()}
+    def run_all(self,
+                data: pd.DataFrame,
+                **kwargs
+                ) -> Dict[str, pd.DataFrame]:
+        return {name: self.run(task, data, **kwargs) for name, task in self.__processing_tasks.items()}
