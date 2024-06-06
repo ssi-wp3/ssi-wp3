@@ -92,6 +92,13 @@ class Processing:
         )
 
     def add_processing_task(self, processing_task: ProcessingTask):
+        """ Add a processing task to the processing_tasks dictionary
+
+        Parameters
+        ----------
+        processing_task : ProcessingTask
+            The processing task to add
+        """
         self.__processing_tasks[processing_task.name] = processing_task
 
     def run(self, processing_task: ProcessingTask, data: pd.DataFrame) -> pd.DataFrame:
