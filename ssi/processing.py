@@ -1,4 +1,5 @@
 from typing import Dict, Callable, Optional
+from abc import ABC, abstractmethod
 import pandas as pd
 
 
@@ -54,12 +55,18 @@ class Processing:
     def output_filenames(self) -> Dict[str, str]:
         return {name: task.output_filename for name, task in self.__processing_tasks.items()}
 
+    @abstractmethod
+    def get_output_filename(self, function_name: str) -> str:
+        pass
+
     def log_analysis_status(self, function_name):
         print(
             f"Running {function_name} for {self.store_name}")
 
     def add_processing_function(self,
                                 function: Callable,
+                                input_filename: str,
+                                output_filename: Optional[str] = None,
                                 name: str = None):
         """ Add a processing function to the processing_functions dictionary
 
@@ -73,10 +80,22 @@ class Processing:
         """
         if name is None:
             name = function.__name__
-        self.add_processing_task(ProcessingTask(name, function))
+        output_filename = output_filename if output_filename else self.get_output_filename(
+            name)
+
+        self.add_processing_task(ProcessingTask(
+            input_filename=input_filename,
+            output_filename=output_filename,
+            processing_function=function,
+            name=name
+        )
+        )
 
     def add_processing_task(self, processing_task: ProcessingTask):
         self.__processing_tasks[processing_task.name] = processing_task
 
     def run(self, processing_task: ProcessingTask, data: pd.DataFrame) -> pd.DataFrame:
         return processing_task(data)
+
+    def run_all(self, data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
+        return {name: self.run(task, data) for name, task in self.__processing_tasks.items()}
