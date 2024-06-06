@@ -32,7 +32,10 @@ class ProcessingTask:
         return self.__processing_function
 
     def __call__(self, data: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        return self.__processing_function(data, **kwargs)
+        # Retrieve only keyword arguments that are in the signature of the processing function
+        function_kwargs = {key: value for key, value in kwargs.items()
+                           if key in self.__processing_function.__code__.co_varnames}
+        return self.__processing_function(data, **function_kwargs)
 
 
 class Processing:
