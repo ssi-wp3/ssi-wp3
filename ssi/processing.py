@@ -1,4 +1,4 @@
-from typing import Dict, Callable, Optional
+from typing import Dict, Callable, Optional, Any
 from abc import ABC, abstractmethod
 import pandas as pd
 
@@ -38,7 +38,7 @@ class ProcessingTask:
         return self.__processing_function(data, **function_kwargs)
 
 
-class Processing:
+class Processing(ABC):
     def __init__(self):
         self.__processing_tasks = dict()
 
@@ -106,12 +106,17 @@ class Processing:
 
     def run(self,
             processing_task: ProcessingTask,
-            data: pd.DataFrame,
+            dataframe: pd.DataFrame,
             **kwargs) -> pd.DataFrame:
-        return processing_task(data, **kwargs)
+        return processing_task(dataframe, **kwargs)
 
     def run_all(self,
-                data: pd.DataFrame,
+                dataframe: pd.DataFrame,
                 **kwargs
                 ) -> Dict[str, pd.DataFrame]:
-        return {name: self.run(task, data, **kwargs) for name, task in self.__processing_tasks.items()}
+        return {name: self.run(task, dataframe, **kwargs) for name, task in self.__processing_tasks.items()}
+
+    def run_from_settings(self,
+                          dataframe: pd.DataFrame,
+                          processing_settings: Dict[str, Any]):
+        pass
