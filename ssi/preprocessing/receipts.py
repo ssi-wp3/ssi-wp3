@@ -67,6 +67,7 @@ class AddReceiptTextsWithDate(luigi.Task):
                         left join {receipt_text_table} as pc on pr.{self.key_column} = pc.{self.key_column} 
                                 and pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
                     """)
+                # TODO order by year_month and coicop_number
                 con.sql(
                     f"copy {receipt_revenue_table} to '{output_path}' with (format 'parquet')")
 
