@@ -64,7 +64,7 @@ class AddReceiptTextsWithDate(luigi.Task):
                 con.sql(f"""drop table if exists {receipt_revenue_table};
                         create table {receipt_revenue_table} as
                         select pr.*, pc.{self.receipt_text_column} from {revenue_table} as pr 
-                        inner join {receipt_text_table} as pc on pr.{self.key_column} = pc.{self.key_column} 
+                        left join {receipt_text_table} as pc on pr.{self.key_column} = pc.{self.key_column} 
                         where pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
                     """)
                 con.sql(
@@ -198,7 +198,9 @@ class AddReceiptTexts(luigi.Task):
                 receipt_texts_file, engine=parquet_engine)
 
             receipt_revenue_df = combined_df.merge(
-                receipt_texts, on=["store_id", "esba_number", "isba_number", "ean_number"])
+                receipt_texts,
+                how="left",
+                on=["store_id", "esba_number", "isba_number", "ean_number"])
 
             receipt_revenue_df = receipt_revenue_df.rename(
                 columns={"coicop_number_x": "coicop_number"})
