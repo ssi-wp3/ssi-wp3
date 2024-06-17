@@ -66,7 +66,7 @@ class AddReceiptTextsWithDate(luigi.Task):
                         create table {receipt_revenue_table} as
                         select pr.*, pc.{self.receipt_text_column} from {revenue_table} as pr 
                         left join {receipt_text_table} as pc on (pr.{self.key_column} = pc.{self.key_column} 
-                                and pc.start_date >= pr.start_date and pc.start_date <= pr.end_date)
+                                and pc.{Constants.START_DATE_COLUMN} >= pr.{Constants.START_DATE_COLUMN} and pc.{Constants.START_DATE_COLUMN} <= pr.{Constants.END_DATE_COLUMN})
                     """)
                 # TODO order by year_month and coicop_number
                 con.sql(

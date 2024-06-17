@@ -43,7 +43,7 @@ class ConvertAHReceipts(luigi.Task):
                 # was in January 2023. Since, we do not have a date column as with Plus, we add this column
                 # artificially here.
                 if self.add_start_date:
-                    ah_receipts_df['start_date'] = "2023-01-01"
+                    ah_receipts_df[Constants.START_DATE_COLUMN] = "2023-01-01"
 
                 ah_receipts_df.to_parquet(output_file, engine="pyarrow")
 
@@ -73,7 +73,7 @@ class ConvertJumboReceipts(luigi.Task):
                 jumbo_receipts_df = convert_jumbo_receipts(
                     input_file, self.delimiter, self.year_month_column, self.csv_encoding)
                 if self.add_start_date:
-                    jumbo_receipts_df['start_date'] = self.get_start_date(
+                    jumbo_receipts_df[Constants.START_DATE_COLUMN] = self.get_start_date(
                         jumbo_receipts_df['year_week'])
                 jumbo_receipts_df.to_parquet(
                     output_file, engine=self.parquet_engine)

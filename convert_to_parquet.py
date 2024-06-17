@@ -39,7 +39,7 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
 def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
     if filename.lower().startswith("kassabon"):
         return {
-            'Datum_vanaf': 'start_date',
+            'Datum_vanaf': Constants.START_DATE_COLUMN,
             'Ean': Constants.PRODUCT_ID_COLUMN,
             'Kassabon': Constants.RECEIPT_TEXT_COLUMN,
             'RPK_REP_id': 'rep_id'

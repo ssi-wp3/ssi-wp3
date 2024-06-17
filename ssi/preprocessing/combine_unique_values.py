@@ -1,4 +1,5 @@
 from typing import List
+from ..constants import Constants
 import os
 import pandas as pd
 import pyarrow as pa
@@ -55,12 +56,12 @@ def combine_unique_column_values(filenames: List[str],
                 # Retrieve the rows in the range of this batch
                 batch_rows = batch_df.loc[batch_indices]
 
-                if "start_date" in batch_rows.columns:
+                if Constants.START_DATE_COLUMN in batch_rows.columns:
                     batch_rows = batch_rows.drop(
-                        columns=["start_date"])
-                if "end_date" in batch_rows.columns:
+                        columns=[Constants.START_DATE_COLUMN])
+                if Constants.END_DATE_COLUMN in batch_rows.columns:
                     batch_rows = batch_rows.drop(
-                        columns=["end_date"])
+                        columns=[Constants.END_DATE_COLUMN])
 
                 if "isba_description" in batch_rows.columns:
                     batch_rows = batch_rows.drop(
