@@ -46,6 +46,7 @@ class PreprocessFile(luigi.Task):
     coicop_level_columns = luigi.ListParameter(default=[])
     column_mapping = luigi.DictParameter(
         default={"bg_number": Constants.STORE_ID_COLUMN, "month": Constants.YEAR_MONTH_COLUMN})
+    # TODO read this from a config file!!
     store_name_mapping = luigi.DictParameter(default={
         "908515": "lidl",
         "901027": "plus",
