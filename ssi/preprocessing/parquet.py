@@ -49,10 +49,12 @@ def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
 
 def check_header(input_file, delimiter: str) -> bool:
     first_line = pd.read_csv(input_file, sep=delimiter, nrows=1)
-    standard_header = ["bgnr", "maand", "coicopnr", "coicopnaam", "isbanr",
+    standard_header = {"bgnr", "maand", "coicopnr", "coicopnaam", "isbanr",
                        "isbanaam", "esbanr", "esbanaam", "repid", "eannr",
-                       "eannaam", "omzet", "aantal"]
-    return standard_header == [column.lower() for column in first_line.columns.tolist()]
+                       "eannaam", "omzet", "aantal"}
+    column_names = set([column.lower()
+                       for column in first_line.columns.tolist()])
+    return column_names.issubset(standard_header)
 
 
 def convert_to_parquet(input_filename: str,
