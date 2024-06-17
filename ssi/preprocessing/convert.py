@@ -109,7 +109,6 @@ class ConvertAllJumboReceipts(luigi.Task):
         return luigi.LocalTarget(os.path.join(self.output_directory, self.output_filename), format=luigi.format.Nop)
 
     def run(self):
-        print("Input:", len(self.input()))
         for input_receipts in self.input():
             receipts_dfs = []
             with input_receipts.open('r') as input_file:
@@ -128,6 +127,7 @@ class ConvertAllJumboReceipts(luigi.Task):
                          input_filename), delimiter=self.delimiter, nrows=1, encoding=self.csv_encoding)
         jumbo_columns = ["NUM_ISO_JAARWEEK",
                          "NUM_VESTIGING", "NUM_ARTIKEL", "NAM_ARTIKEL"]
+        print(df.columns.values)
         return set(df.columns.values).intersection(set(jumbo_columns)) == set(jumbo_columns)
 
 
