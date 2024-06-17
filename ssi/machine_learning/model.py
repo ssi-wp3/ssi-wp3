@@ -4,14 +4,9 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 import numpy as np
 
 
-class ModelSettings:
-    def __init__(self, model: 'Model'):
-        self.__model = model
+class ModelSettings(ABC):
+    def __init__(self):
         self.__settings_dict = dict()
-
-    @property
-    def model(self) -> 'Model':
-        return self.__model
 
     @property
     def settings_dict(self) -> Dict[str, Any]:
@@ -23,9 +18,26 @@ class ModelSettings:
     def __setitem__(self, key: str, value: Any):
         self.__settings_dict[key] = value
 
+    @abstractmethod
+    def check_settings_key_exists(self, key: str) -> bool:
+        pass
+
     def add(self, key: str, value: Any) -> 'ModelSettings':
+        if not self.check_settings_key_exists(key):
+            raise ValueError(f"Key {key} does not exist in the model settings")
+
         self.__settings_dict[key] = value
         return self
+
+
+class SklearnModelSettings(ModelSettings):
+    def __init__(self, model: 'Model'):
+        super().__init__()
+        self.__model = model
+
+    @property
+    def model(self) -> 'Model':
+        return self.__model
 
 
 class Model(BaseEstimator, ClassifierMixin, ABC):
