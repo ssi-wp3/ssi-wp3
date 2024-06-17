@@ -109,8 +109,8 @@ class ConvertAllJumboReceipts(luigi.Task):
         return luigi.LocalTarget(os.path.join(self.output_directory, self.output_filename), format=luigi.format.Nop)
 
     def run(self):
+        print("Input:", len(self.input()))
         for input_receipts in self.input():
-            print("Here")
             receipts_dfs = []
             with input_receipts.open('r') as input_file:
                 receipts_dfs.append(pd.read_parquet(
