@@ -11,3 +11,6 @@ class Constants:
         # full coicop_number
         "coicop_number"
     ]
+
+    PRODUCT_ID_COLUMN = "ean_number"
+    RECEIPT_TEXT_COLUMN = "receipt_text"
