@@ -406,7 +406,7 @@ class CrossStoreAnalysis(luigi.Task):
     def read_store_file(self, input_file, store_name_column: str) -> pd.DataFrame:
         with input_file.open("r") as input_parquet_file:
             dataframe = pd.read_parquet(
-                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns))
+                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns) + [self.store_name_column])
             dataframe[store_name_column] = dataframe[store_name_column].str.replace(
                 "ah_franchise", "ah")
             return dataframe
@@ -452,7 +452,6 @@ class OverlapPerPreprocessing(luigi.Task):
                                  )
 
     def run(self):
-        print("Input", self.input())
         with tqdm.tqdm(total=len(self.preprocessing_functions)) as progress_bar:
             store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
                                 for store_name, input_file in self.input().items()]
@@ -465,10 +464,10 @@ class OverlapPerPreprocessing(luigi.Task):
                 dataframe.to_parquet(
                     output_file, engine=self.parquet_engine)
 
-    def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
+    def read_store_file(self, input_file, store_name_column: str) -> pd.DataFrame:
         with input_file.open("r") as input_parquet_file:
             dataframe = pd.read_parquet(
-                input_parquet_file, engine=self.parquet_engine, columns=[self.product_id_column])
+                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns) + [self.store_name_column])
             dataframe[store_name_column] = dataframe[store_name_column].str.replace(
                 "ah_franchise", "ah")
             return dataframe
@@ -532,10 +531,10 @@ class OverlapPerPreprocessingAndCoicop(luigi.Task):
                     dataframe.to_parquet(
                         output_file, engine=self.parquet_engine)
 
-    def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
+    def read_store_file(self, input_file, store_name_column: str) -> pd.DataFrame:
         with input_file.open("r") as input_parquet_file:
             dataframe = pd.read_parquet(
-                input_parquet_file, engine=self.parquet_engine, columns=[self.product_id_column, self.coicop_column])
+                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns) + [self.store_name_column])
             dataframe[store_name_column] = dataframe[store_name_column].str.replace(
                 "ah_franchise", "ah")
             return dataframe
