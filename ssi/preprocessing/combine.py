@@ -92,33 +92,3 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
                                     filename_prefix=self.input_filename_prefix,
                                     parquet_engine=self.parquet_engine)
                 for store_name in self.store_names]
-
-
-class CombineUniqueValues(luigi.Task):
-    input_directory = luigi.PathParameter()
-    output_directory = luigi.PathParameter()
-    input_filename_prefix = luigi.Parameter()
-    key_columns = luigi.ListParameter(["receipt_text", "coicop_number"])
-    parquet_engine = luigi.Parameter()
-
-    @property
-    def store_names(self):
-        return set([get_store_name(filename)
-                    for filename in os.listdir(self.input_directory)
-                    if self.input_filename_prefix.lower() in filename.lower()]
-                   )
-
-    def requires(self):
-        return [ParquetFile(os.path.join(self.input_directory, f"{self.input_filename_prefix}_{store_name}_revenue.parquet"))
-                for store_name in self.store_names]
-
-    def output(self):
-        return luigi.LocalTarget(os.path.join(self.output_directory, f"{self.input_filename_prefix}_unique_values.parquet"), format=luigi.format.Nop)
-
-    def run(self):
-        with self.output().open('w') as output_file:
-            input_files = [input_file.open("r") for input_file in self.input()]
-            combine_unique_column_values(input_files, output_file,
-                                         key_columns=self.key_columns,
-                                         parquet_engine=self.parquet_engine
-                                         )
