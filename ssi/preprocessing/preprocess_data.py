@@ -17,17 +17,19 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
     all_receipts_df = pd.DataFrame()
     for sheet_name in coicop_sheets:
         ah_receipts_df = pd.read_excel(input_file, sheet_name=sheet_name)
-        ah_receipts_df = ah_receipts_df.rename(columns={'Kassabonomschrijving': 'receipt_text',
-                                                        'ArtikelEAN': "ean_number",
+        ah_receipts_df = ah_receipts_df.rename(columns={'Kassabonomschrijving': Constants.RECEIPT_TEXT_COLUMN,
+                                                        'ArtikelEAN': Constants.PRODUCT_ID_COLUMN,
                                                         'IsbaOmschrijving': 'isba_description',
                                                         'Isba': 'isba_number',
                                                         'Esba': 'esba_number',
-                                                        'BG': 'store_id',
-                                                        'Coicop': 'coicop_number'})
-        ah_receipts_df.ean_number = ah_receipts_df.ean_number.astype(str)
+                                                        'BG': Constants.STORE_ID_COLUMN,
+                                                        'Coicop': Constants.COICOP_LABEL_COLUMN})
+        ah_receipts_df[Constants.PRODUCT_ID_COLUMN] = ah_receipts_df[Constants.PRODUCT_ID_COLUMN].astype(
+            str)
         ah_receipts_df.isba_number = ah_receipts_df.isba_number.astype(str)
         ah_receipts_df.esba_number = ah_receipts_df.esba_number.astype(str)
-        ah_receipts_df.store_id = ah_receipts_df.store_id.astype(str)
+        ah_receipts_df[Constants.STORE_ID_COLUMN] = ah_receipts_df[Constants.STORE_ID_COLUMN].astype(
+            str)
 
         ah_receipts_df = ah_receipts_df.rename(
             columns={column_name: column_name.lower() for column_name in ah_receipts_df.columns})
@@ -42,22 +44,23 @@ def year_week_to_date(year_week_column: pd.Series) -> pd.Series:
 
 def convert_jumbo_receipts(input_file,
                            delimiter: str = "|",
-                           year_month_column: str = "year_month",
+                           year_month_column: str = Constants.YEAR_MONTH_COLUMN,
                            encoding: str = "latin1"
                            ) -> pd.DataFrame:
     jumbo_receipts_df = pd.read_csv(
         input_file, sep=delimiter, encoding=encoding)
     jumbo_receipts_df = jumbo_receipts_df.rename(columns={'NUM_ISO_JAARWEEK': 'year_week',
                                                           'NUM_VESTIGING': 'branch_id',
-                                                          'NUM_EAN': 'ean_number',
-                                                          'CBS_EAN': 'ean_number',
+                                                          'NUM_EAN': Constants.PRODUCT_ID_COLUMN,
+                                                          'CBS_EAN': Constants.PRODUCT_ID_COLUMN,
                                                           'NUM_ARTIKEL': 'article_number',
-                                                          'NAM_ARTIKEL': 'receipt_text',
+                                                          'NAM_ARTIKEL': Constants.RECEIPT_TEXT_COLUMN,
                                                           })
     # Convert year-week to year-month
     jumbo_receipts_df[year_month_column] = year_week_to_date(
         jumbo_receipts_df["year_week"]).dt.strftime('%Y%m')
-    jumbo_receipts_df.ean_number = jumbo_receipts_df.ean_number.astype(str)
+    jumbo_receipts_df[Constants.PRODUCT_ID_COLUMN] = jumbo_receipts_df[Constants.PRODUCT_ID_COLUMN].astype(
+        str)
 
     return jumbo_receipts_df
 
@@ -78,14 +81,14 @@ def split_month_year_column(dataframe: pd.DataFrame, month_year_column: str = "m
     return dataframe
 
 
-def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
+def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = Constants.COICOP_LABEL_COLUMN) -> pd.DataFrame:
     shorter_columns = dataframe[coicop_column].str.len() == 5
     dataframe.loc[shorter_columns, coicop_column] = dataframe[shorter_columns][coicop_column].apply(
         lambda s: f"0{s}")
     return dataframe
 
 
-def add_coicop_levels(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
+def add_coicop_levels(dataframe: pd.DataFrame, coicop_column: str = Constants.COICOP_LABEL_COLUMN) -> pd.DataFrame:
     unique_coicop = pd.Series(
         dataframe[dataframe[coicop_column].str.len() == 6][coicop_column].unique())
     split_coicop_df = split_coicop(unique_coicop)
@@ -111,11 +114,21 @@ def rename_columns(dataframe: pd.DataFrame, column_mapping: dict) -> pd.DataFram
     return dataframe.rename(columns=column_mapping)
 
 
+def add_store_names(dataframe: pd.DataFrame,
+                    store_names: Dict[str, str],
+                    store_id_column: str,
+                    store_name_column: str) -> pd.DataFrame:
+    dataframe[store_name_column] = dataframe[store_id_column].map(
+        store_names)
+    return dataframe
+
+
 def preprocess_data(dataframe: pd.DataFrame,
                     columns: List[str],
                     coicop_column: str,
                     product_description_column: str,
                     column_mapping: Dict[str, str],
+                    store_name_mapping: Dict[str, str]
                     ) -> pd.DataFrame:
     # Lidl file is losing records here
     # 1367 records have COICOP < 5 (length 1) and are filtered out
@@ -124,8 +137,10 @@ def preprocess_data(dataframe: pd.DataFrame,
         dataframe, column_mapping)
     dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
     dataframe = split_month_year_column(
-        dataframe, month_year_column="year_month")
+        dataframe, month_year_column=Constants.YEAR_MONTH_COLUMN)
     dataframe = add_coicop_levels(dataframe, coicop_column=coicop_column)
+    dataframe = add_store_names(dataframe, store_name_mapping,
+                                Constants.STORE_ID_COLUMN, Constants.STORE_NAME_COLUMN)
 
     return dataframe
 
@@ -154,7 +169,7 @@ def save_combined_revenue_files(data_directory: str,
                                 selected_columns: List[str],
                                 coicop_level_columns: List[str],
                                 column_mapping: Dict[str, str],
-                                coicop_column: str = "coicop_number",
+                                coicop_column: str = Constants.COICOP_LABEL_COLUMN,
                                 product_description_column: str = "ean_name",
                                 filename_prefix: str = "Omzet",
                                 engine: str = "pyarrow"):

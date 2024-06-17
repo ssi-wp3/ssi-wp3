@@ -1,4 +1,4 @@
-from ..parquet_file import ParquetFile
+from ..constants import Constants
 from .parquet import convert_to_parquet
 from .preprocess_data import convert_ah_receipts, convert_jumbo_receipts, year_week_to_date
 from .clean import CleanCPIFile
@@ -43,7 +43,7 @@ class ConvertAHReceipts(luigi.Task):
                 # was in January 2023. Since, we do not have a date column as with Plus, we add this column
                 # artificially here.
                 if self.add_start_date:
-                    ah_receipts_df['start_date'] = "2023-01-01"
+                    ah_receipts_df[Constants.START_DATE_COLUMN] = "2023-01-01"
 
                 ah_receipts_df.to_parquet(output_file, engine="pyarrow")
 
@@ -55,7 +55,7 @@ class ConvertJumboReceipts(luigi.Task):
     input_filename = luigi.PathParameter()
     output_filename = luigi.PathParameter()
     delimiter = luigi.Parameter(default='|')
-    year_month_column = luigi.Parameter(default='year_month')
+    year_month_column = luigi.Parameter(default=Constants.YEAR_MONTH_COLUMN)
     add_start_date = luigi.BoolParameter(default=True)
 
     parquet_engine = luigi.Parameter(default="pyarrow")
@@ -73,7 +73,7 @@ class ConvertJumboReceipts(luigi.Task):
                 jumbo_receipts_df = convert_jumbo_receipts(
                     input_file, self.delimiter, self.year_month_column, self.csv_encoding)
                 if self.add_start_date:
-                    jumbo_receipts_df['start_date'] = self.get_start_date(
+                    jumbo_receipts_df[Constants.START_DATE_COLUMN] = self.get_start_date(
                         jumbo_receipts_df['year_week'])
                 jumbo_receipts_df.to_parquet(
                     output_file, engine=self.parquet_engine)
@@ -87,7 +87,7 @@ class ConvertAllJumboReceipts(luigi.Task):
     output_directory = luigi.PathParameter()
     output_filename = luigi.Parameter(default='jumbo_receipts.parquet')
     delimiter = luigi.Parameter(default='|')
-    year_month_column = luigi.Parameter(default='year_month')
+    year_month_column = luigi.Parameter(default=Constants.YEAR_MONTH_COLUMN)
 
     parquet_engine = luigi.Parameter(default="pyarrow")
     csv_encoding = luigi.Parameter(default='latin1')
@@ -117,7 +117,8 @@ class ConvertAllJumboReceipts(luigi.Task):
 
             with self.output().open('w') as output_file:
                 all_receipts_df = pd.concat(receipts_dfs)
-                all_receipts_df.sort_values(by=['year_month'], inplace=True)
+                all_receipts_df.sort_values(
+                    by=[Constants.YEAR_MONTH_COLUMN], inplace=True)
                 all_receipts_df.to_parquet(
                     output_file, engine=self.parquet_engine)
 

@@ -1,5 +1,6 @@
 from typing import Dict, Any, Optional
 from collections import OrderedDict
+from ..constants import Constants
 import argparse
 import pandas as pd
 import os
@@ -12,14 +13,14 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
     column_types = OrderedDict([
         ('bg_number', str),
         ('month', str),
-        ('coicop_number', str),
+        (Constants.COICOP_LABEL_COLUMN, str),
         ('coicop_name', str),
         ('isba_number', str),
         ('isba_name', str),
         ('esba_number', str),
         ('esba_name', str),
         ('rep_id', str),
-        ('ean_number', str),
+        (Constants.PRODUCT_ID_COLUMN, str),
         ('ean_name', str),
         ('revenue', np.float32),
         ('amount', np.float32)
@@ -29,7 +30,7 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
         return column_types
     elif filename.lower().startswith("output"):
         return OrderedDict([(column_name, column_types[column_name])
-                            for column_name in ['bg_number', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', 'ean_number', 'ean_name']
+                            for column_name in ['bg_number', Constants.COICOP_LABEL_COLUMN, 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', Constants.PRODUCT_ID_COLUMN, 'ean_name']
                             ])
     return None
 
@@ -38,9 +39,9 @@ def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
     basename = os.path.basename(filename)
     if basename.lower().startswith("kassabon") or basename.lower().startswith("receipts"):
         return {
-            'Datum_vanaf': 'start_date',
-            'Ean': 'ean_number',
-            'Kassabon': 'receipt_text',
+            'Datum_vanaf': Constants.START_DATE_COLUMN,
+            'Ean': Constants.PRODUCT_ID_COLUMN,
+            'Kassabon': Constants.RECEIPT_TEXT_COLUMN,
             'RPK_REP_id': 'rep_id'
         }
     return None
@@ -48,10 +49,12 @@ def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
 
 def check_header(input_file, delimiter: str) -> bool:
     first_line = pd.read_csv(input_file, sep=delimiter, nrows=1)
-    standard_header = ["bgnr", "maand", "coicopnr", "coicopnaam", "isbanr",
+    standard_header = {"bgnr", "maand", "coicopnr", "coicopnaam", "isbanr",
                        "isbanaam", "esbanr", "esbanaam", "repid", "eannr",
-                       "eannaam", "omzet", "aantal"]
-    return standard_header == [column.lower() for column in first_line.columns.tolist()]
+                       "eannaam", "omzet", "aantal"}
+    column_names = set([column.lower()
+                       for column in first_line.columns.tolist()])
+    return len(column_names.intersection(standard_header)) > 0
 
 
 def convert_to_parquet(input_filename: str,

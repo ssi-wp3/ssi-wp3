@@ -59,9 +59,17 @@ report_settings:
       output_filename: "{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
       settings: 
           plot_type: scatter_plot
-          x_column: {{product_id_column}}
+          x_column: {{period_column}}
           y_column: {{revenue_column}}
           title: Product revenue versus lifetime for {{store_name}}
+    - type: plot  
+      pivot: false
+      output_filename: "{{store_name}}_{{period_column}}_product_amount_versus_lifetime.png"
+      settings: 
+          plot_type: scatter_plot
+          x_column: {{period_column}}
+          y_column: {{amount_column}}
+          title: Product amount versus lifetime for {{store_name}}
   
   # Analysis per COICOP
 
@@ -87,7 +95,7 @@ report_settings:
       value_columns: 
         - {{product_id_column}} 
         - {{receipt_text_column}}
-      output_filename: "{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column}.png"
+      output_filename: "{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column.png"
       settings: 
           plot_type: line_chart
           x_column: {{period_column}}
@@ -103,6 +111,14 @@ report_settings:
           x_column: {{period_column}}
           y_column: {{revenue_column}}
           title: Total revenue per {{period_column}} for {{store_name}}
+    - type: plot  
+      pivot: false
+      output_filename: "{{store_name}}_{{period_column}}_total_amount_per_period.png"
+      settings: 
+          plot_type: line_chart
+          x_column: {{period_column}}
+          y_column: {{amount_column}}
+          title: Total amount per {{period_column}} for {{store_name}}
   compare_products_per_period: 
     - type: plot  
       pivot: true
@@ -140,6 +156,111 @@ report_settings:
           x_column: {{period_column}}
           y_column: jaccard_index_{{product_id_column}}_{{period_column}}
           title: Jaccard index of {{product_id_column}} overlap per {{period_column}} for {{store_name}}      
-  
+    - type: plot
+      pivot: false 
+      sort_values:
+        columns:
+          - {{period_column}}
+        ascending: true
+      value_columns:
+        - {{period_column}}
+        - total_{{product_id_column}}
+      output_filename: "{{store_name}}_{{period_column}}_total_number_{{product_id_column}}.png"
+      settings:
+          plot_type: bar_chart
+          x_column: {{period_column}}
+          y_column: total_{{product_id_column}}
+          title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}}  
+  product_availability_in_period:  
+    - type: plot
+      pivot: false 
+      sort_values:
+        columns:
+          - {{product_id_column}}
+        ascending: true
+      value_columns:
+        - {{product_id_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{product_id_column}}_availability.png"
+      settings:
+          plot_type: heatmap
+          title: Heatmap of {{product_id_column}} availability for {{store_name}}  
+    - type: plot
+      pivot: false 
+      output_filename: "{{store_name}}_{{period_column}}_{{receipt_text_column}}_availability.png"
+      settings:
+          plot_type: heatmap
+          title: Heatmap of {{receipt_text_column}} availability for {{store_name}} 
+  product_lifetime_in_periods:
+    - type: plot
+      pivot: false 
+      sort_values:
+        columns:
+          - {{product_id_column}}
+          - {{period_column}}
+        ascending: true
+      value_columns:
+        - {{product_id_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{product_id_column}}_lifetime.png"
+      settings:
+          plot_type: histogram
+          x_column: {{period_column}}
+          title: Histogram of {{product_id_column}} lifetime for {{store_name}}  
+
   # Analysis per period and coicop
-  
+  total_revenue_per_coicop_and_period:
+    - type: plot 
+      pivot: false
+      sort_values:
+        columns:
+          - {{period_column}}
+          - {{coicop_column}}          
+        ascending: true 
+      value_columns:
+        - {{period_column}}
+        - {{coicop_column}}
+        - {{revenue_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_total_revenue_{{product_id_column}}.png"
+      settings:
+          plot_type: bar_chart
+          x_column: {{period_column}}
+          y_column: {{revenue_column}}
+          group_column: {{coicop_column}}
+          title: Bar chart of the total revenue per {{coicop_column}} and {{period_column}} for {{store_name}} 
+    - type: plot 
+      pivot: false
+      sort_values:
+        columns:
+          - {{period_column}}
+          - {{coicop_column}}          
+        ascending: true 
+      value_columns:
+        - {{period_column}}
+        - {{coicop_column}}
+        - {{amount_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_total_amount_{{product_id_column}}.png"
+      settings:
+          plot_type: bar_chart
+          x_column: {{period_column}}
+          y_column: {{amount_column}}
+          group_column: {{coicop_column}}
+          title: Bar chart of the total amount of products sold per {{coicop_column}} and {{period_column}} for {{store_name}}       
+
+  compare_products_per_period_coicop_level:
+    - type: plot
+      pivot: false 
+      sort_values:
+        columns:
+          - {{period_column}}
+          - {{coicop_column}}
+        ascending: true
+      value_columns:
+        - {{period_column}}
+        - {{coicop_column}}
+        - total_{{product_id_column}}
+      output_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_total_number_{{product_id_column}}.png"
+      settings:
+          plot_type: bar_chart
+          x_column: {{period_column}}
+          y_column: total_{{product_id_column}}
+          group_column: {{coicop_column}}
+          title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}} 

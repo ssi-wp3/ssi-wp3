@@ -1,6 +1,5 @@
 
-from typing import Tuple, Callable, List, Optional
-from transformers import AutoTokenizer
+from typing import Dict, Tuple, Callable, List, Optional
 import pandas as pd
 import numpy as np
 import tqdm
@@ -94,8 +93,8 @@ def jaccard_similarity(left_set: set, right_set: set) -> float:
 def jaccard_index(left_set: set, right_set: set) -> float:
     """ Computes the Jaccard index between two sets
 
-    The Jaccard Index measures similarity between finite sample sets, 
-    and is defined as the size of the intersection divided by the 
+    The Jaccard Index measures similarity between finite sample sets,
+    and is defined as the size of the intersection divided by the
     size of the union of the sample sets.
 
     Parameters
@@ -107,7 +106,7 @@ def jaccard_index(left_set: set, right_set: set) -> float:
         The second set to compare
 
     Returns
-    ------- 
+    -------
     float: The function will return a value between 0 and 1, where 0 means no overlap and 1 means complete overlap.
 
     """
@@ -122,8 +121,8 @@ def jaccard_index(left_set: set, right_set: set) -> float:
 def dice_coefficient(left_set: set, right_set: set) -> float:
     """ Computes the Dice coefficient between two sets
 
-    Similar to the Jaccard index, but uses twice the intersection size in the numerator. 
-    It's defined as 2 * |X ∩ Y| / (|X| + |Y|). 
+    Similar to the Jaccard index, but uses twice the intersection size in the numerator.
+    It's defined as 2 * |X ∩ Y| / (|X| + |Y|).
 
     It ranges from 0 (no overlap) to 1 (complete overlap).
 
@@ -138,7 +137,7 @@ def dice_coefficient(left_set: set, right_set: set) -> float:
     Returns
     -------
 
-    float: The dice coefficient between the two sets.  
+    float: The dice coefficient between the two sets.
     """
     def overlap_function(left_set: set, right_set: set):
         intersection = len(left_set.intersection(right_set))
@@ -150,7 +149,7 @@ def dice_coefficient(left_set: set, right_set: set) -> float:
 def overlap_coefficient(left_set: set, right_set: set) -> float:
     """ Computes the overlap coefficient between two sets
 
-    Defined as |X ∩ Y| / min(|X|, |Y|). 
+    Defined as |X ∩ Y| / min(|X|, |Y|).
     It ranges from 0 (no overlap) to 1 (complete overlap).
 
     Parameters
@@ -177,7 +176,7 @@ def overlap_coefficient(left_set: set, right_set: set) -> float:
 def percentage_overlap(left_set: set, right_set: set) -> float:
     """ Computes the percentage overlap between two sets
 
-    Defined as (|X ∩ Y| / |X| + |Y|) * 100. 
+    Defined as (|X ∩ Y| / |X| + |Y|) * 100.
     It ranges from 0 (no overlap) to 100 (complete overlap).
 
     Parameters
@@ -207,7 +206,7 @@ def asymmetrical_overlap(left_set: set, right_set: set) -> float:
         Y.
 
 
-    Defined as |X ∩ Y| / |X|. 
+    Defined as |X ∩ Y| / |X|.
     It ranges from 0 (no overlap) to 1 (complete overlap).
 
     Parameters
@@ -228,82 +227,44 @@ def asymmetrical_overlap(left_set: set, right_set: set) -> float:
     return len(overlap) / len(left_set)
 
 
-def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
-    """ Split strings in a column into separate words.
+def calculate_store_overlap(store_left: pd.DataFrame,
+                            store_right: pd.DataFrame,
+                            product_id_column: str,
+                            overlap_function: Callable[[set, set], float],
+                            preprocess_function: Callable[[pd.Series], pd.Series],
+                            ):
+    """Calculate the overlap between two stores when using a specific overlap function.
 
     Parameters
     ----------
-    string_column : pd.Series
-        The column containing the strings to split.
+    store_left: pd.DataFrame
+        The first store to compare.
 
-    separator : str
-        The separator to use to split the strings. By default, the separator is a space.
+    store_right: pd.DataFrame
+        The second store to compare.
 
-    Returns
-    -------
-    pd.Series
-        A series with the unique split strings.
-    """
-    return string_column.str.split(separator).explode()
+    product_id_column: str
+        The name of the column containing the product identifiers. Products can be identified by their EAN number
+        or receipt text for example.
 
+    overlap_function: Callable[[set, set], float]
+        The overlap function to use to calculate the overlap between the stores.
 
-def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[str]]) -> pd.Series:
-    """ Tokenize strings in a column using a custom tokenizer.
-
-    Parameters
-    ----------
-    string_column : pd.Series
-        The column containing the strings to tokenize.
-
-    tokenizer : Callable[[str], List[str]]
-        A function that takes a string as input and returns a list of tokens.
+    preprocess_function: Callable[[pd.Series], pd.Series]
+        A function to preprocess the data before calculating the overlap. This function can be used to filter out
+        duplicate products, or return tokens for the product texts. 
 
     Returns
     -------
-    pd.Series
-        A series with the unique tokens.
+    float
+        The overlap between the two stores.
     """
-    return string_column.apply(tokenizer).explode()
+    store1_set = set(preprocess_function(
+        store_left[product_id_column]).values)
+    store2_set = set(preprocess_function(
+        store_right[product_id_column]).values)
 
-
-def drop_short_strings(string_column: pd.Series, drop_less_than: int = 3):
-    """ 
-    Remove all entries with strings shorter than "drop_less_than".
-
-    Parameters
-    ----------
-    string_column : pd.Series
-        The column containing the strings to tokenize.
-
-    Returns
-    -------
-    pd.Series
-        A series with the unique tokens.
-    """
-    if drop_less_than < 1:
-        print("WARNING: Minimum string length less than 1.")
-
-    return string_column[string_column.str.len() >= drop_less_than]
-
-
-def huggingface_tokenize_strings(string_column: pd.Series, tokenizer_name: str = "gpt2") -> pd.Series:
-    """ Tokenize strings in a column using a Hugging Face tokenizer.
-
-    Parameters
-    ----------
-    string_column : pd.Series
-        The column containing the strings to tokenize.
-
-    tokenizer_name : str
-        The name of the Hugging Face tokenizer to use. By default, the GPT-2 tokenizer is used.
-
-    Returns
-    -------
-    pd.Series
-        A series with the unique tokens.
-    """
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-    return tokenize_strings(string_column, tokenizer.tokenize)
+    return overlap_function(store1_set, store2_set)
 
 
 def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
@@ -319,28 +280,28 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
 
     Parameters
     ----------
-    store_data : List[pd.DataFrame]
+    store_data: List[pd.DataFrame]
         A list of dataframes, where each dataframe contains a column with the store name and a column with the store items.
 
-    store_id_column : str
+    store_id_column: str
         The name of the column containing the store identifiers. Stores can be identified by their name or ID for example.
 
-    product_id_column : str
+    product_id_column: str
         The name of the column containing the product identifiers. Products can be identified by their EAN number
-        of receipt text for example.    
+        of receipt text for example.
 
-    overlap_function : Callable[[set, set], float]
+    overlap_function: Callable[[set, set], float]
         The overlap function to use to calculate the overlap between the stores.
 
-    preprocess_function : Callable[[pd.Series], pd.Series]
+    preprocess_function: Callable[[pd.Series], pd.Series]
         A function to preprocess the data before calculating the overlap. This function can be used to filter out
         duplicate products, or return tokens for the product texts. By default, a lambda function is used that returns
-        the series as is.
+        the series as is .
 
-    progress_bar : Optional[tqdm.tqdm]
+    progress_bar: Optional[tqdm.tqdm]
         A progress bar to show the progress of the calculation. By default, no progress bar is shown.
 
-    calculate_all_cells : bool
+    calculate_all_cells: bool
         A flag to indicate if all cells in the overlap matrix should be calculated. By default, only the upper triangle
         of the matrix is calculated, as the matrix is symmetric.
 
@@ -366,17 +327,161 @@ def calculate_overlap_for_stores(store_data: List[pd.DataFrame],
 
             store1 = store_data[row_index]
             store2 = store_data[column_index]
-
-            store1_set = set(preprocess_function(
-                store1[product_id_column]).values)
-            store2_set = set(preprocess_function(
-                store2[product_id_column]).values)
-            overlap = overlap_function(
-                store1_set, store2_set)
+            overlap = calculate_store_overlap(
+                store1,
+                store2,
+                product_id_column,
+                overlap_function,
+                preprocess_function)
             store_overlap[row_index, column_index] = overlap
-            store_overlap[column_index, row_index] = overlap
+            if not calculate_all_cells:
+                store_overlap[column_index, row_index] = overlap
 
             if progress_bar is not None:
                 progress_bar.update(1)
 
     return pd.DataFrame(store_overlap, columns=store_names, index=store_names)
+
+
+def compare_overlap_between_preprocessing_functions(store_data: List[pd.DataFrame],
+                                                    store_id_column: str,
+                                                    product_id_column: str,
+                                                    preprocess_functions: Dict[str, Callable[[pd.Series], pd.Series]],
+                                                    overlap_function: Callable[[
+                                                        set, set], float] = jaccard_index,
+                                                    progress_bar: Optional[tqdm.tqdm] = None,
+                                                    calculate_all_cells: bool = False
+                                                    ) -> pd.DataFrame:
+    """ Compare the overlap between stores for different preprocessing functions.
+
+    Parameters
+    ----------
+    store_data: List[pd.DataFrame]
+        A list of dataframes, where each dataframe contains a column with the store name and a column with the store items.
+
+    store_id_column: str
+        The name of the column containing the store identifiers. Stores can be identified by their name or ID for example.
+
+    product_id_column: str
+        The name of the column containing the product identifiers. Products can be identified by their EAN number
+        or receipt text for example.
+
+    preprocess_functions: Dict[str, Callable[[pd.Series], pd.Series]]
+        A dictionary with the preprocessing functions to compare. The keys are the names of the preprocessing functions.
+
+    overlap_function: Callable[[set, set], float]
+        The overlap function to use to calculate the overlap between the stores.
+
+    progress_bar: Optional[tqdm.tqdm]
+        A progress bar to show the progress of the calculation. By default, no progress bar is shown.
+
+    calculate_all_cells: bool
+        A flag to indicate if all cells in the overlap matrix should be calculated. By default, only the upper triangle
+        of the matrix is calculated, as the matrix is symmetric.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe with the mean overlap between the stores for each preprocessing function. The dataframe contains the
+        mean overlap, the standard deviation, the minimum and maximum overlap for each preprocessing function.
+    """
+    mean_overlap_per_function = []
+    for preprocess_function_name, preprocess_function in preprocess_functions.items():
+        overlap_matrix = calculate_overlap_for_stores(
+            store_data=store_data,
+            store_id_column=store_id_column,
+            product_id_column=product_id_column,
+            overlap_function=overlap_function,
+            preprocess_function=preprocess_function,
+            progress_bar=None,
+            calculate_all_cells=calculate_all_cells
+        )
+        progress_bar.set_description(
+            f"Calculating mean overlap for preprocessing function {preprocess_function_name}")
+        mean_overlap_per_function.append({
+            "preprocessing_function": preprocess_function_name,
+            "mean_overlap": overlap_matrix.values.mean(),
+            "std_overlap": overlap_matrix.values.std(),
+            "min_overlap": overlap_matrix.values.min(),
+            "max_overlap": overlap_matrix.values.max()
+        })
+        progress_bar.update(1)
+    return pd.DataFrame(mean_overlap_per_function)
+
+
+def compare_overlap_per_coicop_label(store_data: List[pd.DataFrame],
+                                     store_id_column: str,
+                                     product_id_column: str,
+                                     coicop_column: str,
+                                     preprocess_function: Callable[[pd.Series], pd.Series],
+                                     overlap_function: Callable[[
+                                         set, set], float] = jaccard_index,
+                                     progress_bar: Optional[tqdm.tqdm] = None) -> pd.DataFrame:
+    """ Compare the overlap between stores for different preprocessing functions per COICOP label.
+    The stores are compared pairwise for each COICOP label. By default, the Jaccard index is used to calculate the overlap.
+
+    Parameters
+    ----------
+    store_data: List[pd.DataFrame]
+        A list of dataframes, where each dataframe contains a column with the store name and a column with the store items.
+
+    store_id_column: str
+        The name of the column containing the store identifiers. Stores can be identified by their name or ID for example.
+
+    product_id_column: str
+        The name of the column containing the product identifiers. Products can be identified by their EAN number
+        or receipt text for example.
+
+    coicop_column: str
+        The name of the column containing the COICOP labels.
+
+    preprocess_function: Dict[str, Callable[[pd.Series], pd.Series]]
+        The preprocessing function to use to preprocess the data before calculating the overlap.
+
+    overlap_function: Callable[[set, set], float]
+        The overlap function to use to calculate the overlap between the stores. Note that this function assumes that
+        the overlap function is symmetric, as only the overlap between store A and store B is compared and the
+        overlap between store B and store A is skipped.
+
+    progress_bar: Optional[tqdm.tqdm]
+        A progress bar to show the progress of the calculation. By default, no progress bar is shown.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe with the overlap between the stores for each preprocessing function per COICOP label.
+    """
+    all_overlap_dfs = []
+    for store_left_index in range(len(store_data)):
+        store_left = store_data[store_left_index]
+        store_left_name = store_left[store_id_column].values[0]
+        for store_right_index in range(store_left_index+1, len(store_data)):
+            store_right = store_data[store_right_index]
+            store_right_name = store_right[store_id_column].values[0]
+
+            coicop_levels = set(store_left[coicop_column].unique()) | set(
+                store_right[coicop_column].unique())
+
+            overlap_values = []
+            for coicop_label in coicop_levels:
+                store_left_coicop = store_left[store_left[coicop_column]
+                                               == coicop_label]
+                store_right_coicop = store_right[store_right[coicop_column]
+                                                 == coicop_label]
+
+                overlap = calculate_store_overlap(
+                    store_left_coicop,
+                    store_right_coicop,
+                    product_id_column,
+                    overlap_function,
+                    preprocess_function
+                )
+                overlap_values.append(overlap)
+                progress_bar.set_description(
+                    f"Calculating overlap for preprocessing function {preprocess_function.__name__} between store {store_left_name} and store {store_right_name} and coicop {coicop_label}")
+
+            overlap_df = pd.DataFrame(
+                overlap_values, columns=[f"{store_left_name}_{store_right_name}"], index=list(coicop_levels))
+            all_overlap_dfs.append(overlap_df)
+
+    return pd.concat(all_overlap_dfs, axis=1)

@@ -1,4 +1,5 @@
 from ..parquet_file import ParquetFile
+from ..constants import Constants
 from .files import get_combined_revenue_files_in_folder, get_store_name_from_combined_filename, get_receipt_texts_for_store
 import pandas as pd
 import luigi
@@ -64,9 +65,10 @@ class AddReceiptTextsWithDate(luigi.Task):
                 con.sql(f"""drop table if exists {receipt_revenue_table};
                         create table {receipt_revenue_table} as
                         select pr.*, pc.{self.receipt_text_column} from {revenue_table} as pr 
-                        inner join {receipt_text_table} as pc on pr.{self.key_column} = pc.{self.key_column} 
-                        where pc.start_date >= pr.start_date and pc.start_date <= pr.end_date
+                        left join {receipt_text_table} as pc on (pr.{self.key_column} = pc.{self.key_column} 
+                                and pc.{Constants.START_DATE_COLUMN} >= pr.{Constants.START_DATE_COLUMN} and pc.{Constants.START_DATE_COLUMN} <= pr.{Constants.END_DATE_COLUMN})
                     """)
+                # TODO order by year_month and coicop_number
                 con.sql(
                     f"copy {receipt_revenue_table} to '{output_path}' with (format 'parquet')")
 
@@ -97,7 +99,7 @@ class AddReceiptTextFromColumn(luigi.Task):
     input_filename = luigi.Parameter()
     output_filename = luigi.Parameter()
     source_column = luigi.Parameter(default="ean_name")
-    destination_column = luigi.Parameter(default="receipt_text")
+    destination_column = luigi.Parameter(default=Constants.RECEIPT_TEXT_COLUMN)
     parquet_engine = luigi.Parameter()
 
     def requires(self):
@@ -198,10 +200,12 @@ class AddReceiptTexts(luigi.Task):
                 receipt_texts_file, engine=parquet_engine)
 
             receipt_revenue_df = combined_df.merge(
-                receipt_texts, on=["store_id", "esba_number", "isba_number", "ean_number"])
+                receipt_texts,
+                how="left",
+                on=[Constants.STORE_ID_COLUMN, "esba_number", "isba_number", Constants.PRODUCT_ID_COLUMN])
 
             receipt_revenue_df = receipt_revenue_df.rename(
-                columns={"coicop_number_x": "coicop_number"})
+                columns={"coicop_number_x": Constants.COICOP_LABEL_COLUMN})
             receipt_revenue_df = receipt_revenue_df.drop(
                 columns=["coicop_number_y"])
 
@@ -238,7 +242,8 @@ class AddAllReceiptTexts(luigi.WrapperTask):
     receipt_file_directory = luigi.PathParameter()
     revenue_file_prefix = luigi.Parameter()
     receipt_file_prefix = luigi.Parameter()
-    receipt_text_column = luigi.Parameter(default="receipt_text")
+    receipt_text_column = luigi.Parameter(
+        default=Constants.RECEIPT_TEXT_COLUMN)
     ean_name_column = luigi.Parameter(default="ean_name")
     parquet_engine = luigi.Parameter()
 
@@ -273,5 +278,5 @@ class AddAllReceiptTexts(luigi.WrapperTask):
                                               output_filename=output_filename,
                                               store_name=store_name,
                                               receipt_text_column=self.receipt_text_column,
-                                              key_column="ean_number" if store_name.lower() == "jumbo" else "rep_id"
+                                              key_column=Constants.PRODUCT_ID_COLUMN if store_name.lower() == "jumbo" else "rep_id"
                                               )

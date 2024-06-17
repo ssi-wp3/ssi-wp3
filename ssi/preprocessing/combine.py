@@ -1,9 +1,9 @@
 
 from .files import get_revenue_files_in_folder, get_store_name
+from ..constants import Constants
 from .convert import ConvertCSVToParquet
 import pandas as pd
 import luigi
-
 import os
 
 
@@ -25,7 +25,7 @@ class CombineRevenueFiles(luigi.Task):
     filename_prefix = luigi.Parameter()
     parquet_engine = luigi.Parameter()
     sort_order = luigi.DictParameter(
-        default={"bg_number": True, "month": True, "coicop_number": True})
+        default={"bg_number": True, "month": True, Constants.COICOP_LABEL_COLUMN: True})
 
     def requires(self):
         revenue_files = get_revenue_files_in_folder(
@@ -69,7 +69,7 @@ class CombineAllRevenueFiles(luigi.WrapperTask):
         The directory where the revenue files are stored.
 
     output_directory : luigi.Parameter
-        The output directory for the combined revenue files.    
+        The output directory for the combined revenue files.
     """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()

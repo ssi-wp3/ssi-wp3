@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractproperty
 from typing import Dict, Callable, Any
 from .files import get_combined_revenue_files_in_directory
-from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, split_strings, huggingface_tokenize_strings, drop_short_strings, asymmetrical_overlap
+from .preprocessing import Preprocessing
+from .overlap import calculate_overlap_for_stores, jaccard_index, jaccard_similarity, dice_coefficient, overlap_coefficient, percentage_overlap, asymmetrical_overlap, compare_overlap_between_preprocessing_functions, compare_overlap_per_coicop_label
 from .products import *
 from .revenue import *
 from .text_analysis import string_length_histogram
@@ -118,6 +119,9 @@ class PeriodAnalysis(BaseStoreAnalysisTask):
             "compare_products_per_period": lambda dataframe: compare_products_per_period(dataframe, self.period_column, value_columns),
             "total_revenue_per_period": lambda dataframe: total_revenue_per_period(dataframe, self.period_column, self.amount_column, self.revenue_column),
             "unique_column_values_per_period": lambda dataframe: unique_column_values_per_period(dataframe, self.period_column, value_columns),
+            "product_revenue_versus_lifetime": lambda dataframe: product_revenue_versus_lifetime(dataframe, self.period_column, self.product_id_column, self.amount_column, self.revenue_column),
+            "product_availability_in_period": lambda dataframe: product_availability_in_period(dataframe, self.product_id_column, self.period_column),
+            "product_lifetime_in_periods": lambda dataframe: product_lifetime_in_periods(dataframe, self.period_column, self.product_id_column),
         }
 
     def get_store_analysis_filename(self, function_name: str) -> str:
@@ -144,7 +148,7 @@ class CoicopAnalysis(BaseStoreAnalysisTask):
 
             # Revenue
             "total_revenue_per_coicop": lambda dataframe: total_revenue_per_coicop(dataframe, self.coicop_column, self.amount_column, self.revenue_column),
-            "product_revenue_versus_lifetime": lambda dataframe: product_revenue_versus_lifetime(dataframe, self.coicop_column, self.product_id_column, self.amount_column, self.revenue_column),
+
         }
 
     def get_store_analysis_filename(self, function_name: str) -> str:
@@ -317,8 +321,8 @@ class CrossStoreAnalysis(luigi.Task):
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     product_id_columns = luigi.ListParameter(
-        default=["ean_number", "receipt_text"])
-    store_name_column = luigi.Parameter(default="store_name")
+        default=[Constants.PRODUCT_ID_COLUMN, Constants.RECEIPT_TEXT_COLUMN])
+    store_name_column = luigi.Parameter(default=Constants.STORE_NAME_COLUMN)
 
     @property
     def combined_revenue_files(self) -> Dict[str, str]:
@@ -340,22 +344,7 @@ class CrossStoreAnalysis(luigi.Task):
 
     @property
     def overlap_preprocessing_functions(self) -> Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]:
-        return {
-            "ean_number": {
-                "raw": lambda x: x
-            },
-            "receipt_text": {
-                "raw": lambda x: x,
-                "lower": lambda x: x.str.lower(),
-                "lower_split_words": lambda x: split_strings(x.str.lower()),
-                "stripped": lambda x: x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.lstrip().str.lower(),
-                "stripped_split_words": lambda x: split_strings(x.str.replace('[^0-9a-zA-Z.,-/ ]', '', regex=True).str.strip().str.lower()),
-                "stripped_split_alpha_drop_short": lambda x: drop_short_strings(split_strings(x.str.replace('[^a-z\s]', '', regex=True).str.strip().str.lower()), drop_less_than=3),
-                "raw_tokenized_gpt2": lambda x: huggingface_tokenize_strings(x, "gpt2"),
-                "raw_tokenized_mini_lm": lambda x: huggingface_tokenize_strings(x, "sentence-transformers/all-MiniLM-L6-v2"),
-                "raw_tokenized_labse": lambda x: huggingface_tokenize_strings(x, "sentence-transformers/LaBSE"),
-            }
-        }
+        return Preprocessing().all_preprocessing_functions
 
     def target_for(self,
                    overlap_directory: str,
@@ -392,7 +381,7 @@ class CrossStoreAnalysis(luigi.Task):
 
     def run(self):
         print("Input", self.input())
-        store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
+        store_dataframes = [self.read_store_file(input_file, self.store_name_column)
                             for store_name, input_file in self.input().items()]
         # TODO calculations give different values then those from the notebook
         for product_id_column in self.product_id_columns:
@@ -414,11 +403,141 @@ class CrossStoreAnalysis(luigi.Task):
                             overlap_matrix_df.to_parquet(
                                 output_file, engine=self.parquet_engine)
 
-    def read_store_file(self, input_file, store_name_column: str, store_name: str) -> pd.DataFrame:
+    def read_store_file(self, input_file, store_name_column: str) -> pd.DataFrame:
         with input_file.open("r") as input_parquet_file:
             dataframe = pd.read_parquet(
-                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns))
-            return self.__add_store_name_column(dataframe, store_name, store_name_column)
+                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns) + [self.store_name_column])
+            dataframe[store_name_column] = dataframe[store_name_column].str.replace(
+                "ah_franchise", "ah")
+            return dataframe
+            # return self.__add_store_name_column(dataframe, store_name, store_name_column)
+
+    def __add_store_name_column(self,
+                                store_dataframe: pd.DataFrame,
+                                store_name: str,
+                                store_name_column: str = "store_name") -> pd.DataFrame:
+        store_dataframe[store_name_column] = store_name
+        return store_dataframe
+
+
+class OverlapPerPreprocessing(luigi.Task):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    project_prefix = luigi.Parameter(default="ssi")
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    product_id_column = luigi.Parameter(
+        default=Constants.RECEIPT_TEXT_COLUMN)
+    store_name_column = luigi.Parameter(default=Constants.STORE_NAME_COLUMN)
+
+    @property
+    def combined_revenue_files(self) -> Dict[str, str]:
+        return {
+            get_store_name_from_combined_filename(filename): filename
+            for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)
+        }
+
+    @property
+    def preprocessing_functions(self) -> Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]:
+        return Preprocessing().receipt_text_preprocessing_functions
+
+    def requires(self):
+        return {store_name: StoreFile(filename)
+                for store_name, filename in self.combined_revenue_files.items()}
+
+    def output(self):
+        overlap_directory = os.path.join(self.output_directory, "overlap")
+        return luigi.LocalTarget(os.path.join(overlap_directory, "mean_overlap_per_preprocessing_function.parquet"),
+                                 format=luigi.format.Nop
+                                 )
+
+    def run(self):
+        with tqdm.tqdm(total=len(self.preprocessing_functions)) as progress_bar:
+            store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
+                                for store_name, input_file in self.input().items()]
+            dataframe = compare_overlap_between_preprocessing_functions(store_dataframes,
+                                                                        self.store_name_column,
+                                                                        self.product_id_column,
+                                                                        self.preprocessing_functions,
+                                                                        progress_bar=progress_bar)
+            with self.output().open("w") as output_file:
+                dataframe.to_parquet(
+                    output_file, engine=self.parquet_engine)
+
+    def read_store_file(self, input_file, store_name_column: str) -> pd.DataFrame:
+        with input_file.open("r") as input_parquet_file:
+            dataframe = pd.read_parquet(
+                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns) + [self.store_name_column])
+            dataframe[store_name_column] = dataframe[store_name_column].str.replace(
+                "ah_franchise", "ah")
+            return dataframe
+
+    def __add_store_name_column(self,
+                                store_dataframe: pd.DataFrame,
+                                store_name: str,
+                                store_name_column: str = "store_name") -> pd.DataFrame:
+        store_dataframe[store_name_column] = store_name
+        return store_dataframe
+
+
+class OverlapPerPreprocessingAndCoicop(luigi.Task):
+    input_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
+    project_prefix = luigi.Parameter(default="ssi")
+    parquet_engine = luigi.Parameter(default="pyarrow")
+
+    product_id_column = luigi.Parameter(
+        default=Constants.RECEIPT_TEXT_COLUMN)
+    store_name_column = luigi.Parameter(default=Constants.STORE_NAME_COLUMN)
+    coicop_column = luigi.Parameter(default="coicop_level_1")
+
+    @property
+    def combined_revenue_files(self) -> Dict[str, str]:
+        return {
+            get_store_name_from_combined_filename(filename): filename
+            for filename in get_combined_revenue_files_in_directory(self.input_directory, project_prefix=self.project_prefix)
+        }
+
+    @property
+    def preprocessing_functions(self) -> Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]:
+        return Preprocessing().receipt_text_preprocessing_functions
+
+    def requires(self):
+        return {store_name: StoreFile(filename)
+                for store_name, filename in self.combined_revenue_files.items()}
+
+    def output(self):
+        overlap_directory = os.path.join(self.output_directory, "overlap")
+        return {preprocessing: luigi.LocalTarget(os.path.join(overlap_directory,
+                                                              f"overlap_{preprocessing}_function_and_{self.coicop_column}.parquet"),
+                                                 format=luigi.format.Nop
+                                                 )
+                for preprocessing in self.preprocessing_functions.keys()}
+
+    def run(self):
+        with tqdm.tqdm(total=len(self.preprocessing_functions)) as progress_bar:
+            store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
+                                for store_name, input_file in self.input().items()]
+
+            for preprocessing_function_name, preprocessing_function in self.preprocessing_functions.items():
+                dataframe = compare_overlap_per_coicop_label(store_dataframes,
+                                                             self.store_name_column,
+                                                             self.product_id_column,
+                                                             self.coicop_column,
+                                                             preprocessing_function,
+                                                             progress_bar=progress_bar)
+                progress_bar.update(1)
+                with self.output()[preprocessing_function_name].open("w") as output_file:
+                    dataframe.to_parquet(
+                        output_file, engine=self.parquet_engine)
+
+    def read_store_file(self, input_file, store_name_column: str) -> pd.DataFrame:
+        with input_file.open("r") as input_parquet_file:
+            dataframe = pd.read_parquet(
+                input_parquet_file, engine=self.parquet_engine, columns=list(self.product_id_columns) + [self.store_name_column])
+            dataframe[store_name_column] = dataframe[store_name_column].str.replace(
+                "ah_franchise", "ah")
+            return dataframe
 
     def __add_store_name_column(self,
                                 store_dataframe: pd.DataFrame,

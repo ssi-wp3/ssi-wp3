@@ -1,6 +1,7 @@
 from ssi.feature_extraction.feature_extraction import FeatureExtractorType
 from ssi.machine_learning.train_model import ModelFactory, train_model_with_feature_extractors
 from ssi.label_extractor import LabelExtractorFactory
+from ssi.constants import Constants
 import argparse
 
 
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train a COICOP classifier')
     parser.add_argument("-i", "--input-filename", type=str,
                         required=True, help="The input filename in parquet format")
-    parser.add_argument("-r", "--receipt-text-column", type=str, default="receipt_text",
+    parser.add_argument("-r", "--receipt-text-column", type=str, default=Constants.RECEIPT_TEXT_COLUMN,
                         help="The column name containing the receipt text")
     parser.add_argument("-c", "--coicop-column", type=str, default="coicop_number",
                         help="The column name containing the COICOP code")

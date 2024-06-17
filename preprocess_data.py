@@ -10,7 +10,7 @@ import os
 parser = argparse.ArgumentParser(description='Preprocess data')
 parser.add_argument("-s", "--supermarket-name", type=str,
                     required=True, help="Name of the supermarket")
-parser.add_argument("-c", "--coicop-column", type=str, default="coicop_number",
+parser.add_argument("-c", "--coicop-column", type=str, default=Constants.COICOP_LABEL_COLUMN,
                     help="Name of the column containing the coicop numbers")
 parser.add_argument("-p", "--product-id-column", type=str, default="product_id",
                     help="Name of the column containing the product ids")
@@ -34,11 +34,13 @@ if not os.path.exists(log_directory):
     print(f"Creating log directory {log_directory}")
     os.makedirs(log_directory)
 
-# selected_columns = ["bg_number", "month", "coicop_number", "rep_id", "ean_number", "ean_name",
+# selected_columns = ["bg_number", "month", Constants.COICOP_LABEL_COLUMN, "rep_id", Constants.PRODUCT_ID_COLUMN, "ean_name",
 #                     "revenue", "amount"] if not args.selected_columns else args.selected_columns
 selected_columns = None if not args.selected_columns else args.selected_columns
-sort_columns = {"bg_number": True, "month": True, "coicop_number": True}
-column_mapping = {"bg_number": "supermarket_id", "month": "year_month"}
+sort_columns = {"bg_number": True, "month": True,
+                Constants.COICOP_LABEL_COLUMN: True}
+column_mapping = {"bg_number": "supermarket_id",
+                  "month": Constants.YEAR_MONTH_COLUMN}
 coicop_level_columns = Constants.COICOP_LEVELS_COLUMNS if not args.coicop_level_columns else args.coicop_level_columns
 
 save_combined_revenue_files(data_directory=output_directory,

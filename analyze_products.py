@@ -9,7 +9,7 @@ import os
 import tqdm
 
 parser = argparse.ArgumentParser(description='Preprocess data')
-parser.add_argument("-c", "--coicop-column", type=str, default="coicop_number",
+parser.add_argument("-c", "--coicop-column", type=str, default=Constants.COICOP_LABEL_COLUMN,
                     help="Name of the column containing the coicop numbers")
 args = parser.parse_args()
 

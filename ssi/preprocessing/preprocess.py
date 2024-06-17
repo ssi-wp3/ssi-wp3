@@ -1,4 +1,5 @@
 from ..parquet_file import ParquetFile
+from ..constants import Constants
 from .combine import CombineRevenueFiles
 from .preprocess_data import preprocess_data
 from .files import get_store_name_from_combined_filename
@@ -39,12 +40,20 @@ class PreprocessFile(luigi.Task):
     """
     input_filename = luigi.Parameter()
     output_filename = luigi.Parameter()
-    coicop_column = luigi.Parameter(default="coicop_number")
+    coicop_column = luigi.Parameter(default=Constants.COICOP_LABEL_COLUMN)
     product_description_column = luigi.Parameter(default="ean_name")
     selected_columns = luigi.ListParameter(default=[])
     coicop_level_columns = luigi.ListParameter(default=[])
     column_mapping = luigi.DictParameter(
-        default={"bg_number": "store_id", "month": "year_month"})
+        default={"bg_number": Constants.STORE_ID_COLUMN, "month": Constants.YEAR_MONTH_COLUMN})
+    # TODO read this from a config file!!
+    store_name_mapping = luigi.DictParameter(default={
+        "908515": "lidl",
+        "901027": "plus",
+        "906172": "jumbo",
+        "470111": "ah",
+        "470112": "ah_franchise"
+    })
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     store_name = luigi.Parameter()
@@ -68,7 +77,8 @@ class PreprocessFile(luigi.Task):
             columns=self.selected_columns,
             coicop_column=self.coicop_column,
             product_description_column=self.product_description_column,
-            column_mapping=self.column_mapping
+            column_mapping=self.column_mapping,
+            store_name_mapping=self.store_name_mapping
         )
 
         with self.output().open('w') as output_file:

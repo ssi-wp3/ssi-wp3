@@ -1,14 +1,15 @@
 from typing import Optional, List
 from .text_analysis import series_to_set, dataframe_to_set
 from .overlap import jaccard_index, dice_coefficient, overlap_coefficient
-import pandas as pd
 from pandas.core.groupby.generic import DataFrameGroupBy
+from ..constants import Constants
+import pandas as pd
 import numpy as np
 
 
 def unique_column_values(dataframe: pd.DataFrame,
                          value_columns: List[str] = [
-                             "receipt_text", "ean_number"]
+                             Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN]
                          ) -> pd.DataFrame:
     """ This function calculates the number of unique column values for the selected columns
     over the complete dataframe.
@@ -20,9 +21,9 @@ def unique_column_values(dataframe: pd.DataFrame,
         The input dataframe.
 
     value_columns : List[str]
-        The columns to calculate the unique counts for. By default, it is ["receipt_text", "ean_number"].
-        -   "receipt_text" is the column containing the receipt text.
-        -   "ean_number" is the column containing the product ID.
+        The columns to calculate the unique counts for. By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        -   Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        -   Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -36,7 +37,7 @@ def unique_column_values(dataframe: pd.DataFrame,
 def unique_column_values_per_coicop(dataframe: pd.DataFrame,
                                     coicop_column: str = "coicop_level_1",
                                     value_columns: List[str] = [
-                                        "receipt_text", "ean_number"]
+                                        Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN]
                                     ) -> pd.DataFrame:
     """ This function calculates the number of unique column values for selected columns per COICOP.
 
@@ -50,9 +51,9 @@ def unique_column_values_per_coicop(dataframe: pd.DataFrame,
         Pass a different column name to group by other (deeper) COICOP levels.
 
     value_columns : List[str]
-        The columns to calculate the unique counts for. By default, it is ["receipt_text", "ean_number"].
-        -   "receipt_text" is the column containing the receipt text.
-        -   "ean_number" is the column containing the product ID.
+        The columns to calculate the unique counts for. By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        -   Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        -   Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -64,9 +65,9 @@ def unique_column_values_per_coicop(dataframe: pd.DataFrame,
 
 
 def unique_column_values_per_period(dataframe: pd.DataFrame,
-                                    period_column: str = "year_month",
+                                    period_column: str = Constants.YEAR_MONTH_COLUMN,
                                     value_columns: List[str] = [
-                                        "receipt_text",  "ean_number"]
+                                        Constants.RECEIPT_TEXT_COLUMN,  Constants.PRODUCT_ID_COLUMN]
                                     ) -> pd.DataFrame:
     """ This function calculates the number of unique column values per period.
 
@@ -76,14 +77,14 @@ def unique_column_values_per_period(dataframe: pd.DataFrame,
         The input dataframe.
 
     period_column : str
-        The column containing the period information. By default, it is "year_month".
+        The column containing the period information. By default, it is Constants.YEAR_MONTH_COLUMN.
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
     value_columns : List[str]
-        The columns to calculate the unique counts for. By default, it is ["receipt_text", "ean_number"].
-        -  "receipt_text" is the column containing the receipt text.
-        -  "ean_number" is the column containing the product ID.
+        The columns to calculate the unique counts for. By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        -  Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        -  Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -95,8 +96,8 @@ def unique_column_values_per_period(dataframe: pd.DataFrame,
 
 
 def texts_per_ean_histogram(dataframe: pd.DataFrame,
-                            receipt_text_column: str = "receipt_text",
-                            product_id_column: str = "ean_number"
+                            receipt_text_column: str = Constants.RECEIPT_TEXT_COLUMN,
+                            product_id_column: str = Constants.PRODUCT_ID_COLUMN
                             ) -> pd.Series:
     """ This function calculates the histogram of the receipt texts per EAN.
     First the number of unique texts per EAN is calculated. Then these counts
@@ -111,10 +112,10 @@ def texts_per_ean_histogram(dataframe: pd.DataFrame,
         The input dataframe.
 
     receipt_text_column : str
-        The column containing the receipt text. By default, it is "receipt_text".
+        The column containing the receipt text. By default, it is Constants.RECEIPT_TEXT_COLUMN.
 
     product_id_column : str
-        The column containing the product ID. By default, it is "ean_number".
+        The column containing the product ID. By default, it is Constants.PRODUCT_ID_COLUMN.
 
     Returns
     -------
@@ -131,8 +132,8 @@ def texts_per_ean_histogram(dataframe: pd.DataFrame,
 
 
 def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
-                                receipt_text_column: str = "receipt_text",
-                                product_id_column: str = "ean_number"
+                                receipt_text_column: str = Constants.RECEIPT_TEXT_COLUMN,
+                                product_id_column: str = Constants.PRODUCT_ID_COLUMN
                                 ) -> pd.Series:
     """ This function calculates the histogram of the receipt texts per EAN,
     but instead of the function above returns the logarithm of the counts.
@@ -149,10 +150,10 @@ def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
         The input dataframe.
 
     receipt_text_column : str
-        The column containing the receipt text. By default, it is "receipt_text".
+        The column containing the receipt text. By default, it is Constants.RECEIPT_TEXT_COLUMN.
 
     product_id_column : str
-        The column containing the product ID. By default, it is "ean_number".
+        The column containing the product ID. By default, it is Constants.PRODUCT_ID_COLUMN.
 
     Returns
     -------
@@ -169,7 +170,7 @@ def log_texts_per_ean_histogram(dataframe: pd.DataFrame,
 
 def add_lagged_columns(grouped_texts_eans_per_month: pd.DataFrame,
                        lagged_columns: List[str] = [
-                           "receipt_text", "ean_number"]
+                           Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN]
                        ) -> pd.DataFrame:
     """ This function adds lagged columns to the dataframe. The lagged columns contain the values
     of the previous period for the selected columns.
@@ -180,9 +181,9 @@ def add_lagged_columns(grouped_texts_eans_per_month: pd.DataFrame,
         The input dataframe.
 
     lagged_columns : List[str]
-        The columns to add lagged columns for. By default, it is ["receipt_text", "ean_number"].
-        -   "receipt_text" is the column containing the receipt text.
-        -   "ean_number" is the column containing the product ID.
+        The columns to add lagged columns for. By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        -   Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        -   Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -196,9 +197,9 @@ def add_lagged_columns(grouped_texts_eans_per_month: pd.DataFrame,
 
 
 def products_per_period(dataframe: pd.DataFrame,
-                        period_column: str = "year_month",
+                        period_column: str = Constants.YEAR_MONTH_COLUMN,
                         product_columns: List[str] = [
-                            "receipt_text", "ean_number"]
+                            Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN]
                         ) -> pd.DataFrame:
     """ This function creates a dataframe that contains the unique product columns per period in
     "period column". The dataframe contains a columns with a set of unique product column values.
@@ -211,15 +212,15 @@ def products_per_period(dataframe: pd.DataFrame,
         The input dataframe.
 
     period_column : str
-        The column containing the period information. By default, it is "year_month".
+        The column containing the period information. By default, it is Constants.YEAR_MONTH_COLUMN.
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
 
     product_columns : List[str]
-        The columns to calculate the unique products for. By default, it is ["receipt_text", "ean_number"].
-        -   "receipt_text" is the column containing the receipt text.
-        -   "ean_number" is the column containing the product ID.
+        The columns to calculate the unique products for. By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        -   Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        -   Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -335,9 +336,9 @@ def number_of_products(column: Optional[set]) -> int:
 
 
 def compare_products_per_period(dataframe: pd.DataFrame,
-                                period_column: str = "year_month",
+                                period_column: str = Constants.YEAR_MONTH_COLUMN,
                                 product_columns: List[str] = [
-                                    "receipt_text", "ean_number"]
+                                    Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN]
                                 ) -> pd.DataFrame:
     """This functions compares the unique column values of the selected columns per period with those of
     the last period. It returns the column values that are the same, introduced, or
@@ -349,15 +350,15 @@ def compare_products_per_period(dataframe: pd.DataFrame,
         The input dataframe.
 
     period_column : str
-        The column containing the period information. By default, it is "year_month".
+        The column containing the period information. By default, it is Constants.YEAR_MONTH_COLUMN.
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
 
     product_columns : List[str]
-        The columns to compare the values for. By default, it is ["receipt_text", "ean_number"].
-        -   "receipt_text" is the column containing the receipt text.
-        -   "ean_number" is the column containing the product ID.
+        The columns to compare the values for. By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        -   Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        -   Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -376,7 +377,7 @@ def compare_products_per_period(dataframe: pd.DataFrame,
         texts_per_period_df[f"{column}_removed"] = texts_per_period_df.apply(
             lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
 
-        texts_per_period_df[f"jacard_index_{column}_{period_column}"] = texts_per_period_df.apply(
+        texts_per_period_df[f"jaccard_index_{column}_{period_column}"] = texts_per_period_df.apply(
             lambda row: jaccard_index(row[column], row[f"{column}_lagged"]), axis=1)
 
         texts_per_period_df[f"dice_coefficient_{column}_{period_column}"] = texts_per_period_df.apply(
@@ -385,6 +386,8 @@ def compare_products_per_period(dataframe: pd.DataFrame,
         texts_per_period_df[f"overlap_coefficient_{column}_{period_column}"] = texts_per_period_df.apply(
             lambda row: overlap_coefficient(row[column], row[f"{column}_lagged"]), axis=1)
 
+        texts_per_period_df[f"total_{column}"] = texts_per_period_df[column].apply(
+            number_of_products)
         texts_per_period_df[f"number_{column}_same"] = texts_per_period_df[f"{column}_same"].apply(
             number_of_products)
         texts_per_period_df[f"number_{column}_introduced"] = texts_per_period_df[f"{column}_introduced"].apply(
@@ -396,10 +399,10 @@ def compare_products_per_period(dataframe: pd.DataFrame,
 
 
 def compare_products_with_start_period(dataframe: pd.DataFrame,
-                                       period_column: str = "year_month",
+                                       period_column: str = Constants.YEAR_MONTH_COLUMN,
                                        start_period_length: int = 1,
                                        product_columns: List[str] = [
-                                           "receipt_text", "ean_number"]
+                                           Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN]
                                        ) -> pd.DataFrame:
     """This functions compares the unique column values of the selected columns per period with those of
     the start period. It returns the column values that are the same, introduced, or
@@ -413,7 +416,7 @@ def compare_products_with_start_period(dataframe: pd.DataFrame,
         The input dataframe.
 
     period_column : str
-        The column containing the period information. By default, it is "year_month".
+        The column containing the period information. By default, it is Constants.YEAR_MONTH_COLUMN.
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
@@ -421,9 +424,9 @@ def compare_products_with_start_period(dataframe: pd.DataFrame,
         The length of the start period in periods. By default, it is 1.    
 
     product_columns : List[str]
-        The columns to compare the values for. By default, it is ["receipt_text", "ean_number"].
-        -   "receipt_text" is the column containing the receipt text.
-        -   "ean_number" is the column containing the product ID.
+        The columns to compare the values for. By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        -   Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        -   Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -453,10 +456,10 @@ def compare_products_with_start_period(dataframe: pd.DataFrame,
 
 
 def products_per_period_coicop_level(dataframe: pd.DataFrame,
-                                     period_column: str = "year_month",
+                                     period_column: str = Constants.YEAR_MONTH_COLUMN,
                                      coicop_level_column: str = "coicop_level_1",
                                      product_columns: List[str] = [
-                                         "receipt_text", "ean_number"]
+                                         Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN]
                                      ) -> DataFrameGroupBy:
     """ This function creates a dataframe that contains the product column values per period
     and COICOP level. The dataframe contains a column with a set of unique receipt texts and
@@ -469,15 +472,15 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
         The input dataframe.
 
     period_column: str
-        The column containing the period information. By default, it is "year_month".
+        The column containing the period information. By default, it is Constants.YEAR_MONTH_COLUMN.
 
     coicop_level_column: str
         The column containing the COICOP level information. By default, it is "coicop_level_1".
 
     product_columns: List[str]
-        The columns to calculate the unique products for . By default, it is ["receipt_text", "ean_number"].
-        - "receipt_text" is the column containing the receipt text.
-        - "ean_number" is the column containing the product ID.
+        The columns to calculate the unique products for . By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        - Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        - Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -495,10 +498,10 @@ def products_per_period_coicop_level(dataframe: pd.DataFrame,
 
 
 def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
-                                             period_column: str = "year_month",
+                                             period_column: str = Constants.YEAR_MONTH_COLUMN,
                                              coicop_level_column: str = "coicop_level_1",
                                              product_columns: List[str] = [
-                                                 "receipt_text", "ean_number"]
+                                                 Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN]
                                              ) -> pd.DataFrame:
     """ This function compares the unique column values of the selected columns per period and COICOP level with those
     of the last period. It returns the column values that are the same, introduced, or removed, as well as, the number
@@ -511,7 +514,7 @@ def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
         The input dataframe.
 
     period_column: str
-        The column containing the period information. By default, it is "year_month".
+        The column containing the period information. By default, it is Constants.YEAR_MONTH_COLUMN.
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
@@ -520,9 +523,9 @@ def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
         Pass a different column name to group by other(deeper) COICOP levels.
 
     product_columns: List[str]
-        The columns to compare the values for . By default, it is ["receipt_text", "ean_number"].
-        -   "receipt_text" is the column containing the receipt text.
-        -   "ean_number" is the column containing the product ID.
+        The columns to compare the values for . By default, it is [Constants.RECEIPT_TEXT_COLUMN, Constants.PRODUCT_ID_COLUMN].
+        -   Constants.RECEIPT_TEXT_COLUMN is the column containing the receipt text.
+        -   Constants.PRODUCT_ID_COLUMN is the column containing the product ID.
 
     Returns
     -------
@@ -540,6 +543,9 @@ def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
         texts_per_period_coicop_df[f"{column}_removed"] = texts_per_period_coicop_df.apply(
             lambda row: removed_products(row[column], row[f"{column}_lagged"]), axis=1)
 
+        texts_per_period_coicop_df[f"total_{column}"] = texts_per_period_coicop_df[column].apply(
+            number_of_products)
+
         texts_per_period_coicop_df[f"number_{column}_same"] = texts_per_period_coicop_df[f"{column}_same"].apply(
             number_of_products)
         texts_per_period_coicop_df[f"number_{column}_introduced"] = texts_per_period_coicop_df[f"{column}_introduced"].apply(
@@ -551,8 +557,8 @@ def compare_products_per_period_coicop_level(dataframe: pd.DataFrame,
 
 
 def product_lifetime_in_periods(dataframe: pd.DataFrame,
-                                product_id_column: str = "ean_number",
-                                period_column: str = "year_month"
+                                period_column: str = Constants.YEAR_MONTH_COLUMN,
+                                product_id_column: str = Constants.PRODUCT_ID_COLUMN
                                 ) -> pd.DataFrame:
     """ This function calculates the lifetime of a product. The lifetime is the number of periods a product is present in the dataframe.
 
@@ -562,11 +568,11 @@ def product_lifetime_in_periods(dataframe: pd.DataFrame,
         The input dataframe.
 
     product_id_column: str
-        The column containing the product id. By default, it is "ean_number".
+        The column containing the product id. By default, it is Constants.PRODUCT_ID_COLUMN.
         Can also be the receipt text column to see how long a receipt text is present in the dataframe.
 
     period_column: str
-        The column containing the period information. By default, it is "year_month".
+        The column containing the period information. By default, it is Constants.YEAR_MONTH_COLUMN.
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
@@ -579,8 +585,8 @@ def product_lifetime_in_periods(dataframe: pd.DataFrame,
 
 
 def product_availability_in_period(dataframe: pd.DataFrame,
-                                   product_id_column: str = "ean_number",
-                                   period_column: str = "year_month"
+                                   product_id_column: str = Constants.PRODUCT_ID_COLUMN,
+                                   period_column: str = Constants.YEAR_MONTH_COLUMN
                                    ) -> pd.DataFrame:
     """ This function calculates the availability of a product in a period. The availability is the number of periods a product is present in the dataframe. The resulting dataframe contains the product_id column and all unique product ids in the dataframe. In addition, the dataframe contains a column for each of the unique periods in the dataframe.
     Each of the period column contains a bool value whether the product is present in that specific period.
@@ -593,11 +599,11 @@ def product_availability_in_period(dataframe: pd.DataFrame,
         The input dataframe.
 
     product_id_column: str
-        The column containing the product id. By default, it is "ean_number".
+        The column containing the product id. By default, it is Constants.PRODUCT_ID_COLUMN.
         Can also be the receipt text column to see how long a receipt text is present in the dataframe.
 
     period_column: str
-        The column containing the period information. By default, it is "year_month".
+        The column containing the period information. By default, it is Constants.YEAR_MONTH_COLUMN.
         Pass a different column name for other periods, for example "year". It's also
         possible to pass a list of columns to period_column to group by multiple columns.
 
@@ -606,4 +612,5 @@ def product_availability_in_period(dataframe: pd.DataFrame,
     pd.DataFrame
         A dataframe containing the availability of a product in a period.
     """
-    return dataframe.pivot_table(index=product_id_column, columns=period_column, aggfunc="size", fill_value=0).reset_index() > 0
+    return dataframe.pivot_table(
+        index=product_id_column, columns=period_column, aggfunc="size", fill_value=0) > 0
