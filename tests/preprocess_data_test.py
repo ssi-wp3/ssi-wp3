@@ -113,7 +113,7 @@ class TestPreprocessData(unittest.TestCase):
             "product_name": [f"product_{i}" for i in range(10)],
             "isba_number": [i for i in range(10)],
             "isba_name": [f"isba_{i}" for i in range(10)],
-            "ean_number": [i for i in range(10)],
+            Constants.PRODUCT_ID_COLUMN: [i for i in range(10)],
             "ean_name": [f"ean_{i}" for i in range(10)]
         })
         filtered_dataframe1 = filter_columns(
@@ -138,7 +138,7 @@ class TestPreprocessData(unittest.TestCase):
             "product_name": [f"product_{i}" for i in range(10)],
             "isba_number": [i for i in range(10)],
             "isba_name": [f"isba_{i}" for i in range(10)],
-            "ean_number": [i for i in range(10)],
+            Constants.PRODUCT_ID_COLUMN: [i for i in range(10)],
             "ean_name": [f"ean_{i}" for i in range(10)]
         })
 
@@ -148,7 +148,7 @@ class TestPreprocessData(unittest.TestCase):
             "product_name": "name",
             "isba_number": "isba",
             "isba_name": "isba_name",
-            "ean_number": "ean",
+            Constants.PRODUCT_ID_COLUMN: "ean",
             "ean_name": "ean_name"
         })
 
@@ -166,23 +166,23 @@ class TestPreprocessData(unittest.TestCase):
             "product_name": [f"product_{i}" for i in range(15)],
             "isba_number": [i for i in range(15)],
             "isba_name": [f"isba_{i}" for i in range(15)],
-            "ean_number": [i for i in range(15)],
+            Constants.PRODUCT_ID_COLUMN: [i for i in range(15)],
             "ean_name": [f"ean_{i}" for i in range(15)]
         })
 
         processed_dataframe = preprocess_data(
             dataframe,
             columns=["bg_number", "month",
-                     "coicop_number", "ean_number", "ean_name"],
+                     "coicop_number", Constants.PRODUCT_ID_COLUMN, "ean_name"],
             coicop_column="coicop_number",
-            product_description_column="receipt_text",
+            product_description_column=Constants.RECEIPT_TEXT_COLUMN,
             column_mapping={"bg_number": "supermarket_id",
-                            "month": "year_month", "ean_name": "receipt_text"},
+                            "month": Constants.YEAR_MONTH_COLUMN, "ean_name": Constants.RECEIPT_TEXT_COLUMN},
         )
         self.assertEqual(len(dataframe), len(processed_dataframe))
         self.assertEqual([6] * len(processed_dataframe),
                          processed_dataframe["coicop_number"].str.len().tolist())
-        self.assertEqual(["supermarket_id", "year_month", "coicop_number", "ean_number", "receipt_text",
+        self.assertEqual(["supermarket_id", Constants.YEAR_MONTH_COLUMN, "coicop_number", Constants.PRODUCT_ID_COLUMN, Constants.RECEIPT_TEXT_COLUMN,
                           "year", "month",
                           "coicop_level_1", "coicop_level_2",
                           "coicop_level_3", "coicop_level_4"],
@@ -193,7 +193,7 @@ class TestPreprocessData(unittest.TestCase):
         self.assertEqual(["201801", "201802", "201803", "201804", "201805",
                           "201806", "201807", "201808", "201809", "201810",
                           "201811", "201812", "201901", "201902", "201903"],
-                         processed_dataframe["year_month"].tolist())
+                         processed_dataframe[Constants.YEAR_MONTH_COLUMN].tolist())
         self.assertEqual(["2018", "2018", "2018", "2018", "2018", "2018",
                           "2018", "2018", "2018", "2018", "2018", "2018",
                           "2019", "2019", "2019"], processed_dataframe["year"].tolist())

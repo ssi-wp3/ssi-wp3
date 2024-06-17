@@ -1,7 +1,6 @@
 # %%
-import evaluate
+from .constants import Constants
 from transformers import Trainer
-import numpy as np
 from transformers import TrainingArguments
 from transformers import AutoModelForSequenceClassification
 from functools import partial
@@ -12,11 +11,11 @@ from sklearn.metrics import classification_report, confusion_matrix
 from typing import Tuple
 from machine_learning.evaluate import plot_confusion_matrix
 import pandas as pd
-import seaborn as sns
+import numpy as np
+import evaluate
 import argparse
 import os
 import json
-import matplotlib.pyplot as plt
 
 # %%
 parser = argparse.ArgumentParser()
@@ -30,7 +29,8 @@ parser.add_argument("-s", "--sample-size", type=int, default=None,
                     help="Number of samples to use from the total dataset. These samples are split over train, validation and test datasets.")
 parser.add_argument("-e", "--epochs", type=int, default=3)
 parser.add_argument("-b", "--batch-size", type=int, default=32)
-parser.add_argument("-ic", "--input-column", type=str, default="receipt_text")
+parser.add_argument("-ic", "--input-column", type=str,
+                    default=Constants.RECEIPT_TEXT_COLUMN)
 parser.add_argument("-lc", "--label-column", type=str,
                     default="coicop_level_1")
 parser.add_argument("-ef", "--evaluation-function", type=str, default="f1")
@@ -66,7 +66,7 @@ def split_data(dataframe: pd.DataFrame,
     return train_df, val_df, test_df
 
 
-def tokenize_function(data, text_column: str = "receipt_text", padding: str = "max_length", truncation=True):
+def tokenize_function(data, text_column: str = Constants.RECEIPT_TEXT_COLUMN, padding: str = "max_length", truncation=True):
     receipt_texts = data[text_column]
     tokens = tokenizer(receipt_texts, padding="max_length")
     return tokens

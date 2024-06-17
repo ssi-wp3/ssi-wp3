@@ -41,7 +41,7 @@ def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
         return {
             'Datum_vanaf': 'start_date',
             'Ean': Constants.PRODUCT_ID_COLUMN,
-            'Kassabon': 'receipt_text',
+            'Kassabon': Constants.RECEIPT_TEXT_COLUMN,
             'RPK_REP_id': 'rep_id'
         }
     return None

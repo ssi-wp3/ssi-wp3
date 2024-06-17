@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import List, Dict, Callable
 from transformers import AutoTokenizer
+from ..constants import Constants
 
 
 def split_strings(string_column: pd.Series, separator: str = ' ') -> pd.Series:
@@ -85,10 +86,10 @@ class Preprocessing:
     @property
     def all_preprocessing_functions(self) -> Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]:
         return {
-            "ean_number": {
+            Constants.PRODUCT_ID_COLUMN: {
                 "raw": lambda x: x
             },
-            "receipt_text": {
+            Constants.RECEIPT_TEXT_COLUMN: {
                 "raw": lambda x: x,
                 "lower": lambda x: x.str.lower(),
                 "lower_split_words": lambda x: split_strings(x.str.lower()),
@@ -103,8 +104,8 @@ class Preprocessing:
 
     @property
     def ean_number_preprocessing_functions(self) -> Dict[str, Callable[[pd.Series], pd.Series]]:
-        return self.all_preprocessing_functions["ean_number"]
+        return self.all_preprocessing_functions[Constants.PRODUCT_ID_COLUMN]
 
     @property
     def receipt_text_preprocessing_functions(self) -> Dict[str, Callable[[pd.Series], pd.Series]]:
-        return self.all_preprocessing_functions["receipt_text"]
+        return self.all_preprocessing_functions[Constants.RECEIPT_TEXT_COLUMN]

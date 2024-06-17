@@ -321,7 +321,7 @@ class CrossStoreAnalysis(luigi.Task):
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     product_id_columns = luigi.ListParameter(
-        default=["ean_number", "receipt_text"])
+        default=[Constants.PRODUCT_ID_COLUMN, Constants.RECEIPT_TEXT_COLUMN])
     store_name_column = luigi.Parameter(default="store_name")
 
     @property
@@ -424,7 +424,7 @@ class OverlapPerPreprocessing(luigi.Task):
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     product_id_column = luigi.Parameter(
-        default="receipt_text")
+        default=Constants.RECEIPT_TEXT_COLUMN)
     store_name_column = luigi.Parameter(default="store_name")
 
     @property
@@ -483,7 +483,7 @@ class OverlapPerPreprocessingAndCoicop(luigi.Task):
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     product_id_column = luigi.Parameter(
-        default="receipt_text")
+        default=Constants.RECEIPT_TEXT_COLUMN)
     store_name_column = luigi.Parameter(default="store_name")
     coicop_column = luigi.Parameter(default="coicop_level_1")
 

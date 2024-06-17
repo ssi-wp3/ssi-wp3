@@ -1,4 +1,5 @@
 from ..parquet_file import ParquetFile
+from ..constants import Constants
 from .files import get_combined_revenue_files_in_folder, get_store_name_from_combined_filename, get_receipt_texts_for_store
 import pandas as pd
 import luigi
@@ -98,7 +99,7 @@ class AddReceiptTextFromColumn(luigi.Task):
     input_filename = luigi.Parameter()
     output_filename = luigi.Parameter()
     source_column = luigi.Parameter(default="ean_name")
-    destination_column = luigi.Parameter(default="receipt_text")
+    destination_column = luigi.Parameter(default=Constants.RECEIPT_TEXT_COLUMN)
     parquet_engine = luigi.Parameter()
 
     def requires(self):
@@ -201,7 +202,7 @@ class AddReceiptTexts(luigi.Task):
             receipt_revenue_df = combined_df.merge(
                 receipt_texts,
                 how="left",
-                on=["store_id", "esba_number", "isba_number", "ean_number"])
+                on=["store_id", "esba_number", "isba_number", Constants.PRODUCT_ID_COLUMN])
 
             receipt_revenue_df = receipt_revenue_df.rename(
                 columns={"coicop_number_x": "coicop_number"})
@@ -241,7 +242,8 @@ class AddAllReceiptTexts(luigi.WrapperTask):
     receipt_file_directory = luigi.PathParameter()
     revenue_file_prefix = luigi.Parameter()
     receipt_file_prefix = luigi.Parameter()
-    receipt_text_column = luigi.Parameter(default="receipt_text")
+    receipt_text_column = luigi.Parameter(
+        default=Constants.RECEIPT_TEXT_COLUMN)
     ean_name_column = luigi.Parameter(default="ean_name")
     parquet_engine = luigi.Parameter()
 
@@ -276,5 +278,5 @@ class AddAllReceiptTexts(luigi.WrapperTask):
                                               output_filename=output_filename,
                                               store_name=store_name,
                                               receipt_text_column=self.receipt_text_column,
-                                              key_column="ean_number" if store_name.lower() == "jumbo" else "rep_id"
+                                              key_column=Constants.PRODUCT_ID_COLUMN if store_name.lower() == "jumbo" else "rep_id"
                                               )

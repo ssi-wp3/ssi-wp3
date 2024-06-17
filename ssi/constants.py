@@ -13,6 +13,6 @@ class Constants:
     ]
 
     STORE_ID_COLUMN = "store_id"
-    MONTH_YEAR_COLUMN = "year_month"
+    YEAR_MONTH_COLUMN = "year_month"
     PRODUCT_ID_COLUMN = "ean_number"
     RECEIPT_TEXT_COLUMN = "receipt_text"

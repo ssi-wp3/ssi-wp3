@@ -3,6 +3,7 @@ from .files import get_combined_revenue_files_in_directory
 from ..files import get_features_files_in_directory
 from ..preprocessing.combine_unique_values import combine_unique_column_values
 from ..parquet_file import ParquetFile
+from ..constants import Constants
 import luigi
 import pandas as pd
 import os
@@ -31,7 +32,7 @@ class FeatureExtractionTask(luigi.Task):
         The number of rows to process at a time. The default value is 1000.
 
     source_column : luigi.Parameter
-        The name of the column containing the text to extract features from. The default value is "receipt_text".
+        The name of the column containing the text to extract features from. The default value is Constants.RECEIPT_TEXT_COLUMN.
 
     destination_column : luigi.Parameter
         The name of the column to write the features to. The default value is "features".
@@ -42,7 +43,7 @@ class FeatureExtractionTask(luigi.Task):
     feature_extraction_method = luigi.EnumParameter(enum=FeatureExtractorType)
     batch_size = luigi.IntParameter(default=1000)
 
-    source_column = luigi.Parameter(default="receipt_text")
+    source_column = luigi.Parameter(default=Constants.RECEIPT_TEXT_COLUMN)
     destination_column = luigi.Parameter(default="features")
 
     def requires(self):
@@ -93,7 +94,7 @@ class ExtractFeaturesForAllFiles(luigi.WrapperTask):
         The number of rows to process at a time. The default value is 1000.
 
     source_column : luigi.Parameter
-        The name of the column containing the text to extract features from. The default value is "receipt_text".
+        The name of the column containing the text to extract features from. The default value is Constants.RECEIPT_TEXT_COLUMN.
 
     destination_column : luigi.Parameter
         The name of the column to write the features to. The default value is "features".
@@ -103,7 +104,7 @@ class ExtractFeaturesForAllFiles(luigi.WrapperTask):
     output_directory = luigi.PathParameter()
     feature_extraction_method = luigi.EnumParameter(enum=FeatureExtractorType)
     batch_size = luigi.IntParameter(default=1000)
-    source_column = luigi.Parameter(default="receipt_text")
+    source_column = luigi.Parameter(default=Constants.RECEIPT_TEXT_COLUMN)
     destination_column = luigi.Parameter(default="features")
     filename_prefix = luigi.Parameter(default="ssi")
 
@@ -139,7 +140,7 @@ class ExtractAllFeatures(luigi.WrapperTask):
         The number of rows to process at a time. The default value is 1000.
 
     source_column : luigi.Parameter
-        The name of the column containing the text to extract features from. The default value is "receipt_text".
+        The name of the column containing the text to extract features from. The default value is Constants.RECEIPT_TEXT_COLUMN.
 
     destination_column : luigi.Parameter
         The name of the column to write the features to. The default value is "features".
@@ -151,7 +152,7 @@ class ExtractAllFeatures(luigi.WrapperTask):
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     batch_size = luigi.IntParameter(default=1000)
-    source_column = luigi.Parameter(default="receipt_text")
+    source_column = luigi.Parameter(default=Constants.RECEIPT_TEXT_COLUMN)
     destination_column = luigi.Parameter(default="features")
     filename_prefix = luigi.Parameter(default="ssi")
 
@@ -172,7 +173,8 @@ class CombineUniqueValues(luigi.Task):
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     filename_prefix = luigi.Parameter()
-    key_columns = luigi.ListParameter(["receipt_text", "coicop_number"])
+    key_columns = luigi.ListParameter(
+        [Constants.RECEIPT_TEXT_COLUMN, "coicop_number"])
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     parquet_engine = luigi.Parameter()
 

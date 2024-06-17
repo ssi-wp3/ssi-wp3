@@ -1,4 +1,5 @@
 from ..parquet_file import ParquetFile
+from ..constants import Constants
 from .combine import CombineRevenueFiles
 from .preprocess_data import preprocess_data
 from .files import get_store_name_from_combined_filename
@@ -44,7 +45,7 @@ class PreprocessFile(luigi.Task):
     selected_columns = luigi.ListParameter(default=[])
     coicop_level_columns = luigi.ListParameter(default=[])
     column_mapping = luigi.DictParameter(
-        default={"bg_number": "store_id", "month": "year_month"})
+        default={"bg_number": "store_id", "month": Constants.YEAR_MONTH_COLUMN})
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     store_name = luigi.Parameter()

@@ -17,8 +17,8 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
     all_receipts_df = pd.DataFrame()
     for sheet_name in coicop_sheets:
         ah_receipts_df = pd.read_excel(input_file, sheet_name=sheet_name)
-        ah_receipts_df = ah_receipts_df.rename(columns={'Kassabonomschrijving': 'receipt_text',
-                                                        'ArtikelEAN': "ean_number",
+        ah_receipts_df = ah_receipts_df.rename(columns={'Kassabonomschrijving': Constants.RECEIPT_TEXT_COLUMN,
+                                                        'ArtikelEAN': Constants.PRODUCT_ID_COLUMN,
                                                         'IsbaOmschrijving': 'isba_description',
                                                         'Isba': 'isba_number',
                                                         'Esba': 'esba_number',
@@ -42,7 +42,7 @@ def year_week_to_date(year_week_column: pd.Series) -> pd.Series:
 
 def convert_jumbo_receipts(input_file,
                            delimiter: str = "|",
-                           year_month_column: str = "year_month",
+                           year_month_column: str = Constants.YEAR_MONTH_COLUMN,
                            encoding: str = "latin1"
                            ) -> pd.DataFrame:
     jumbo_receipts_df = pd.read_csv(
@@ -52,7 +52,7 @@ def convert_jumbo_receipts(input_file,
                                                           'NUM_EAN': Constants.PRODUCT_ID_COLUMN,
                                                           'CBS_EAN': Constants.PRODUCT_ID_COLUMN,
                                                           'NUM_ARTIKEL': 'article_number',
-                                                          'NAM_ARTIKEL': 'receipt_text',
+                                                          'NAM_ARTIKEL': Constants.RECEIPT_TEXT_COLUMN,
                                                           })
     # Convert year-week to year-month
     jumbo_receipts_df[year_month_column] = year_week_to_date(
@@ -124,7 +124,7 @@ def preprocess_data(dataframe: pd.DataFrame,
         dataframe, column_mapping)
     dataframe = add_leading_zero(dataframe, coicop_column=coicop_column)
     dataframe = split_month_year_column(
-        dataframe, month_year_column="year_month")
+        dataframe, month_year_column=Constants.YEAR_MONTH_COLUMN)
     dataframe = add_coicop_levels(dataframe, coicop_column=coicop_column)
 
     return dataframe

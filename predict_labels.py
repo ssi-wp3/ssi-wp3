@@ -1,5 +1,6 @@
 from ssi.coicop_pipeline import CoicopPipeline
 from ssi.machine_learning.predict import predict_from_file
+from ssi.constants import Constants
 import argparse
 import json
 # Adapted from https://huggingface.co/scikit-learn/sklearn-transformers/blob/main/pipeline.py
@@ -22,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input-data", type=str,
                         required=True, help="Path to the input parquet file")
     parser.add_argument("-r", "--receipt-text-column", type=str,
-                        default="receipt_text", help="The column name containing the receipt text")
+                        default=Constants.RECEIPT_TEXT_COLUMN, help="The column name containing the receipt text")
     parser.add_argument("-l", "--label-column", type=str, default="coicop_number",
                         help="The column name containing the COICOP code")
     parser.add_argument("-o", "--output-data", type=str,

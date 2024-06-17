@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, List
+from typing import Tuple, List
 from wordcloud import WordCloud
 import pandas as pd
 import os

@@ -1,5 +1,6 @@
 from ssi.analysis.revenue import product_revenue_versus_lifetime, total_revenue_per_product
 from ssi.analysis.products import product_lifetime_in_periods
+from ssi.constants import Constants
 import pandas as pd
 import os
 import argparse
@@ -7,9 +8,9 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-filename", type=str,
                     required=True, help="The input filename in parquet format")
-parser.add_argument("-p", "--period-column", default="year_month", type=str,
+parser.add_argument("-p", "--period-column", default=Constants.YEAR_MONTH_COLUMN, type=str,
                     help="The name of the period column")
-parser.add_argument("-e", "--product-id-column", default="ean_number", type=str,
+parser.add_argument("-e", "--product-id-column", default=Constants.PRODUCT_ID_COLUMN, type=str,
                     help="The name of the product id column")
 parser.add_argument("-a", "--amount-column", default="amount", type=str,
                     help="The name of the amount column")
