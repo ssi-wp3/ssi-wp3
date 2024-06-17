@@ -1,6 +1,7 @@
 from typing import List, Optional
 from faker import Faker
 from .preprocessing.preprocess_data import preprocess_data
+from .constants import Constants
 import pandas as pd
 import numpy as np
 import random
@@ -82,7 +83,7 @@ def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int, su
         'month': month,
         'coicop_number': coicop_number,
         'coicop_name': coicop_name,
-        'ean_number': ean_number,
+        Constants.PRODUCT_ID_COLUMN: ean_number,
         'ean_name': ean_name,
         'revenue': np.random.randint(100, 1000, size=num_rows),
         'amount': np.random.randint(1, 10, size=num_rows)

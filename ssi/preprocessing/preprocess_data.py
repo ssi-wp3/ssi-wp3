@@ -49,8 +49,8 @@ def convert_jumbo_receipts(input_file,
         input_file, sep=delimiter, encoding=encoding)
     jumbo_receipts_df = jumbo_receipts_df.rename(columns={'NUM_ISO_JAARWEEK': 'year_week',
                                                           'NUM_VESTIGING': 'branch_id',
-                                                          'NUM_EAN': 'ean_number',
-                                                          'CBS_EAN': 'ean_number',
+                                                          'NUM_EAN': Constants.PRODUCT_ID_COLUMN,
+                                                          'CBS_EAN': Constants.PRODUCT_ID_COLUMN,
                                                           'NUM_ARTIKEL': 'article_number',
                                                           'NAM_ARTIKEL': 'receipt_text',
                                                           })

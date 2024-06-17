@@ -1,5 +1,6 @@
 from typing import Dict, Any, Optional
 from collections import OrderedDict
+from ..constants import Constants
 import argparse
 import pandas as pd
 import os
@@ -19,7 +20,7 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
         ('esba_number', str),
         ('esba_name', str),
         ('rep_id', str),
-        ('ean_number', str),
+        (Constants.PRODUCT_ID_COLUMN, str),
         ('ean_name', str),
         ('revenue', np.float32),
         ('amount', np.float32)
@@ -29,7 +30,7 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
         return column_types
     elif filename.lower().startswith("output"):
         return OrderedDict([(column_name, column_types[column_name])
-                            for column_name in ['bg_number', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', 'ean_number', 'ean_name']
+                            for column_name in ['bg_number', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', Constants.PRODUCT_ID_COLUMN, 'ean_name']
                             ])
     return None
 
@@ -39,7 +40,7 @@ def get_columns_to_rename(filename: str) -> Optional[Dict[str, str]]:
     if basename.lower().startswith("kassabon") or basename.lower().startswith("receipts"):
         return {
             'Datum_vanaf': 'start_date',
-            'Ean': 'ean_number',
+            'Ean': Constants.PRODUCT_ID_COLUMN,
             'Kassabon': 'receipt_text',
             'RPK_REP_id': 'rep_id'
         }
