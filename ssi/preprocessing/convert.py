@@ -110,6 +110,7 @@ class ConvertAllJumboReceipts(luigi.Task):
 
     def run(self):
         for input_receipts in self.input():
+            print("Here")
             receipts_dfs = []
             with input_receipts.open('r') as input_file:
                 receipts_dfs.append(pd.read_parquet(
