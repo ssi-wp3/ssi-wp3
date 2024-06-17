@@ -74,6 +74,9 @@ def convert_to_parquet(input_filename: str,
 
     skipheader = 1 if has_header else 0
 
+    print(
+        f"File {filename} has header: {has_header} and skipheader: {skipheader}")
+
     df = pd.read_csv(input_filename,
                      sep=delimiter,
                      engine="pyarrow",
