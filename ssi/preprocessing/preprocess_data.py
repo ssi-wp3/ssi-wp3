@@ -114,11 +114,21 @@ def rename_columns(dataframe: pd.DataFrame, column_mapping: dict) -> pd.DataFram
     return dataframe.rename(columns=column_mapping)
 
 
+def add_store_names(dataframe: pd.DataFrame,
+                    store_names: Dict[str, str],
+                    store_id_column: str,
+                    store_name_column: str) -> pd.DataFrame:
+    dataframe[store_name_column] = dataframe[store_id_column].map(
+        store_names)
+    return dataframe
+
+
 def preprocess_data(dataframe: pd.DataFrame,
                     columns: List[str],
                     coicop_column: str,
                     product_description_column: str,
                     column_mapping: Dict[str, str],
+                    store_name_mapping: Dict[str, str]
                     ) -> pd.DataFrame:
     # Lidl file is losing records here
     # 1367 records have COICOP < 5 (length 1) and are filtered out
@@ -129,6 +139,8 @@ def preprocess_data(dataframe: pd.DataFrame,
     dataframe = split_month_year_column(
         dataframe, month_year_column=Constants.YEAR_MONTH_COLUMN)
     dataframe = add_coicop_levels(dataframe, coicop_column=coicop_column)
+    dataframe = add_store_names(dataframe, store_name_mapping,
+                                Constants.STORE_ID_COLUMN, Constants.STORE_NAME_COLUMN)
 
     return dataframe
 

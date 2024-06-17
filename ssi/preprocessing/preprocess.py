@@ -46,6 +46,13 @@ class PreprocessFile(luigi.Task):
     coicop_level_columns = luigi.ListParameter(default=[])
     column_mapping = luigi.DictParameter(
         default={"bg_number": Constants.STORE_ID_COLUMN, "month": Constants.YEAR_MONTH_COLUMN})
+    store_name_mapping = luigi.DictParameter(default={
+        "908515": "lidl",
+        "901027": "plus",
+        "906172": "jumbo",
+        "470111": "ah",
+        "470112": "ah_franchise"
+    })
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     store_name = luigi.Parameter()
@@ -69,7 +76,8 @@ class PreprocessFile(luigi.Task):
             columns=self.selected_columns,
             coicop_column=self.coicop_column,
             product_description_column=self.product_description_column,
-            column_mapping=self.column_mapping
+            column_mapping=self.column_mapping,
+            store_name_mapping=self.store_name_mapping
         )
 
         with self.output().open('w') as output_file:
