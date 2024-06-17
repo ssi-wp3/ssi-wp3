@@ -322,7 +322,7 @@ class CrossStoreAnalysis(luigi.Task):
 
     product_id_columns = luigi.ListParameter(
         default=[Constants.PRODUCT_ID_COLUMN, Constants.RECEIPT_TEXT_COLUMN])
-    store_name_column = luigi.Parameter(default="store_name")
+    store_name_column = luigi.Parameter(default=Constants.STORE_NAME_COLUMN)
 
     @property
     def combined_revenue_files(self) -> Dict[str, str]:
@@ -428,7 +428,7 @@ class OverlapPerPreprocessing(luigi.Task):
 
     product_id_column = luigi.Parameter(
         default=Constants.RECEIPT_TEXT_COLUMN)
-    store_name_column = luigi.Parameter(default="store_name")
+    store_name_column = luigi.Parameter(default=Constants.STORE_NAME_COLUMN)
 
     @property
     def combined_revenue_files(self) -> Dict[str, str]:
@@ -489,7 +489,7 @@ class OverlapPerPreprocessingAndCoicop(luigi.Task):
 
     product_id_column = luigi.Parameter(
         default=Constants.RECEIPT_TEXT_COLUMN)
-    store_name_column = luigi.Parameter(default="store_name")
+    store_name_column = luigi.Parameter(default=Constants.STORE_NAME_COLUMN)
     coicop_column = luigi.Parameter(default="coicop_level_1")
 
     @property
