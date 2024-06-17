@@ -22,12 +22,14 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
                                                         'IsbaOmschrijving': 'isba_description',
                                                         'Isba': 'isba_number',
                                                         'Esba': 'esba_number',
-                                                        'BG': 'store_id',
+                                                        'BG': Constants.STORE_ID_COLUMN,
                                                         'Coicop': 'coicop_number'})
-        ah_receipts_df.ean_number = ah_receipts_df.ean_number.astype(str)
+        ah_receipts_df[Constants.PRODUCT_ID_COLUMN] = ah_receipts_df[Constants.PRODUCT_ID_COLUMN].astype(
+            str)
         ah_receipts_df.isba_number = ah_receipts_df.isba_number.astype(str)
         ah_receipts_df.esba_number = ah_receipts_df.esba_number.astype(str)
-        ah_receipts_df.store_id = ah_receipts_df.store_id.astype(str)
+        ah_receipts_df[Constants.STORE_ID_COLUMN] = ah_receipts_df[Constants.STORE_ID_COLUMN].astype(
+            str)
 
         ah_receipts_df = ah_receipts_df.rename(
             columns={column_name: column_name.lower() for column_name in ah_receipts_df.columns})
@@ -57,7 +59,8 @@ def convert_jumbo_receipts(input_file,
     # Convert year-week to year-month
     jumbo_receipts_df[year_month_column] = year_week_to_date(
         jumbo_receipts_df["year_week"]).dt.strftime('%Y%m')
-    jumbo_receipts_df.ean_number = jumbo_receipts_df.ean_number.astype(str)
+    jumbo_receipts_df[Constants.PRODUCT_ID_COLUMN] = jumbo_receipts_df[Constants.PRODUCT_ID_COLUMN].astype(
+        str)
 
     return jumbo_receipts_df
 
