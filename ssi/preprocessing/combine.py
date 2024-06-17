@@ -24,7 +24,7 @@ class CombineRevenueFiles(luigi.Task):
     filename_prefix = luigi.Parameter()
     parquet_engine = luigi.Parameter()
     sort_order = luigi.DictParameter(
-        default={"bg_number": True, "month": True, "coicop_number": True})
+        default={"bg_number": True, "month": True, Constants.COICOP_LABEL_COLUMN: True})
 
     def requires(self):
         revenue_files = get_revenue_files_in_folder(

@@ -13,7 +13,7 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
     column_types = OrderedDict([
         ('bg_number', str),
         ('month', str),
-        ('coicop_number', str),
+        (Constants.COICOP_LABEL_COLUMN, str),
         ('coicop_name', str),
         ('isba_number', str),
         ('isba_name', str),
@@ -30,7 +30,7 @@ def get_column_types(filename: str) -> Optional[OrderedDict[str, Any]]:
         return column_types
     elif filename.lower().startswith("output"):
         return OrderedDict([(column_name, column_types[column_name])
-                            for column_name in ['bg_number', 'coicop_number', 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', Constants.PRODUCT_ID_COLUMN, 'ean_name']
+                            for column_name in ['bg_number', Constants.COICOP_LABEL_COLUMN, 'coicop_name', 'isba_number', 'isba_name', 'esba_number', 'esba_name', 'rep_id', Constants.PRODUCT_ID_COLUMN, 'ean_name']
                             ])
     return None
 

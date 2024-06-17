@@ -174,7 +174,7 @@ class CombineUniqueValues(luigi.Task):
     output_directory = luigi.PathParameter()
     filename_prefix = luigi.Parameter()
     key_columns = luigi.ListParameter(
-        [Constants.RECEIPT_TEXT_COLUMN, "coicop_number"])
+        [Constants.RECEIPT_TEXT_COLUMN, Constants.COICOP_LABEL_COLUMN])
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     parquet_engine = luigi.Parameter()
 

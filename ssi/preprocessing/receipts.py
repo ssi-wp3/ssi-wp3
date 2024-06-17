@@ -205,7 +205,7 @@ class AddReceiptTexts(luigi.Task):
                 on=[Constants.STORE_ID_COLUMN, "esba_number", "isba_number", Constants.PRODUCT_ID_COLUMN])
 
             receipt_revenue_df = receipt_revenue_df.rename(
-                columns={"coicop_number_x": "coicop_number"})
+                columns={"coicop_number_x": Constants.COICOP_LABEL_COLUMN})
             receipt_revenue_df = receipt_revenue_df.drop(
                 columns=["coicop_number_y"])
 

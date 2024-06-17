@@ -40,7 +40,7 @@ class PreprocessFile(luigi.Task):
     """
     input_filename = luigi.Parameter()
     output_filename = luigi.Parameter()
-    coicop_column = luigi.Parameter(default="coicop_number")
+    coicop_column = luigi.Parameter(default=Constants.COICOP_LABEL_COLUMN)
     product_description_column = luigi.Parameter(default="ean_name")
     selected_columns = luigi.ListParameter(default=[])
     coicop_level_columns = luigi.ListParameter(default=[])

@@ -9,11 +9,11 @@ import random
 
 def read_coicop_2018_data() -> pd.DataFrame:
     coicop_data = pd.read_csv('./ssi/coicop_2018.txt', sep=",").rename(
-        columns={"CODE_COICOP_2018": "coicop_number", "HEADING_COICOP_2018": "description"})
+        columns={"CODE_COICOP_2018": Constants.COICOP_LABEL_COLUMN, "HEADING_COICOP_2018": "description"})
 
-    coicop_data["coicop_number"] = coicop_data["coicop_number"].str.replace(
+    coicop_data[Constants.COICOP_LABEL_COLUMN] = coicop_data[Constants.COICOP_LABEL_COLUMN].str.replace(
         ".", "")
-    coicop_data["coicop_level"] = coicop_data["coicop_number"].str.len() - 1
+    coicop_data["coicop_level"] = coicop_data[Constants.COICOP_LABEL_COLUMN].str.len() - 1
     return coicop_data
 
 
@@ -25,7 +25,7 @@ def generate_fake_coicop_2018(num_rows: int) -> str:
     """
     coicop_data = read_coicop_2018_data()
     coicop_data = coicop_data[coicop_data["coicop_level"] == 5]
-    return coicop_data.sample(num_rows, replace=True)[["coicop_number", "description"]]
+    return coicop_data.sample(num_rows, replace=True)[[Constants.COICOP_LABEL_COLUMN, "description"]]
 
 
 def generate_supermarked_ids(num_rows: int, supermarket_id: Optional[str] = None) -> List[str]:
@@ -72,7 +72,7 @@ def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int, su
     month = generate_dates(num_rows, start_date, end_date)  # Year and month
     fake_coicop_data = generate_fake_coicop_2018(
         num_rows)  # COICOP product code
-    coicop_number = fake_coicop_data["coicop_number"]
+    coicop_number = fake_coicop_data[Constants.COICOP_LABEL_COLUMN]
     coicop_name = fake_coicop_data["description"]
     ean_number = [fake.ean() for _ in range(num_rows)]  # EAN product number
     ean_name = [fake.bs() for _ in range(num_rows)]  # Product descriptions
@@ -81,19 +81,19 @@ def generate_fake_revenue_data(num_rows: int, start_date: int, end_date: int, su
     fake_data_df = pd.DataFrame({
         'bg_number': bg_number,
         'month': month,
-        'coicop_number': coicop_number,
+        Constants.COICOP_LABEL_COLUMN: coicop_number,
         'coicop_name': coicop_name,
         Constants.PRODUCT_ID_COLUMN: ean_number,
         'ean_name': ean_name,
         'revenue': np.random.randint(100, 1000, size=num_rows),
         'amount': np.random.randint(1, 10, size=num_rows)
     })
-    return fake_data_df.sort_values(by=["bg_number", "month", "coicop_number"]).reset_index(drop=True)
+    return fake_data_df.sort_values(by=["bg_number", "month", Constants.COICOP_LABEL_COLUMN]).reset_index(drop=True)
 
 
 def generate_fake_data_with_coicop_levels(num_rows: int, start_date: int, end_date: int) -> pd.DataFrame:
     dataframe = generate_fake_revenue_data(num_rows, start_date, end_date)
-    dataframe = preprocess_data(dataframe, ["bg_number", "month", "coicop_number",
+    dataframe = preprocess_data(dataframe, ["bg_number", "month", Constants.COICOP_LABEL_COLUMN,
                                             "coicop_name", Constants.PRODUCT_ID_COLUMN, "ean_name"],
-                                "coicop_number", "product_id", "ean_name", column_mapping={"bg_number": "supermarket_id", "month": Constants.YEAR_MONTH_COLUMN})
+                                Constants.COICOP_LABEL_COLUMN, "product_id", "ean_name", column_mapping={"bg_number": "supermarket_id", "month": Constants.YEAR_MONTH_COLUMN})
     return dataframe

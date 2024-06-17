@@ -1,5 +1,6 @@
 from ssi.preprocessing.preprocess_data import *
 from ssi.synthetic_data import generate_fake_revenue_data
+from ssi.constants import Constants
 import unittest
 import pandas as pd
 import os
@@ -14,7 +15,7 @@ class TestPreprocessData(unittest.TestCase):
 
     def test_split_coicop_returns_full_coicop_number(self):
         self.assertTrue(self.coicop_series.equals(split_coicop(
-            self.coicop_series).coicop_number))
+            self.coicop_series)[Constants.COICOP_LABEL_COLUMN]))
 
     def test_split_coicop_returns_coicop_divisions(self):
         coicop_division = pd.Series([
@@ -67,9 +68,9 @@ class TestPreprocessData(unittest.TestCase):
 
     def test_add_leading_zero(self):
         dataframe = pd.DataFrame(
-            {"coicop_number": ["1234", "12345", "123456"]})
+            {Constants.COICOP_LABEL_COLUMN: ["1234", "12345", "123456"]})
         dataframe = add_leading_zero(dataframe)
-        self.assertTrue(dataframe["coicop_number"].equals(
+        self.assertTrue(dataframe[Constants.COICOP_LABEL_COLUMN].equals(
             pd.Series(["1234", "012345", "123456"])))
 
     def test_add_unique_product_id(self):
@@ -81,7 +82,7 @@ class TestPreprocessData(unittest.TestCase):
 
     def test_add_coicop_levels(self):
         dataframe = pd.DataFrame(
-            {"coicop_number": ["011201", "022312", "123423", "054534", "065645"]})
+            {Constants.COICOP_LABEL_COLUMN: ["011201", "022312", "123423", "054534", "065645"]})
         dataframe = add_coicop_levels(dataframe)
         self.assertTrue(dataframe["coicop_level_1"].equals(
             pd.Series(["01", "02", "12", "05", "06"])))
@@ -94,21 +95,21 @@ class TestPreprocessData(unittest.TestCase):
 
     def test_get_category_counts(self):
         dataframe = pd.DataFrame({
-            "coicop_number": ["011201", "011201", "022312", "022312", "022312",
-                              "123423", "054534", "054534", "054534", "054534",
-                              "065645", "065645", "065645", "065645", "065645"],
+            Constants.COICOP_LABEL_COLUMN: ["011201", "011201", "022312", "022312", "022312",
+                                            "123423", "054534", "054534", "054534", "054534",
+                                            "065645", "065645", "065645", "065645", "065645"],
             "product_id": [1, 1, 2, 3, 4,
                            5, 6, 6, 8, 9,
                            10, 11, 11, 12, 13]})
 
         category_counts = get_category_counts(
-            dataframe, coicop_column="coicop_number", product_id_column="product_id")
-        self.assertTrue(category_counts.sort_values(by="coicop_number")["count"].equals(
+            dataframe, coicop_column=Constants.COICOP_LABEL_COLUMN, product_id_column="product_id")
+        self.assertTrue(category_counts.sort_values(by=Constants.COICOP_LABEL_COLUMN)["count"].equals(
             pd.Series([1, 3, 3, 4, 1])))
 
     def test_filter_columns(self):
         dataframe = pd.DataFrame({
-            "coicop_number": ["011201" for _ in range(10)],
+            Constants.COICOP_LABEL_COLUMN: ["011201" for _ in range(10)],
             "product_id": [i for i in range(10)],
             "product_name": [f"product_{i}" for i in range(10)],
             "isba_number": [i for i in range(10)],
@@ -117,23 +118,23 @@ class TestPreprocessData(unittest.TestCase):
             "ean_name": [f"ean_{i}" for i in range(10)]
         })
         filtered_dataframe1 = filter_columns(
-            dataframe, columns=["coicop_number"])
-        self.assertTrue(["coicop_number"] ==
+            dataframe, columns=[Constants.COICOP_LABEL_COLUMN])
+        self.assertTrue([Constants.COICOP_LABEL_COLUMN] ==
                         filtered_dataframe1.columns.tolist())
 
         filtered_dataframe2 = filter_columns(
-            dataframe, columns=["coicop_number", "product_id"])
-        self.assertTrue(["coicop_number", "product_id"]
+            dataframe, columns=[Constants.COICOP_LABEL_COLUMN, "product_id"])
+        self.assertTrue([Constants.COICOP_LABEL_COLUMN, "product_id"]
                         == filtered_dataframe2.columns.tolist())
 
         filtered_dataframe3 = filter_columns(
-            dataframe, columns=["coicop_number", "product_id", "product_name"])
-        self.assertTrue(["coicop_number", "product_id",
+            dataframe, columns=[Constants.COICOP_LABEL_COLUMN, "product_id", "product_name"])
+        self.assertTrue([Constants.COICOP_LABEL_COLUMN, "product_id",
                         "product_name"] == filtered_dataframe3.columns.tolist())
 
     def test_rename_columns(self):
         dataframe = pd.DataFrame({
-            "coicop_number": ["011201" for _ in range(10)],
+            Constants.COICOP_LABEL_COLUMN: ["011201" for _ in range(10)],
             "product_id": [i for i in range(10)],
             "product_name": [f"product_{i}" for i in range(10)],
             "isba_number": [i for i in range(10)],
@@ -143,7 +144,7 @@ class TestPreprocessData(unittest.TestCase):
         })
 
         renamed_dataframe = rename_columns(dataframe, {
-            "coicop_number": "coicop",
+            Constants.COICOP_LABEL_COLUMN: "coicop",
             "product_id": "id",
             "product_name": "name",
             "isba_number": "isba",
@@ -158,9 +159,9 @@ class TestPreprocessData(unittest.TestCase):
     def test_preprocess_data(self):
         dataframe = pd.DataFrame({
             "bg_number": [1 for _ in range(15)],
-            "coicop_number": ["11201", "11201", "22312", "22312", "022312",
-                              "123423", "54534", "054534", "54534", "54534",
-                              "65645", "065645", "65645", "65645", "065645"],
+            Constants.COICOP_LABEL_COLUMN: ["11201", "11201", "22312", "22312", "022312",
+                                            "123423", "54534", "054534", "54534", "54534",
+                                            "65645", "065645", "65645", "65645", "065645"],
             "month": [(datetime.date(2018, 1, 1) + datetime.timedelta(days=31*i)).strftime("%Y%m")
                       for i in range(15)],
             "product_name": [f"product_{i}" for i in range(15)],
@@ -173,16 +174,16 @@ class TestPreprocessData(unittest.TestCase):
         processed_dataframe = preprocess_data(
             dataframe,
             columns=["bg_number", "month",
-                     "coicop_number", Constants.PRODUCT_ID_COLUMN, "ean_name"],
-            coicop_column="coicop_number",
+                     Constants.COICOP_LABEL_COLUMN, Constants.PRODUCT_ID_COLUMN, "ean_name"],
+            coicop_column=Constants.COICOP_LABEL_COLUMN,
             product_description_column=Constants.RECEIPT_TEXT_COLUMN,
             column_mapping={"bg_number": "supermarket_id",
                             "month": Constants.YEAR_MONTH_COLUMN, "ean_name": Constants.RECEIPT_TEXT_COLUMN},
         )
         self.assertEqual(len(dataframe), len(processed_dataframe))
         self.assertEqual([6] * len(processed_dataframe),
-                         processed_dataframe["coicop_number"].str.len().tolist())
-        self.assertEqual(["supermarket_id", Constants.YEAR_MONTH_COLUMN, "coicop_number", Constants.PRODUCT_ID_COLUMN, Constants.RECEIPT_TEXT_COLUMN,
+                         processed_dataframe[Constants.COICOP_LABEL_COLUMN].str.len().tolist())
+        self.assertEqual(["supermarket_id", Constants.YEAR_MONTH_COLUMN, Constants.COICOP_LABEL_COLUMN, Constants.PRODUCT_ID_COLUMN, Constants.RECEIPT_TEXT_COLUMN,
                           "year", "month",
                           "coicop_level_1", "coicop_level_2",
                           "coicop_level_3", "coicop_level_4"],
@@ -204,7 +205,7 @@ class TestPreprocessData(unittest.TestCase):
         self.assertEqual(["011201", "011201", "022312", "022312", "022312",
                           "123423", "054534", "054534", "054534", "054534",
                           "065645", "065645", "065645", "065645", "065645"],
-                         processed_dataframe["coicop_number"].tolist())
+                         processed_dataframe[Constants.COICOP_LABEL_COLUMN].tolist())
 
         self.assertEqual(["01", "01", "02", "02", "02",
                           "12", "05", "05", "05", "05",
@@ -244,11 +245,11 @@ class TestPreprocessData(unittest.TestCase):
                 dataframes.append(dataframe)
 
         combined_dataframe = combine_revenue_files(
-            filenames, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True])
+            filenames, sort_columns=["bg_number", "month", Constants.COICOP_LABEL_COLUMN], sort_order=[True, True, True])
         self.assertEqual(500, len(combined_dataframe))
 
         expected_dataframe = pd.concat(dataframes).sort_values(
-            by=["bg_number", "month", "coicop_number"], ascending=[True, True, True]).reset_index(drop=True)
+            by=["bg_number", "month", Constants.COICOP_LABEL_COLUMN], ascending=[True, True, True]).reset_index(drop=True)
         self.assertTrue(expected_dataframe.equals(combined_dataframe))
 
     def test_combine_revenue_files_in_folder(self):
@@ -276,10 +277,10 @@ class TestPreprocessData(unittest.TestCase):
         number_of_files_read = 0
         for i, (supermarket_name, number_of_files) in enumerate(revenue_files.items()):
             supermarket_dataframe = combine_revenue_files_in_folder(
-                data_directory, supermarket_name, sort_columns=["bg_number", "month", "coicop_number"], sort_order=[True, True, True])
+                data_directory, supermarket_name, sort_columns=["bg_number", "month", Constants.COICOP_LABEL_COLUMN], sort_order=[True, True, True])
             self.assertEqual(number_of_files * 50, len(supermarket_dataframe))
             expected_dataframe = pd.concat([pd.read_parquet(filename) for filename in filenames[number_of_files_read:number_of_files_read+number_of_files]]).sort_values(
-                by=["bg_number", "month", "coicop_number"], ascending=[True, True, True]).reset_index(drop=True)
+                by=["bg_number", "month", Constants.COICOP_LABEL_COLUMN], ascending=[True, True, True]).reset_index(drop=True)
 
             self.assertTrue(expected_dataframe.equals(supermarket_dataframe))
             number_of_files_read += number_of_files

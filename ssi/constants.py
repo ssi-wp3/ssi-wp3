@@ -16,3 +16,4 @@ class Constants:
     YEAR_MONTH_COLUMN = "year_month"
     PRODUCT_ID_COLUMN = "ean_number"
     RECEIPT_TEXT_COLUMN = "receipt_text"
+    COICOP_LABEL_COLUMN = "coicop_number"

@@ -23,7 +23,7 @@ def convert_ah_receipts(input_file, coicop_sheet_prefix: str = "coi") -> pd.Data
                                                         'Isba': 'isba_number',
                                                         'Esba': 'esba_number',
                                                         'BG': Constants.STORE_ID_COLUMN,
-                                                        'Coicop': 'coicop_number'})
+                                                        'Coicop': Constants.COICOP_LABEL_COLUMN})
         ah_receipts_df[Constants.PRODUCT_ID_COLUMN] = ah_receipts_df[Constants.PRODUCT_ID_COLUMN].astype(
             str)
         ah_receipts_df.isba_number = ah_receipts_df.isba_number.astype(str)
@@ -81,14 +81,14 @@ def split_month_year_column(dataframe: pd.DataFrame, month_year_column: str = "m
     return dataframe
 
 
-def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
+def add_leading_zero(dataframe: pd.DataFrame, coicop_column: str = Constants.COICOP_LABEL_COLUMN) -> pd.DataFrame:
     shorter_columns = dataframe[coicop_column].str.len() == 5
     dataframe.loc[shorter_columns, coicop_column] = dataframe[shorter_columns][coicop_column].apply(
         lambda s: f"0{s}")
     return dataframe
 
 
-def add_coicop_levels(dataframe: pd.DataFrame, coicop_column: str = "coicop_number") -> pd.DataFrame:
+def add_coicop_levels(dataframe: pd.DataFrame, coicop_column: str = Constants.COICOP_LABEL_COLUMN) -> pd.DataFrame:
     unique_coicop = pd.Series(
         dataframe[dataframe[coicop_column].str.len() == 6][coicop_column].unique())
     split_coicop_df = split_coicop(unique_coicop)
@@ -157,7 +157,7 @@ def save_combined_revenue_files(data_directory: str,
                                 selected_columns: List[str],
                                 coicop_level_columns: List[str],
                                 column_mapping: Dict[str, str],
-                                coicop_column: str = "coicop_number",
+                                coicop_column: str = Constants.COICOP_LABEL_COLUMN,
                                 product_description_column: str = "ean_name",
                                 filename_prefix: str = "Omzet",
                                 engine: str = "pyarrow"):
