@@ -54,7 +54,7 @@ def check_header(input_file, delimiter: str) -> bool:
                        "eannaam", "omzet", "aantal"}
     column_names = set([column.lower()
                        for column in first_line.columns.tolist()])
-    return column_names.issubset(standard_header)
+    return len(column_names.intersection(standard_header)) > 0
 
 
 def convert_to_parquet(input_filename: str,
