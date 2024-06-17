@@ -39,7 +39,7 @@ def tokenize_strings(string_column: pd.Series, tokenizer: Callable[[str], List[s
     pd.Series
         A series with the unique tokens.
     """
-    return string_column.apply(tokenizer).explode()
+    return string_column.dropna().apply(tokenizer).explode()
 
 
 def drop_short_strings(string_column: pd.Series, drop_less_than: int = 3):
