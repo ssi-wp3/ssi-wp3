@@ -453,7 +453,7 @@ class OverlapPerPreprocessing(luigi.Task):
 
     def run(self):
         with tqdm.tqdm(total=len(self.preprocessing_functions)) as progress_bar:
-            store_dataframes = [self.read_store_file(input_file, self.store_name_column, store_name)
+            store_dataframes = [self.read_store_file(input_file, self.store_name_column)
                                 for store_name, input_file in self.input().items()]
             dataframe = compare_overlap_between_preprocessing_functions(store_dataframes,
                                                                         self.store_name_column,
