@@ -132,7 +132,6 @@ class HuggingFaceModel(Model):
     def _create_model(self, model_name: str, model_settings: HuggingFaceModelSettings, number_of_categories: int) -> Trainer:
         model = AutoModelForSequenceClassification.from_pretrained(
             model_name, num_labels=number_of_categories)
-
         return Trainer(model=model, args=model_settings.training_args)
 
     def fit(self, X, y) -> 'Model':
