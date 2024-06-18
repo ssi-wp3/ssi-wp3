@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from sklearn.model_selection import train_test_split
 from .label_encoder import DataLabelEncoder
 import pandas as pd
+import enum
 
 
 class DataProvider:
@@ -51,6 +52,24 @@ class DataProvider:
     @abstractmethod
     def get_subset(self, indices: pd.Series) -> pd.DataFrame:
         pass
+
+
+class DataProviderType(enum.Enum):
+    DataFrame = "dataframe"
+    HuggingFace = "huggingface"
+    PyTorch = "pytorch"
+
+
+class DataProviderFactory:
+    @staticmethod
+    def create_data_provider(filename: str,
+                             data_provider_type: DataProviderType,
+                             **kwargs) -> 'DataProvider':
+        if data_provider_type == DataProviderType.DataFrame:
+            # return DataframeDataProvider(features_column, label_column, label_encoder, **kwargs)
+        else:
+            raise ValueError(
+                f"Data provider type {data_provider_type} is not supported.")
 
 
 class DataframeDataProvider(DataProvider):
