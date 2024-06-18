@@ -1,7 +1,7 @@
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 from abc import ABC, abstractmethod, abstractproperty
 from sklearn.base import BaseEstimator, ClassifierMixin
-from transformers import TrainingArguments
+from transformers import Trainer, TrainingArguments
 import numpy as np
 
 
@@ -69,16 +69,21 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
     read the training and evaluation data in a form suitable to the model type.
     """
 
-    def __init__(self, model: Any, classes: np.ndarray = None):
-        self.__model_class = model
+    def __init__(self, model_create_function: Callable[[ModelSettings], Any], model_settings: ModelSettings, classes: np.ndarray = None):
         self.__model = None
+        self.__model_create_function = model_create_function
+        self.__model_settings = model_settings
         self.__classes = classes
 
     @property
     def model(self) -> Any:
-        if self.__model is None:
-            self.__model = self.__model_class()
+        if not self.__model:
+            self.__model = self.__model_create_function(self.model_settings)
         return self.__model
+
+    @property
+    def model_settings(self) -> ModelSettings:
+        return self.__model_settings
 
     @property
     def classes_(self) -> np.ndarray:
@@ -89,5 +94,47 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
         self.__classes = value
 
     @abstractmethod
-    def load_data(self, filename: str, **kwargs) -> Any:
+    def fit(self, X, y) -> 'Model':
         pass
+
+    @abstractmethod
+    def predict(self, X) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def predict_proba(self, X) -> np.ndarray:
+        pass
+
+
+class SklearnModel(Model):
+    def __init__(self, model: ClassifierMixin, model_settings: SklearnModelSettings, classes: np.ndarray = None):
+        super().__init__(lambda sk_model_settings: model(
+            sk_model_settings.settings_dict), model_settings, classes)
+
+    def fit(self, X, y) -> 'Model':
+        self.model.fit(X, y)
+        return self
+
+    def predict(self, X) -> np.ndarray:
+        return self.model.predict(X)
+
+    def predict_proba(self, X) -> np.ndarray:
+        return self.model.predict_proba(X)
+
+
+class HuggingFaceModel(Model):
+    def __init__(self, model_name: str, model_settings: HuggingFaceModelSettings, classes: np.ndarray = None):
+        super().__init__(lambda model_settings: Trainer(model=model_name,
+                                                        args=model_settings.training_args), model_settings, classes)
+
+    def fit(self, X, y) -> 'Model':
+        self.model.train()
+        return self
+
+    def predict(self, X) -> np.ndarray:
+        self.model.eval()
+        return self.model.predict(X)
+
+    def predict_proba(self, X) -> np.ndarray:
+        self.model.eval()
+        return self.model.predict_proba(X)
