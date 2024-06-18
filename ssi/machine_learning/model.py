@@ -1,6 +1,7 @@
 from typing import Dict, Any
 from abc import ABC, abstractmethod, abstractproperty
 from sklearn.base import BaseEstimator, ClassifierMixin
+from transformers import TrainingArguments
 import numpy as np
 
 
@@ -41,6 +42,19 @@ class SklearnModelSettings(ModelSettings):
 
     def check_settings_key_exists(self, key: str) -> bool:
         return key in self.__model.model.get_params().keys()
+
+
+class HuggingFaceModelSettings(ModelSettings):
+    def __init__(self, training_args: TrainingArguments):
+        super().__init__()
+        self.__training_args = training_args
+
+    @property
+    def training_args(self) -> TrainingArguments:
+        return self.__training_args
+
+    def check_settings_key_exists(self, key: str) -> bool:
+        return hasattr(self.__training_args, key)
 
 
 class Model(BaseEstimator, ClassifierMixin, ABC):
