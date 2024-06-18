@@ -6,8 +6,10 @@ import numpy as np
 
 
 class ModelSettings(ABC):
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.__settings_dict = dict()
+        for key, value in kwargs.items():
+            self.add(key, value)
 
     @property
     def settings_dict(self) -> Dict[str, Any]:
@@ -32,8 +34,8 @@ class ModelSettings(ABC):
 
 
 class SklearnModelSettings(ModelSettings):
-    def __init__(self, model: 'Model'):
-        super().__init__()
+    def __init__(self, model: 'Model', **kwargs):
+        super().__init__(**kwargs)
         self.__model = model
 
     @property
@@ -45,14 +47,8 @@ class SklearnModelSettings(ModelSettings):
 
 
 class HuggingFaceModelSettings(ModelSettings):
-    def __init__(self, output_directory: str):
-        super().__init__()
-        self.__output_directory = output_directory
-        self.add("output_dir", output_directory)
-
-    @property
-    def output_directory(self) -> str:
-        return self.__output_directory
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @property
     def training_args(self) -> TrainingArguments:
