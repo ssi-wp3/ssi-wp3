@@ -45,13 +45,18 @@ class SklearnModelSettings(ModelSettings):
 
 
 class HuggingFaceModelSettings(ModelSettings):
-    def __init__(self, training_args: TrainingArguments):
+    def __init__(self, output_directory: str):
         super().__init__()
-        self.__training_args = training_args
+        self.__output_directory = output_directory
+        self.add("output_dir", output_directory)
+
+    @property
+    def output_directory(self) -> str:
+        return self.__output_directory
 
     @property
     def training_args(self) -> TrainingArguments:
-        return self.__training_args
+        return TrainingArguments(**self.settings_dict)
 
     def check_settings_key_exists(self, key: str) -> bool:
         return hasattr(self.__training_args, key)
