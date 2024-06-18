@@ -1,7 +1,8 @@
 from typing import Dict, Any, Callable
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from sklearn.base import BaseEstimator, ClassifierMixin
 from transformers import Trainer, TrainingArguments, AutoModelForSequenceClassification
+from data_loaders.data import DataProvider
 import numpy as np
 
 
@@ -55,7 +56,7 @@ class HuggingFaceModelSettings(ModelSettings):
         return TrainingArguments(**self.settings_dict)
 
     def check_settings_key_exists(self, key: str) -> bool:
-        return hasattr(self.__training_args, key)
+        return hasattr(self.training_args, key)
 
 
 class Model(BaseEstimator, ClassifierMixin, ABC):
@@ -81,24 +82,15 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
         return self.__model_settings
 
     @abstractmethod
-    @property
-    def classes_(self) -> np.ndarray:
-        pass
-
-    @classes_.setter
-    def classes_(self, value: np.ndarray):
-        self.__classes = value
-
-    @abstractmethod
-    def fit(self, X, y) -> 'Model':
+    def fit(self, training_dataset: DataProvider) -> 'Model':
         pass
 
     @abstractmethod
-    def predict(self, X) -> np.ndarray:
+    def predict(self, test_dataset: DataProvider) -> np.ndarray:
         pass
 
     @abstractmethod
-    def predict_proba(self, X) -> np.ndarray:
+    def predict_proba(self, test_dataset: DataProvider) -> np.ndarray:
         pass
 
 
@@ -108,14 +100,14 @@ class SklearnModel(Model):
         super().__init__(lambda sk_model_settings: model(
             sk_model_settings.settings_dict), model_settings)
 
-    def fit(self, X, y) -> 'Model':
+    def fit(self, training_dataset: DataProvider) -> 'Model':
         self.model.fit(X, y)
         return self
 
-    def predict(self, X) -> np.ndarray:
+    def predict(self, test_dataset: DataProvider) -> np.ndarray:
         return self.model.predict(X)
 
-    def predict_proba(self, X) -> np.ndarray:
+    def predict_proba(self, test_dataset: DataProvider) -> np.ndarray:
         return self.model.predict_proba(X)
 
 
@@ -130,14 +122,14 @@ class HuggingFaceModel(Model):
             model_name, num_labels=number_of_categories)
         return Trainer(model=model, args=model_settings.training_args)
 
-    def fit(self, X, y) -> 'Model':
+    def fit(self, training_dataset: DataProvider) -> 'Model':
         self.model.train()
         return self
 
-    def predict(self, X) -> np.ndarray:
+    def predict(self, test_dataset: DataProvider) -> np.ndarray:
         self.model.eval()
         return self.model.predict(X)
 
-    def predict_proba(self, X) -> np.ndarray:
+    def predict_proba(self, test_dataset: DataProvider) -> np.ndarray:
         self.model.eval()
         return self.model.predict_proba(X)
