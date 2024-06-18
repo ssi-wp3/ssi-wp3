@@ -1,7 +1,7 @@
 from typing import Dict, Any, Callable
 from abc import ABC, abstractmethod, abstractproperty
 from sklearn.base import BaseEstimator, ClassifierMixin
-from transformers import Trainer, TrainingArguments
+from transformers import Trainer, TrainingArguments, AutoModelForSequenceClassification
 import numpy as np
 
 
@@ -124,8 +124,17 @@ class SklearnModel(Model):
 
 class HuggingFaceModel(Model):
     def __init__(self, model_name: str, model_settings: HuggingFaceModelSettings, classes: np.ndarray = None):
-        super().__init__(lambda model_settings: Trainer(model=model_name,
-                                                        args=model_settings.training_args), model_settings, classes)
+
+        super().__init__(lambda model_settings: self._create_model(
+            model_name, model_settings), model_settings, classes)
+
+    def _create_model(self, model_name: str, model_settings: HuggingFaceModelSettings) -> Trainer:
+        number_of_categories = len(
+            np.unique(classes)) if classes is not None else None
+        model = AutoModelForSequenceClassification.from_pretrained(
+            model_name, num_labels=number_of_categories)
+
+        return Trainer(model=model, args=model_settings.training_args)
 
     def fit(self, X, y) -> 'Model':
         self.model.train()
