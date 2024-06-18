@@ -39,6 +39,9 @@ class SklearnModelSettings(ModelSettings):
     def model(self) -> 'Model':
         return self.__model
 
+    def check_settings_key_exists(self, key: str) -> bool:
+        return key in self.__model.model.get_params().keys()
+
 
 class Model(BaseEstimator, ClassifierMixin, ABC):
     """ The Model class is a super class for different classifiers. It wraps the classifier in
