@@ -534,7 +534,7 @@ class OverlapPerPreprocessingAndCoicop(luigi.Task):
     def read_store_file(self, input_file, store_name_column: str) -> pd.DataFrame:
         with input_file.open("r") as input_parquet_file:
             dataframe = pd.read_parquet(
-                input_parquet_file, engine=self.parquet_engine, columns=[self.product_id_column, self.store_name_column])
+                input_parquet_file, engine=self.parquet_engine, columns=[self.product_id_column, self.store_name_column, self.coicop_column])
             dataframe[store_name_column] = dataframe[store_name_column].str.replace(
                 "ah_franchise", "ah")
             return dataframe
