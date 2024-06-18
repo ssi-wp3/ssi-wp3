@@ -69,11 +69,10 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
     read the training and evaluation data in a form suitable to the model type.
     """
 
-    def __init__(self, model_create_function: Callable[[ModelSettings], Any], model_settings: ModelSettings, classes: np.ndarray = None):
+    def __init__(self, model_create_function: Callable[[ModelSettings], Any], model_settings: ModelSettings):
         self.__model = None
         self.__model_create_function = model_create_function
         self.__model_settings = model_settings
-        self.__classes = classes
 
     @property
     def model(self) -> Any:
@@ -85,9 +84,10 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
     def model_settings(self) -> ModelSettings:
         return self.__model_settings
 
+    @abstractmethod
     @property
     def classes_(self) -> np.ndarray:
-        return self.__classes
+        pass
 
     @classes_.setter
     def classes_(self, value: np.ndarray):
@@ -107,9 +107,10 @@ class Model(BaseEstimator, ClassifierMixin, ABC):
 
 
 class SklearnModel(Model):
-    def __init__(self, model: ClassifierMixin, model_settings: SklearnModelSettings, classes: np.ndarray = None):
+    def __init__(self, model: ClassifierMixin, **kwargs):
+        model_settings = SklearnModelSettings(**kwargs)
         super().__init__(lambda sk_model_settings: model(
-            sk_model_settings.settings_dict), model_settings, classes)
+            sk_model_settings.settings_dict), model_settings)
 
     def fit(self, X, y) -> 'Model':
         self.model.fit(X, y)
@@ -123,14 +124,12 @@ class SklearnModel(Model):
 
 
 class HuggingFaceModel(Model):
-    def __init__(self, model_name: str, model_settings: HuggingFaceModelSettings, classes: np.ndarray = None):
-
+    def __init__(self, model_name: str, **kwargs):
+        model_settings = HuggingFaceModelSettings(**kwargs)
         super().__init__(lambda model_settings: self._create_model(
-            model_name, model_settings), model_settings, classes)
+            model_name, model_settings), model_settings)
 
-    def _create_model(self, model_name: str, model_settings: HuggingFaceModelSettings) -> Trainer:
-        number_of_categories = len(
-            np.unique(classes)) if classes is not None else None
+    def _create_model(self, model_name: str, model_settings: HuggingFaceModelSettings, number_of_categories: int) -> Trainer:
         model = AutoModelForSequenceClassification.from_pretrained(
             model_name, num_labels=number_of_categories)
 
