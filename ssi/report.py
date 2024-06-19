@@ -6,6 +6,7 @@ from .analysis.utils import unpivot
 from .plots import PlotEngine
 from .settings import Settings
 from .file_index import FileIndex
+import luigi
 import pandas as pd
 import tqdm
 
@@ -231,6 +232,74 @@ class TableReport(Report):
             raise ValueError(f"Unknown table type: {table_type}")
 
 
+class ReportFileManager(ABC):
+    """Abstract class for a report file manager.
+    This class is used to make it possible to use the ReportEngine with luigi.    
+    """
+    @abstractmethod
+    def open_input_file(self, filename: str):
+        """ Opens a file for reading.
+
+        Parameters
+        ----------
+        filename : str
+            The filename of the file to open.
+
+        Returns
+        -------
+        A context manager used for reading the opened file.
+
+        """
+        pass
+
+    @abstractmethod
+    def open_output_file(self, filename: str):
+        """ Opens a file for writing.
+
+        Parameters
+        ----------
+        filename : str
+            The filename of the file to open.
+
+        Returns
+        -------
+        A context manager used for writing to the opened file.
+
+        """
+        pass
+
+
+class DefaultReportFileManager(ReportFileManager):
+    """A default implementation of the ReportFileManager class. This implementation uses the built-in open function to open files.
+    """
+
+    def open_input_file(self, filename: str):
+        return open(filename, "r")
+
+    def open_output_file(self, filename: str):
+        return open(filename, "w")
+
+
+class LuigiReportFileManager(ReportFileManager):
+    def __init__(self, luigi_input_targets: Dict[str, luigi.Target], luigi_output_targets: Dict[str, luigi.Target]):
+        self.__luigi_input_targets = luigi_input_targets
+        self.__luigi_output_targets = luigi_output_targets
+
+    @property
+    def luigi_input_targets(self) -> Dict[str, luigi.Target]:
+        return self.__luigi_input_targets
+
+    @property
+    def luigi_output_targets(self) -> Dict[str, luigi.Target]:
+        return self.__luigi_output_targets
+
+    def open_input_file(self, filename: str):
+        return self.luigi_input_targets[filename].open("r")
+
+    def open_output_file(self, filename: str):
+        return self.luigi_output_targets[filename].open("w")
+
+
 class ReportEngine:
     def __init__(self, settings: Settings):
         self.__settings = settings
@@ -264,7 +333,11 @@ class ReportEngine:
         else:
             raise ValueError(f"Unknown report type: {result_settings['type']}")
 
-    def reports_for_path(self, data_path: str, file_extension: str = ".parquet"):
+    def reports_for_path(self,
+                         data_path: str,
+                         file_extension: str = ".parquet",
+                         parquet_engine: str = "pyarrow",
+                         report_file_manager: ReportFileManager = DefaultReportFileManager()):
         file_index = FileIndex(data_path, file_extension)
 
         with tqdm.tqdm(total=len(file_index.files)) as progress_bar:
@@ -273,12 +346,15 @@ class ReportEngine:
                     progress_bar.set_description(f"Skipping {file_key}")
                     continue
 
-                dataframe = pd.read_parquet(
-                    file_path, engine=self.parquet_engine)
+                with report_file_manager.open_input_file(file_path) as input_file:
+                    dataframe = pd.read_parquet(
+                        input_file, engine=parquet_engine)
 
                 reports = self.reports[file_key]
                 for report in reports:
                     progress_bar.set_description(
                         f"Writing {report.output_filename}")
-                    report.write_to_file(dataframe, report.output_filename)
+
+                    with report_file_manager.open_output_file(report.output_filename) as output_file:
+                        report.write_to_file(dataframe, output_file)
                 progress_bar.update(1)
