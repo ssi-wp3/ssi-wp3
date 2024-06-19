@@ -45,6 +45,7 @@ class ReportTask(luigi.Task):
         return luigi.LocalTarget(filename)
 
     def requires(self):
+        # TODO read input files.
         return []
 
     def output(self):
