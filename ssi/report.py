@@ -9,6 +9,7 @@ from .file_index import FileIndex
 import luigi
 import pandas as pd
 import tqdm
+import os
 
 
 class ReportType(Enum):
@@ -356,5 +357,10 @@ class ReportEngine:
                         f"Writing {report.output_filename}")
 
                     with report_file_manager.open_output_file(report.output_filename) as output_file:
+                        self.create_directory(report.output_filename)
                         report.write_to_file(dataframe, output_file)
                 progress_bar.update(1)
+
+    def create_directory(self, filename: str):
+        directory = os.path.dirname(filename)
+        os.makedirs(directory, exist_ok=True)
