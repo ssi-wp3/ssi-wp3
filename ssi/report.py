@@ -348,8 +348,10 @@ class ReportEngine:
         return reports
 
     def all_reports(self) -> List['Report']:
-        pass
-        # [ for report_id, report_combinations in self.reports_config.items()]
+        report_file_ids = [f"{report_key}_{report_id}"
+                           for report_id, report_combinations in self.reports_config.items()
+                           for report_key in report_combinations["store_name"]
+                           ]
 
     def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
         if result_settings["type"].lower() == ReportType.plot.value:
