@@ -1,29 +1,29 @@
 report_settings:
   # Analysis for whole store
 
-  texts_per_ean_histogram: 
+  texts_per_product_id_histogram: 
       - type: plot
         pivot: false
-        output_filename: "{{store_name}}_texts_per_ean_histogram.png"
+        output_filename: "{{store_name}}_texts_per_product_id_histogram.png"
         settings: 
             plot_type: bar_chart
             x_column: {{receipt_text_column}}
             y_column: count
-            title: Unique receipt texts per EAN for {{store_name}}
+            title: Unique receipt texts per product_id for {{store_name}}
       - type: table
         pivot: false
-        output_filename: "{{store_name}}_texts_per_ean_histogram.md"
+        output_filename: "{{store_name}}_texts_per_product_id_histogram.md"
         settings:
             table_type: markdown 
-  log_texts_per_ean_histogram: 
+  log_texts_per_product_id_histogram: 
       - type: plot
         pivot: false
-        output_filename: "{{store_name}}_log_texts_per_ean_histogram.png"
+        output_filename: "{{store_name}}_log_texts_per_product_id_histogram.png"
         settings: 
             plot_type: bar_chart
             x_column: {{receipt_text_column}}
             y_column: count
-            title: Unique receipt texts per EAN for {{store_name}} (Log scale)
+            title: Unique receipt texts per product_id for {{store_name}} (Log scale)
   receipt_length_histogram: 
       - type: plot
         pivot: false
@@ -33,15 +33,15 @@ report_settings:
             x_column: {{receipt_text_column}}
             y_column: count
             title: Receipt text length histogram for {{store_name}}
-  ean_length_histogram: 
+  product_id_length_histogram: 
       - type: plot
         pivot: false
-        output_filename: "{{store_name}}_ean_length_histogram.png"
+        output_filename: "{{store_name}}_product_id_length_histogram.png"
         settings: 
             plot_type: bar_chart
             x_column: {{product_id_column}}
             y_column: count
-            title: EAN length histogram for {{store_name}}
+            title: product_id length histogram for {{store_name}}
   revenue_for_coicop_hierarchy: 
     - type: plot
       pivot: false

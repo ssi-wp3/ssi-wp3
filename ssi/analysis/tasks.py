@@ -80,11 +80,11 @@ class TableAnalysis(BaseStoreAnalysisTask):
         return {
             # Whole table
             "unique_column_values": lambda dataframe: unique_column_values(dataframe, value_columns),
-            "texts_per_ean_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
-            "log_texts_per_ean_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
+            "texts_per_product_id_histogram": lambda dataframe: texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
+            "log_texts_per_product_id_histogram": lambda dataframe: log_texts_per_ean_histogram(dataframe, self.receipt_text_column, self.product_id_column),
             # Receipt and EAN lengths
             "receipt_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.receipt_text_column),
-            "ean_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
+            "product_id_length_histogram": lambda dataframe: string_length_histogram(dataframe, self.product_id_column),
 
             # Revenue
             "total_revenue": lambda dataframe: total_revenue(dataframe, self.amount_column, self.revenue_column),
