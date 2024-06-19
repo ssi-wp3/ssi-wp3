@@ -1,5 +1,11 @@
 report_settings:
   # Analysis for whole store
+  # report_stores:
+  #   - ah
+  #   - lidl 
+  #   - plus 
+  #   - jumbo
+
 
   texts_per_product_id_histogram: 
       - type: plot
