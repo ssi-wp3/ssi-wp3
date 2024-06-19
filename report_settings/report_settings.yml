@@ -1,4 +1,4 @@
-constants:
+report_settings:
   #period_column=self.period_column,
   #  coicop_column=self.coicop_column,
   
@@ -12,16 +12,72 @@ constants:
     - "coicop_level_3"
     - "coicop_level_4"
     - "coicop_number"
-  report_stores:
-    - ah
-    - lidl 
-    - plus 
-    - jumbo
-  report_period_columns:
-    - "year"
-    - "year_month"
 
-report_settings:
+  reports:  
+    texts_per_product_id_histogram: 
+      store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
+    log_texts_per_product_id_histogram:
+      store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
+    receipt_length_histogram:
+      store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
+    product_id_length_histogram:
+      store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
+    revenue_for_coicop_hierarchy:
+      store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
+    product_revenue_versus_lifetime:
+      store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
+      period_column:
+        - "year"
+        - "year_month"
+  
+    unique_coicop_values_per_coicop: 
+      store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
+      coicop_column:
+        - "coicop_level_1"
+        - "coicop_level_2"
+        - "coicop_level_3"
+        - "coicop_level_4"
+        - "coicop_number"
+    
+    unique_column_values_per_period:
+      store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
+      period_column:
+        - "year"
+        - "year_month"
+
+report_templates:
   # Analysis for whole store
   texts_per_product_id_histogram: 
       - type: plot
