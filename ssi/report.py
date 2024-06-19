@@ -347,6 +347,10 @@ class ReportEngine:
                 reports[report_key].append(self.report_for(report_settings))
         return reports
 
+    def all_reports(self) -> List['Report']:
+        pass
+        # [ for report_id, report_combinations in self.reports_config.items()]
+
     def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
         if result_settings["type"].lower() == ReportType.plot.value:
             return PlotReport(result_settings)
