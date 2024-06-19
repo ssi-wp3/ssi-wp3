@@ -16,26 +16,6 @@ class ReportTask(luigi.Task):
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     @property
-    def report_settings(self) -> Settings:
-        return Settings.load(self.settings_filename,
-                             self.settings_section_name,
-                             False)
-
-    @property
-    def report_template_settings(self) -> Settings:
-        return Settings.load(self.settings_filename,
-                             "report_templates",
-                             True,
-                             **self.report_settings)
-
-    @property
-    def reports(self) -> Settings:
-        return Settings.load(self.settings_filename,
-                             "reports",
-                             False,
-                             **self.report_settings)
-
-    @property
     def report_engine(self) -> ReportEngine:
         return ReportEngine(self.report_settings)
 

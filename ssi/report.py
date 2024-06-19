@@ -66,7 +66,7 @@ class Report(ABC):
         Returns
         -------
         Dict[str, Any]
-            The settings for the specific report type.        
+            The settings for the specific report type.
         """
         return self.settings["settings"]
 
@@ -235,7 +235,7 @@ class TableReport(Report):
 
 class ReportFileManager(ABC):
     """Abstract class for a report file manager.
-    This class is used to make it possible to use the ReportEngine with luigi.    
+    This class is used to make it possible to use the ReportEngine with luigi.
     """
     @abstractmethod
     def open_input_file(self, filename: str):
@@ -302,12 +302,32 @@ class LuigiReportFileManager(ReportFileManager):
 
 
 class ReportEngine:
-    def __init__(self, settings: Settings):
-        self.__settings = settings
+    def __init__(self, settings_filename: str):
+        self.__settings_filename = settings_filename
 
     @property
-    def settings(self) -> Settings:
-        return self.__settings
+    def settings_filename(self) -> str:
+        return self.__settings_filename
+
+    @property
+    def report_settings(self) -> Settings:
+        return Settings.load(self.settings_filename,
+                             "report_settings",
+                             False)
+
+    @property
+    def report_template_settings(self) -> Settings:
+        return Settings.load(self.settings_filename,
+                             "report_templates",
+                             True,
+                             **self.report_settings)
+
+    @property
+    def reports_config(self) -> Settings:
+        return Settings.load(self.settings_filename,
+                             "reports",
+                             False,
+                             **self.report_settings)
 
     @property
     def flattened_reports(self) -> List[Report]:
@@ -318,6 +338,7 @@ class ReportEngine:
     @property
     def reports(self) -> Dict[str, List['Report']]:
         reports = defaultdict(list)
+        # TODO base this on the reports_config
         for report_key, report_settings in self.settings.items():
             if isinstance(report_settings, list):
                 for settings in report_settings:
@@ -343,7 +364,7 @@ class ReportEngine:
 
         with tqdm.tqdm(total=len(file_index.files)) as progress_bar:
             for file_key, file_path in file_index.files.items():
-                if file_key not in self.settings:
+                if file_key not in self.report_template_settings:
                     progress_bar.set_description(f"Skipping {file_key}")
                     continue
 
