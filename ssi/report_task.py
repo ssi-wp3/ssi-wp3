@@ -18,10 +18,18 @@ class ReportTask(luigi.Task):
 
     @property
     def report_settings(self) -> Dict[str, Any]:
+        constants_settings = Settings.load(self.settings_filename,
+                                           "constants",
+                                           False)
+
+        kwargs = dict()
+        kwargs.update(constants_settings)
+        kwargs.update(self.template_key_values)
+
         settings = Settings.load(self.settings_filename,
                                  self.settings_section_name,
                                  self.render_as_template,
-                                 **self.template_key_values)
+                                 **kwargs)
         #  store_name=self.store_name,
         #  period_column=self.period_column,
         #  receipt_text_column=self.receipt_text_column,
