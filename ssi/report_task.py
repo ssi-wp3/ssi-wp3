@@ -13,34 +13,27 @@ class ReportTask(luigi.Task):
     settings_filename = luigi.PathParameter()
     settings_section_name = luigi.Parameter(default="report_settings")
     render_as_template = luigi.BoolParameter(default=True)
-    template_key_values = luigi.DictParameter(default={})
     parquet_engine = luigi.Parameter(default="pyarrow")
 
     @property
-    def report_settings(self) -> Dict[str, Any]:
-        constants_settings = Settings.load(self.settings_filename,
-                                           "constants",
-                                           False)
+    def report_settings(self) -> Settings:
+        return Settings.load(self.settings_filename,
+                             self.settings_section_name,
+                             False)
 
-        kwargs = dict()
-        kwargs.update(constants_settings)
-        kwargs.update(self.template_key_values)
+    @property
+    def report_template_settings(self) -> Settings:
+        return Settings.load(self.settings_filename,
+                             "report_templates",
+                             True,
+                             **self.report_settings)
 
-        settings = Settings.load(self.settings_filename,
-                                 self.settings_section_name,
-                                 self.render_as_template,
-                                 **kwargs)
-        #  store_name=self.store_name,
-        #  period_column=self.period_column,
-        #  receipt_text_column=self.receipt_text_column,
-        #  product_id_column=self.product_id_column,
-        #  amount_column=self.amount_column,
-        #  revenue_column=self.revenue_column,
-        #  coicop_column=self.coicop_column,
-        #  coicop_columns=list(self.coicop_columns)
-        #  )
-
-        return settings
+    @property
+    def reports(self) -> Settings:
+        return Settings.load(self.settings_filename,
+                             "reports",
+                             False,
+                             **self.report_settings)
 
     @property
     def report_engine(self) -> ReportEngine:
