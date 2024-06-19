@@ -17,6 +17,9 @@ constants:
     - lidl 
     - plus 
     - jumbo
+  report_period_columns:
+    - "year"
+    - "year_month"
 
 report_settings:
   # Analysis for whole store
