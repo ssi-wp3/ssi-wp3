@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict
+import os
 
 
 class FileIndex:
@@ -17,4 +18,7 @@ class FileIndex:
 
     @property
     def files(self) -> Dict[str, Path]:
-        return {file.name: file for file in self.root_directory.glob(f"*{self.file_extension}")}
+        return {self.__get_file_key(file): file for file in self.root_directory.rglob(f"*{self.file_extension}")}
+
+    def __get_file_key(self, file: Path) -> str:
+        return os.path.splitext(os.path.basename(file.name))[0]
