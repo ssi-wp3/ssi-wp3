@@ -5,7 +5,9 @@ from collections import defaultdict
 from .analysis.utils import unpivot
 from .plots import PlotEngine
 from .settings import Settings
+from .file_index import FileIndex
 import pandas as pd
+import tqdm
 
 
 class ReportType(Enum):
@@ -261,3 +263,23 @@ class ReportEngine:
             return TableReport(result_settings)
         else:
             raise ValueError(f"Unknown report type: {result_settings['type']}")
+
+    def reports_for_path(self, data_path: str, file_extension: str = ".parquet"):
+        file_index = FileIndex(data_path, file_extension)
+
+        with tqdm.tqdm(total=len(file_index.files)) as progress_bar:
+            for file_key, file_path in file_index.files.items():
+                if file_key not in self.settings:
+                    progress_bar.set_description(f"Skipping {file_key}")
+                    continue
+
+                dataframe = pd.read_parquet(
+                    file_path, engine=self.parquet_engine)
+
+                reports = self.reports[file_key]
+                for report in reports:
+                    progress_bar.set_description(
+                        f"Writing {report.output_filename}")
+                    with open(report.output_filename, "w") as output_file:
+                        report.write_to_file(dataframe, output_file)
+                progress_bar.update(1)
