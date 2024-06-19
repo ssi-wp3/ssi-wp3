@@ -280,6 +280,5 @@ class ReportEngine:
                 for report in reports:
                     progress_bar.set_description(
                         f"Writing {report.output_filename}")
-                    with open(report.output_filename, "w") as output_file:
-                        report.write_to_file(dataframe, output_file)
+                    report.write_to_file(dataframe, report.output_filename)
                 progress_bar.update(1)
