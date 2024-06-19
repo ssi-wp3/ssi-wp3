@@ -1,3 +1,18 @@
+constants:
+  #period_column=self.period_column,
+  #  coicop_column=self.coicop_column,
+  
+  receipt_text_column: "receipt_text"
+  product_id_column: "product_id"
+  amount_column: "amount"
+  revenue_column: "revenue"
+  coicop_columns:
+    - "coicop_level_1"
+    - "coicop_level_2"
+    - "coicop_level_3"
+    - "coicop_level_4"
+    - "coicop_number"
+
 report_settings:
   # Analysis for whole store
   # report_stores:
@@ -5,6 +20,7 @@ report_settings:
   #   - lidl 
   #   - plus 
   #   - jumbo
+
 
 
   texts_per_product_id_histogram: 
