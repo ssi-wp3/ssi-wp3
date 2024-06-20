@@ -1,7 +1,4 @@
 report_settings:
-  #period_column=self.period_column,
-  #  coicop_column=self.coicop_column,
-  
   receipt_text_column: "receipt_text"
   product_id_column: "product_id"
   amount_column: "amount"
