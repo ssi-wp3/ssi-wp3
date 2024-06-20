@@ -320,7 +320,7 @@ class ReportEngine:
     def reports_config(self) -> Settings:
         return Settings.load(self.settings_filename,
                              "reports",
-                             False,
+                             True,
                              **self.report_settings)
 
     @property
