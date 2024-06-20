@@ -19,14 +19,14 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
     # TODO class if not thread safe yet
 
     def __init__(self, filename: str,
-                 feature_column: str,
-                 target_column: str,
+                 features_column: str,
+                 label_column: str,
                  label_mapping: Dict[str, int],
                  memory_map: bool = False):
-        super().__init__()
+        super().__init__(features_column, label_column, DataLabelEncoder(label_mapping))
         self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
-        self.__features_column = feature_column
-        self.__label_column = target_column
+        self.__features_column = features_column
+        self.__label_column = label_column
         self.__label_mapping = label_mapping
         self.__current_row_group_index = 0
         self.__current_row_group = None
