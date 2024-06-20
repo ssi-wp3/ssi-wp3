@@ -1,5 +1,6 @@
 from typing import Dict, Any
 from .report import ReportEngine, LuigiReportFileManager
+from .parquet_file import ParquetFile
 from .settings import Settings
 import pandas as pd
 import os
@@ -20,17 +21,20 @@ class ReportTask(luigi.Task):
     def report_engine(self) -> ReportEngine:
         return ReportEngine(self.settings_filename)
 
-    def target_for(self, filename: str, binary_file: bool = True) -> luigi.LocalTarget:
+    def input_file_for(self, filename: str) -> ParquetFile:
+        return ParquetFile(os.path.join(self.data_directory, filename))
+
+    def output_target_for(self, filename: str, binary_file: bool = True) -> luigi.LocalTarget:
         if binary_file:
             return luigi.LocalTarget(filename, format=luigi.format.Nop)
         return luigi.LocalTarget(filename)
 
     def requires(self):
-        # TODO read input files.
-        return []
+        return {report.input_filename: self.input_file_for(report.input_filename)
+                for report in self.report_engine.flattened_reports}
 
     def output(self):
-        return {report.output_filename: self.target_for(os.path.join(self.output_directory, report.output_filename), binary_file=report.needs_binary_file)
+        return {report.output_filename: self.output_target_for(os.path.join(self.output_directory, report.output_filename), binary_file=report.needs_binary_file)
                 for report in self.report_engine.flattened_reports}
 
     def run(self):
