@@ -54,6 +54,14 @@ class DataProvider:
     @property
     @abstractmethod
     def feature_vector_size(self) -> int:
+        """ Returns the size of the feature vector.
+        This can be useful to determine the input size of a neural network.
+
+        Returns
+        -------
+        int
+            The size of the feature vector.
+        """
         pass
 
     @property
@@ -83,10 +91,24 @@ class DataProvider:
 
     @property
     def label_encoder(self) -> DataLabelEncoder:
+        """ Returns the label encoder for this DataProvider.
+
+        Returns
+        -------
+        DataLabelEncoder
+            The label encoder for this DataProvider.
+        """
         return self.__label_encoder
 
     @label_encoder.setter
     def label_encoder(self, value: DataLabelEncoder):
+        """ Sets the label encoder for this DataProvider.
+
+        Parameters
+
+        value : DataLabelEncoder
+            The label encoder to set for this DataProvider.
+        """
         self.__label_encoder = value
 
     @abstractmethod
