@@ -353,6 +353,7 @@ class ReportEngine:
                 permutations_dict[f"{prefix}_{report_id}"] = report_template[report_id]
 
         # Combine the permutations with the report template settings
+        print(f"Permutations dict: {permutations_dict}")
         return permutations_dict
 
     @property
