@@ -33,6 +33,9 @@ class DataframeDataProvider(DataProvider):
     def __len__(self) -> int:
         return len(self.dataframe)
 
+    def __getitems__(self, indices):
+        return self.dataframe[self.dataframe.index.isin(indices)]
+
     def get_column(self, column_name: str) -> pd.Series:
         return self.dataframe[column_name]
 
