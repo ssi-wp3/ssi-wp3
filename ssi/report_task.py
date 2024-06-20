@@ -17,7 +17,7 @@ class ReportTask(luigi.Task):
 
     @property
     def report_engine(self) -> ReportEngine:
-        return ReportEngine(self.report_settings)
+        return ReportEngine(self.settings_filename)
 
     def target_for(self, filename: str, binary_file: bool = True) -> luigi.LocalTarget:
         if binary_file:
