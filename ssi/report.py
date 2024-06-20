@@ -340,8 +340,11 @@ class ReportEngine:
         for report_id, report_id_settings in self.reports_config.items():
             print(f"Report id settings: {report_id_settings}")
             keys, values = zip(*report_id_settings.items())
+            print(f"Keys: {keys}")
+            print(f"Values: {values}")
             all_report_settings = [dict(zip(keys, combination))
                                    for combination in itertools.product(*values)]
+            print(f"All report settings: {all_report_settings}")
 
             for all_report_dict in all_report_settings:
                 template_settings = self.report_settings.copy().update(
