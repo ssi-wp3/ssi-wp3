@@ -177,7 +177,7 @@ class ModelPipeline:
                                                                             train_data_loader.y,
                                                                             train_data_loader.groups):
             train_data = self.train_dataset.get_subset(train_indices)
-            validation_data = self.train_dataset_dataset.get_subset(
+            validation_data = self.train_dataset.get_subset(
                 validation_indices)
 
             self.model.fit(train_data)
