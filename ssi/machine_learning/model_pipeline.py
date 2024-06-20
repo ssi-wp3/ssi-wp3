@@ -23,6 +23,7 @@ class ModelPipeline:
         self.__features_column = features_column
         self.__label_column = label_column
         self.__evaluation_metric = evaluation_metric
+        self.__train_dataset = None
         self.__test_dataset = None
         self.__best_model_fold = None
         self.__best_model = None

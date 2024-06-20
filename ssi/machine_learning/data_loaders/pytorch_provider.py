@@ -235,9 +235,10 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
 
     def get_subset(self,
                    indices: pd.Series,
-                   original_label_encoder: Optional[DataLabelEncoder] = None):
-        # TODO implement this
-        # self.fit_or_refit_labels(original_label_encoder)
+                   original_label_encoder: Optional[DataLabelEncoder] = None) -> DataProvider:
+        self.fit_or_refit_labels(original_label_encoder)
+        subset_dataset = torch.utils.data.Subset(self, indices)
+        # TODO figure out how to create a new ParquetDataset from the subset!!
         raise NotImplementedError("Method not implemented")
 
 
