@@ -382,13 +382,12 @@ class ReportEngine:
                          parquet_engine: str = "pyarrow",
                          report_file_manager: ReportFileManager = DefaultReportFileManager()):
         file_index = FileIndex(data_path, file_extension)
+        files_for_reports = {file_key: file_path
+                             for file_key, file_path in file_index.files.items()
+                             if file_key in self.reports}
 
-        with tqdm.tqdm(total=len(file_index.files)) as progress_bar:
-            for file_key, file_path in file_index.files.items():
-                if file_key not in self.reports:
-                    progress_bar.set_description(f"Skipping {file_key}")
-                    continue
-
+        with tqdm.tqdm(total=len(files_for_reports)) as progress_bar:
+            for file_key, file_path in files_for_reports.items():
                 with report_file_manager.open_input_file(file_path) as input_file:
                     dataframe = pd.read_parquet(
                         input_file, engine=parquet_engine)
