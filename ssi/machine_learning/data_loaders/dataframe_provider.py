@@ -1,5 +1,5 @@
 import pandas as pd
-from .data import DataProvider
+from .data_provider import DataProvider
 from .label_encoder import DataLabelEncoder
 
 

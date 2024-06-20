@@ -3,15 +3,16 @@ from bisect import bisect_right
 import torch.nn as nn
 import torch
 import pyarrow.parquet as pq
+from ..model import Model
+from ssi.machine_learning.data_loaders.data_provider import DataProvider
 from skorch import NeuralNetClassifier
 from sklearn.preprocessing import LabelEncoder
-from .model import Model
 from torch.nn import functional as F
 import pandas as pd
 import numpy as np
 
 
-class ParquetDataset(torch.utils.data.Dataset):
+class ParquetDataset(torch.utils.data.Dataset, DataProvider):
     """ This class is a PyTorch Dataset specifically designed to read Parquet files.
     The class reads the Parquet file in batches and returns the data in the form of a PyTorch tensor.
     """

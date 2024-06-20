@@ -13,7 +13,7 @@ from ..label_extractor import LabelExtractor
 from ..constants import Constants
 from .model import Model
 from .scikit_model import SklearnModel
-from .pytorch import PytorchModel, TorchLogisticRegression
+from .data_loaders.pytorch_provider import PytorchModel, TorchLogisticRegression
 import pandas as pd
 import numpy as np
 import tqdm

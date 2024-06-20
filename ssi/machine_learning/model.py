@@ -2,7 +2,7 @@ from typing import Dict, Any, Callable
 from abc import ABC, abstractmethod
 from sklearn.base import BaseEstimator, ClassifierMixin
 from transformers import Trainer, TrainingArguments, AutoModelForSequenceClassification
-from data_loaders.data import DataProvider
+from ssi.machine_learning.data_loaders.data_provider import DataProvider
 import numpy as np
 
 

@@ -1,5 +1,5 @@
 from typing import Any, Dict, List
-from data_loaders.data import DataProvider
+from ssi.machine_learning.data_loaders.data_provider import DataProvider
 from .model import Model
 from .evaluate import ModelEvaluator
 from sklearn.model_selection import BaseCrossValidator

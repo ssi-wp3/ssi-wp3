@@ -4,7 +4,7 @@ from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..files import get_features_files_in_directory
 from ..parquet_file import ParquetFile
 from .train_model_task import TrainModelTask
-from .pytorch import ParquetDataset, TorchLogisticRegression, TorchMLP
+from .data_loaders.pytorch_provider import ParquetDataset, TorchLogisticRegression, TorchMLP
 from .evaluate import calculate_metrics_per_group
 from ..analysis.products import compare_products_per_period
 from collections import OrderedDict
