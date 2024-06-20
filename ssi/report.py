@@ -346,7 +346,6 @@ class ReportEngine:
                 template_settings.update(
                     all_report_dict)
 
-                print(f"Template settings: {template_settings}")
                 report_template = Settings.load(
                     self.settings_filename, "report_templates", True, **template_settings)
 
