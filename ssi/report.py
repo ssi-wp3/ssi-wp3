@@ -351,7 +351,8 @@ class ReportEngine:
                     self.settings_filename, "report_templates", True, **template_settings)
 
                 prefix = all_report_dict[prefix_key]
-                permutations_dict[f"{prefix}_{report_id}"] = report_template[report_id]
+                input_filename = report_template["input_filename"]
+                permutations_dict[f"{prefix}_{input_filename}"] = report_template[report_id]
 
         # Combine the permutations with the report template settings
         return permutations_dict
