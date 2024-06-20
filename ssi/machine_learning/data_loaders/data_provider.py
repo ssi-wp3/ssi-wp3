@@ -156,9 +156,4 @@ class DataProvider:
         train_data = self.get_subset(train_indices)
         test_data = self.get_subset(test_indices, train_data.label_encoder)
 
-        # train_df[f"{self.label_column}_index"] = train_df[self.label_column].map(
-        #     self.label_encoder.transform)
-        # test_df[f"{self.label_column}_index"] = test_df[self.label_column].map(
-        #     self.test_label_encoder.transform)
-
         return train_data, test_data

@@ -51,8 +51,10 @@ class DataframeDataProvider(DataProvider):
                    indices: pd.Series,
                    original_label_encoder: Optional[DataLabelEncoder] = None) -> DataProvider:
         self.fit_or_refit_labels(original_label_encoder)
-
-        return self.__data_provider(self.__getitems__(indices),
+        subset_df = self.__getitems__(indices)
+        subset_df[self.encoded_label_column] = self.label_encoder.transform(
+            subset_df[self.label_column])
+        return self.__data_provider(subset_df,
                                     self.features_column,
                                     self.label_column,
                                     self.label_encoder)
