@@ -1,3 +1,4 @@
+from .data_provider import DataProvider
 from .dataframe_provider import DataframeDataProvider
 from .pytorch_provider import ParquetDataset
 import enum
@@ -14,7 +15,7 @@ class DataProviderFactory:
     def create_data_provider(data_provider_type: DataProviderType,
                              features_column: str,
                              label_column: str,
-                             **kwargs) -> 'DataProvider':
+                             **kwargs) -> DataProvider:
         if data_provider_type == DataProviderType.DataFrame:
             return DataframeDataProvider(features_column, label_column, **kwargs)
         elif data_provider_type == DataProviderType.HuggingFace:
