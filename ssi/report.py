@@ -337,7 +337,6 @@ class ReportEngine:
 
         """
         permutations_dict = dict()
-        prefix_key = "store_name"
         for report_id, report_id_settings in self.reports_config.items():
             keys, values = zip(*report_id_settings.items())
             all_report_settings = [dict(zip(keys, combination))
@@ -350,10 +349,9 @@ class ReportEngine:
                 all_report_templates = Settings.load(
                     self.settings_filename, "report_templates", True, **template_settings)
 
-                prefix = all_report_dict[prefix_key]
                 report_template = all_report_templates[report_id]
                 input_filename = report_template["input_filename"]
-                permutations_dict[f"{prefix}_{input_filename}"] = report_template
+                permutations_dict[input_filename] = report_template
 
         # Combine the permutations with the report template settings
         return permutations_dict
