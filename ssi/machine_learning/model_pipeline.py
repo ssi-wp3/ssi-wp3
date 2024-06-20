@@ -177,9 +177,11 @@ class ModelPipeline:
 
         model_evaluation_score = -1
         # TODO Split needs X, y, and sometimes groups, how to provide them?
-        for train_indices, validation_indices in self.cross_validator.split(train_data_loader.X,
-                                                                            train_data_loader.y,
-                                                                            train_data_loader.groups):
+        groups = []
+
+        for train_indices, validation_indices in self.cross_validator.split(list(range(len(self.train_dataset))),
+                                                                            self.train_dataset.label_column,
+                                                                            groups):
             train_data = self.train_dataset.get_subset(train_indices)
             validation_data = self.train_dataset.get_subset(
                 validation_indices)
