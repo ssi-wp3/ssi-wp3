@@ -77,7 +77,7 @@ reports:
 report_templates:
   # Analysis for whole store
   unique_column_values: 
-    input_filename: "{{store_name}}_analysis_unique_column_values.parquet"
+    input_filename: "{{store_name}}_analysis_unique_column_values"
     reports:
       - type: table
         pivot: false
@@ -86,7 +86,7 @@ report_templates:
             table_type: latex
             float_format: "%.2f"
   texts_per_product_id_histogram:
-      input_filename: "{{store_name}}_analysis_texts_per_product_id_histogram.parquet"
+      input_filename: "{{store_name}}_analysis_texts_per_product_id_histogram"
       reports: 
         - type: plot
           pivot: false
@@ -103,7 +103,7 @@ report_templates:
               table_type: latex 
               float_format: "%.2f"
   log_texts_per_product_id_histogram: 
-      input_filename: "{{store_name}}_analysis_log_texts_per_product_id_histogram.parquet"
+      input_filename: "{{store_name}}_analysis_log_texts_per_product_id_histogram"
       reports:
         - type: plot
           pivot: false
@@ -114,7 +114,7 @@ report_templates:
               y_column: count
               title: Unique receipt texts per product_id for {{store_name}} (Log scale)
   receipt_length_histogram: 
-      input_filename: "{{store_name}}_analysis_receipt_length_histogram.parquet"
+      input_filename: "{{store_name}}_analysis_receipt_length_histogram"
       reports:
         - type: plot
           pivot: false
@@ -131,7 +131,7 @@ report_templates:
               table_type: latex
               float_format: "%.2f"
   product_id_length_histogram: 
-      input_filename: "{{store_name}}_analysis_product_id_length_histogram.parquet"
+      input_filename: "{{store_name}}_analysis_product_id_length_histogram"
       reports:
         - type: plot
           pivot: false
@@ -148,7 +148,7 @@ report_templates:
               table_type: latex
               float_format: "%.2f"
   revenue_for_coicop_hierarchy: 
-    input_filename: "{{store_name}}_analysis_revenue_for_coicop_hierarchy.parquet"
+    input_filename: "{{store_name}}_analysis_revenue_for_coicop_hierarchy"
     reports:
       - type: plot
         pivot: false
@@ -161,7 +161,7 @@ report_templates:
             title: Sunburst of revenue per coicop level for {{store_name}}
   
   product_revenue_versus_lifetime:
-    input_filename: "{{store_name}}_{{period_column}}_analysis_product_revenue_versus_lifetime.parquet"
+    input_filename: "{{store_name}}_{{period_column}}_analysis_product_revenue_versus_lifetime"
     reports:
       - type: plot  
         pivot: false
@@ -183,7 +183,7 @@ report_templates:
   # Analysis per COICOP
 
   unique_coicop_values_per_coicop: 
-    input_filename: "{{store_name}}_{{coicop_column}}_analysis_unique_coicop_values.parquet"
+    input_filename: "{{store_name}}_{{coicop_column}}_analysis_unique_coicop_values"
     reports:
       - type: plot  
         pivot: true
@@ -201,7 +201,7 @@ report_templates:
   # Analysis per period
   
   unique_column_values_per_period: 
-    input_filename: "{{store_name}}_{{period_column}}_analysis_unique_column_values.parquet"
+    input_filename: "{{store_name}}_{{period_column}}_analysis_unique_column_values"
     reports:
       - type: plot  
         pivot: true
@@ -222,7 +222,7 @@ report_templates:
             table_type: latex
             float_format: "%.2f"
   total_revenue_per_period: 
-    input_filename: "{{store_name}}_{{period_column}}_analysis_total_revenue_per_period.parquet"
+    input_filename: "{{store_name}}_{{period_column}}_analysis_total_revenue_per_period"
     reports:
       - type: plot  
         pivot: false
@@ -241,7 +241,7 @@ report_templates:
             y_column: "{{amount_column}}"
             title: Total amount per {{period_column}} for {{store_name}}
   compare_products_per_period: 
-    input_filename: "{{store_name}}_{{period_column}}_analysis_compare_products_per_period.parquet"
+    input_filename: "{{store_name}}_{{period_column}}_analysis_compare_products_per_period"
     reports:
       - type: plot  
         pivot: true
@@ -295,7 +295,7 @@ report_templates:
             y_column: total_{{product_id_column}}
             title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}}  
   product_availability_in_period:  
-    input_filename: "{{store_name}}_{{period_column}}_analysis_product_availability_in_period.parquet"
+    input_filename: "{{store_name}}_{{period_column}}_analysis_product_availability_in_period"
     reports:
       - type: plot
         pivot: false 
@@ -318,7 +318,7 @@ report_templates:
             plot_type: heatmap
             title: Heatmap of {{receipt_text_column}} availability for {{store_name}} 
   product_lifetime_in_periods:
-    input_filename: "{{store_name}}_{{period_column}}_analysis_product_lifetime_in_periods.parquet"
+    input_filename: "{{store_name}}_{{period_column}}_analysis_product_lifetime_in_periods"
     reports:
       - type: plot
         pivot: false 
@@ -337,7 +337,7 @@ report_templates:
 
   # Analysis per period and coicop
   total_revenue_per_coicop_and_period:
-    input_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_analysis_total_revenue_per_coicop_and_period.parquet"
+    input_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_analysis_total_revenue_per_coicop_and_period"
     reports:
       - type: plot 
         pivot: false
@@ -377,7 +377,7 @@ report_templates:
             title: Bar chart of the total amount of products sold per {{coicop_column}} and {{period_column}} for {{store_name}}       
 
   compare_products_per_period_coicop_level:
-    input_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_analysis_compare_products_per_period.parquet"
+    input_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_analysis_compare_products_per_period"
     reports:
       - type: plot
         pivot: false 
