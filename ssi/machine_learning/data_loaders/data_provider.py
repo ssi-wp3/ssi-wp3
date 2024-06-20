@@ -139,7 +139,7 @@ class DataProvider:
         pass
 
     @abstractmethod
-    def load(self, filename: str):
+    def load(self):
         pass
 
     @abstractmethod

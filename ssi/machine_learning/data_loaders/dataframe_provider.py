@@ -44,9 +44,9 @@ class DataframeDataProvider(DataProvider):
     def get_item(self, index: int):
         return self.dataframe.iloc[index]
 
-    def load(self, filename: str):
+    def load(self):
         self.dataframe = pd.read_parquet(
-            filename, engine=self.parquet_engine)
+            self.filename, engine=self.parquet_engine)
 
     def get_subset(self,
                    indices: pd.Series,

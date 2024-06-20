@@ -230,6 +230,9 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         # Sort the items back to the original order
         return [items[sort_dict[original_index]] for original_index in indices]
 
+    def load(self):
+        pass
+
     def get_subset(self,
                    indices: pd.Series,
                    original_label_encoder: Optional[DataLabelEncoder] = None):
