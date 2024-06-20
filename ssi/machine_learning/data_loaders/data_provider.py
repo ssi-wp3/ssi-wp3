@@ -59,10 +59,26 @@ class DataProvider:
     @property
     @abstractmethod
     def labels(self) -> pd.Series:
+        """ Returns all labels from the label column.
+
+        Returns
+        -------
+        pd.Series
+            A pandas Series object with all labels from the label column.
+        """
         return self[self.label_column]
 
     @property
     def number_of_classes(self) -> int:
+        """ Returns the number of classes in the target column.
+        The number of classes is determined by the number of
+        unique classes determined by the LabelEncoder.
+
+        Returns
+        -------
+        int
+            The number of classes in the target column.
+        """
         return len(self.label_encoder.label_mapping)
 
     @property

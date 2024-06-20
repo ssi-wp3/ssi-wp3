@@ -94,19 +94,6 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
                                                       columns=[self.features_column]).to_pandas()
         return len(feature_df[self.features_column].iloc[0])
 
-    @property
-    def number_of_classes(self) -> int:
-        """ Returns the number of classes in the target column.
-        The number of classes is determined by the number of
-        unique classes determined by the LabelEncoder.
-
-        Returns
-        -------
-        int
-            The number of classes in the target column.
-        """
-        return len(self.label_mapping)
-
     def number_of_rows_in_row_group(self, row_group_index: int) -> int:
         """ Get the number of rows in a row group. The number of rows
         in a row group is determined from the metadata of the Parquet file.
