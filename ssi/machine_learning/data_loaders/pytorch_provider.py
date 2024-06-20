@@ -25,8 +25,8 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
                  memory_map: bool = False):
         super().__init__()
         self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
-        self.__feature_column = feature_column
-        self.__target_column = target_column
+        self.__features_column = feature_column
+        self.__label_column = target_column
         self.__label_mapping = label_mapping
         self.__current_row_group_index = 0
         self.__current_row_group = None
@@ -68,7 +68,7 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         self.__current_row_group = value
 
     @property
-    def feature_column(self) -> str:
+    def features_column(self) -> str:
         """ Returns the name of the feature column in the Parquet file.
 
         Returns
@@ -76,10 +76,10 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         str
             The name of the feature column in the Parquet file.
         """
-        return self.__feature_column
+        return self.__features_column
 
     @property
-    def target_column(self) -> str:
+    def label_column(self) -> str:
         """ Returns the name of the target column in the Parquet file.
 
         Returns
@@ -87,7 +87,7 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         str
             The name of the target column in the Parquet file.
         """
-        return self.__target_column
+        return self.__label_column
 
     @property
     def label_mapping(self) -> Dict[str, int]:
@@ -115,8 +115,8 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
             The size of the feature vector.
         """
         feature_df = self.parquet_file.read_row_group(0,
-                                                      columns=[self.feature_column]).to_pandas()
-        return len(feature_df[self.feature_column].iloc[0])
+                                                      columns=[self.features_column]).to_pandas()
+        return len(feature_df[self.features_column].iloc[0])
 
     @property
     def number_of_classes(self) -> int:
@@ -218,16 +218,16 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
             A tuple containing the feature tensor, the label tensor, and the additional columns.
         """
         feature_tensor = torch.tensor(
-            sample[self.feature_column], dtype=torch.float32)
+            sample[self.features_column], dtype=torch.float32)
 
-        label_vector = sample[self.target_column]
+        label_vector = sample[self.label_column]
         mapped_label = self.label_mapping[label_vector]
 
         label_tensor = torch.tensor(
             mapped_label, dtype=torch.long)
 
         additional_columns = sample.drop(
-            labels=[self.feature_column, self.target_column])
+            labels=[self.features_column, self.label_column])
 
         return feature_tensor, label_tensor, additional_columns
 

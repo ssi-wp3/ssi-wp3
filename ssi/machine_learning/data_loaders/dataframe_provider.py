@@ -27,7 +27,7 @@ class DataframeDataProvider(DataProvider):
         self.__dataframe = value
 
     @property
-    def feature_vector_length(self) -> int:
+    def feature_vector_size(self) -> int:
         return len(self.dataframe[self.features_column].iloc[0])
 
     def __len__(self) -> int:

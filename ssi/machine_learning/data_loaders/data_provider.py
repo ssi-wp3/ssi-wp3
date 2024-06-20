@@ -30,7 +30,7 @@ class DataProvider:
 
     @property
     @abstractmethod
-    def feature_vector_length(self) -> int:
+    def feature_vector_size(self) -> int:
         pass
 
     @property
