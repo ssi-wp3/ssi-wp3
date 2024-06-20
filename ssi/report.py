@@ -338,6 +338,7 @@ class ReportEngine:
         permutations_dict = dict()
         prefix_key = "store_name"
         for report_id, report_id_settings in self.reports_config.items():
+            print(f"Report id settings: {report_id_settings}")
             keys, values = zip(*report_id_settings.items())
             all_report_settings = [dict(zip(keys, combination))
                                    for combination in itertools.product(*values)]
