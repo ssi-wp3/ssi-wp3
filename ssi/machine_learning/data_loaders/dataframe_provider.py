@@ -1,6 +1,7 @@
-import pandas as pd
+from typing import Optional
 from .data_provider import DataProvider
 from .label_encoder import DataLabelEncoder
+import pandas as pd
 
 
 class DataframeDataProvider(DataProvider):
@@ -46,7 +47,14 @@ class DataframeDataProvider(DataProvider):
         self.dataframe = pd.read_parquet(
             filename, engine=self.parquet_engine)
 
-    def get_subset(self, indices: pd.Series) -> DataProvider:
+    def get_subset(self,
+                   indices: pd.Series,
+                   original_label_encoder: Optional[DataLabelEncoder] = None) -> DataProvider:
+        if original_label_encoder:
+            self.label_encoder = original_label_encoder.refit(self.labels)
+        else:
+            self.label_encoder = self.label_encoder.fit(self.labels)
+
         return self.__data_provider(self.__getitems__(indices),
                                     self.features_column,
                                     self.label_column,

@@ -1,12 +1,12 @@
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from bisect import bisect_right
 import torch.nn as nn
 import torch
 import pyarrow.parquet as pq
 from ..model import Model
+from .label_encoder import DataLabelEncoder
 from ssi.machine_learning.data_loaders.data_provider import DataProvider
 from skorch import NeuralNetClassifier
-from sklearn.preprocessing import LabelEncoder
 from torch.nn import functional as F
 import pandas as pd
 import numpy as np
@@ -265,7 +265,9 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         # Sort the items back to the original order
         return [items[sort_dict[original_index]] for original_index in indices]
 
-    def get_subset(self, indices):
+    def get_subset(self,
+                   indices: pd.Series,
+                   original_label_encoder: Optional[DataLabelEncoder] = None):
         # TODO implement this
         raise NotImplementedError("Method not implemented")
 

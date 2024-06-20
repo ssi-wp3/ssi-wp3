@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 from abc import ABC, abstractmethod
 from sklearn.model_selection import train_test_split
 from .label_encoder import DataLabelEncoder
@@ -69,7 +69,9 @@ class DataProvider:
         pass
 
     @abstractmethod
-    def get_subset(self, indices: pd.Series) -> 'DataProvider':
+    def get_subset(self,
+                   indices: pd.Series,
+                   original_label_encoder: Optional[DataLabelEncoder] = None) -> 'DataProvider':
         pass
 
     @abstractmethod
