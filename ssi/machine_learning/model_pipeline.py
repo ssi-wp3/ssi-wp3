@@ -119,9 +119,9 @@ class ModelPipeline:
         self.__best_model = value
 
     @ staticmethod
-    def pipeline_for(model: Union[str, Model]) -> "ModelPipeline":
+    def pipeline_for(model: Union[str, Model], **kwargs) -> "ModelPipeline":
         if isinstance(model, str):
-            model = ModelFactory.model_for(model)
+            model = ModelFactory.model_for(model, **kwargs)
         return ModelPipeline(model)
 
     def with_model_evaluator(self, model_evaluator: ModelEvaluator) -> "ModelPipeline":
