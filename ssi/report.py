@@ -387,7 +387,7 @@ class ReportEngine:
         file_index = FileIndex(data_path, file_extension)
         files_for_reports = {file_key: file_path
                              for file_key, file_path in file_index.files.items()
-                             if file_key in self.reports}
+                             if file_key in self.reports.keys()}
         print("Files for reports:", files_for_reports)
 
         with tqdm.tqdm(total=len(files_for_reports)) as progress_bar:
