@@ -269,6 +269,7 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
                    indices: pd.Series,
                    original_label_encoder: Optional[DataLabelEncoder] = None):
         # TODO implement this
+        # self.fit_or_refit_labels(original_label_encoder)
         raise NotImplementedError("Method not implemented")
 
 
