@@ -305,6 +305,7 @@ class LuigiReportFileManager(ReportFileManager):
 class ReportEngine:
     def __init__(self, settings_filename: str):
         self.__settings_filename = settings_filename
+        self.__reports = None
 
     @property
     def settings_filename(self) -> str:
@@ -353,20 +354,22 @@ class ReportEngine:
                 permutations_dict[f"{prefix}_{report_id}"] = report_template[report_id]
 
         # Combine the permutations with the report template settings
-        print(f"Permutations dict: {permutations_dict}")
         return permutations_dict
 
     @property
     def reports(self) -> Dict[str, List['Report']]:
-        reports = defaultdict(list)
-        # TODO base this on the reports_config
-        for report_key, report_settings in self.all_report_permutations.items():
-            if isinstance(report_settings, list):
-                for settings in report_settings:
-                    reports[report_key].append(self.report_for(settings))
-            else:
-                reports[report_key].append(self.report_for(report_settings))
-        return reports
+        if not self.__reports:
+            self.__reports = defaultdict(list)
+            # TODO base this on the reports_config
+            for report_key, report_settings in self.all_report_permutations.items():
+                if isinstance(report_settings, list):
+                    for settings in report_settings:
+                        self.__reports[report_key].append(
+                            self.report_for(settings))
+                else:
+                    self.__reports[report_key].append(
+                        self.report_for(report_settings))
+        return self.__reports
 
     def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
         if result_settings["type"].lower() == ReportType.plot.value:
