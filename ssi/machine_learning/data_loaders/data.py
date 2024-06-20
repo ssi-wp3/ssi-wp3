@@ -25,6 +25,10 @@ class DataProvider:
         return self.__label_column
 
     @property
+    def encoded_label_column(self) -> str:
+        return f"{self.label_column}_index"
+
+    @property
     @abstractmethod
     def feature_vector_length(self) -> int:
         pass
@@ -32,7 +36,7 @@ class DataProvider:
     @property
     @abstractmethod
     def labels(self) -> pd.Series:
-        pass
+        return self[self.label_column]
 
     @property
     def number_of_classes(self) -> int:
@@ -48,6 +52,10 @@ class DataProvider:
 
     @abstractmethod
     def __len__(self) -> int:
+        pass
+
+    @abstractmethod
+    def __getitem__(self, key: str) -> pd.Series:
         pass
 
     @abstractmethod
@@ -124,12 +132,11 @@ class DataframeDataProvider(DataProvider):
     def feature_vector_length(self) -> int:
         return len(self.dataframe[self.features_column].iloc[0])
 
-    @property
-    def labels(self) -> pd.Series:
-        return self.dataframe[self.label_column]
-
     def __len__(self) -> int:
         return len(self.dataframe)
+
+    def __getitem__(self, key: str) -> pd.Series:
+        return self.dataframe[key]
 
     def load(self, filename: str):
         self.dataframe = pd.read_parquet(
