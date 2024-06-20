@@ -10,7 +10,7 @@ class DataProvider:
     def __init__(self,
                  features_column: str,
                  label_column: str,
-                 label_encoder: DataLabelEncoder
+                 label_encoder: DataLabelEncoder = DataLabelEncoder()
                  ):
         self.__features_column = features_column
         self.__label_column = label_column
