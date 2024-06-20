@@ -232,7 +232,7 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         return feature_tensor, label_tensor, additional_columns
 
     def get_column(self, column_name: str) -> pd.Series:
-        raise NotImplementedError("Method not implemented")
+        return self.parquet_file.read(columns=[column_name]).to_pandas()
 
     def __getitem__(self, index):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
