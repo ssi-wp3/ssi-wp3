@@ -82,6 +82,12 @@ class DataProvider:
     def get_item(self, index: int):
         pass
 
+    def fit_or_refit_labels(self, original_label_encoder: Optional[DataLabelEncoder]):
+        if original_label_encoder:
+            self.label_encoder = original_label_encoder.refit(self.labels)
+        else:
+            self.label_encoder = self.label_encoder.fit(self.labels)
+
     def train_test_split(self, test_size: float) -> Tuple['DataProvider', 'DataProvider']:
         train_indices, test_indices = train_test_split(
             len(self), test_size=test_size, stratify=self.labels)

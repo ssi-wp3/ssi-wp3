@@ -50,10 +50,7 @@ class DataframeDataProvider(DataProvider):
     def get_subset(self,
                    indices: pd.Series,
                    original_label_encoder: Optional[DataLabelEncoder] = None) -> DataProvider:
-        if original_label_encoder:
-            self.label_encoder = original_label_encoder.refit(self.labels)
-        else:
-            self.label_encoder = self.label_encoder.fit(self.labels)
+        self.fit_or_refit_labels(original_label_encoder)
 
         return self.__data_provider(self.__getitems__(indices),
                                     self.features_column,
