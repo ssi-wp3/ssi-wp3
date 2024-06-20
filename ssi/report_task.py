@@ -8,6 +8,7 @@ import luigi
 
 class ReportTask(luigi.Task):
     data_directory = luigi.PathParameter()
+    output_directory = luigi.PathParameter()
 
     data_file_extension = luigi.Parameter(default=".parquet")
     settings_filename = luigi.PathParameter()
