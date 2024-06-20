@@ -8,13 +8,26 @@ import enum
 
 class DataProvider:
     def __init__(self,
+                 filename: str,
                  features_column: str,
                  label_column: str,
                  label_encoder: DataLabelEncoder = DataLabelEncoder()
                  ):
+        self.__filename = filename
         self.__features_column = features_column
         self.__label_column = label_column
         self.__label_encoder = label_encoder
+
+    @property
+    def filename(self) -> str:
+        """ Returns the filename of the data source for this DataProvider.
+
+        Returns
+        -------
+        str
+            The filename of the data source for this DataProvider.
+        """
+        return self.__filename
 
     @property
     def features_column(self) -> str:

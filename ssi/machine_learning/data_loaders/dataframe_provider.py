@@ -6,12 +6,13 @@ import pandas as pd
 
 class DataframeDataProvider(DataProvider):
     def init(self,
+             filename: str,
              features_column: str,
              label_column: str,
              label_encoder: DataLabelEncoder = DataLabelEncoder(),
              parquet_engine: str = "pyarrow"
              ):
-        super().init(features_column, label_column, label_encoder)
+        super().init(filename, features_column, label_column, label_encoder)
         self.__parquet_engine = parquet_engine
         self.__dataframe = None
 
