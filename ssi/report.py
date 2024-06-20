@@ -317,13 +317,6 @@ class ReportEngine:
                              False)
 
     @property
-    def report_template_settings(self) -> Settings:
-        return Settings.load(self.settings_filename,
-                             "report_templates",
-                             True,
-                             **self.report_settings)
-
-    @property
     def reports_config(self) -> Settings:
         return Settings.load(self.settings_filename,
                              "reports",
