@@ -58,6 +58,25 @@ class DataProvider:
     def get_subset(self, indices: pd.Series) -> 'DataProvider':
         pass
 
+    def train_test_split(self, test_size: float) -> Tuple['DataProvider', 'DataProvider']:
+        train_indices, test_indices = train_test_split(
+            len(self), test_size=test_size, stratify=self.labels)
+
+        train_data = self.get_subset(train_indices)
+        test_data = self.get_subset(test_indices)
+
+        # self.label_encoder.fit(self.labels)
+
+        # self.test_label_encoder = self.label_encoder.refit(
+        #     test_df[self.label_column])
+
+        # train_df[f"{self.label_column}_index"] = train_df[self.label_column].map(
+        #     self.label_encoder.transform)
+        # test_df[f"{self.label_column}_index"] = test_df[self.label_column].map(
+        #     self.test_label_encoder.transform)
+
+        return train_data, test_data
+
 
 class DataProviderType(enum.Enum):
     DataFrame = "dataframe"
@@ -121,23 +140,6 @@ class DataframeDataProvider(DataProvider):
                                     self.features_column,
                                     self.label_column,
                                     self.label_encoder)
-
-    def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        # TODO split off to DataSplitter.
-
-        train_df, test_df = train_test_split(
-            dataframe, test_size=test_size, stratify=dataframe[self.label_column])
-
-        self.label_encoder.fit(train_df[self.label_column])
-
-        self.test_label_encoder = self.label_encoder.refit(
-            test_df[self.label_column])
-
-        train_df[f"{self.label_column}_index"] = train_df[self.label_column].map(
-            self.label_encoder.transform)
-        test_df[f"{self.label_column}_index"] = test_df[self.label_column].map(
-            self.test_label_encoder.transform)
-        return train_df, test_df
 
     def __data_provider(self,
                         dataframe: pd.DataFrame,
