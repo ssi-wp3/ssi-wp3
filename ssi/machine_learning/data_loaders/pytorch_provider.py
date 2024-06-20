@@ -231,6 +231,9 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
 
         return feature_tensor, label_tensor, additional_columns
 
+    def get_column(self, column_name: str) -> pd.Series:
+        raise NotImplementedError("Method not implemented")
+
     def __getitem__(self, index):
         row_group_index, index_in_row_group = self.get_row_group_for_index(
             index)
@@ -261,6 +264,10 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
 
         # Sort the items back to the original order
         return [items[sort_dict[original_index]] for original_index in indices]
+
+    def get_subset(self, indices):
+        # TODO implement this
+        raise NotImplementedError("Method not implemented")
 
 
 class TorchLogisticRegression(nn.Module):

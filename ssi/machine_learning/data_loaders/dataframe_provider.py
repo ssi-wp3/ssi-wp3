@@ -47,7 +47,7 @@ class DataframeDataProvider(DataProvider):
             filename, engine=self.parquet_engine)
 
     def get_subset(self, indices: pd.Series) -> DataProvider:
-        return self.__data_provider(self.dataframe.loc[indices],
+        return self.__data_provider(self.__getitems__(indices),
                                     self.features_column,
                                     self.label_column,
                                     self.label_encoder)
