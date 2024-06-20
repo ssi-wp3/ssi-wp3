@@ -9,6 +9,7 @@ from .file_index import FileIndex
 import luigi
 import pandas as pd
 import tqdm
+import itertools
 import os
 
 
@@ -336,22 +337,41 @@ class ReportEngine:
                 for report in report_list]
 
     @property
+    def all_report_permutations(self) -> Dict[str, Dict[str, Any]]:
+        """Returns a dictionary with all possible permutations of the reports.
+        The permutations are based on the reports_config settings and the report_templates settings.
+
+        """
+        permutations_dict = dict()
+        prefix_key = "store_name"
+        for report_id, report_id_settings in self.reports_config.items():
+            keys, values = zip(*report_id_settings.items())
+            all_report_settings = [dict(zip(keys, combination))
+                                   for combination in itertools.product(*values)]
+
+            for all_report_dict in all_report_settings:
+                template_settings = self.report_settings.copy().update(
+                    all_report_dict)
+                report_template = Settings.load(
+                    self.settings_filename, "report_templates", True, **template_settings)
+
+                prefix = all_report_dict[prefix_key]
+                permutations_dict[f"{prefix}_{report_id}"] = report_template[report_id]
+
+        # Combine the permutations with the report template settings
+        return permutations_dict
+
+    @property
     def reports(self) -> Dict[str, List['Report']]:
         reports = defaultdict(list)
         # TODO base this on the reports_config
-        for report_key, report_settings in self.settings.items():
+        for report_key, report_settings in self.all_report_permutations.items():
             if isinstance(report_settings, list):
                 for settings in report_settings:
                     reports[report_key].append(self.report_for(settings))
             else:
                 reports[report_key].append(self.report_for(report_settings))
         return reports
-
-    def all_reports(self) -> List['Report']:
-        report_file_ids = [f"{report_key}_{report_id}"
-                           for report_id, report_combinations in self.reports_config.items()
-                           for report_key in report_combinations["store_name"]
-                           ]
 
     def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
         if result_settings["type"].lower() == ReportType.plot.value:
@@ -370,7 +390,7 @@ class ReportEngine:
 
         with tqdm.tqdm(total=len(file_index.files)) as progress_bar:
             for file_key, file_path in file_index.files.items():
-                if file_key not in self.report_template_settings:
+                if file_key not in self.reports:
                     progress_bar.set_description(f"Skipping {file_key}")
                     continue
 
