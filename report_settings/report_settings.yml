@@ -76,268 +76,324 @@ reports:
 
 report_templates:
   # Analysis for whole store
-  texts_per_product_id_histogram: 
-      - type: plot
-        pivot: false
-        output_filename: "Images/{{store_name}}_texts_per_product_id_histogram.png"
-        settings: 
-            plot_type: bar_chart
-            x_column: "{{receipt_text_column}}"
-            y_column: count
-            title: Unique receipt texts per product_id for {{store_name}}
+  unique_column_values: 
+    input_filename: "{{store_name}}_analysis_unique_column_values.parquet"
+    reports:
       - type: table
         pivot: false
-        output_filename: "Tables/{{store_name}}_texts_per_product_id_histogram.tex"
+        output_filename: "Tables/{{store_name}}_unique_column_values.tex"
         settings:
-            table_type: latex 
+            table_type: latex
+            float_format: "%.2f"
+  texts_per_product_id_histogram:
+      input_filename: "{{store_name}}_analysis_texts_per_product_id_histogram.parquet"
+      reports: 
+        - type: plot
+          pivot: false
+          output_filename: "Images/{{store_name}}_texts_per_product_id_histogram.png"
+          settings: 
+              plot_type: bar_chart
+              x_column: "{{receipt_text_column}}"
+              y_column: count
+              title: Unique receipt texts per product_id for {{store_name}}
+        - type: table
+          pivot: false
+          output_filename: "Tables/{{store_name}}_texts_per_product_id_histogram.tex"
+          settings:
+              table_type: latex 
+              float_format: "%.2f"
   log_texts_per_product_id_histogram: 
-      - type: plot
-        pivot: false
-        output_filename: "Images/{{store_name}}_log_texts_per_product_id_histogram.png"
-        settings: 
-            plot_type: bar_chart
-            x_column: "{{receipt_text_column}}"
-            y_column: count
-            title: Unique receipt texts per product_id for {{store_name}} (Log scale)
+      input_filename: "{{store_name}}_analysis_log_texts_per_product_id_histogram.parquet"
+      reports:
+        - type: plot
+          pivot: false
+          output_filename: "Images/{{store_name}}_log_texts_per_product_id_histogram.png"
+          settings: 
+              plot_type: bar_chart
+              x_column: "{{receipt_text_column}}"
+              y_column: count
+              title: Unique receipt texts per product_id for {{store_name}} (Log scale)
   receipt_length_histogram: 
-      - type: plot
-        pivot: false
-        output_filename: "Images/{{store_name}}_receipt_length_histogram.png"
-        settings: 
-            plot_type: bar_chart
-            x_column: "{{receipt_text_column}}"
-            y_column: count
-            title: Receipt text length histogram for {{store_name}}
+      input_filename: "{{store_name}}_analysis_receipt_length_histogram.parquet"
+      reports:
+        - type: plot
+          pivot: false
+          output_filename: "Images/{{store_name}}_receipt_length_histogram.png"
+          settings: 
+              plot_type: bar_chart
+              x_column: "{{receipt_text_column}}"
+              y_column: count
+              title: Receipt text length histogram for {{store_name}}
+        - type: table
+          pivot: false
+          output_filename: "Tables/{{store_name}}_receipt_length_histogram.tex"
+          settings:
+              table_type: latex
+              float_format: "%.2f"
   product_id_length_histogram: 
+      input_filename: "{{store_name}}_analysis_product_id_length_histogram.parquet"
+      reports:
+        - type: plot
+          pivot: false
+          output_filename: "Images/{{store_name}}_product_id_length_histogram.png"
+          settings: 
+              plot_type: bar_chart
+              x_column: "{{product_id_column}}"
+              y_column: count
+              title: product_id length histogram for {{store_name}}
+        - type: table
+          pivot: false
+          output_filename: "Tables/{{store_name}}_product_id_length_histogram.tex"
+          settings:
+              table_type: latex
+              float_format: "%.2f"
+  revenue_for_coicop_hierarchy: 
+    input_filename: "{{store_name}}_analysis_revenue_for_coicop_hierarchy.parquet"
+    reports:
       - type: plot
         pivot: false
-        output_filename: "Images/{{store_name}}_product_id_length_histogram.png"
+        output_filename: "Images/{{store_name}}_revenue_for_coicop_hierarchy_sunburst.html"
         settings: 
-            plot_type: bar_chart
-            x_column: "{{product_id_column}}"
-            y_column: count
-            title: product_id length histogram for {{store_name}}
-  revenue_for_coicop_hierarchy: 
-    - type: plot
-      pivot: false
-      output_filename: "Images/{{store_name}}_revenue_for_coicop_hierarchy_sunburst.html"
-      settings: 
-          plot_type: sunburst_chart
-          format: html
-          sunburst_columns: "{{coicop_columns}}"
-          amount_column: "{{revenue_column}}"
-          title: Sunburst of revenue per coicop level for {{store_name}}
+            plot_type: sunburst_chart
+            format: html
+            sunburst_columns: "{{coicop_columns}}"
+            amount_column: "{{revenue_column}}"
+            title: Sunburst of revenue per coicop level for {{store_name}}
   
   product_revenue_versus_lifetime:
-    - type: plot  
-      pivot: false
-      output_filename: "Images/{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
-      settings: 
-          plot_type: scatter_plot
-          x_column: "{{period_column}}"
-          y_column: "{{revenue_column}}"
-          title: Product revenue versus lifetime for {{store_name}}
-    - type: plot  
-      pivot: false
-      output_filename: "Images/{{store_name}}_{{period_column}}_product_amount_versus_lifetime.png"
-      settings: 
-          plot_type: scatter_plot
-          x_column: "{{period_column}}"
-          y_column: "{{amount_column}}"
-          title: Product amount versus lifetime for {{store_name}}
-  
+    input_filename: "{{store_name}}_{{period_column}}_analysis_product_revenue_versus_lifetime.parquet"
+    reports:
+      - type: plot  
+        pivot: false
+        output_filename: "Images/{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
+        settings: 
+            plot_type: scatter_plot
+            x_column: "{{period_column}}"
+            y_column: "{{revenue_column}}"
+            title: Product revenue versus lifetime for {{store_name}}
+      - type: plot  
+        pivot: false
+        output_filename: "Images/{{store_name}}_{{period_column}}_product_amount_versus_lifetime.png"
+        settings: 
+            plot_type: scatter_plot
+            x_column: "{{period_column}}"
+            y_column: "{{amount_column}}"
+            title: Product amount versus lifetime for {{store_name}}
+    
   # Analysis per COICOP
 
   unique_coicop_values_per_coicop: 
-    - type: plot  
-      pivot: true
-      value_columns: 
-        - "{{product_id_column}}"
-        - "{{receipt_text_column}}"
-      output_filename: "Images/{{store_name}}_{{coicop_column}}_unique_receipt_values_per_coicop.png"
-      settings: 
-          plot_type: bar_chart
-          x_column: "{{coicop_column}}"
-          y_column: value
-          group_column: group
-          title: Unique receipt texts per {{coicop_column}} for {{store_name}}
+    input_filename: "{{store_name}}_{{coicop_column}}_analysis_unique_coicop_values.parquet"
+    reports:
+      - type: plot  
+        pivot: true
+        value_columns: 
+          - "{{product_id_column}}"
+          - "{{receipt_text_column}}"
+        output_filename: "Images/{{store_name}}_{{coicop_column}}_unique_receipt_values_per_coicop.png"
+        settings: 
+            plot_type: bar_chart
+            x_column: "{{coicop_column}}"
+            y_column: value
+            group_column: group
+            title: Unique receipt texts per {{coicop_column}} for {{store_name}}
 
   # Analysis per period
   
   unique_column_values_per_period: 
-    - type: plot  
-      pivot: true
-      value_columns: 
-        - "{{product_id_column}}" 
-        - "{{receipt_text_column}}"
-      output_filename: "Images/{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column.png"
-      settings: 
-          plot_type: line_chart
-          x_column: "{{period_column}}"
-          y_column: value
-          group_column: group
-          title: Unique receipt texts per {{period_column}} for {{store_name}}
+    input_filename: "{{store_name}}_{{period_column}}_analysis_unique_column_values.parquet"
+    reports:
+      - type: plot  
+        pivot: true
+        value_columns: 
+          - "{{product_id_column}}" 
+          - "{{receipt_text_column}}"
+        output_filename: "Images/{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column.png"
+        settings: 
+            plot_type: line_chart
+            x_column: "{{period_column}}"
+            y_column: value
+            group_column: group
+            title: Unique receipt texts per {{period_column}} for {{store_name}}
+      - type: table
+        pivot: false
+        output_filename: "Tables/{{store_name}}_{{period_column}}_unique_column_values.tex"
+        settings:
+            table_type: latex
+            float_format: "%.2f"
   total_revenue_per_period: 
-    - type: plot  
-      pivot: false
-      output_filename: "Images/{{store_name}}_{{period_column}}_total_revenue_per_period.png"
-      settings: 
-          plot_type: line_chart
-          x_column: "{{period_column}}"
-          y_column: "{{revenue_column}}"
-          title: Total revenue per {{period_column}} for {{store_name}}
-    - type: plot  
-      pivot: false
-      output_filename: "Images/{{store_name}}_{{period_column}}_total_amount_per_period.png"
-      settings: 
-          plot_type: line_chart
-          x_column: "{{period_column}}"
-          y_column: "{{amount_column}}"
-          title: Total amount per {{period_column}} for {{store_name}}
+    input_filename: "{{store_name}}_{{period_column}}_analysis_total_revenue_per_period.parquet"
+    reports:
+      - type: plot  
+        pivot: false
+        output_filename: "Images/{{store_name}}_{{period_column}}_total_revenue_per_period.png"
+        settings: 
+            plot_type: line_chart
+            x_column: "{{period_column}}"
+            y_column: "{{revenue_column}}"
+            title: Total revenue per {{period_column}} for {{store_name}}
+      - type: plot  
+        pivot: false
+        output_filename: "Images/{{store_name}}_{{period_column}}_total_amount_per_period.png"
+        settings: 
+            plot_type: line_chart
+            x_column: "{{period_column}}"
+            y_column: "{{amount_column}}"
+            title: Total amount per {{period_column}} for {{store_name}}
   compare_products_per_period: 
-    - type: plot  
-      pivot: true
-      value_columns: 
-        - number_{{receipt_text_column}}_introduced
-        - number_{{receipt_text_column}}_removed
-        - number_{{product_id_column}}_introduced
-        - number_{{product_id_column}}_removed
-      output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_compare_products_per_period.png"
-      settings: 
-          plot_type: line_chart
-          x_column: "{{period_column}}"
-          y_column: value
-          group_column: group
-          title: Number of products introduced/removed per {{period_column}} for {{store_name}}
-    - type: plot
-      pivot: false 
-      value_columns:
-        - "{{period_column}}"
-        - jaccard_index_{{receipt_text_column}}_{{period_column}}
-      output_filename: "Images/overlap_{{store_name}}_{{period_column}}_jaccard_index_{{receipt_text_column}}.png"
-      settings:
-          plot_type: line_chart
-          x_column: "{{period_column}}"
-          y_column: jaccard_index_{{receipt_text_column}}_{{period_column}}
-          title: Jaccard index of {{receipt_text_column}} overlap per {{period_column}} for {{store_name}}
-    - type: plot
-      pivot: false 
-      value_columns:
-        - "{{period_column}}"
-        - jaccard_index_{{product_id_column}}_{{period_column}}
-      output_filename: "Images/overlap_{{store_name}}_{{period_column}}_jaccard_index_{{product_id_column}}.png"
-      settings:
-          plot_type: line_chart
-          x_column: "{{period_column}}"
-          y_column: jaccard_index_{{product_id_column}}_{{period_column}}
-          title: Jaccard index of {{product_id_column}} overlap per {{period_column}} for {{store_name}}      
-    - type: plot
-      pivot: false 
-      sort_values:
-        columns:
+    input_filename: "{{store_name}}_{{period_column}}_analysis_compare_products_per_period.parquet"
+    reports:
+      - type: plot  
+        pivot: true
+        value_columns: 
+          - number_{{receipt_text_column}}_introduced
+          - number_{{receipt_text_column}}_removed
+          - number_{{product_id_column}}_introduced
+          - number_{{product_id_column}}_removed
+        output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_compare_products_per_period.png"
+        settings: 
+            plot_type: line_chart
+            x_column: "{{period_column}}"
+            y_column: value
+            group_column: group
+            title: Number of products introduced/removed per {{period_column}} for {{store_name}}
+      - type: plot
+        pivot: false 
+        value_columns:
           - "{{period_column}}"
-        ascending: true
-      value_columns:
-        - "{{period_column}}"
-        - total_{{product_id_column}}
-      output_filename: "Images/{{store_name}}_{{period_column}}_total_number_{{product_id_column}}.png"
-      settings:
-          plot_type: bar_chart
-          x_column: "{{period_column}}"
-          y_column: total_{{product_id_column}}
-          title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}}  
+          - jaccard_index_{{receipt_text_column}}_{{period_column}}
+        output_filename: "Images/overlap_{{store_name}}_{{period_column}}_jaccard_index_{{receipt_text_column}}.png"
+        settings:
+            plot_type: line_chart
+            x_column: "{{period_column}}"
+            y_column: jaccard_index_{{receipt_text_column}}_{{period_column}}
+            title: Jaccard index of {{receipt_text_column}} overlap per {{period_column}} for {{store_name}}
+      - type: plot
+        pivot: false 
+        value_columns:
+          - "{{period_column}}"
+          - jaccard_index_{{product_id_column}}_{{period_column}}
+        output_filename: "Images/overlap_{{store_name}}_{{period_column}}_jaccard_index_{{product_id_column}}.png"
+        settings:
+            plot_type: line_chart
+            x_column: "{{period_column}}"
+            y_column: jaccard_index_{{product_id_column}}_{{period_column}}
+            title: Jaccard index of {{product_id_column}} overlap per {{period_column}} for {{store_name}}      
+      - type: plot
+        pivot: false 
+        sort_values:
+          columns:
+            - "{{period_column}}"
+          ascending: true
+        value_columns:
+          - "{{period_column}}"
+          - total_{{product_id_column}}
+        output_filename: "Images/{{store_name}}_{{period_column}}_total_number_{{product_id_column}}.png"
+        settings:
+            plot_type: bar_chart
+            x_column: "{{period_column}}"
+            y_column: total_{{product_id_column}}
+            title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}}  
   product_availability_in_period:  
-    - type: plot
-      pivot: false 
-      sort_values:
-        columns:
+    input_filename: "{{store_name}}_{{period_column}}_analysis_product_availability_in_period.parquet"
+    reports:
+      - type: plot
+        pivot: false 
+        sort_values:
+          columns:
+            - "{{product_id_column}}"
+          ascending: true
+        value_columns:
           - "{{product_id_column}}"
-        ascending: true
-      value_columns:
-        - "{{product_id_column}}"
-      output_filename: "Images/{{store_name}}_{{period_column}}_{{product_id_column}}_availability.png"
-      settings:
-          plot_type: heatmap
-          title: Heatmap of {{product_id_column}} availability for {{store_name}}  
-    - type: plot
-      pivot: false 
-      value_columns:
-        - "{{product_id_column}}"
-      output_filename: "Images/{{store_name}}_{{period_column}}_{{receipt_text_column}}_availability.png"
-      settings:
-          plot_type: heatmap
-          title: Heatmap of {{receipt_text_column}} availability for {{store_name}} 
+        output_filename: "Images/{{store_name}}_{{period_column}}_{{product_id_column}}_availability.png"
+        settings:
+            plot_type: heatmap
+            title: Heatmap of {{product_id_column}} availability for {{store_name}}  
+      - type: plot
+        pivot: false 
+        value_columns:
+          - "{{product_id_column}}"
+        output_filename: "Images/{{store_name}}_{{period_column}}_{{receipt_text_column}}_availability.png"
+        settings:
+            plot_type: heatmap
+            title: Heatmap of {{receipt_text_column}} availability for {{store_name}} 
   product_lifetime_in_periods:
-    - type: plot
-      pivot: false 
-      sort_values:
-        columns:
+    input_filename: "{{store_name}}_{{period_column}}_analysis_product_lifetime_in_periods.parquet"
+    reports:
+      - type: plot
+        pivot: false 
+        sort_values:
+          columns:
+            - "{{product_id_column}}"
+            - "{{period_column}}"
+          ascending: true
+        value_columns:
           - "{{product_id_column}}"
-          - "{{period_column}}"
-        ascending: true
-      value_columns:
-        - "{{product_id_column}}"
-      output_filename: "Images/{{store_name}}_{{period_column}}_{{product_id_column}}_lifetime.png"
-      settings:
-          plot_type: histogram
-          x_column: "{{period_column}}"
-          title: Histogram of {{product_id_column}} lifetime for {{store_name}}  
+        output_filename: "Images/{{store_name}}_{{period_column}}_{{product_id_column}}_lifetime.png"
+        settings:
+            plot_type: histogram
+            x_column: "{{period_column}}"
+            title: Histogram of {{product_id_column}} lifetime for {{store_name}}  
 
   # Analysis per period and coicop
   total_revenue_per_coicop_and_period:
-    - type: plot 
-      pivot: false
-      sort_values:
-        columns:
-          - "{{period_column}}"
-          - "{{coicop_column}}"          
-        ascending: true 
-      value_columns:
-        - "{{period_column}}"
-        - "{{coicop_column}}"
-        - "{{revenue_column}}"
-      output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_revenue_{{product_id_column}}.png"
-      settings:
-          plot_type: bar_chart
-          x_column: "{{period_column}}"
-          y_column: "{{revenue_column}}"
-          group_column: "{{coicop_column}}"
-          title: Bar chart of the total revenue per {{coicop_column}} and {{period_column}} for {{store_name}} 
-    - type: plot 
-      pivot: false
-      sort_values:
-        columns:
-          - "{{period_column}}"
-          - "{{coicop_column}}"          
-        ascending: true 
-      value_columns:
-        - "{{period_column}}"
-        - "{{coicop_column}}"
-        - "{{amount_column}}"
-      output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_amount_{{product_id_column}}.png"
-      settings:
-          plot_type: bar_chart
-          x_column: "{{period_column}}"
-          y_column: "{{amount_column}}"
-          group_column: "{{coicop_column}}"
-          title: Bar chart of the total amount of products sold per {{coicop_column}} and {{period_column}} for {{store_name}}       
-
-  compare_products_per_period_coicop_level:
-    - type: plot
-      pivot: false 
-      sort_values:
-        columns:
+    input_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_analysis_total_revenue_per_coicop_and_period.parquet"
+    reports:
+      - type: plot 
+        pivot: false
+        sort_values:
+          columns:
+            - "{{period_column}}"
+            - "{{coicop_column}}"          
+          ascending: true 
+        value_columns:
           - "{{period_column}}"
           - "{{coicop_column}}"
-        ascending: true
-      value_columns:
-        - "{{period_column}}"
-        - "{{coicop_column}}"
-        - total_{{product_id_column}}
-      output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_number_{{product_id_column}}.png"
-      settings:
-          plot_type: bar_chart
-          x_column: "{{period_column}}"
-          y_column: total_{{product_id_column}}
-          group_column: "{{coicop_column}}"
-          title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}} 
+          - "{{revenue_column}}"
+        output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_revenue_{{product_id_column}}.png"
+        settings:
+            plot_type: bar_chart
+            x_column: "{{period_column}}"
+            y_column: "{{revenue_column}}"
+            group_column: "{{coicop_column}}"
+            title: Bar chart of the total revenue per {{coicop_column}} and {{period_column}} for {{store_name}} 
+      - type: plot 
+        pivot: false
+        sort_values:
+          columns:
+            - "{{period_column}}"
+            - "{{coicop_column}}"          
+          ascending: true 
+        value_columns:
+          - "{{period_column}}"
+          - "{{coicop_column}}"
+          - "{{amount_column}}"
+        output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_amount_{{product_id_column}}.png"
+        settings:
+            plot_type: bar_chart
+            x_column: "{{period_column}}"
+            y_column: "{{amount_column}}"
+            group_column: "{{coicop_column}}"
+            title: Bar chart of the total amount of products sold per {{coicop_column}} and {{period_column}} for {{store_name}}       
+
+  compare_products_per_period_coicop_level:
+    input_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_analysis_compare_products_per_period.parquet"
+    reports:
+      - type: plot
+        pivot: false 
+        sort_values:
+          columns:
+            - "{{period_column}}"
+            - "{{coicop_column}}"
+          ascending: true
+        value_columns:
+          - "{{period_column}}"
+          - "{{coicop_column}}"
+          - total_{{product_id_column}}
+        output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_number_{{product_id_column}}.png"
+        settings:
+            plot_type: bar_chart
+            x_column: "{{period_column}}"
+            y_column: total_{{product_id_column}}
+            group_column: "{{coicop_column}}"
+            title: Bar chart of the total number of {{product_id_column}} per {{period_column}} for {{store_name}} 
