@@ -1,6 +1,7 @@
 from .data_provider import DataProvider
 from .dataframe_provider import DataframeDataProvider
 from .pytorch_provider import ParquetDataset
+from .huggingface_provider import HuggingFaceDataProvider
 import enum
 
 
@@ -13,21 +14,19 @@ class DataProviderType(enum.Enum):
 class DataProviderFactory:
     @staticmethod
     def create_data_provider(data_provider_type: DataProviderType,
+                             filename: str,
                              features_column: str,
                              label_column: str,
-                             **kwargs) -> DataProvider:
+                             **kwargs) -> 'DataProvider':
         if data_provider_type == DataProviderType.DataFrame:
-            return DataframeDataProvider(features_column, label_column, **kwargs)
+            return DataframeDataProvider(filename, features_column, label_column, **kwargs)
         elif data_provider_type == DataProviderType.HuggingFace:
-            raise NotImplementedError(
-                "HuggingFace data provider is not implemented.")
+            return HuggingFaceDataProvider(filename, features_column, label_column, **kwargs)
         elif data_provider_type == DataProviderType.PyTorch:
-            # return ParquetDataset(filename: str,
-            #                      features_column,
-            #                      label_column,
-            #                      **kwargs):
-            raise NotImplementedError(
-                "PyTorch data provider is not implemented.")
+            return ParquetDataset(filename,
+                                  features_column,
+                                  label_column,
+                                  **kwargs)
         else:
             raise ValueError(
                 f"Data provider type {data_provider_type} is not supported.")
