@@ -5,7 +5,7 @@ import torch
 import pyarrow.parquet as pq
 from ..model import Model
 from .label_encoder import DataLabelEncoder
-from ssi.machine_learning.data_loaders.data_provider import DataProvider
+from .data_provider import DataProvider
 from skorch import NeuralNetClassifier
 from torch.nn import functional as F
 import pandas as pd
@@ -25,8 +25,6 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
                  memory_map: bool = False):
         super().__init__(features_column, label_column, DataLabelEncoder(label_mapping))
         self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
-        self.__features_column = features_column
-        self.__label_column = label_column
         self.__label_mapping = label_mapping
         self.__current_row_group_index = 0
         self.__current_row_group = None
@@ -66,28 +64,6 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
     @current_row_group.setter
     def current_row_group(self, value: pd.DataFrame):
         self.__current_row_group = value
-
-    @property
-    def features_column(self) -> str:
-        """ Returns the name of the feature column in the Parquet file.
-
-        Returns
-        -------
-        str
-            The name of the feature column in the Parquet file.
-        """
-        return self.__features_column
-
-    @property
-    def label_column(self) -> str:
-        """ Returns the name of the target column in the Parquet file.
-
-        Returns
-        -------
-        str
-            The name of the target column in the Parquet file.
-        """
-        return self.__label_column
 
     @property
     def label_mapping(self) -> Dict[str, int]:

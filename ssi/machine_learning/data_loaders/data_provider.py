@@ -18,14 +18,37 @@ class DataProvider:
 
     @property
     def features_column(self) -> str:
+        """ Returns the name of the feature column for this DataProvider.
+
+        Returns
+        -------
+        str
+            The name of the feature column for this DataProvider.
+        """
         return self.__features_column
 
     @property
     def label_column(self) -> str:
+        """ Returns the name of the label column for this DataProvider.
+
+        Returns
+        -------
+        str
+            The name of the label column for this DataProvider.
+        """
         return self.__label_column
 
     @property
     def encoded_label_column(self) -> str:
+        """ Returns the name of the encoded label column for this DataProvider.
+        The encoded label column is the label column with the labels encoded as integers.
+
+        Returns
+        -------
+        str
+            The name of the encoded label column for this DataProvider.
+            The name is derived from the label column name by appending "_index".
+        """
         return f"{self.label_column}_index"
 
     @property
