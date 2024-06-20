@@ -149,7 +149,20 @@ class DataProvider:
         else:
             self.label_encoder = self.label_encoder.fit(self.labels)
 
-    def train_test_split(self, test_size: float) -> Tuple['DataProvider', 'DataProvider']:
+    def train_test_split(self, test_size: float = 0.2) -> Tuple['DataProvider', 'DataProvider']:
+        """ Splits the data into a training and a test set, the test size is determined by the
+        test_size parameter. The data is split using the train_test_split method from scikit-learn.
+
+        Parameters
+        ----------
+        test_size : float, optional
+            The size of the test set, by default 0.2
+
+        Returns
+        -------
+        Tuple[DataProvider, DataProvider]
+            A tuple containing the training and test DataProviders.
+        """
         train_indices, test_indices = train_test_split(
             len(self), test_size=test_size, stratify=self.labels)
 
@@ -157,3 +170,28 @@ class DataProvider:
         test_data = self.get_subset(test_indices, train_data.label_encoder)
 
         return train_data, test_data
+
+    def train_validation_test_split(self, validation_size: float = 0.1, test_size: float = 0.2) -> Tuple['DataProvider', 'DataProvider', 'DataProvider']:
+        """ Splits the data into training, validation, and test sets.
+        The data is first split into a training validation set and a test set, using the test_size parameter.
+        After that, the training validation set is split into a training set and a validation set, using the validation_size parameter. To split the data, the train_test_split method is used.
+
+        Parameters
+        ----------
+        validation_size : float, optional
+            The size of the validation set, by default 0.1
+
+        test_size : float, optional
+            The size of the test set, by default 0.2
+
+        Returns
+        -------
+
+        Tuple[DataProvider, DataProvider, DataProvider]
+            A tuple containing the training, validation, and test DataProviders.
+        """
+        train_validation_provider, test_provider = self.train_test_split(
+            test_size)
+        train_provider, validation_provider = train_validation_provider.train_test_split(
+            validation_size)
+        return train_provider, validation_provider, test_provider
