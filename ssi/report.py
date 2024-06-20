@@ -360,15 +360,15 @@ class ReportEngine:
     def reports(self) -> Dict[str, List['Report']]:
         if not self.__reports:
             self.__reports = defaultdict(list)
-            # TODO base this on the reports_config
             for report_key, report_settings in self.all_report_permutations.items():
-                if isinstance(report_settings, list):
-                    for settings in report_settings:
+                report_template = report_settings["reports"]
+                if isinstance(report_template, list):
+                    for settings in report_template:
                         self.__reports[report_key].append(
                             self.report_for(settings))
                 else:
                     self.__reports[report_key].append(
-                        self.report_for(report_settings))
+                        self.report_for(report_template))
         return self.__reports
 
     def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
