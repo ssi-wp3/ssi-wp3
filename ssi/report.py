@@ -23,9 +23,6 @@ class Report(ABC):
 
     Parameters
     ----------
-    input_filename : str
-        The filename of the input file to read the data from.
-
     settings : Dict[str, Any]
         The settings for the report. These settings are often read from a YAML configuration file.
 
@@ -33,21 +30,9 @@ class Report(ABC):
         Whether the report needs a binary file to be written to.
     """
 
-    def __init__(self, input_filename: str, settings: Dict[str, Any], needs_binary_file: bool = True):
-        self.__input_filename = input_filename
+    def __init__(self, settings: Dict[str, Any], needs_binary_file: bool = True):
         self.__settings = settings
         self.__needs_binary_file = needs_binary_file
-
-    @property
-    def input_filename(self) -> str:
-        """The filename of the input file to read the data from.
-
-        Returns
-        -------
-        str
-            The filename of the input file.
-        """
-        return self.__input_filename
 
     @property
     def settings(self) -> Dict[str, Any]:
@@ -136,21 +121,18 @@ class Report(ABC):
 
 
 class PlotReport(Report):
-    def __init__(self, input_filename: str, settings: Dict[str, Any], plot_engine: PlotEngine = PlotEngine()):
+    def __init__(self, settings: Dict[str, Any], plot_engine: PlotEngine = PlotEngine()):
         """ A report class for plots. This class is a subclass of the Report class.
 
         Parameters
         ----------
-        input_filename : str
-            The filename of the input file to read the data from.
-
         settings : Dict[str, Any]
             The settings for the report. These settings are often read from a YAML configuration file.
 
         plot_engine : PlotEngine
             The plot engine to use for plotting. The default is the PlotEngine class.
         """
-        super().__init__(input_filename, settings, True)
+        super().__init__(settings, True)
         self.__plot_engine = plot_engine
         # Bit of a hack
         self.__set_plot_format()
@@ -226,8 +208,8 @@ class TableReport(Report):
         markdown = "markdown"
         latex = "latex"
 
-    def __init__(self, input_filename: str, settings: Dict[str, Any]):
-        super().__init__(input_filename, settings, False)
+    def __init__(self, settings: Dict[str, Any]):
+        super().__init__(settings, False)
 
     def write_to_file(self, dataframe: pd.DataFrame, filename: str):
         table_type = TableReport.TableType[self.type_settings.get(
@@ -383,17 +365,17 @@ class ReportEngine:
                 if isinstance(report_template, list):
                     for settings in report_template:
                         self.__reports[report_key].append(
-                            self.report_for(report_key, settings))
+                            self.report_for(settings))
                 else:
                     self.__reports[report_key].append(
-                        self.report_for(report_key, report_template))
+                        self.report_for(report_template))
         return self.__reports
 
-    def report_for(self, input_filename: str, result_settings: Dict[str, Any]) -> 'Report':
+    def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
         if result_settings["type"].lower() == ReportType.plot.value:
-            return PlotReport(input_filename, result_settings)
+            return PlotReport(result_settings)
         elif result_settings["type"].lower() == ReportType.table.value:
-            return TableReport(input_filename, result_settings)
+            return TableReport(result_settings)
         else:
             raise ValueError(f"Unknown report type: {result_settings['type']}")
 
@@ -407,6 +389,15 @@ class ReportEngine:
                              for file_key, file_path in file_index.files.items()
                              if file_key in self.reports.keys()}
         print("File index keys", file_index.files.keys())
+
+        self.reports_for_file_index(files_for_reports,
+                                    parquet_engine=parquet_engine,
+                                    report_file_manager=report_file_manager)
+
+    def reports_for_file_index(self,
+                               files_for_reports: Dict[str, str],
+                               parquet_engine: str = "pyarrow",
+                               report_file_manager: ReportFileManager = DefaultReportFileManager()):
         print("Reports keys", self.reports.keys())
         print("Files for reports:", files_for_reports)
 

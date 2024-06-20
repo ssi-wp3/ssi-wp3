@@ -2,6 +2,7 @@ from typing import Dict, Any
 from .report import ReportEngine, LuigiReportFileManager
 from .parquet_file import ParquetFile
 from .settings import Settings
+from .file_index import FileIndex
 import pandas as pd
 import os
 import luigi
@@ -30,8 +31,10 @@ class ReportTask(luigi.Task):
         return luigi.LocalTarget(filename)
 
     def requires(self):
-        return {report.input_filename: self.input_file_for(report.input_filename)
-                for report in self.report_engine.flattened_reports}
+        file_index = FileIndex(self.data_directory, self.data_file_extension)
+        return {file_key: self.input_file_for(file_path)
+                for file_key, file_path in file_index.files.items()
+                if file_key in self.report_engine.flattened_reports.keys()}
 
     def output(self):
         return {report.output_filename: self.output_target_for(os.path.join(self.output_directory, report.output_filename), binary_file=report.needs_binary_file)
@@ -40,8 +43,8 @@ class ReportTask(luigi.Task):
     def run(self):
         luigi_report_file_manager = LuigiReportFileManager(
             self.input(), self.output())
-        self.report_engine.reports_for_path(
-            self.data_directory,
+        self.report_engine.reports_for_file_index(
+            self.input(),
             file_extension=self.data_file_extension,
             report_file_manager=luigi_report_file_manager,
             parquet_engine=self.parquet_engine
