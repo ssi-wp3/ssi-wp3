@@ -46,79 +46,79 @@ class ModelPipeline:
         raise ValueError(
             f"DataProvider not known for model type: {self.model}.")
 
-    @ property
+    @property
     def cross_validator(self) -> BaseCrossValidator:
         return self.__cross_validator
 
-    @ property
+    @property
     def model_evaluator(self) -> ModelEvaluator:
         return self.__model_evaluator
 
-    @ model_evaluator.setter
+    @model_evaluator.setter
     def model_evaluator(self, value: ModelEvaluator):
         self.__model_evaluator = value
 
-    @ property
+    @property
     def train_dataset(self) -> DataProvider:
         return self.__train_dataset
 
-    @ train_dataset.setter
+    @train_dataset.setter
     def train_dataset(self, value: DataProvider):
         self.__train_dataset = value
 
-    @ property
+    @property
     def validation_dataset(self) -> DataProvider:
         return self.__validation_dataset
 
-    @ validation_dataset.setter
+    @validation_dataset.setter
     def validation_dataset(self, value: DataProvider):
         self.__validation_dataset = value
 
-    @ property
+    @property
     def test_dataset(self) -> DataProvider:
         return self.__test_dataset
 
-    @ test_dataset.setter
+    @test_dataset.setter
     def test_dataset(self, value: DataProvider):
         self.__test_dataset = value
 
-    @ property
+    @property
     def features_column(self) -> str:
         return self.__features_column
 
-    @ features_column.setter
+    @features_column.setter
     def features_column(self, value: str):
         self.__features_column = value
 
-    @ property
+    @property
     def label_column(self) -> str:
         return self.__label_column
 
-    @ label_column.setter
+    @label_column.setter
     def label_column(self, value: str):
         self.__label_column = value
 
-    @ property
+    @property
     def evaluation_metric(self) -> str:
         return self.__evaluation_metric
 
-    @ property
+    @property
     def best_model_fold(self) -> int:
         return self.__best_model_fold
 
-    @ best_model_fold.setter
+    @best_model_fold.setter
     def best_model_fold(self, value: int):
         self.__best_model_fold = value
 
-    @ property
+    @property
     def best_model(self) -> Model:
         return self.__best_model
 
-    @ best_model.setter
+    @best_model.setter
     def best_model(self, value: Model):
         self.__best_model = value
 
-    @ staticmethod
+    @staticmethod
     def pipeline_for(model: Union[str, Model], **kwargs) -> "ModelPipeline":
         if isinstance(model, str):
             model = ModelFactory.model_for(model, **kwargs)
