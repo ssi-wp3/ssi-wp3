@@ -30,6 +30,11 @@ class DataProvider:
         pass
 
     @property
+    @abstractmethod
+    def labels(self) -> pd.Series:
+        pass
+
+    @property
     def number_of_classes(self) -> int:
         return len(self.label_encoder.label_mapping)
 
@@ -50,7 +55,7 @@ class DataProvider:
         pass
 
     @abstractmethod
-    def get_subset(self, indices: pd.Series) -> pd.DataFrame:
+    def get_subset(self, indices: pd.Series) -> 'DataProvider':
         pass
 
 
@@ -92,15 +97,30 @@ class DataframeDataProvider(DataProvider):
     def dataframe(self) -> pd.DataFrame:
         return self.__dataframe
 
+    @dataframe.setter
+    def dataframe(self, value: pd.DataFrame):
+        self.__dataframe = value
+
+    @property
+    def feature_vector_length(self) -> int:
+        return len(self.dataframe[self.features_column].iloc[0])
+
+    @property
+    def labels(self) -> pd.Series:
+        return self.dataframe[self.label_column]
+
     def __len__(self) -> int:
         return len(self.dataframe)
 
     def load(self, filename: str):
-        self.__dataframe = pd.read_parquet(
+        self.dataframe = pd.read_parquet(
             filename, engine=self.parquet_engine)
 
-    def get_subset(self, indices: pd.Series) -> pd.DataFrame:
-        return self.dataframe.loc[indices]
+    def get_subset(self, indices: pd.Series) -> DataProvider:
+        return self.__data_provider(self.dataframe.loc[indices],
+                                    self.features_column,
+                                    self.label_column,
+                                    self.label_encoder)
 
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
         # TODO split off to DataSplitter.
@@ -108,13 +128,23 @@ class DataframeDataProvider(DataProvider):
         train_df, test_df = train_test_split(
             dataframe, test_size=test_size, stratify=dataframe[self.label_column])
 
-        self.train_label_encoder.fit(train_df[self.label_column])
+        self.label_encoder.fit(train_df[self.label_column])
 
-        self.test_label_encoder = self.train_label_encoder.refit(
+        self.test_label_encoder = self.label_encoder.refit(
             test_df[self.label_column])
 
         train_df[f"{self.label_column}_index"] = train_df[self.label_column].map(
-            self.train_label_encoder.transform)
+            self.label_encoder.transform)
         test_df[f"{self.label_column}_index"] = test_df[self.label_column].map(
             self.test_label_encoder.transform)
         return train_df, test_df
+
+    def __data_provider(self,
+                        dataframe: pd.DataFrame,
+                        features_column: str,
+                        label_column: str,
+                        label_encoder: DataLabelEncoder):
+        provider = DataframeDataProvider(
+            features_column, label_column, label_encoder)
+        provider.dataframe = dataframe
+        return provider
