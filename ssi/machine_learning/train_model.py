@@ -1,69 +1,18 @@
 
 from typing import List, Dict, Callable, Any, Optional
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-from sklearn.utils.discovery import all_estimators
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
-from sklearn.ensemble._voting import _BaseVoting
-from sklearn.ensemble._stacking import _BaseStacking
-from .hiclass_model import HiClassModel
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..label_extractor import LabelExtractor
 from ..constants import Constants
-from .model import Model
-from .scikit_model import SklearnModel
-from .data_loaders.pytorch_provider import PytorchModel, TorchLogisticRegression
+from .model_factory import ModelFactory
 import pandas as pd
 import numpy as np
 import tqdm
 import joblib
 import os
 import json
-
-
-class ModelFactory:
-    def __init__(self, type_filter: str = "classifier"):
-        self._models = None
-        self._model_type_filter = type_filter
-
-    @property
-    def model_type_filter(self) -> str:
-        return self._model_type_filter
-
-    @property
-    def model_names(self) -> List[str]:
-        return list(self.models.keys())
-
-    @property
-    def models(self) -> Dict[str, Callable[[Dict[str, object]], Model]]:
-        # From: https://stackoverflow.com/questions/42160313/how-to-list-all-classification-regression-clustering-algorithms-in-scikit-learn
-        if not self._models:
-            self._models = {model_name: SklearnModel(model)
-                            for model_name, model in all_estimators(type_filter=self.model_type_filter)
-                            if not issubclass(model, _BaseVoting) and not issubclass(model, _BaseStacking)
-                            }
-            self._models = self._add_extra_models(self._models)
-
-        return self._models
-
-    def create_model(self, model_type: str, **model_kwargs) -> Model:
-        if model_type in self.models:
-            return self.models[model_type]  # (**model_kwargs)
-        else:
-            raise ValueError(f"Invalid model type: {model_type}")
-
-    @staticmethod
-    def model_for(model_type: str, **model_kwargs) -> Model:
-        model_factory = ModelFactory()
-        return model_factory.create_model(model_type, **model_kwargs)
-
-    def _add_extra_models(self, models: Dict[str, Callable[[Dict[str, object]], object]]):
-        # (local_classifier=LogisticRegression(), verbose=1)
-        models["hiclass"] = HiClassModel(model=LogisticRegression)
-        models["pytorch_classifier"] = PytorchModel(
-            model=TorchLogisticRegression)
-        return models
 
 
 def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, object]:

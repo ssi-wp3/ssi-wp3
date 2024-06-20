@@ -3,6 +3,7 @@ from ssi.machine_learning.data_loaders.data_provider import DataProvider
 from .model import Model, SklearnModel, HuggingFaceModel, PyTorchModel
 from .evaluate import ModelEvaluator
 from .data_loaders.data_provider_factory import DataProviderFactory, DataProviderType
+from .model_factory import ModelFactory
 from sklearn.model_selection import BaseCrossValidator
 import torch.nn as nn
 
@@ -119,7 +120,9 @@ class ModelPipeline:
 
     @ staticmethod
     def pipeline_for(model: Union[str, Model]) -> "ModelPipeline":
-        pass
+        if isinstance(model, str):
+            model = ModelFactory.model_for(model)
+        return ModelPipeline(model)
 
     def with_model_evaluator(self, model_evaluator: ModelEvaluator) -> "ModelPipeline":
         self.model_evaluator = model_evaluator
