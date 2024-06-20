@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 from abc import ABC, abstractmethod
 from sklearn.model_selection import train_test_split
 from .label_encoder import DataLabelEncoder
@@ -54,8 +54,14 @@ class DataProvider:
     def __len__(self) -> int:
         pass
 
+    def __getitem__(self, key: Union[int, str]) -> pd.Series:
+        if isinstance(key, int):
+            return self.get_column(key)
+        else:
+            return self.get_item(key)
+
     @abstractmethod
-    def __getitem__(self, key: str) -> pd.Series:
+    def __getitems__(self, indices):
         pass
 
     @abstractmethod
@@ -64,6 +70,14 @@ class DataProvider:
 
     @abstractmethod
     def get_subset(self, indices: pd.Series) -> 'DataProvider':
+        pass
+
+    @abstractmethod
+    def get_column(self, column_name: str) -> pd.Series:
+        pass
+
+    @abstractmethod
+    def get_item(self, index: int):
         pass
 
     def train_test_split(self, test_size: float) -> Tuple['DataProvider', 'DataProvider']:
@@ -135,8 +149,11 @@ class DataframeDataProvider(DataProvider):
     def __len__(self) -> int:
         return len(self.dataframe)
 
-    def __getitem__(self, key: str) -> pd.Series:
-        return self.dataframe[key]
+    def get_column(self, column_name: str) -> pd.Series:
+        return self.dataframe[column_name]
+
+    def get_item(self, index: int):
+        return self.dataframe.iloc[index]
 
     def load(self, filename: str):
         self.dataframe = pd.read_parquet(
