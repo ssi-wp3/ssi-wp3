@@ -404,8 +404,8 @@ class ReportEngine:
             files_for_reports.keys()))
 
         with tqdm.tqdm(total=len(files_for_reports)) as progress_bar:
-            for file_key, file_path in files_for_reports.items():
-                with report_file_manager.open_input_file(file_path) as input_file:
+            for file_key, _ in files_for_reports.items():
+                with report_file_manager.open_input_file(file_key) as input_file:
                     dataframe = pd.read_parquet(
                         input_file, engine=parquet_engine)
 
