@@ -157,7 +157,7 @@ report_templates:
             plot_type: sunburst_chart
             format: html
             sunburst_columns: "{{coicop_columns}}"
-            amount_column: "{{revenue_column}}"
+            amount_column: "{{amount_column}}"
             title: Sunburst of revenue per coicop level for {{store_name}}
   
   product_revenue_versus_lifetime:

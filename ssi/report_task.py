@@ -33,8 +33,8 @@ class ReportTask(luigi.Task):
     def requires(self):
         file_index = FileIndex(self.data_directory, self.data_file_extension)
         return {file_key: self.input_file_for(file_path)
-                for file_key, file_path in file_index.files.items()}
-        # if file_key in self.report_engine.flattened_reports}
+                for file_key, file_path in file_index.files.items()
+                if file_key in self.report_engine.flattened_reports}
 
     def output(self):
         return {report.output_filename: self.output_target_for(os.path.join(self.output_directory, report.output_filename), binary_file=report.needs_binary_file)

@@ -398,10 +398,7 @@ class ReportEngine:
                                files_for_reports: Dict[str, str],
                                parquet_engine: str = "pyarrow",
                                report_file_manager: ReportFileManager = DefaultReportFileManager()):
-        # print("Reports keys", self.reports.keys())
-        # print("Files for reports:", files_for_reports.keys())
-        print("Overlap:", set(self.reports.keys()).intersection(
-            files_for_reports.keys()))
+        print("Files for reports:", files_for_reports.keys())
 
         with tqdm.tqdm(total=len(files_for_reports)) as progress_bar:
             for file_key, _ in files_for_reports.items():
