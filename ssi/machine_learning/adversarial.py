@@ -6,6 +6,7 @@ from ..preprocessing.files import get_store_name_from_combined_filename
 from ..files import get_features_files_in_directory
 from ..feature_extraction.feature_extraction import FeatureExtractorType
 from ..parquet_file import ParquetFile
+from ..report import LuigiReportFileManager
 from .train_model import train_model, train_and_evaluate_model, drop_labels_with_few_samples
 from .train_model_task import TrainModelTask
 from .utils import store_combinations, read_parquet_indices
@@ -298,7 +299,11 @@ class TrainAdversarialModelTask(TrainModelTask):
         print(
             f"Running adversarial model training task for {self.store1_filename} and {self.store2_filename}")
         print(f"Store1: {self.store1}, Store2: {self.store2}")
-        model_pipeline = ModelPipeline.pipeline_for(self.model_type) \
+        luigi_report_file_manager = LuigiReportFileManager(
+            self.input(), self.output())
+        model_pipeline = ModelPipeline.pipeline_for(
+            model=self.model_type,
+            report_file_manager=luigi_report_file_manager) \
             .with_train_dataset(train_dataframe) \
             .with_features_column(self.features_column) \
             .with_label_column(self.store_id_column) \

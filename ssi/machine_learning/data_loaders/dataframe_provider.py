@@ -44,6 +44,11 @@ class DataframeDataProvider(DataProvider):
     def get_item(self, index: int):
         return self.dataframe.iloc[index]
 
+    def drop_duplicates(self, subset=None, keep='first') -> DataProvider:
+        dataframe_without_duplicates = self.dataframe.drop_duplicates(
+            subset=subset, keep=keep, ignore_index=False)
+        return self.get_subset(dataframe_without_duplicates.index)
+
     def load(self):
         self.dataframe = pd.read_parquet(
             self.filename, engine=self.parquet_engine)

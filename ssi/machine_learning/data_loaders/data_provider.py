@@ -156,6 +156,10 @@ class DataProvider:
     def get_item(self, index: int):
         pass
 
+    @abstractmethod
+    def drop_duplicates(self, subset=None, keep: str = 'first') -> 'DataProvider':
+        pass
+
     def fit_or_refit_labels(self, original_label_encoder: Optional[DataLabelEncoder]):
         if original_label_encoder:
             self.label_encoder = original_label_encoder.refit(self.labels)
