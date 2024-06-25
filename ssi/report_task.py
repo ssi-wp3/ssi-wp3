@@ -45,7 +45,6 @@ class ReportTask(luigi.Task):
             self.input(), self.output())
         self.report_engine.reports_for_file_index(
             self.input(),
-            file_extension=self.data_file_extension,
             report_file_manager=luigi_report_file_manager,
             parquet_engine=self.parquet_engine
         )
