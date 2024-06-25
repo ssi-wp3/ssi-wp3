@@ -4,6 +4,7 @@ from .model import Model, SklearnModel, HuggingFaceModel, PyTorchModel
 from .evaluate import ModelEvaluator
 from .data_loaders.data_provider_factory import DataProviderFactory, DataProviderType
 from .model_factory import ModelFactory
+from ..report import ReportFileManager, DefaultReportFileManager
 from sklearn.model_selection import BaseCrossValidator
 import torch.nn as nn
 
@@ -15,6 +16,7 @@ class ModelPipeline:
                  model_evaluator: ModelEvaluator,
                  features_column: str,
                  label_column: str,
+                 report_file_manager: ReportFileManager = DefaultReportFileManager(),
                  evaluation_metric: str = "balanced_accuracy"
                  ):
         self.__model = model
@@ -22,15 +24,27 @@ class ModelPipeline:
         self.__model_evaluator = model_evaluator
         self.__features_column = features_column
         self.__label_column = label_column
+        self.__report_file_manager = report_file_manager
         self.__evaluation_metric = evaluation_metric
         self.__train_dataset = None
+        self.__validation_split_config = dict()
         self.__test_dataset = None
+        self.__test_split_config = dict()
         self.__best_model_fold = None
         self.__best_model = None
+        self.__training_predictions_filename = "training_predictions.parquet"
+        self.__train_evaluation_filename = "train_evaluation.json"
+        self.__test_predictions_filename = "test_predictions.parquet"
+        self.__test_evaluation_filename = "test_evaluation.json"
+        self.__model_filename = "model.joblib"
 
     @property
     def model(self) -> Model:
         return self.__model
+
+    @property
+    def report_file_manager(self) -> ReportFileManager:
+        return self.__report_file_manager
 
     @property
     def data_provider_type(self) -> DataProviderType:
@@ -68,6 +82,14 @@ class ModelPipeline:
         self.__train_dataset = value
 
     @property
+    def validation_split_config(self) -> Dict[str, Any]:
+        return self.__validation_split_config
+
+    @validation_split_config.setter
+    def validation_split_config(self, value: Dict[str, Any]):
+        self.__validation_split_config = value
+
+    @property
     def validation_dataset(self) -> DataProvider:
         return self.__validation_dataset
 
@@ -82,6 +104,14 @@ class ModelPipeline:
     @test_dataset.setter
     def test_dataset(self, value: DataProvider):
         self.__test_dataset = value
+
+    @property
+    def test_split_config(self) -> Dict[str, Any]:
+        return self.__test_split_config
+
+    @test_split_config.setter
+    def test_split_config(self, value: Dict[str, Any]):
+        self.__test_split_config = value
 
     @property
     def features_column(self) -> str:
@@ -119,10 +149,53 @@ class ModelPipeline:
     def best_model(self, value: Model):
         self.__best_model = value
 
+    @property
+    def training_predictions_filename(self) -> str:
+        return self.__training_predictions_filename
+
+    @training_predictions_filename.setter
+    def training_predictions_filename(self, value: str):
+        self.__training_predictions_filename = value
+
+    @property
+    def train_evaluation_filename(self) -> str:
+        return self.__train_evaluation_filename
+
+    @train_evaluation_filename.setter
+    def train_evaluation_filename(self, value: str):
+        self.__train_evaluation_filename = value
+
+    @property
+    def test_predictions_filename(self) -> str:
+        return self.__test_predictions_filename
+
+    @test_predictions_filename.setter
+    def test_predictions_filename(self, value: str):
+        self.__test_predictions_filename = value
+
+    @property
+    def test_evaluation_filename(self) -> str:
+        return self.__test_evaluation_filename
+
+    @test_evaluation_filename.setter
+    def test_evaluation_filename(self, value: str):
+        self.__test_evaluation_filename = value
+
+    @property
+    def model_filename(self) -> str:
+        return self.__model_filename
+
+    @model_filename.setter
+    def model_filename(self, value: str):
+        self.__model_filename = value
+
     @staticmethod
-    def pipeline_for(model: Union[str, Model], **kwargs) -> "ModelPipeline":
+    def pipeline_for(model: Union[str, Model],
+                     report_file_manager: ReportFileManager = ReportFileManager(),
+                     **kwargs) -> "ModelPipeline":
         if isinstance(model, str):
-            model = ModelFactory.model_for(model, **kwargs)
+            model = ModelFactory.model_for(
+                model, report_file_manager=report_file_manager, **kwargs)
         return ModelPipeline(model)
 
     def with_model_evaluator(self, model_evaluator: ModelEvaluator) -> "ModelPipeline":
@@ -145,8 +218,21 @@ class ModelPipeline:
         self.train_dataset = self.__get_data_provider(train_dataset)
         return self
 
+    def save_training_predictions_to(self, training_predictions_filename: str) -> "ModelPipeline":
+        self.__training_predictions_filename = training_predictions_filename
+        return self
+
+    def save_train_evaluation_to(self, train_evaluation_filename: str) -> "ModelPipeline":
+        self.__train_evaluation_filename = train_evaluation_filename
+        return self
+
     def with_validation_dataset(self, validation_dataset: Union[str, DataProvider]) -> "ModelPipeline":
         self.validation_dataset = self.__get_data_provider(validation_dataset)
+        return self
+
+    def with_validation_split_size(self, test_size: float, random_state: Optional[int] = None, shuffle: bool = True) -> "ModelPipeline":
+        self.validation_split_config = {"test_size": test_size,
+                                        "random_state": random_state, "shuffle": shuffle}
         return self
 
     def with_test_dataset(self, test_dataset: Union[str, DataProvider]) -> "ModelPipeline":
@@ -154,20 +240,21 @@ class ModelPipeline:
         return self
 
     def with_test_size(self, test_size: float, random_state: Optional[int] = None, shuffle: bool = True) -> "ModelPipeline":
-        # TODO implement this
+        self.test_split_config = {"test_size": test_size,
+                                  "random_state": random_state, "shuffle": shuffle}
         return self
 
-    # def train_model(self,
-    #                 data_loader: DataProvider,
-    #                 model_file: str,
-    #                 training_predictions_file: str,
-    #                 training_evaluation_file: str,
-    #                 test_predictions_file: str,
-    #                 test_evaluation_file: str
-    #                 ):
-    #     # TODO do train test split here?
-    #     # TODO where to fit the label encoder?
-    #     pass
+    def save_test_predictions_to(self, test_predictions_filename: str) -> "ModelPipeline":
+        self.__test_predictions_filename = test_predictions_filename
+        return self
+
+    def save_test_evaluation_to(self, test_evaluation_filename: str) -> "ModelPipeline":
+        self.__test_evaluation_filename = test_evaluation_filename
+        return self
+
+    def save_model_to(self, model_filename: str) -> "ModelPipeline":
+        self.__model_filename = model_filename
+        return self
 
     def train_model(self) -> List[Dict[str, Any]]:
         if not self.train_dataset:

@@ -9,6 +9,7 @@ from ..parquet_file import ParquetFile
 from .train_model import train_model, train_and_evaluate_model, drop_labels_with_few_samples
 from .train_model_task import TrainModelTask
 from .utils import store_combinations, read_parquet_indices
+from .model_pipeline import ModelPipeline
 from pyarrow import parquet as pq
 import pandas as pd
 import numpy as np
@@ -273,46 +274,6 @@ class TrainAdversarialModelTask(TrainModelTask):
                                                       self.receipt_text_column,
                                                       self.features_column)
 
-    def train_adversarial_model(self,
-                                adversarial_dataframe: pd.DataFrame,
-                                features_column: str,
-                                store_id_column: str,
-                                model_type: str,
-                                verbose: bool = False
-                                ) -> Tuple[Pipeline, Dict[str, Any]]:
-        """This trains the adversarial model and uses an additional validation set to evaluate the model.
-
-        TODO not sure whether we should use validation split.
-
-        Parameters:
-        -----------
-        adversarial_dataframe: pd.DataFrame
-            The dataframe with the adversarial data
-
-        features_column: str
-            The column with the features
-
-        store_id_column: str
-            The column with the store ids
-
-        model_type: str
-            The type of model to train
-
-        verbose: bool
-            Whether to print verbose output
-
-        Returns:
-        --------
-        Tuple[Pipeline, Dict[str, Any]]
-            The trained pipeline and the evaluation dictionary
-        """
-        print(f"Training adversarial model: {model_type}")
-        return train_model(adversarial_dataframe,
-                           model_type=model_type,
-                           feature_column=features_column,
-                           label_column=store_id_column,
-                           verbose=verbose)
-
     def prepare_data(self) -> pd.DataFrame:
         with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
             print("Reading parquet files")
@@ -323,6 +284,7 @@ class TrainAdversarialModelTask(TrainModelTask):
                 combined_dataframe, self.label_column, min_samples=10)
 
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
+
         self.model_trainer.fit(train_dataframe,
                                self.train_adversarial_model,
                                training_predictions_file,
@@ -336,7 +298,16 @@ class TrainAdversarialModelTask(TrainModelTask):
         print(
             f"Running adversarial model training task for {self.store1_filename} and {self.store2_filename}")
         print(f"Store1: {self.store1}, Store2: {self.store2}")
-        super().run()
+        model_pipeline = ModelPipeline.pipeline_for(self.model_type) \
+            .with_train_dataset(train_dataframe) \
+            .with_features_column(self.features_column) \
+            .with_label_column(self.store_id_column) \
+            .save_training_predictions_to(self.training_predictions_filename) \
+            .save_training_evaluation_to(self.training_evaluation_filename) \
+            .save_test_predictions_to(self.predictions_filename) \
+            .save_test_evaluation_to(self.evaluation_filename) \
+            .save_model_to(self.model_filename)
+        model_pipeline.train_model()
 
 
 class TrainAllAdversarialModels(luigi.WrapperTask):
