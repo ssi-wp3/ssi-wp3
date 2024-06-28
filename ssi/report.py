@@ -349,6 +349,10 @@ class ReportEngine:
                 all_report_templates = Settings.load(
                     self.settings_filename, "report_templates", True, **template_settings)
 
+                if report_id not in all_report_templates:
+                    print(f"No report template found for {report_id}")
+                    continue
+
                 report_template = all_report_templates[report_id]
                 print(f"Getting report template for {report_id}")
                 input_filename = report_template["input_filename"]
