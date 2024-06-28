@@ -211,7 +211,7 @@ report_templates:
             table_type: latex
             title: Unique product IDs and receipt texts for {{store_name}}
             label: unique_products_total
-            float_format: "%.2f"
+            float_format: ".2f"
   texts_per_product_id_histogram:
       input_filename: "{{store_name}}_analysis_texts_per_product_id_histogram"
       reports: 
@@ -228,7 +228,7 @@ report_templates:
           output_filename: "Tables/product_inventory/{{store_name}}_texts_per_product_id_histogram.tex"
           settings:
               table_type: latex 
-              float_format: "%.2f"
+              float_format: ".2f"
   log_texts_per_product_id_histogram: 
       input_filename: "{{store_name}}_analysis_log_texts_per_product_id_histogram"
       reports:
@@ -256,7 +256,7 @@ report_templates:
           output_filename: "Tables/product_inventory/{{store_name}}_receipt_length_histogram.tex"
           settings:
               table_type: latex
-              float_format: "%.2f"
+              float_format: ".2f"
   product_id_length_histogram: 
       input_filename: "{{store_name}}_analysis_product_id_length_histogram"
       reports:
@@ -273,7 +273,7 @@ report_templates:
           output_filename: "Tables/product_inventory/{{store_name}}_product_id_length_histogram.tex"
           settings:
               table_type: latex
-              float_format: "%.2f"
+              float_format: ".2f"
   revenue_for_coicop_hierarchy: 
     input_filename: "{{store_name}}_analysis_revenue_for_coicop_hierarchy"
     reports:
@@ -341,7 +341,7 @@ report_templates:
             table_type: latex
             title: "{{overlap_metric}} between the unique sets of product IDs per store"
             label: overlap_product_ids_{{overlap_metric}}
-            float_format: "%.2f"
+            float_format: ".2f"
   overlap_receipt_text:
     input_filename: "overlap_{{receipt_text_column}}_{{preprocessing}}_{{overlap_metric}}"
     reports:
@@ -352,7 +352,7 @@ report_templates:
             table_type: latex
             title: "{{overlap_metric}} between the unique sets of receipt texts per store"
             label: "{{overlap_metric}}_{{preprocessing}}_receipt_texts"
-            float_format: "%.2f"
+            float_format: ".2f"
 
   overlap_coicop_level:
     input_filename: "overlap_{{preprocessing}}_{{overlap_metric}}_and_{{coicop_level}}"
@@ -363,7 +363,7 @@ report_templates:
         settings:
             table_type: latex
             title: "{{ovelap_metric}} between stores and per COICOP category for the \\emph{ {{preprocessing}} } preprocessing method"
-            float_format: "%.2f"
+            float_format: ".2f"
 
   mean_overlap_per_preprocessing_function:
     input_filename: "mean_overlap_per_preprocessing_function"
@@ -383,7 +383,7 @@ report_templates:
             table_type: latex
             title: Mean overlap between the receipt texts of the stores for different preprocessing methods
             label: mean_preprocessing_overlap
-            float_format: "%.2f"
+            float_format: ".2f"
 
   # Analysis per period
   
@@ -409,7 +409,7 @@ report_templates:
             table_type: latex
             title: Unique product IDs and receipt texts per {{period_column}} for {{store_name}}
             label: unique_products_per_period
-            float_format: "%.2f"
+            float_format: ".2f"
   # Missing?
   total_revenue_per_period: 
     input_filename: "{{store_name}}_{{period_column}}_analysis_total_revenue_per_period"
@@ -461,7 +461,7 @@ report_templates:
             title: Total number of receipt texts and product IDs introduced and removed per month for AH
             label: number_of_products_introduced_removed_month_{{store_name}}
             add_resize_box: true
-            float_format: "%.2f"           
+            float_format: ".2f"           
       - type: plot
         pivot: false 
         value_columns:
