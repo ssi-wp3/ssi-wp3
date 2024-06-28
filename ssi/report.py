@@ -306,6 +306,7 @@ class ReportEngine:
     def __init__(self, settings_filename: str):
         self.__settings_filename = settings_filename
         self.__reports = None
+        self.__all_report_permutations = dict()
 
     @property
     def settings_filename(self) -> str:
@@ -336,34 +337,33 @@ class ReportEngine:
         The permutations are based on the reports_config settings and the report_templates settings.
 
         """
-        permutations_dict = dict()
-        for report_id, report_id_settings in self.reports_config.items():
-            keys, values = zip(*report_id_settings.items())
-            all_report_settings = [dict(zip(keys, combination))
-                                   for combination in itertools.product(*values)]
-            print("All report settings", all_report_settings)
-            break
-            for all_report_dict in all_report_settings:
+        if not self.__all_report_permutations:
+            for report_id, report_id_settings in self.reports_config.items():
+                keys, values = zip(*report_id_settings.items())
+                all_report_settings = [dict(zip(keys, combination))
+                                       for combination in itertools.product(*values)]
+                print("All report settings", all_report_settings)
+                for all_report_dict in all_report_settings:
 
-                template_settings = self.report_settings.copy()
-                template_settings.update(
-                    all_report_dict)
+                    template_settings = self.report_settings.copy()
+                    template_settings.update(
+                        all_report_dict)
 
-                all_report_templates = Settings.load(
-                    self.settings_filename, "report_templates", True, **template_settings)
+                    all_report_templates = Settings.load(
+                        self.settings_filename, "report_templates", True, **template_settings)
 
-                if report_id not in all_report_templates:
-                    print(f"No report template found for {report_id}")
-                    continue
+                    if report_id not in all_report_templates:
+                        print(f"No report template found for {report_id}")
+                        continue
 
-                report_template = all_report_templates[report_id]
-                print(
-                    f"Getting report template for {report_id}")
-                input_filename = report_template["input_filename"]
-                permutations_dict[input_filename] = report_template
+                    report_template = all_report_templates[report_id]
+                    print(
+                        f"Getting report template for {report_id}")
+                    input_filename = report_template["input_filename"]
+                    self.__all_report_permutations[input_filename] = report_template
 
         # Combine the permutations with the report template settings
-        return permutations_dict
+        return self.__all_report_permutations
 
     @property
     def reports(self) -> Dict[str, List['Report']]:
