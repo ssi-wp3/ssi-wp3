@@ -6,6 +6,7 @@ from .file_index import FileIndex
 import pandas as pd
 import os
 import luigi
+import zipfile
 
 
 class ReportTask(luigi.Task):
@@ -43,6 +44,11 @@ class ReportTask(luigi.Task):
         return {report.output_filename: self.output_target_for(os.path.join(self.output_directory, report.output_filename), binary_file=report.needs_binary_file)
                 for report in self.report_engine.flattened_reports}
 
+    def zip_output_files(self, filename: str):
+        with zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for report in self.output():
+                zipf.write(report.path)
+
     def run(self):
         luigi_report_file_manager = LuigiReportFileManager(
             self.input(), self.output())
@@ -51,3 +57,5 @@ class ReportTask(luigi.Task):
             report_file_manager=luigi_report_file_manager,
             parquet_engine=self.parquet_engine
         )
+        self.zip_output_files(os.path.join(
+            self.output_directory, "reports.zip"))
