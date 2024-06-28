@@ -307,7 +307,7 @@ report_templates:
     reports:
       - type: plot  
         pivot: false
-        output_filename: "Images/revenue/{store_name}}_{{period_column}}_total_revenue_per_period.png"
+        output_filename: "Images/revenue/{{store_name}}_{{period_column}}_total_revenue_per_period.png"
         settings: 
             plot_type: line_chart
             x_column: "{{period_column}}"
@@ -331,7 +331,7 @@ report_templates:
           - number_{{receipt_text_column}}_removed
           - number_{{product_id_column}}_introduced
           - number_{{product_id_column}}_removed
-        output_filename: "Images/{{store_name}}_{{period_column}}_compare_products_per_period.png"
+        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_compare_products_per_period.png"
         settings: 
             plot_type: line_chart
             x_column: "{{period_column}}"
@@ -461,7 +461,7 @@ report_templates:
           - "{{period_column}}"
           - "{{coicop_column}}"
           - "{{amount_column}}"
-        output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_amount_{{product_id_column}}.png"
+        output_filename: "Images/revenue/{{store_name}}_{{period_column}}_{{coicop_column}}_total_amount_{{product_id_column}}.png"
         settings:
             plot_type: bar_chart
             x_column: "{{period_column}}"
