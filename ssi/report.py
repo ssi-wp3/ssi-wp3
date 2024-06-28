@@ -363,7 +363,7 @@ class ReportEngine:
                     self.__all_report_permutations[input_filename] = report_template
 
         # Combine the permutations with the report template settings
-        print("All permutations:", self.__all_report_permutations)
+        print("All permutations:", len(self.__all_report_permutations))
 
         return self.__all_report_permutations
 
