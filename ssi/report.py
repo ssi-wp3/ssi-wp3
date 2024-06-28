@@ -341,7 +341,10 @@ class ReportEngine:
             keys, values = zip(*report_id_settings.items())
             all_report_settings = [dict(zip(keys, combination))
                                    for combination in itertools.product(*values)]
+            print("All report settings", all_report_settings)
+            break
             for all_report_dict in all_report_settings:
+
                 template_settings = self.report_settings.copy()
                 template_settings.update(
                     all_report_dict)
