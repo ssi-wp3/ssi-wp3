@@ -361,7 +361,7 @@ report_templates:
             float_format: ".2f"
 
   overlap_coicop_level:
-    input_filename: "overlap_{{preprocessing}}_{{overlap_metric}}_and_{{coicop_level}}"
+    input_filename: "overlap_{{preprocessing}}_{{overlap_metric}}_function_and_{{coicop_level}}"
     reports:
       - type: table 
         pivot: false
