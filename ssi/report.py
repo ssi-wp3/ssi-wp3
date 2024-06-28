@@ -214,6 +214,7 @@ class CustomLatex:
                  title: str,
                  label: str,
                  float_format: str,
+                 add_resize_box: bool = False,
                  **kwargs):
         with open(output_file, "w") as latex_file:
             column_names = " & ".join(dataframe.columns)
@@ -222,9 +223,17 @@ class CustomLatex:
             table_data = "\\\\\n".join([" & ".join([f"{CustomLatex.encode_column(column):.2f}"
                                                     for column in row.values])
                                         for _, row in dataframe.iterrows()])
+
+            begin_resize_box = ""
+            end_resize_box = ""
+            if add_resize_box:
+                begin_resize_box = "\\resizebox{\\textwidth}{!}{"
+                end_resize_box = "}"
+
             latex_string = f"""
             \\begin{{table}}
                 \\centering
+                {begin_resize_box}
                 \\begin{{tabular}}{{ {column_alignments} }}
                     \\toprule
                     {column_names}
@@ -234,6 +243,7 @@ class CustomLatex:
                     \\caption{{ {title} }}
                     \\label{{table:{label} }}
                 \\end{{tabular}}
+                {end_resize_box}
             \\end{{table}}
             """
             latex_file.write(latex_string)

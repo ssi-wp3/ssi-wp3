@@ -460,6 +460,7 @@ report_templates:
             table_type: latex
             title: Total number of receipt texts and product IDs introduced and removed per month for AH
             label: number_of_products_introduced_removed_month_{{store_name}}
+            add_resize_box: true
             float_format: "%.2f"           
       - type: plot
         pivot: false 
