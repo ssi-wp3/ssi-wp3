@@ -46,7 +46,7 @@ class ReportTask(luigi.Task):
 
     def zip_output_files(self, filename: str):
         with zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for report in self.output():
+            for report in self.output().values():
                 zipf.write(report.path)
 
     def run(self):
