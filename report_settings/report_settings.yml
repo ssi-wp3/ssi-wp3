@@ -3,12 +3,7 @@ report_settings:
   product_id_column: "product_id"
   amount_column: "amount"
   revenue_column: "revenue"
-  coicop_columns:
-    - "coicop_level_1"
-    - "coicop_level_2"
-    - "coicop_level_3"
-    - "coicop_level_4"
-    - "coicop_number"
+  coicop_columns: !!python/tuple ["coicop_level_1", "coicop_level_2", "coicop_level_3", "coicop_level_4", coicop_number"]
 
 reports:  
   texts_per_product_id_histogram: 
