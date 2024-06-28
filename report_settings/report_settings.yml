@@ -106,9 +106,9 @@ reports:
       - "raw_tokenized_mini_lm"
     overlap_metric: 
       - "jaccard_index"
-      - "asymmetrical_overlap"
-      - "dice_coefficient"
-      - "overlap_coefficient"
+      # - "asymmetrical_overlap"
+      # - "dice_coefficient"
+      # - "overlap_coefficient"
     coicop_level: 
       - "coicop_level_1"
       # - "coicop_level_2"
@@ -361,14 +361,14 @@ report_templates:
             float_format: ".2f"
 
   overlap_coicop_level:
-    input_filename: "overlap_{{preprocessing}}_{{overlap_metric}}_function_and_{{coicop_level}}"
+    input_filename: "overlap_{{preprocessing}}_function_and_{{coicop_level}}"
     reports:
       - type: table 
         pivot: false
-        output_filename: "Tables/product_inventory/overlap/overlap_coicop_level_1_{{overlap_metric}}.tex"
+        output_filename: "Tables/product_inventory/overlap/overlap_{{preprocessing}}_coicop_level_1.tex"
         settings:
             table_type: latex
-            title: "{{overlap_metric}} between stores and per COICOP category for the \\emph{ {{preprocessing}} } preprocessing method"
+            title: "Jaccard index overlap between stores and per COICOP category for the \\emph{ {{preprocessing}} } preprocessing method"
             float_format: ".2f"
 
   mean_overlap_per_preprocessing_function:
