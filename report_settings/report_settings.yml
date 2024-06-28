@@ -396,16 +396,16 @@ report_templates:
           columns:
             - "{{product_id_column}}"
           ascending: true
-        value_columns:
-          - "{{product_id_column}}"
+        #value_columns:
+        #  - "{{product_id_column}}"
         output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_{{product_id_column}}_availability.png"
         settings:
             plot_type: heatmap
             title: Heatmap of {{product_id_column}} availability for {{store_name}}  
       - type: plot
         pivot: false 
-        value_columns:
-          - "{{product_id_column}}"
+        #value_columns:
+        #  - "{{product_id_column}}"
         output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_{{receipt_text_column}}_availability.png"
         settings:
             plot_type: heatmap
