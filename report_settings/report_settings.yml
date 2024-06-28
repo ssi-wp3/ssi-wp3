@@ -258,6 +258,8 @@ report_templates:
           output_filename: "Tables/product_inventory/{{store_name}}_receipt_length_histogram.tex"
           settings:
               table_type: latex
+              title: Receipt text length histogram for {{store_name}}
+              label: receipt_length_histogram
               float_format: ".2f"
   product_id_length_histogram: 
       input_filename: "{{store_name}}_analysis_product_id_length_histogram"
@@ -275,6 +277,8 @@ report_templates:
           output_filename: "Tables/product_inventory/{{store_name}}_product_id_length_histogram.tex"
           settings:
               table_type: latex
+              title: Product_id length histogram for {{store_name}}
+              label: product_id_length_histogram
               float_format: ".2f"
   revenue_for_coicop_hierarchy: 
     input_filename: "{{store_name}}_analysis_revenue_for_coicop_hierarchy"
