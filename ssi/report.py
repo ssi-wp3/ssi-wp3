@@ -230,8 +230,8 @@ class CustomLatex:
                  **kwargs):
         column_names = " & ".join([CustomLatex.encode_column_name(
             column_name, rename_columns) for column_name in dataframe.columns.values])
-        column_alignments = ["l" if column_index == 0 else "r" for column_index in range(
-            len(dataframe.columns))]
+        column_alignments = "".join(["l" if column_index == 0 else "r" for column_index in range(
+            len(dataframe.columns))])
         table_data = "\\\\\n".join([" & ".join([CustomLatex.encode_column(column, float_format)
                                                 for column in row.values])
                                     for _, row in dataframe.iterrows()])
