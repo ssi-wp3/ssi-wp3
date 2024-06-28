@@ -147,18 +147,18 @@ report_templates:
           settings:
               table_type: latex
               float_format: "%.2f"
-  revenue_for_coicop_hierarchy: 
-    input_filename: "{{store_name}}_analysis_revenue_for_coicop_hierarchy"
-    reports:
-      - type: plot
-        pivot: false
-        output_filename: "Images/{{store_name}}_revenue_for_coicop_hierarchy_sunburst.html"
-        settings: 
-            plot_type: sunburst_chart
-            format: html
-            sunburst_columns: "{{coicop_columns}}"
-            amount_column: "{{amount_column}}"
-            title: Sunburst of revenue per coicop level for {{store_name}}
+  # revenue_for_coicop_hierarchy: 
+  #   input_filename: "{{store_name}}_analysis_revenue_for_coicop_hierarchy"
+  #   reports:
+  #     - type: plot
+  #       pivot: false
+  #       output_filename: "Images/{{store_name}}_revenue_for_coicop_hierarchy_sunburst.html"
+  #       settings: 
+  #           plot_type: sunburst_chart
+  #           format: html
+  #           sunburst_columns: "{{coicop_columns}}"
+  #           amount_column: "{{amount_column}}"
+  #           title: Sunburst of revenue per coicop level for {{store_name}}
   
   product_revenue_versus_lifetime:
     input_filename: "{{store_name}}_{{period_column}}_analysis_product_revenue_versus_lifetime"
