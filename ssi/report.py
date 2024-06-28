@@ -399,7 +399,6 @@ class ReportEngine:
         files_for_reports = {file_key: file_path
                              for file_key, file_path in file_index.files.items()
                              if file_key in self.reports.keys()}
-        print("File index keys", file_index.files.keys())
 
         self.reports_for_file_index(files_for_reports,
                                     parquet_engine=parquet_engine,
@@ -409,10 +408,15 @@ class ReportEngine:
                                files_for_reports: Dict[str, str],
                                parquet_engine: str = "pyarrow",
                                report_file_manager: ReportFileManager = DefaultReportFileManager()):
-        print("Files for reports:", files_for_reports.keys())
+        print("Files for reports", files_for_reports.keys())
+        print("Length of reports", len(files_for_reports))
 
         with tqdm.tqdm(total=len(files_for_reports)) as progress_bar:
             for file_key, _ in files_for_reports.items():
+                if file_key not in self.reports:
+                    progress_bar.update(1)
+                    continue
+
                 with report_file_manager.open_input_file(file_key) as input_file:
                     dataframe = pd.read_parquet(
                         input_file, engine=parquet_engine)
