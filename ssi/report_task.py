@@ -21,7 +21,7 @@ class ReportTask(luigi.Task):
 
     @property
     def report_engine(self) -> ReportEngine:
-        if self.__report_engine is None:
+        if not self.__report_engine:
             print("Creating new report engine")
             self._report_engine = ReportEngine(self.settings_filename)
         return self.__report_engine
