@@ -201,7 +201,7 @@ report_templates:
               title: Receipt text length histogram for {{store_name}}
         - type: table
           pivot: false
-          output_filename: "Tables/{{store_name}}_receipt_length_histogram.tex"
+          output_filename: "Tables/product_inventory/{{store_name}}_receipt_length_histogram.tex"
           settings:
               table_type: latex
               float_format: "%.2f"
