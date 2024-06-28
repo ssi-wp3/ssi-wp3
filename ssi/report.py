@@ -464,6 +464,9 @@ class ReportEngine:
                                report_file_manager: ReportFileManager = DefaultReportFileManager()):
         print("Number of files: ", len(files_for_reports))
         print("Number of reports: ", len(self.reports))
+
+        print("Missing reports: ", set(files_for_reports.keys()) -
+              set(self.reports.keys()))
         with tqdm.tqdm(total=len(files_for_reports)) as progress_bar:
             for file_key, _ in files_for_reports.items():
                 if file_key not in self.reports:
