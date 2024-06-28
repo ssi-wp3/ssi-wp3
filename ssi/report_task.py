@@ -23,7 +23,7 @@ class ReportTask(luigi.Task):
     def report_engine(self) -> ReportEngine:
         if not self.__report_engine:
             print("Creating new report engine")
-            self._report_engine = ReportEngine(self.settings_filename)
+            self.__report_engine = ReportEngine(self.settings_filename)
         return self.__report_engine
 
     def input_file_for(self, filename: str) -> ParquetFile:
