@@ -371,8 +371,7 @@ class ReportEngine:
     def reports(self) -> Dict[str, List['Report']]:
         if not self.__reports:
             self.__reports = defaultdict(list)
-            permutations_dict = self.all_report_permutations
-            for report_key, report_settings in permutations_dict.items():
+            for report_key, report_settings in self.all_report_permutations.items():
                 report_template = report_settings["reports"]
                 if isinstance(report_template, list):
                     for settings in report_template:
