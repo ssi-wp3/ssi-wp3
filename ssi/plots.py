@@ -181,7 +181,7 @@ class PlotlyBackend(PlotBackend):
             self.figure.show()
 
         def save(self, filename: str, format: str = "png"):
-            print("filename", filename)
+            # print("filename", filename)
             if format == "html":
                 self.figure.write_html(filename)
             else:
@@ -275,8 +275,6 @@ class PlotlyBackend(PlotBackend):
                        amount_column: str,
                        title: str = None
                        ) -> PlotBackend.FigureWrapper:
-        print("sunburst_columns", sunburst_columns)
-        print("amount_column", amount_column)
         return self.__figure_wrapper_for(
             px.sunburst(dataframe, path=sunburst_columns,
                         values=amount_column, title=title)
