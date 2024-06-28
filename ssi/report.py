@@ -223,6 +223,7 @@ class CustomLatex:
                  add_resize_box: bool = False,
                  rename_columns: Dict[str, str] = dict(),
                  **kwargs):
+        print(output_file)
         with open(output_file, "w") as latex_file:
             column_names = " & ".join([CustomLatex.encode_column_name(
                 column_name, rename_columns) for column_name in dataframe.columns.values])
