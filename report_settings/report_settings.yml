@@ -94,6 +94,28 @@ reports:
       - "dice_coefficient"
       - "overlap_coefficient"
 
+  overlap_coicop_level:
+    preprocessing: 
+      - "stripped"
+      - "lower"
+      - "lower_split_words"
+      - "stripped_split_words"
+      - "stripped_split_alpha_drop_short"
+      - "raw_tokenized_gpt2"
+      - "raw_tokenized_labse"
+      - "raw_tokenized_mini_lm"
+    overlap_metric: 
+      - "jaccard_index"
+      - "asymmetrical_overlap"
+      - "dice_coefficient"
+      - "overlap_coefficient"
+    overlap_coicop_level: 
+      - "coicop_level_1"
+      - "coicop_level_2"
+      - "coicop_level_3"
+      - "coicop_level_4"
+      - "coicop_number"
+
   mean_overlap_per_preprocessing_function:
       dummy_list:
         - "entry1"
@@ -322,6 +344,16 @@ report_templates:
       - type: table 
         pivot: false
         output_filename: "Tables/product_inventory/overlap/overlap_{{receipt_text_column}}_{{preprocessing}}_{{overlap_metric}}.tex"
+        settings:
+            table_type: latex
+            float_format: "%.2f"
+
+  overlap_coicop_level:
+    input_filename: "overlap_{{preprocessing}}_{{overlap_metric}}_and_{{coicop_level}}"
+    reports:
+      - type: table 
+        pivot: false
+        output_filename: "Tables/product_inventory/overlap/overlap_coicop_level_1_{{overlap_metric}}.tex"
         settings:
             table_type: latex
             float_format: "%.2f"
