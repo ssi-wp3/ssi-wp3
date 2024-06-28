@@ -205,7 +205,7 @@ class PlotReport(Report):
 class CustomLatex:
     @classmethod
     def encode_column(column_name: str) -> str:
-        return column_name.replace("_", "\\_")
+        return column_name.replace("_", "\\_").lower()
 
     @classmethod
     def to_latex(cls,
@@ -213,6 +213,7 @@ class CustomLatex:
                  output_file: str,
                  title: str,
                  label: str,
+                 float_format: str,
                  **kwargs):
         with open(output_file, "w") as latex_file:
             column_names = " & ".join(dataframe.columns)
