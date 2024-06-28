@@ -70,6 +70,33 @@ reports:
       - "coicop_level_4"
       - "coicop_number"
   
+  overlap_product_id:
+    overlap_metric: 
+      - "jaccard_index"
+      - "asymmetrical_overlap"
+      - "dice_coefficient"
+      - "overlap_coefficient"
+
+  overlap_receipt_text:
+    preprocessing: 
+      - "stripped"
+      - "text_lower"
+      - "text_lower_split_words"
+      - "stripped_split_words"
+      - "stripped_split_alpha_drop_short"
+      - "tokenized_gpt2"
+      - "tokenized_labse"
+      - "tokenized_mini_lm"
+    overlap_metric: 
+      - "jaccard_index"
+      - "asymmetrical_overlap"
+      - "dice_coefficient"
+      - "overlap_coefficient"
+
+    mean_overlap_per_preprocessing_function:
+      dummy_list:
+        - "entry1"
+
   unique_column_values_per_period:
     store_name:  
       - ah
@@ -277,6 +304,36 @@ report_templates:
             y_column: value
             group_column: group
             title: Unique receipt texts per {{coicop_column}} for {{store_name}}
+
+  # Overlap 
+  overlap_product_id:
+    input_filename: "overlap/overlap_{{product_id_column}}_raw_{{overlap_metric}}"
+    reports:
+      - type: table 
+        pivot: false
+        output_filename: "Tables/product_inventory/overlap/overlap_{{product_id_column}}_{{overlap_metric}}.tex"
+        settings:
+            table_type: latex
+            float_format: "%.2f"
+  overlap_receipt_text:
+    input_filename: "overlap/overlap_{{receipt_text_column}}_{{preprocessing}}_{{overlap_metric}}"
+    reports:
+      - type: table 
+        pivot: false
+        output_filename: "Tables/product_inventory/overlap/overlap_{{receipt_text_column}}_{{overlap_metric}}.tex"
+        settings:
+            table_type: latex
+            float_format: "%.2f"
+
+  mean_overlap_per_preprocessing_function:
+    input_filename: "overlap/mean_overlap_per_preprocessing_function"
+    reports:
+      - type: table 
+        pivot: false
+        output_filename: "Tables/product_inventory/overlap/mean_overlap_per_preprocessing_function.tex"
+        settings:
+            table_type: latex
+            float_format: "%.2f"
 
   # Analysis per period
   
