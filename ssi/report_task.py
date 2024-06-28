@@ -20,6 +20,7 @@ class ReportTask(luigi.Task):
 
     @property
     def report_engine(self) -> ReportEngine:
+        print("Creating new report engine")
         return ReportEngine(self.settings_filename)
 
     def input_file_for(self, filename: str) -> ParquetFile:
