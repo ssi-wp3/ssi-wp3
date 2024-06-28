@@ -380,6 +380,7 @@ report_templates:
             title: Total amount per {{period_column}} for {{store_name}}
   compare_products_per_period: 
     input_filename: "{{store_name}}_{{period_column}}_analysis_compare_products_per_period"
+    # TODO Find out why this one does not work with a subdirectory
     reports:
       # - type: plot  
       #   pivot: true
