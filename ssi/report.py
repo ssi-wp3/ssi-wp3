@@ -202,6 +202,37 @@ class PlotReport(Report):
         figure.save(output_file, format=plot_format)
 
 
+class CustomLatex:
+    @classmethod
+    def to_latex(cls,
+                 dataframe: pd.DataFrame,
+                 output_file: str,
+                 title: str,
+                 label: str,
+                 **kwargs):
+        with open(output_file, "w") as latex_file:
+            column_names = " & ".join(dataframe.columns)
+            column_alignments = ["l" if column_index == 0 else "r" for column_index in range(
+                len(dataframe.columns))]
+            table_data = "\\\\\n".join([" & ".join([f"{column:.2f}" for column in row.values])
+                                        for _, row in dataframe.iterrows()])
+            latex_string = f"""
+            \\begin{{table}}
+                \\centering
+                \\begin{{tabular}}{{ {column_alignments} }}
+                    \\toprule
+                    {column_names}
+                    \\midrule
+                    {table_data}
+                    \\bottomrule
+                    \\caption{{ {title} }}
+                    \\label{{table:{label} }}
+                \\end{{tabular}}
+            \\end{{table}}
+            """
+            latex_file.write(latex_string)
+
+
 class TableReport(Report):
     class TableType(Enum):
         csv = "csv"
@@ -229,7 +260,8 @@ class TableReport(Report):
         elif table_type == TableReport.TableType.markdown:
             dataframe.to_markdown(output_file, **kwargs)
         elif table_type == TableReport.TableType.latex:
-            dataframe.to_latex(output_file, **kwargs)
+            # dataframe.to_latex(output_file, **kwargs)
+            CustomLatex.to_latex(dataframe, output_file, **kwargs)
         else:
             raise ValueError(f"Unknown table type: {table_type}")
 
