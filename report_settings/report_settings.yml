@@ -109,12 +109,12 @@ reports:
       - "asymmetrical_overlap"
       - "dice_coefficient"
       - "overlap_coefficient"
-    overlap_coicop_level: 
+    coicop_level: 
       - "coicop_level_1"
-      - "coicop_level_2"
-      - "coicop_level_3"
-      - "coicop_level_4"
-      - "coicop_number"
+      # - "coicop_level_2"
+      # - "coicop_level_3"
+      # - "coicop_level_4"
+      # - "coicop_number"
 
   mean_overlap_per_preprocessing_function:
       dummy_list:
@@ -368,7 +368,7 @@ report_templates:
         output_filename: "Tables/product_inventory/overlap/overlap_coicop_level_1_{{overlap_metric}}.tex"
         settings:
             table_type: latex
-            title: "{{ovelap_metric}} between stores and per COICOP category for the \\emph{ {{preprocessing}} } preprocessing method"
+            title: "{{overlap_metric}} between stores and per COICOP category for the \\emph{ {{preprocessing}} } preprocessing method"
             float_format: ".2f"
 
   mean_overlap_per_preprocessing_function:
