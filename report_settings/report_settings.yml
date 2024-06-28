@@ -80,8 +80,8 @@ reports:
   overlap_receipt_text:
     preprocessing: 
       - "stripped"
-      - "text_lower"
-      - "text_lower_split_words"
+      - "lower"
+      - "lower_split_words"
       - "stripped_split_words"
       - "stripped_split_alpha_drop_short"
       - "tokenized_gpt2"
