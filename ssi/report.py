@@ -205,12 +205,11 @@ class PlotReport(Report):
 class CustomLatex:
     @staticmethod
     def encode_column_name(column_name: Any, rename_columns: Dict[str, str]) -> str:
+        column_name = f"{column_name}"
         if column_name in rename_columns:
             column_name = rename_columns[column_name]
 
-        if isinstance(column_name, str):
-            return column_name.replace("_", "\\_").lower()
-        return column_name
+        return column_name.replace("_", "\\_").lower()
 
     @staticmethod
     def encode_column(column_data: Any, float_format: str) -> str:
