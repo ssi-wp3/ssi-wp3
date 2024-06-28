@@ -204,7 +204,9 @@ class PlotReport(Report):
 
 class CustomLatex:
     @classmethod
-    def encode_column(column_name: str) -> str:
+    def encode_column(column_name: str, rename_columns: Dict[str, str]) -> str:
+        if column_name in rename_columns:
+            column_name = rename_columns[column_name]
         return column_name.replace("_", "\\_").lower()
 
     @classmethod
@@ -215,12 +217,13 @@ class CustomLatex:
                  label: str,
                  float_format: str,
                  add_resize_box: bool = False,
+                 rename_columns: Dict[str, str] = dict(),
                  **kwargs):
         with open(output_file, "w") as latex_file:
             column_names = " & ".join(dataframe.columns)
             column_alignments = ["l" if column_index == 0 else "r" for column_index in range(
                 len(dataframe.columns))]
-            table_data = "\\\\\n".join([" & ".join([f"{CustomLatex.encode_column(column):.2f}"
+            table_data = "\\\\\n".join([" & ".join([f"{CustomLatex.encode_column(column, rename_columns):.2f}"
                                                     for column in row.values])
                                         for _, row in dataframe.iterrows()])
 
