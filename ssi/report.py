@@ -210,7 +210,9 @@ class CustomLatex:
         return column_name.replace("_", "\\_").lower()
 
     @staticmethod
-    def encode_column(column_data: str, float_format: str) -> str:
+    def encode_column(column_data: Any, float_format: str) -> str:
+        if isinstance(column_data, str):
+            return f"{column_data}"
         return f"{column_data:{float_format}}"
 
     @staticmethod
