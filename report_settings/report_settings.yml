@@ -228,6 +228,8 @@ report_templates:
           output_filename: "Tables/product_inventory/{{store_name}}_texts_per_product_id_histogram.tex"
           settings:
               table_type: latex 
+              title:  Unique receipt texts per product_id for {{store_name}}
+              label: texts_per_product_id_histogram
               float_format: ".2f"
   log_texts_per_product_id_histogram: 
       input_filename: "{{store_name}}_analysis_log_texts_per_product_id_histogram"
