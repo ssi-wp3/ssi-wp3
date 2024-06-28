@@ -188,7 +188,7 @@ report_templates:
   # Analysis per COICOP
 
   unique_coicop_values_per_coicop: 
-    input_filename: "{{store_name}}_{{coicop_column}}_analysis_unique_coicop_values"
+    input_filename: "{{store_name}}_{{coicop_column}}_analysis_unique_coicop_values_per_coicop"
     reports:
       - type: plot  
         pivot: true
@@ -206,7 +206,7 @@ report_templates:
   # Analysis per period
   
   unique_column_values_per_period: 
-    input_filename: "{{store_name}}_{{period_column}}_analysis_unique_column_values"
+    input_filename: "{{store_name}}_{{period_column}}_analysis_unique_column_values_per_period"
     reports:
       - type: plot  
         pivot: true
