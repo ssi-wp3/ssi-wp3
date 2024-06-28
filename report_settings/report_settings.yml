@@ -76,6 +76,7 @@ reports:
       - "asymmetrical_overlap"
       - "dice_coefficient"
       - "overlap_coefficient"
+      - "percentage_overlap"
 
   overlap_receipt_text:
     preprocessing: 
@@ -84,9 +85,9 @@ reports:
       - "lower_split_words"
       - "stripped_split_words"
       - "stripped_split_alpha_drop_short"
-      - "tokenized_gpt2"
-      - "tokenized_labse"
-      - "tokenized_mini_lm"
+      - "raw_tokenized_gpt2"
+      - "raw_tokenized_labse"
+      - "raw_tokenized_mini_lm"
     overlap_metric: 
       - "jaccard_index"
       - "asymmetrical_overlap"
