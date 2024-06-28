@@ -213,7 +213,7 @@ class CustomLatex:
     def encode_column(column_data: Any, float_format: str) -> str:
         if isinstance(column_data, str):
             return f"{column_data}"
-        return f"{column_data[0]:{float_format}}"
+        return f"{column_data.item():{float_format}}"
 
     @staticmethod
     def to_latex(dataframe: pd.DataFrame,
