@@ -204,6 +204,10 @@ class PlotReport(Report):
 
 class CustomLatex:
     @classmethod
+    def encode_column(column_name: str) -> str:
+        return column_name.replace("_", "\\_")
+
+    @classmethod
     def to_latex(cls,
                  dataframe: pd.DataFrame,
                  output_file: str,
@@ -214,7 +218,8 @@ class CustomLatex:
             column_names = " & ".join(dataframe.columns)
             column_alignments = ["l" if column_index == 0 else "r" for column_index in range(
                 len(dataframe.columns))]
-            table_data = "\\\\\n".join([" & ".join([f"{column:.2f}" for column in row.values])
+            table_data = "\\\\\n".join([" & ".join([f"{CustomLatex.encode_column(column):.2f}"
+                                                    for column in row.values])
                                         for _, row in dataframe.iterrows()])
             latex_string = f"""
             \\begin{{table}}
