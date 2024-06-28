@@ -324,20 +324,20 @@ report_templates:
   compare_products_per_period: 
     input_filename: "{{store_name}}_{{period_column}}_analysis_compare_products_per_period"
     reports:
-      - type: plot  
-        pivot: true
-        value_columns: 
-          - number_{{receipt_text_column}}_introduced
-          - number_{{receipt_text_column}}_removed
-          - number_{{product_id_column}}_introduced
-          - number_{{product_id_column}}_removed
-        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_compare_products_per_period.png"
-        settings: 
-            plot_type: line_chart
-            x_column: "{{period_column}}"
-            y_column: value
-            group_column: group
-            title: Number of products introduced/removed per {{period_column}} for {{store_name}}
+      # - type: plot  
+      #   pivot: true
+      #   value_columns: 
+      #     - number_{{receipt_text_column}}_introduced
+      #     - number_{{receipt_text_column}}_removed
+      #     - number_{{product_id_column}}_introduced
+      #     - number_{{product_id_column}}_removed
+      #   output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_compare_products_per_period.png"
+      #   settings: 
+      #       plot_type: line_chart
+      #       x_column: "{{period_column}}"
+      #       y_column: value
+      #       group_column: group
+      #       title: Number of products introduced/removed per {{period_column}} for {{store_name}}
       - type: table  
         pivot: true
         value_columns: 
