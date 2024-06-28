@@ -215,7 +215,7 @@ class CustomLatex:
             return f"{column_data}"
         if isinstance(column_data, float):
             return f"{column_data:{float_format}}"
-        return f"{column_data.item():{float_format}}"
+        return f"{column_data}"
 
     @staticmethod
     def to_latex(dataframe: pd.DataFrame,
