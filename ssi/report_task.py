@@ -17,7 +17,7 @@ class ReportTask(luigi.Task):
     settings_section_name = luigi.Parameter(default="report_settings")
     render_as_template = luigi.BoolParameter(default=True)
     parquet_engine = luigi.Parameter(default="pyarrow")
-    report_engine = None
+    __report_engine = None
 
     @property
     def report_engine(self) -> ReportEngine:
