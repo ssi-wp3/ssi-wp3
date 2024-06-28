@@ -17,11 +17,14 @@ class ReportTask(luigi.Task):
     settings_section_name = luigi.Parameter(default="report_settings")
     render_as_template = luigi.BoolParameter(default=True)
     parquet_engine = luigi.Parameter(default="pyarrow")
+    report_engine = None
 
     @property
     def report_engine(self) -> ReportEngine:
-        print("Creating new report engine")
-        return ReportEngine(self.settings_filename)
+        if self._report_engine is None:
+            print("Creating new report engine")
+            self._report_engine = ReportEngine(self.settings_filename)
+        return self.__report_engine
 
     def input_file_for(self, filename: str) -> ParquetFile:
         return ParquetFile(os.path.join(self.data_directory, filename))
