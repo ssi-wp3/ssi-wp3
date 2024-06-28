@@ -93,7 +93,7 @@ reports:
       - "dice_coefficient"
       - "overlap_coefficient"
 
-    mean_overlap_per_preprocessing_function:
+  mean_overlap_per_preprocessing_function:
       dummy_list:
         - "entry1"
 
@@ -311,7 +311,7 @@ report_templates:
     reports:
       - type: table 
         pivot: false
-        output_filename: "Tables/product_inventory/overlap/overlap_{{product_id_column}}_{{overlap_metric}}.tex"
+        output_filename: "Tables/product_inventory/overlap/overlap_{{product_id_column}}_raw_{{overlap_metric}}.tex"
         settings:
             table_type: latex
             float_format: "%.2f"
@@ -320,7 +320,7 @@ report_templates:
     reports:
       - type: table 
         pivot: false
-        output_filename: "Tables/product_inventory/overlap/overlap_{{receipt_text_column}}_{{overlap_metric}}.tex"
+        output_filename: "Tables/product_inventory/overlap/overlap_{{receipt_text_column}}_{{preprocessing}}_{{overlap_metric}}.tex"
         settings:
             table_type: latex
             float_format: "%.2f"
