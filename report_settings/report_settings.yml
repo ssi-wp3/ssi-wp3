@@ -459,7 +459,6 @@ report_templates:
             group_column: "{{coicop_column}}"
             title: Bar chart of the total amount of products sold per {{coicop_column}} and {{period_column}} for {{store_name}}       
 
-  # Missing
   compare_products_per_period_coicop_level:
     input_filename: "{{store_name}}_{{period_column}}_{{coicop_column}}_analysis_compare_products_per_period_coicop_level"
     reports:
