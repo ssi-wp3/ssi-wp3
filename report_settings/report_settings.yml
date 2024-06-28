@@ -11,6 +11,12 @@ report_settings:
     - "coicop_number"
 
 reports:  
+  unique_column_values:
+    store_name:  
+        - ah
+        - lidl 
+        - plus 
+        - jumbo
   texts_per_product_id_histogram: 
     store_name:  
       - ah
@@ -73,6 +79,75 @@ reports:
     period_column:
       - "year"
       - "year_month"
+
+  total_revenue_per_period: 
+    store_name:  
+      - ah
+      - lidl 
+      - plus 
+      - jumbo
+    period_column:
+      - "year"
+      - "year_month"
+
+  compare_products_per_period:
+    store_name:  
+      - ah
+      - lidl 
+      - plus 
+      - jumbo
+    period_column:
+      - "year"
+      - "year_month"
+
+  product_availability_in_period:
+    store_name:  
+      - ah
+      - lidl 
+      - plus 
+      - jumbo
+    period_column:
+      - "year"
+      - "year_month"
+  product_lifetime_in_periods:
+    store_name:  
+      - ah
+      - lidl 
+      - plus 
+      - jumbo
+    period_column:
+      - "year"
+      - "year_month"
+  total_revenue_per_coicop_and_period:
+    store_name:  
+      - ah
+      - lidl 
+      - plus 
+      - jumbo
+    period_column:
+      - "year"
+      - "year_month"
+    coicop_column:
+      - "coicop_level_1"
+      - "coicop_level_2"
+      - "coicop_level_3"
+      - "coicop_level_4"
+      - "coicop_number"
+  compare_products_per_period_coicop_level:
+    store_name:  
+      - ah
+      - lidl 
+      - plus 
+      - jumbo
+    period_column:
+      - "year"
+      - "year_month"
+    coicop_column:
+      - "coicop_level_1"
+      - "coicop_level_2"
+      - "coicop_level_3"
+      - "coicop_level_4"
+      - "coicop_number" 
 
 report_templates:
   # Analysis for whole store
