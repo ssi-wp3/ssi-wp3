@@ -223,23 +223,23 @@ class CustomLatex:
                  add_resize_box: bool = False,
                  rename_columns: Dict[str, str] = dict(),
                  **kwargs):
-        print(output_file)
-        with open(output_file, "w") as latex_file:
-            column_names = " & ".join([CustomLatex.encode_column_name(
-                column_name, rename_columns) for column_name in dataframe.columns.values])
-            column_alignments = ["l" if column_index == 0 else "r" for column_index in range(
-                len(dataframe.columns))]
-            table_data = "\\\\\n".join([" & ".join([CustomLatex.encode_column(column, float_format)
-                                                    for column in row.values])
-                                        for _, row in dataframe.iterrows()])
 
-            begin_resize_box = ""
-            end_resize_box = ""
-            if add_resize_box:
-                begin_resize_box = "\\resizebox{\\textwidth}{!}{"
-                end_resize_box = "}"
+        # with open(output_file, "w") as latex_file:
+        column_names = " & ".join([CustomLatex.encode_column_name(
+            column_name, rename_columns) for column_name in dataframe.columns.values])
+        column_alignments = ["l" if column_index == 0 else "r" for column_index in range(
+            len(dataframe.columns))]
+        table_data = "\\\\\n".join([" & ".join([CustomLatex.encode_column(column, float_format)
+                                                for column in row.values])
+                                    for _, row in dataframe.iterrows()])
 
-            latex_string = f"""
+        begin_resize_box = ""
+        end_resize_box = ""
+        if add_resize_box:
+            begin_resize_box = "\\resizebox{\\textwidth}{!}{"
+            end_resize_box = "}"
+
+        latex_string = f"""
             \\begin{{table}}
                 \\centering
                 {begin_resize_box}
@@ -255,7 +255,7 @@ class CustomLatex:
                 {end_resize_box}
             \\end{{table}}
             """
-            latex_file.write(latex_string)
+        latex_file.write(latex_string)
 
 
 class TableReport(Report):
