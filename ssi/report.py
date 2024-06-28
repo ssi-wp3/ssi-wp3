@@ -204,10 +204,14 @@ class PlotReport(Report):
 
 class CustomLatex:
     @classmethod
-    def encode_column(column_name: str, rename_columns: Dict[str, str]) -> str:
+    def encode_column_name(column_name: str, rename_columns: Dict[str, str]) -> str:
         if column_name in rename_columns:
             column_name = rename_columns[column_name]
         return column_name.replace("_", "\\_").lower()
+
+    @classmethod
+    def encode_column(column_data: str, float_format: str) -> str:
+        return f"{column_data:{float_format}}"
 
     @classmethod
     def to_latex(cls,
@@ -220,10 +224,11 @@ class CustomLatex:
                  rename_columns: Dict[str, str] = dict(),
                  **kwargs):
         with open(output_file, "w") as latex_file:
-            column_names = " & ".join(dataframe.columns)
+            column_names = " & ".join([CustomLatex.encode_column_name(
+                column_name, rename_columns) for column_name in dataframe.columns.values])
             column_alignments = ["l" if column_index == 0 else "r" for column_index in range(
                 len(dataframe.columns))]
-            table_data = "\\\\\n".join([" & ".join([f"{CustomLatex.encode_column(column, rename_columns):.2f}"
+            table_data = "\\\\\n".join([" & ".join([CustomLatex.encode_column(column, float_format)
                                                     for column in row.values])
                                         for _, row in dataframe.iterrows()])
 
