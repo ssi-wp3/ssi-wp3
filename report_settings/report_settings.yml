@@ -156,7 +156,7 @@ report_templates:
     reports:
       - type: table
         pivot: false
-        output_filename: "Tables/{{store_name}}_unique_column_values.tex"
+        output_filename: "Tables/product_inventory/{{store_name}}_unique_column_values.tex"
         settings:
             table_type: latex
             float_format: "%.2f"
@@ -165,7 +165,7 @@ report_templates:
       reports: 
         - type: plot
           pivot: false
-          output_filename: "Images/{{store_name}}_texts_per_product_id_histogram.png"
+          output_filename: "Images/product_inventory/{{store_name}}_texts_per_product_id_histogram.png"
           settings: 
               plot_type: bar_chart
               x_column: "{{receipt_text_column}}"
@@ -173,7 +173,7 @@ report_templates:
               title: Unique receipt texts per product_id for {{store_name}}
         - type: table
           pivot: false
-          output_filename: "Tables/{{store_name}}_texts_per_product_id_histogram.tex"
+          output_filename: "Tables/product_inventory/{{store_name}}_texts_per_product_id_histogram.tex"
           settings:
               table_type: latex 
               float_format: "%.2f"
@@ -182,7 +182,7 @@ report_templates:
       reports:
         - type: plot
           pivot: false
-          output_filename: "Images/{{store_name}}_log_texts_per_product_id_histogram.png"
+          output_filename: "Images/product_inventory/{{store_name}}_log_texts_per_product_id_histogram.png"
           settings: 
               plot_type: bar_chart
               x_column: "{{receipt_text_column}}"
@@ -193,7 +193,7 @@ report_templates:
       reports:
         - type: plot
           pivot: false
-          output_filename: "Images/{{store_name}}_receipt_length_histogram.png"
+          output_filename: "Images/product_inventory/{{store_name}}_receipt_length_histogram.png"
           settings: 
               plot_type: bar_chart
               x_column: "{{receipt_text_column}}"
@@ -210,7 +210,7 @@ report_templates:
       reports:
         - type: plot
           pivot: false
-          output_filename: "Images/{{store_name}}_product_id_length_histogram.png"
+          output_filename: "Images/product_inventory/{{store_name}}_product_id_length_histogram.png"
           settings: 
               plot_type: bar_chart
               x_column: "{{product_id_column}}"
@@ -218,7 +218,7 @@ report_templates:
               title: product_id length histogram for {{store_name}}
         - type: table
           pivot: false
-          output_filename: "Tables/{{store_name}}_product_id_length_histogram.tex"
+          output_filename: "Tables/product_inventory/{{store_name}}_product_id_length_histogram.tex"
           settings:
               table_type: latex
               float_format: "%.2f"
@@ -227,7 +227,7 @@ report_templates:
     reports:
       - type: plot
         pivot: false
-        output_filename: "Images/{{store_name}}_revenue_for_coicop_hierarchy_sunburst.html"
+        output_filename: "Images/revenue/{{store_name}}_revenue_for_coicop_hierarchy_sunburst.html"
         settings: 
             plot_type: sunburst_chart
             format: html
@@ -245,7 +245,7 @@ report_templates:
     reports:
       - type: plot  
         pivot: false
-        output_filename: "Images/{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
+        output_filename: "Images/revenue/{{store_name}}_{{period_column}}_product_revenue_versus_lifetime.png"
         settings: 
             plot_type: scatter_plot
             x_column: "{{period_column}}"
@@ -253,7 +253,7 @@ report_templates:
             title: Product revenue versus lifetime for {{store_name}}
       - type: plot  
         pivot: false
-        output_filename: "Images/{{store_name}}_{{period_column}}_product_amount_versus_lifetime.png"
+        output_filename: "Images/revenue/{{store_name}}_{{period_column}}_product_amount_versus_lifetime.png"
         settings: 
             plot_type: scatter_plot
             x_column: "{{period_column}}"
@@ -270,7 +270,7 @@ report_templates:
         value_columns: 
           - "{{product_id_column}}"
           - "{{receipt_text_column}}"
-        output_filename: "Images/{{store_name}}_{{coicop_column}}_unique_receipt_values_per_coicop.png"
+        output_filename: "Images/product_inventory/{{store_name}}_{{coicop_column}}_unique_receipt_values_per_coicop.png"
         settings: 
             plot_type: bar_chart
             x_column: "{{coicop_column}}"
@@ -288,7 +288,7 @@ report_templates:
         value_columns: 
           - "{{product_id_column}}" 
           - "{{receipt_text_column}}"
-        output_filename: "Images/{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column.png"
+        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_unique_receipt_values_per_period_column.png"
         settings: 
             plot_type: line_chart
             x_column: "{{period_column}}"
@@ -297,7 +297,7 @@ report_templates:
             title: Unique receipt texts per {{period_column}} for {{store_name}}
       - type: table
         pivot: false
-        output_filename: "Tables/{{store_name}}_{{period_column}}_unique_column_values.tex"
+        output_filename: "Tables/product_dynamics/{{store_name}}_{{period_column}}_unique_column_values.tex"
         settings:
             table_type: latex
             float_format: "%.2f"
@@ -307,7 +307,7 @@ report_templates:
     reports:
       - type: plot  
         pivot: false
-        output_filename: "Images/{{store_name}}_{{period_column}}_total_revenue_per_period.png"
+        output_filename: "Images/revenue/{store_name}}_{{period_column}}_total_revenue_per_period.png"
         settings: 
             plot_type: line_chart
             x_column: "{{period_column}}"
@@ -315,13 +315,12 @@ report_templates:
             title: Total revenue per {{period_column}} for {{store_name}}
       - type: plot  
         pivot: false
-        output_filename: "Images/{{store_name}}_{{period_column}}_total_amount_per_period.png"
+        output_filename: "Images/revenue/{{store_name}}_{{period_column}}_total_amount_per_period.png"
         settings: 
             plot_type: line_chart
             x_column: "{{period_column}}"
             y_column: "{{amount_column}}"
             title: Total amount per {{period_column}} for {{store_name}}
-  #Missing
   compare_products_per_period: 
     input_filename: "{{store_name}}_{{period_column}}_analysis_compare_products_per_period"
     reports:
@@ -332,7 +331,7 @@ report_templates:
           - number_{{receipt_text_column}}_removed
           - number_{{product_id_column}}_introduced
           - number_{{product_id_column}}_removed
-        output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_compare_products_per_period.png"
+        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_compare_products_per_period.png"
         settings: 
             plot_type: line_chart
             x_column: "{{period_column}}"
@@ -344,7 +343,7 @@ report_templates:
         value_columns:
           - "{{period_column}}"
           - jaccard_index_{{receipt_text_column}}_{{period_column}}
-        output_filename: "Images/overlap_{{store_name}}_{{period_column}}_jaccard_index_{{receipt_text_column}}.png"
+        output_filename: "Images/product_dynamics/overlap_{{store_name}}_{{period_column}}_jaccard_index_{{receipt_text_column}}.png"
         settings:
             plot_type: line_chart
             x_column: "{{period_column}}"
@@ -355,7 +354,7 @@ report_templates:
         value_columns:
           - "{{period_column}}"
           - jaccard_index_{{product_id_column}}_{{period_column}}
-        output_filename: "Images/overlap_{{store_name}}_{{period_column}}_jaccard_index_{{product_id_column}}.png"
+        output_filename: "Images/product_dynamics/overlap_{{store_name}}_{{period_column}}_jaccard_index_{{product_id_column}}.png"
         settings:
             plot_type: line_chart
             x_column: "{{period_column}}"
@@ -370,7 +369,7 @@ report_templates:
         value_columns:
           - "{{period_column}}"
           - total_{{product_id_column}}
-        output_filename: "Images/{{store_name}}_{{period_column}}_total_number_{{product_id_column}}.png"
+        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_total_number_{{product_id_column}}.png"
         settings:
             plot_type: bar_chart
             x_column: "{{period_column}}"
@@ -388,7 +387,7 @@ report_templates:
           ascending: true
         value_columns:
           - "{{product_id_column}}"
-        output_filename: "Images/{{store_name}}_{{period_column}}_{{product_id_column}}_availability.png"
+        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_{{product_id_column}}_availability.png"
         settings:
             plot_type: heatmap
             title: Heatmap of {{product_id_column}} availability for {{store_name}}  
@@ -396,7 +395,7 @@ report_templates:
         pivot: false 
         value_columns:
           - "{{product_id_column}}"
-        output_filename: "Images/{{store_name}}_{{period_column}}_{{receipt_text_column}}_availability.png"
+        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_{{receipt_text_column}}_availability.png"
         settings:
             plot_type: heatmap
             title: Heatmap of {{receipt_text_column}} availability for {{store_name}} 
@@ -412,7 +411,7 @@ report_templates:
           ascending: true
         value_columns:
           - "{{product_id_column}}"
-        output_filename: "Images/{{store_name}}_{{period_column}}_{{product_id_column}}_lifetime.png"
+        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_{{product_id_column}}_lifetime.png"
         settings:
             plot_type: histogram
             x_column: "{{period_column}}"
@@ -433,7 +432,7 @@ report_templates:
           - "{{period_column}}"
           - "{{coicop_column}}"
           - "{{revenue_column}}"
-        output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_revenue_{{product_id_column}}.png"
+        output_filename: "Images/revenue/{{store_name}}_{{period_column}}_{{coicop_column}}_total_revenue_{{product_id_column}}.png"
         settings:
             plot_type: bar_chart
             x_column: "{{period_column}}"
@@ -473,7 +472,7 @@ report_templates:
           - "{{period_column}}"
           - "{{coicop_column}}"
           - total_{{product_id_column}}
-        output_filename: "Images/{{store_name}}_{{period_column}}_{{coicop_column}}_total_number_{{product_id_column}}.png"
+        output_filename: "Images/product_inventory/{{store_name}}_{{period_column}}_{{coicop_column}}_total_number_{{product_id_column}}.png"
         settings:
             plot_type: bar_chart
             x_column: "{{period_column}}"
