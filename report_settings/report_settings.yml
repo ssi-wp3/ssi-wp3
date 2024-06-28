@@ -329,6 +329,14 @@ report_templates:
   mean_overlap_per_preprocessing_function:
     input_filename: "mean_overlap_per_preprocessing_function"
     reports:
+      - type: plot
+        pivot: false
+        output_filename: "Images/product_inventory/overlap/mean_overlap_per_preprocessing_function.png"
+        settings:
+            plot_type: bar_chart
+            x_column: preprocessing
+            y_column: mean
+            title: Mean overlap per preprocessing function
       - type: table 
         pivot: false
         output_filename: "Tables/product_inventory/overlap/mean_overlap_per_preprocessing_function.tex"
