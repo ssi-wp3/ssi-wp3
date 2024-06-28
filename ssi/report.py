@@ -229,7 +229,7 @@ class CustomLatex:
         column_alignments = ["l" if column_index == 0 else "r" for column_index in range(
             len(dataframe.columns))]
         table_data = "\\\\\n".join([" & ".join([CustomLatex.encode_column(column, float_format)
-                                                for column in row.values])
+                                                for column in row.values.tolist()])
                                     for _, row in dataframe.iterrows()])
 
         begin_resize_box = ""
@@ -284,7 +284,6 @@ class TableReport(Report):
         elif table_type == TableReport.TableType.markdown:
             dataframe.to_markdown(output_file, **kwargs)
         elif table_type == TableReport.TableType.latex:
-            # dataframe.to_latex(output_file, **kwargs)
             CustomLatex.to_latex(dataframe, output_file, **kwargs)
         else:
             raise ValueError(f"Unknown table type: {table_type}")
