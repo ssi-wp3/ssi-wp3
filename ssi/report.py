@@ -363,8 +363,6 @@ class ReportEngine:
                     self.__all_report_permutations[input_filename] = report_template
 
         # Combine the permutations with the report template settings
-        print("All permutations:", len(self.__all_report_permutations))
-
         return self.__all_report_permutations
 
     @property
@@ -408,9 +406,6 @@ class ReportEngine:
                                files_for_reports: Dict[str, str],
                                parquet_engine: str = "pyarrow",
                                report_file_manager: ReportFileManager = DefaultReportFileManager()):
-        print("Files for reports", files_for_reports.keys())
-        print("Length of reports", len(files_for_reports))
-
         with tqdm.tqdm(total=len(files_for_reports)) as progress_bar:
             for file_key, _ in files_for_reports.items():
                 if file_key not in self.reports:
