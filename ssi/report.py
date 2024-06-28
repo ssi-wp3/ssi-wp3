@@ -350,6 +350,7 @@ class ReportEngine:
                     self.settings_filename, "report_templates", True, **template_settings)
 
                 report_template = all_report_templates[report_id]
+                print(f"Getting report template for {report_id}")
                 input_filename = report_template["input_filename"]
                 permutations_dict[input_filename] = report_template
 
