@@ -368,7 +368,8 @@ report_templates:
         output_filename: "Tables/product_inventory/overlap/overlap_{{preprocessing}}_coicop_level_1.tex"
         settings:
             table_type: latex
-            title: "Jaccard index overlap between stores and per COICOP category for the \\emph{ {{preprocessing}} } preprocessing method"
+            title: Jaccard index overlap between stores and per COICOP category for the \\emph{ {{preprocessing}} } preprocessing method
+            label: overlap_jaccard_index_{{preprocessing}}
             float_format: ".2f"
 
   mean_overlap_per_preprocessing_function:
