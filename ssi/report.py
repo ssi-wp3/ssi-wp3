@@ -220,6 +220,10 @@ class CustomLatex:
         return f"{column_data}"
 
     @staticmethod
+    def index_to_latex(index: pd.Index, add_index: bool = True) -> str:
+        return f"{index}" if add_index else ""
+
+    @staticmethod
     def to_latex(dataframe: pd.DataFrame,
                  output_file: str,
                  title: str,
@@ -227,14 +231,15 @@ class CustomLatex:
                  float_format: str,
                  add_resize_box: bool = False,
                  rename_columns: Dict[str, str] = dict(),
+                 add_index: bool = True,
                  **kwargs):
-        column_names = " & ".join([CustomLatex.encode_column_name(
-            column_name, rename_columns) for column_name in dataframe.columns.values])
+        column_names = " & ".join([CustomLatex.encode_column_name(column_name, rename_columns)
+                                   for column_name in dataframe.columns.values])
         column_alignments = "".join(["l" if column_index == 0 else "r" for column_index in range(
             len(dataframe.columns))])
-        table_data = "\\\\\n".join([" & ".join([CustomLatex.encode_column(column, float_format)
-                                                for column in row.values])
-                                    for _, row in dataframe.iterrows()])
+        table_data = "\\\\\n".join([CustomLatex.index_to_latex(index, add_index) + " & ".join([CustomLatex.encode_column(column, float_format)
+                                                                                               for column in row.values])
+                                    for index, row in dataframe.iterrows()])
 
         begin_resize_box = ""
         end_resize_box = ""
