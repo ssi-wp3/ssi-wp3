@@ -511,24 +511,24 @@ class ReportEngine:
 
     def preprocess_data(self, dataframe: pd.DataFrame, preprocessing_settings: Dict[str, Any]) -> pd.DataFrame:
         # if len(set(["pivot", "select_columns", "sort_values"]).intersection(set(preprocessing_settings.keys()))) > 0:
-        dataframe = dataframe.copy()
+        copied_dataframe = dataframe.copy()
 
         if "pivot" in preprocessing_settings:
             value_columns = preprocessing_settings["value_columns"]
-            dataframe = unpivot(dataframe, value_columns)
+            copied_dataframe = unpivot(copied_dataframe, value_columns)
 
         if "select_columns" in preprocessing_settings:
             select_columns = preprocessing_settings["select_columns"]
-            dataframe = dataframe[select_columns]
+            copied_dataframe = copied_dataframe[select_columns]
 
         if "sort_values" in preprocessing_settings:
             sort_settings = preprocessing_settings["sort_values"]
             columns = sort_settings.get("columns", [])
             ascending = sort_settings.get("ascending", True)
 
-            dataframe = dataframe.sort_values(
+            copied_dataframe = copied_dataframe.sort_values(
                 by=columns, ascending=ascending)
-        return dataframe
+        return copied_dataframe
 
     def create_directory(self, filename: str):
         directory = os.path.dirname(filename)
