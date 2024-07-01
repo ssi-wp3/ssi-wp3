@@ -72,6 +72,17 @@ class Report(ABC):
         return self.settings["settings"]
 
     @property
+    def preprocessing_settings(self) -> Dict[str, Any]:
+        """The settings for the preprocessing of the data before generating the report.
+
+        Returns
+        -------
+        Dict[str, Any]
+            The settings for the preprocessing of the data before generating the report.
+        """
+        return self.settings.get("preprocessing", dict())
+
+    @property
     def needs_binary_file(self) -> bool:
         """Whether the report needs a binary file to be written to.
 
@@ -493,8 +504,28 @@ class ReportEngine:
 
                     with report_file_manager.open_output_file(report.output_filename) as output_file:
                         self.create_directory(report.output_filename)
+                        dataframe = self.preprocess_data(
+                            dataframe, report.preprocessing_settings)
                         report.write_to_file(dataframe, output_file)
                 progress_bar.update(1)
+
+    def preprocess_data(self, dataframe: pd.DataFrame, preprocessing_settings: Dict[str, Any]) -> pd.DataFrame:
+        if "pivot" in preprocessing_settings and preprocessing_settings["pivot"]:
+            value_columns = preprocessing_settings["value_columns"]
+            dataframe = unpivot(dataframe, value_columns)
+
+        if "select_columns" in preprocessing_settings:
+            select_columns = preprocessing_settings["select_columns"]
+            dataframe = dataframe[select_columns]
+
+        if "sort_values" in preprocessing_settings:
+            sort_settings = preprocessing_settings["sort_values"]
+            columns = sort_settings.get("columns", [])
+            ascending = sort_settings.get("ascending", True)
+
+            dataframe = dataframe.sort_values(
+                by=columns, ascending=ascending)
+        return dataframe
 
     def create_directory(self, filename: str):
         directory = os.path.dirname(filename)
