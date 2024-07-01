@@ -459,10 +459,10 @@ report_templates:
         preprocessing:
           select_columns: 
             - "{{period_column}}"
-            - number_{{receipt_text_column}}_introduced
-            - number_{{receipt_text_column}}_removed
             - number_{{product_id_column}}_introduced
             - number_{{product_id_column}}_removed
+            - number_{{receipt_text_column}}_introduced
+            - number_{{receipt_text_column}}_removed
         output_filename: "Tables/product_dynamics/{{store_name}}_{{period_column}}_compare_products_per_period.tex"
         settings: 
             table_type: latex
