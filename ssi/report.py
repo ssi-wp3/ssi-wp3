@@ -231,11 +231,11 @@ class CustomLatex:
         return f"{column_data}"
 
     @staticmethod
-    def index_to_latex(index: pd.Index, add_index: bool = True) -> str:
+    def index_to_latex(index: pd.Index, add_index: bool) -> str:
         return f"{index} " if add_index else ""
 
     @staticmethod
-    def index_name(index: pd.Index, add_index: bool = True) -> str:
+    def index_name(index: pd.Index, add_index: bool) -> str:
         return f"{index.name} " if add_index and index.name else ""
 
     @staticmethod
