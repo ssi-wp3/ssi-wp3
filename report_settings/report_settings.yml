@@ -604,7 +604,7 @@ report_templates:
           - "{{period_column}}"
           - "{{coicop_column}}"
           - total_{{product_id_column}}
-        output_filename: "Images/product_inventory/{{store_name}}_{{period_column}}_{{coicop_column}}_total_number_{{product_id_column}}.png"
+        output_filename: "Images/product_dynamics/{{store_name}}_{{period_column}}_{{coicop_column}}_total_number_{{product_id_column}}.png"
         settings:
             plot_type: bar_chart
             x_column: "{{period_column}}"
