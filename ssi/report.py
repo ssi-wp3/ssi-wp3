@@ -224,6 +224,10 @@ class CustomLatex:
         return f"{index}" if add_index else ""
 
     @staticmethod
+    def index_name(index: pd.Index, add_index: bool = True) -> str:
+        return f"{index.name}" if add_index else ""
+
+    @staticmethod
     def to_latex(dataframe: pd.DataFrame,
                  output_file: str,
                  title: str,
@@ -233,8 +237,8 @@ class CustomLatex:
                  rename_columns: Dict[str, str] = dict(),
                  add_index: bool = True,
                  **kwargs):
-        column_names = " & ".join([CustomLatex.encode_column_name(column_name, rename_columns)
-                                   for column_name in dataframe.columns.values])
+        column_names = CustomLatex.index_name(dataframe.index, add_index) + " & ".join([CustomLatex.encode_column_name(column_name, rename_columns)
+                                                                                        for column_name in dataframe.columns.values])
         column_alignments = "".join(["l" if column_index == 0 else "r" for column_index in range(
             len(dataframe.columns))])
         table_data = "\\\\\n".join([CustomLatex.index_to_latex(index, add_index) + " & ".join([CustomLatex.encode_column(column, float_format)
