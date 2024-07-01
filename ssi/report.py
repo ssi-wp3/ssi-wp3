@@ -510,7 +510,7 @@ class ReportEngine:
                 progress_bar.update(1)
 
     def preprocess_data(self, dataframe: pd.DataFrame, preprocessing_settings: Dict[str, Any]) -> pd.DataFrame:
-        if set(["pivot", "select_columns", "sort_values"]).issubset(preprocessing_settings.keys()):
+        if len(set(["pivot", "select_columns", "sort_values"]).intersection(set(preprocessing_settings.keys()))) > 0:
             dataframe = dataframe.copy()
 
         if "pivot" in preprocessing_settings:
