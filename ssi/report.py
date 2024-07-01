@@ -504,9 +504,10 @@ class ReportEngine:
 
                     with report_file_manager.open_output_file(report.output_filename) as output_file:
                         self.create_directory(report.output_filename)
-                        dataframe = self.preprocess_data(
+                        preprocessed_dataframe = self.preprocess_data(
                             dataframe, report.preprocessing_settings)
-                        report.write_to_file(dataframe, output_file)
+                        report.write_to_file(
+                            preprocessed_dataframe, output_file)
                 progress_bar.update(1)
 
     def preprocess_data(self, dataframe: pd.DataFrame, preprocessing_settings: Dict[str, Any]) -> pd.DataFrame:
