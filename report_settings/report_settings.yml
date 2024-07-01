@@ -458,6 +458,7 @@ report_templates:
       - type: table  
         preprocessing:
           select_columns: 
+            - "{{period_column}}"
             - number_{{receipt_text_column}}_introduced
             - number_{{receipt_text_column}}_removed
             - number_{{product_id_column}}_introduced
