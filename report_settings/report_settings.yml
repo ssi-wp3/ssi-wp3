@@ -97,7 +97,7 @@ reports:
 
   overlap_coicop_level:
     preprocessing: 
-      #- "raw"
+      - "raw"
       - "stripped"
       - "lower"
       - "lower_split_words"
@@ -350,6 +350,7 @@ report_templates:
             title: "{{overlap_metric}} between the unique sets of product IDs per store"
             label: overlap_product_ids_{{overlap_metric}}
             float_format: ".2f"
+  
   overlap_receipt_text:
     input_filename: "overlap_{{receipt_text_column}}_{{preprocessing}}_{{overlap_metric}}"
     reports:
