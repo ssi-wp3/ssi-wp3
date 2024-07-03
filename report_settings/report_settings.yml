@@ -80,6 +80,7 @@ reports:
 
   overlap_receipt_text:
     preprocessing: 
+      - "raw"
       - "stripped"
       - "lower"
       - "lower_split_words"
@@ -96,6 +97,7 @@ reports:
 
   overlap_coicop_level:
     preprocessing: 
+      - "raw"
       - "stripped"
       - "lower"
       - "lower_split_words"
