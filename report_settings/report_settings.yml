@@ -80,7 +80,7 @@ reports:
 
   overlap_receipt_text:
     preprocessing: 
-      #- "raw"
+      - "raw"
       - "stripped"
       - "lower"
       - "lower_split_words"
