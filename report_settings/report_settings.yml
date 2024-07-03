@@ -374,6 +374,7 @@ report_templates:
             title: Jaccard index overlap between stores and per COICOP category for the \\emph{ {{preprocessing}} } preprocessing method
             label: overlap_jaccard_index_{{preprocessing}}
             float_format: ".2f"
+            add_index: true
 
   mean_overlap_per_preprocessing_function:
     input_filename: "mean_overlap_per_preprocessing_function"
