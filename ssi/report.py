@@ -247,7 +247,11 @@ class CustomLatex:
                  add_resize_box: bool = False,
                  rename_columns: Dict[str, str] = dict(),
                  add_index: bool = False,
+                 sort_index: bool = False,
                  **kwargs):
+        if sort_index:
+            dataframe = dataframe.sort_index()
+
         column_names = CustomLatex.index_name(dataframe.index, add_index) + " & ".join([CustomLatex.encode_column_name(column_name, rename_columns)
                                                                                         for column_name in dataframe.columns.values])
         column_alignments = "".join(["l" if column_index == 0 else "r" for column_index in range(
