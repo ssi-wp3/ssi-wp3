@@ -9,6 +9,7 @@ from .file_index import FileIndex
 import luigi
 import pandas as pd
 import tqdm
+import itertools
 import os
 
 
@@ -66,9 +67,20 @@ class Report(ABC):
         Returns
         -------
         Dict[str, Any]
-            The settings for the specific report type.        
+            The settings for the specific report type.
         """
         return self.settings["settings"]
+
+    @property
+    def preprocessing_settings(self) -> Dict[str, Any]:
+        """The settings for the preprocessing of the data before generating the report.
+
+        Returns
+        -------
+        Dict[str, Any]
+            The settings for the preprocessing of the data before generating the report.
+        """
+        return self.settings.get("preprocessing", dict())
 
     @property
     def needs_binary_file(self) -> bool:
@@ -201,6 +213,78 @@ class PlotReport(Report):
         figure.save(output_file, format=plot_format)
 
 
+class CustomLatex:
+    @staticmethod
+    def encode_column_name(column_name: Any, rename_columns: Dict[str, str]) -> str:
+        column_name = f"{column_name}"
+        if column_name in rename_columns:
+            column_name = rename_columns[column_name]
+
+        return column_name.replace("_", "\\_").lower()
+
+    @staticmethod
+    def encode_column(column_data: Any, float_format: str) -> str:
+        if isinstance(column_data, str):
+            return f"{column_data}"
+        if isinstance(column_data, float):
+            return f"{column_data:{float_format}}"
+        return f"{column_data}"
+
+    @staticmethod
+    def index_to_latex(index: pd.Index, add_index: bool) -> str:
+        return f"{index} " if add_index else ""
+
+    @staticmethod
+    def index_name(index: pd.Index, add_index: bool) -> str:
+        return f"{index.name} " if add_index and index.name else ""
+
+    @staticmethod
+    def to_latex(dataframe: pd.DataFrame,
+                 output_file: str,
+                 title: str,
+                 label: str,
+                 float_format: str,
+                 add_resize_box: bool = False,
+                 rename_columns: Dict[str, str] = dict(),
+                 add_index: bool = False,
+                 sort_index: bool = False,
+                 **kwargs):
+        if sort_index:
+            dataframe = dataframe.sort_index()
+
+        column_names = CustomLatex.index_name(dataframe.index, add_index) + " & ".join([CustomLatex.encode_column_name(column_name, rename_columns)
+                                                                                        for column_name in dataframe.columns.values])
+        column_alignments = "".join(["l" if column_index == 0 else "r" for column_index in range(
+            len(dataframe.columns))])
+        table_data = "\\\\\n".join([CustomLatex.index_to_latex(index, add_index) + " & ".join([CustomLatex.encode_column(column, float_format)
+                                                                                               for column in row.values])
+                                    for index, row in dataframe.iterrows()])
+
+        begin_resize_box = ""
+        end_resize_box = ""
+        if add_resize_box:
+            begin_resize_box = "\\resizebox{\\textwidth}{!}{"
+            end_resize_box = "}"
+
+        latex_string = f"""
+            \\begin{{table}}
+                \\centering
+                {begin_resize_box}
+                \\begin{{tabular}}{{ {column_alignments} }}
+                    \\toprule
+                    {column_names}
+                    \\midrule
+                    {table_data}
+                    \\bottomrule
+                    \\caption{{ {title} }}
+                    \\label{{table:{label} }}
+                \\end{{tabular}}
+                {end_resize_box}
+            \\end{{table}}
+            """
+        output_file.write(latex_string)
+
+
 class TableReport(Report):
     class TableType(Enum):
         csv = "csv"
@@ -228,14 +312,14 @@ class TableReport(Report):
         elif table_type == TableReport.TableType.markdown:
             dataframe.to_markdown(output_file, **kwargs)
         elif table_type == TableReport.TableType.latex:
-            dataframe.to_latex(output_file, **kwargs)
+            CustomLatex.to_latex(dataframe, output_file, **kwargs)
         else:
             raise ValueError(f"Unknown table type: {table_type}")
 
 
 class ReportFileManager(ABC):
     """Abstract class for a report file manager.
-    This class is used to make it possible to use the ReportEngine with luigi.    
+    This class is used to make it possible to use the ReportEngine with luigi.
     """
     @abstractmethod
     def open_input_file(self, filename: str):
@@ -302,12 +386,27 @@ class LuigiReportFileManager(ReportFileManager):
 
 
 class ReportEngine:
-    def __init__(self, settings: Settings):
-        self.__settings = settings
+    def __init__(self, settings_filename: str):
+        self.__settings_filename = settings_filename
+        self.__reports = None
+        self.__all_report_permutations = dict()
 
     @property
-    def settings(self) -> Settings:
-        return self.__settings
+    def settings_filename(self) -> str:
+        return self.__settings_filename
+
+    @property
+    def report_settings(self) -> Settings:
+        return Settings.load(self.settings_filename,
+                             "report_settings",
+                             False)
+
+    @property
+    def reports_config(self) -> Settings:
+        return Settings.load(self.settings_filename,
+                             "reports",
+                             True,
+                             **self.report_settings)
 
     @property
     def flattened_reports(self) -> List[Report]:
@@ -316,15 +415,50 @@ class ReportEngine:
                 for report in report_list]
 
     @property
+    def all_report_permutations(self) -> Dict[str, Dict[str, Any]]:
+        """Returns a dictionary with all possible permutations of the reports.
+        The permutations are based on the reports_config settings and the report_templates settings.
+
+        """
+        if not self.__all_report_permutations:
+            for report_id, report_id_settings in self.reports_config.items():
+                keys, values = zip(*report_id_settings.items())
+                all_report_settings = [dict(zip(keys, combination))
+                                       for combination in itertools.product(*values)]
+                for all_report_dict in all_report_settings:
+
+                    template_settings = self.report_settings.copy()
+                    template_settings.update(
+                        all_report_dict)
+
+                    all_report_templates = Settings.load(
+                        self.settings_filename, "report_templates", True, **template_settings)
+
+                    if report_id not in all_report_templates:
+                        print(f"No report template found for {report_id}")
+                        continue
+
+                    report_template = all_report_templates[report_id]
+                    input_filename = report_template["input_filename"]
+                    self.__all_report_permutations[input_filename] = report_template
+
+        # Combine the permutations with the report template settings
+        return self.__all_report_permutations
+
+    @property
     def reports(self) -> Dict[str, List['Report']]:
-        reports = defaultdict(list)
-        for report_key, report_settings in self.settings.items():
-            if isinstance(report_settings, list):
-                for settings in report_settings:
-                    reports[report_key].append(self.report_for(settings))
-            else:
-                reports[report_key].append(self.report_for(report_settings))
-        return reports
+        if not self.__reports:
+            self.__reports = defaultdict(list)
+            for report_key, report_settings in self.all_report_permutations.items():
+                report_template = report_settings["reports"]
+                if isinstance(report_template, list):
+                    for settings in report_template:
+                        self.__reports[report_key].append(
+                            self.report_for(settings))
+                else:
+                    self.__reports[report_key].append(
+                        self.report_for(report_template))
+        return self.__reports
 
     def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
         if result_settings["type"].lower() == ReportType.plot.value:
@@ -340,14 +474,30 @@ class ReportEngine:
                          parquet_engine: str = "pyarrow",
                          report_file_manager: ReportFileManager = DefaultReportFileManager()):
         file_index = FileIndex(data_path, file_extension)
+        files_for_reports = {file_key: file_path
+                             for file_key, file_path in file_index.files.items()
+                             if file_key in self.reports.keys()}
 
-        with tqdm.tqdm(total=len(file_index.files)) as progress_bar:
-            for file_key, file_path in file_index.files.items():
-                if file_key not in self.settings:
-                    progress_bar.set_description(f"Skipping {file_key}")
+        self.reports_for_file_index(files_for_reports,
+                                    parquet_engine=parquet_engine,
+                                    report_file_manager=report_file_manager)
+
+    def reports_for_file_index(self,
+                               files_for_reports: Dict[str, str],
+                               parquet_engine: str = "pyarrow",
+                               report_file_manager: ReportFileManager = DefaultReportFileManager()):
+        print("Number of files: ", len(files_for_reports))
+        print("Number of reports: ", len(self.reports))
+
+        print("Missing files: ", set(self.reports.keys()) -
+              set(files_for_reports.keys()))
+        with tqdm.tqdm(total=len(files_for_reports)) as progress_bar:
+            for file_key, _ in files_for_reports.items():
+                if file_key not in self.reports:
+                    progress_bar.update(1)
                     continue
 
-                with report_file_manager.open_input_file(file_path) as input_file:
+                with report_file_manager.open_input_file(file_key) as input_file:
                     dataframe = pd.read_parquet(
                         input_file, engine=parquet_engine)
 
@@ -358,8 +508,32 @@ class ReportEngine:
 
                     with report_file_manager.open_output_file(report.output_filename) as output_file:
                         self.create_directory(report.output_filename)
-                        report.write_to_file(dataframe, output_file)
+                        preprocessed_dataframe = self.preprocess_data(
+                            dataframe, report.preprocessing_settings)
+                        report.write_to_file(
+                            preprocessed_dataframe, output_file)
                 progress_bar.update(1)
+
+    def preprocess_data(self, dataframe: pd.DataFrame, preprocessing_settings: Dict[str, Any]) -> pd.DataFrame:
+        # if len(set(["pivot", "select_columns", "sort_values"]).intersection(set(preprocessing_settings.keys()))) > 0:
+        copied_dataframe = dataframe.copy()
+
+        if "pivot" in preprocessing_settings:
+            value_columns = preprocessing_settings["value_columns"]
+            copied_dataframe = unpivot(copied_dataframe, value_columns)
+
+        if "select_columns" in preprocessing_settings:
+            select_columns = preprocessing_settings["select_columns"]
+            copied_dataframe = copied_dataframe[select_columns]
+
+        if "sort_values" in preprocessing_settings:
+            sort_settings = preprocessing_settings["sort_values"]
+            columns = sort_settings.get("columns", [])
+            ascending = sort_settings.get("ascending", True)
+
+            copied_dataframe = copied_dataframe.sort_values(
+                by=columns, ascending=ascending)
+        return copied_dataframe
 
     def create_directory(self, filename: str):
         directory = os.path.dirname(filename)
