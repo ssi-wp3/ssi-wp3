@@ -29,8 +29,11 @@ LOAD_COLUMNS = [
 ]
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
-  # drop 99999
-  df = df[df["coicop_number"] != "999999"]
+  # drop records if no receipt texts
+  df = df[df["receipt_text"].notna()]
+
+  # drop 99999 (ununsed category)
+  df = df[df["coicop_number"] != "999999"] 
 
   df = df.sort_values("year_month", ascending=False)
 
@@ -39,49 +42,50 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
   assert all(col in df.columns for col in groupby_cols)
 
-  df = df.set_index(groupby_cols)
+  #
+  # assign weights based on count
+  #
 
+  # count the number of duplicate records (by groupby_cols)
+  df = df.set_index(groupby_cols)
   df["count"] = df.groupby(groupby_cols).size()
   df = df.reset_index()
-  df = df.drop_duplicates(subset=groupby_cols, keep="first")
 
-  df["count_weight_col_name"] = 1.0
-  import pdb; pdb.set_trace()
-  print(df.groupby("receipt_text")["count"] / df.groupby("receipt_text")["count"].sum())
+  df = df.drop_duplicates(subset=groupby_cols, keep="first") # sorted by date, most recent first, so keep only the newest entry
 
+  # normalize the count by the total count of the receipt text
+  count_weight_col_name = "weight__count"
 
-
-
-  #
-  # add weights
-  #
-  # weight_col_name
-  # date_weight_col_name
-  # count_weight_col_name
-
-  # add 
+  df = df.set_index(groupby_cols)
+  df[count_weight_col_name] = df["count"] / df.groupby("receipt_text")["count"].sum()
+  df = df.reset_index()
 
   return df
 
-#def 
+def save_dataset(df: pd.DataFrame, out_fn: str) -> None:
+  if not os.path.isdir(config.OUTPUT_DATA_DIR):
+    os.mkdir(config.OUTPUT_DATA_DIR)
+
+  output_path = os.path.join(config.OUTPUT_DATA_DIR, out_fn)
+  df.to_parquet(output_path)
 
 if __name__ == "__main__":
   df_stores = [] # all stores
 
+  print("Loading datasets...")
   for store_name in config.STORES:
     dataset_fn = f"ssi_{store_name}_revenue.parquet"
     dataset_path = os.path.join(config.SOURCE_DATA_DIR, dataset_fn)
 
     df = pd.read_parquet(dataset_path, columns=LOAD_COLUMNS)
-    preprocess(df)
-    import pdb; pdb.set_trace()
     df_stores.append(df)
 
   df_stores = pd.concat(df_stores)
 
-  df_stores_preprocessed = preprocess(df_stores)
+  print("Preprocessing datasets...")
+  df_stores = preprocess(df_stores)
 
-  # 
-
-  # dfs[supermarket_name] = pd.read_parquet(data_file_path, columns=LOAD_COLUMNS)
+  print("Saving datasets...")
+  out_fn = f"{config.STORES.join('_')}.parquet"
+  save_dataset(df_stores, out_fn=out_fn)
 
