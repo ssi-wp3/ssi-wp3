@@ -62,6 +62,15 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
   return df
 
+def split_dev_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+  # take 2023-05 and 2023-06 as test set
+  query_test = (df["year_month"] == "202305") | (df["year_month"] == "202306")
+
+  df_test = df[query_test]
+  df_dev  = df[~query_test]
+
+  return df_dev, df_test
+
 def save_dataset(df: pd.DataFrame, out_fn: str) -> None:
   if not os.path.isdir(config.OUTPUT_DATA_DIR):
     os.mkdir(config.OUTPUT_DATA_DIR)
@@ -82,10 +91,15 @@ if __name__ == "__main__":
 
   df_stores = pd.concat(df_stores)
 
+  df_stores_dev, df_stores_test = split_dev_test(df_stores)
+
   print("Preprocessing datasets...")
-  df_stores = preprocess(df_stores)
+  df_stores_dev = preprocess(df_stores_dev)
 
   print("Saving datasets...")
-  out_fn = f"{config.STORES.join('_')}.parquet"
-  save_dataset(df_stores, out_fn=out_fn)
+  out_dev_fn = f"dev_{'_'.join(config.STORES)}.parquet"
+  save_dataset(df_stores_dev, out_fn=out_dev_fn)
+
+  out_test_fn = f"test_{'_'.join(config.STORES)}.parquet"
+  save_dataset(df_stores_test, out_fn=out_test_fn)
 
