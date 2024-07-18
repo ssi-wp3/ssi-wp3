@@ -85,18 +85,32 @@ def write_dataset(df: pd.DataFrame, out_fn: str, write_metadata=True) -> None:
     metadata_out_fn, _ = os.path.splitext(out_fn)
     metadata_out_fn = f"{metadata_out_fn}_metadata.txt"
     metadata_output_path = os.path.join(config.OUTPUT_DATA_DIR, metadata_out_fn)
+
+    out = (
+    f"==================================\n"
+    f"{out_fn}\n"
+    "===================================\n\n"
+    )
     
-    out  = f"Rows   : {df.shape[0]}\n"
-    out += f"Columns: {df.shape[1]}\n"
+    out += f"Num. of Rows   : {df.shape[0]}\n"
+    out += f"Num. of Columns: {df.shape[1]}\n\n"
 
-    out += """\n
-    ----------------------------------
-    Rows per COICOP Level 1 Categories
-    ----------------------------------\n
-    """
+    out += f"Columns:\n"
 
-    for coicop_level, counts in df["coicop_level_1"].value_counts().items():
-      out += f"{coicop_level}: {counts}\n"
+    for col_name in df.columns:
+      out += f"\t{col_name}\n"
+
+    out += (
+    "\n----------------------------------\n"
+    "Rows per COICOP Level 1 Categories\n"
+    "----------------------------------\n"
+    )
+
+    coicop_counts = df["coicop_level_1"].value_counts()
+    coicop_counts = coicop_counts.sort_index()
+
+    for coicop_level, counts in coicop_counts.items():
+      out += f"\t{coicop_level}: {counts}\n"
 
     with open(metadata_output_path, 'w') as fp:
       fp.write(out)
