@@ -28,23 +28,21 @@ LOAD_COLUMNS = [
  'month',
 ]
 
-def preprocess(df: pd.DataFrame) -> pd.DataFrame:
-  # drop records if no receipt texts
+def preprocess(df: pd.DataFrame, assign_weights=False) -> pd.DataFrame:
   df = df[df["receipt_text"].notna()]
+  df = df[df["receipt_text"].str.len() > 2]
 
   # drop 99999 (ununsed category)
   df = df[df["coicop_number"] != "999999"] 
 
   df = df.sort_values("year_month", ascending=False)
 
-  # group by ean name, receipt text, and coicop
-  groupby_cols = ["ean_name", "receipt_text", "coicop_number"]
+  # 
+  # remove duplicate records based on groupby_cols
+  # 
+  groupby_cols = ["ean_name", "receipt_text", "coicop_number"] # group by ean name, receipt text, and coicop
 
   assert all(col in df.columns for col in groupby_cols)
-
-  #
-  # assign weights based on count
-  #
 
   # count the number of duplicate records (by groupby_cols)
   df = df.set_index(groupby_cols)
@@ -53,12 +51,17 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
   df = df.drop_duplicates(subset=groupby_cols, keep="first") # sorted by date, most recent first, so keep only the newest entry
 
-  # normalize the count by the total count of the receipt text
-  count_weight_col_name = "weight__count"
+  if assign_weights:
+    #
+    # assign weights based on count
+    #
 
-  df = df.set_index(groupby_cols)
-  df[count_weight_col_name] = df["count"] / df.groupby("receipt_text")["count"].sum()
-  df = df.reset_index()
+    # normalize the count by the total count of the receipt text
+    count_weight_col_name = "weight__count"
+
+    df = df.set_index(groupby_cols)
+    df[count_weight_col_name] = df["count"] / df.groupby("receipt_text")["count"].sum()
+    df = df.reset_index()
 
   return df
 
@@ -71,13 +74,33 @@ def split_dev_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
   return df_dev, df_test
 
-def save_dataset(df: pd.DataFrame, out_fn: str) -> None:
+def write_dataset(df: pd.DataFrame, out_fn: str, write_metadata=True) -> None:
   if not os.path.isdir(config.OUTPUT_DATA_DIR):
     os.mkdir(config.OUTPUT_DATA_DIR)
 
   output_path = os.path.join(config.OUTPUT_DATA_DIR, out_fn)
   df.to_parquet(output_path)
 
+  if write_metadata:
+    metadata_out_fn, _ = os.path.splitext(out_fn)
+    metadata_out_fn = f"{metadata_out_fn}_metadata.txt"
+    metadata_output_path = os.path.join(config.OUTPUT_DATA_DIR, metadata_out_fn)
+    
+    out  = f"Rows   : {df.shape[0]}\n"
+    out += f"Columns: {df.shape[1]}\n"
+
+    out += """\n
+    ----------------------------------
+    Rows per COICOP Level 1 Categories
+    ----------------------------------\n
+    """
+
+    for coicop_level, counts in df["coicop_level_1"].value_counts().items():
+      out += f"{coicop_level}: {counts}\n"
+
+    with open(metadata_output_path, 'w') as fp:
+      fp.write(out)
+      
 if __name__ == "__main__":
   df_stores = [] # all stores
 
@@ -94,12 +117,13 @@ if __name__ == "__main__":
   df_stores_dev, df_stores_test = split_dev_test(df_stores)
 
   print("Preprocessing datasets...")
-  df_stores_dev = preprocess(df_stores_dev)
+  df_stores_dev = preprocess(df_stores_dev, assign_weights=True)
+  df_stores_test = preprocess(df_stores)
 
   print("Saving datasets...")
   out_dev_fn = f"dev_{'_'.join(config.STORES)}.parquet"
-  save_dataset(df_stores_dev, out_fn=out_dev_fn)
+  write_dataset(df_stores_dev, out_fn=out_dev_fn)
 
   out_test_fn = f"test_{'_'.join(config.STORES)}.parquet"
-  save_dataset(df_stores_test, out_fn=out_test_fn)
+  write_dataset(df_stores_test, out_fn=out_test_fn)
 
