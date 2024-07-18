@@ -67,7 +67,7 @@ def preprocess(df: pd.DataFrame, assign_weights=False) -> pd.DataFrame:
 
 def split_dev_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
   # take 2023-05 and 2023-06 as test set
-  query_test = (df["year_month"] == "202305") | (df["year_month"] == "202306")
+  query_test = (df["year_month"] == "202307") | (df["year_month"] == "202308")
 
   df_test = df[query_test]
   df_dev  = df[~query_test]
@@ -87,15 +87,19 @@ def write_dataset(df: pd.DataFrame, out_fn: str, write_metadata=True) -> None:
     metadata_output_path = os.path.join(config.OUTPUT_DATA_DIR, metadata_out_fn)
 
     out = (
-    f"==================================\n"
-    f"{out_fn}\n"
-    "===================================\n\n"
+      "==================================\n"
+      f"{out_fn}\n"
+      "===================================\n\n"
     )
     
     out += f"Num. of Rows   : {df.shape[0]}\n"
-    out += f"Num. of Columns: {df.shape[1]}\n\n"
+    out += f"Num. of Columns: {df.shape[1]}\n"
+    out += f"Min. Period    : {df['year_month'].min()}\n"
+    out += f"Max. Period    : {df['year_month'].max()}\n"
+    out += f"Stores         : {', '.join(df['store_name'].unique())}\n\n"
 
-    out += f"Columns:\n"
+    # add column data
+    out += "Columns:\n"
 
     for col_name in df.columns:
       out += f"\t{col_name}\n"
@@ -106,11 +110,12 @@ def write_dataset(df: pd.DataFrame, out_fn: str, write_metadata=True) -> None:
     "----------------------------------\n"
     )
 
+    # add coicop data
     coicop_counts = df["coicop_level_1"].value_counts()
     coicop_counts = coicop_counts.sort_index()
 
     for coicop_level, counts in coicop_counts.items():
-      out += f"\t{coicop_level}: {counts}\n"
+      out += f"\t{coicop_level}: {counts:<10} {(counts / df.shape[0]):.4f}\n"
 
     with open(metadata_output_path, 'w') as fp:
       fp.write(out)
@@ -131,8 +136,8 @@ if __name__ == "__main__":
   df_stores_dev, df_stores_test = split_dev_test(df_stores)
 
   print("Preprocessing datasets...")
-  df_stores_dev = preprocess(df_stores_dev, assign_weights=True)
-  df_stores_test = preprocess(df_stores)
+  df_stores_dev  = preprocess(df_stores_dev, assign_weights=True)
+  df_stores_test = preprocess(df_stores_test)
 
   print("Saving datasets...")
   out_dev_fn = f"dev_{'_'.join(config.STORES)}.parquet"

@@ -18,7 +18,7 @@ def get_X_y(df: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
 
   return X, y
 
-def eval_pipeline(pipe: Pipeline, X_dev, y_dev, X_test, y_test):
+def eval_pipeline(pipe: Pipeline, X_dev: pd.DataFrame, y_dev: pd.Series, X_test: pd.DataFrame, y_test: pd.Series) -> None:
   pipe.fit(X_dev, y_dev)
 
   y_pred  = pipe.predict(X_test)
@@ -39,8 +39,7 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
-  if type(sample) == float:
-    df_dev = df_dev.sample(frac=0.1, replace=True)
+  df_dev = df_dev.sample(frac=0.1, replace=True)
 
   X_dev, y_dev = get_X_y(df_dev)
   X_test, y_test = get_X_y(df_test)
@@ -48,7 +47,7 @@ if __name__ == "__main__":
   pipe = Pipeline([
     ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
     #("clf", DummyClassifier()),
-    ("clf", SGDClassifier(n_jobs=4, loss="modified_huber")),
+    ("clf", SGDClassifier(n_jobs=4, loss="log_loss")),
   ])
   
   eval_pipeline(pipe, X_dev, y_dev, X_test, y_test)

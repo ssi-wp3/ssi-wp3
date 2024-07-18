@@ -29,7 +29,6 @@ if __name__ == "__main__":
   graph_data = graph_data.fillna(0)
   graph_data = graph_data.transpose() # flip x and y such that year_month is displayed at the bottom
 
-
   sns.heatmap(graph_data, cmap="Blues", robust=True)
 
   out_fn = "stores__inventory_per_month.png"
