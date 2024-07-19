@@ -72,17 +72,6 @@ class HierarchicalClassifier():
 
     return df
 
-#  def __predict(self, X, parent_coicop_label: str):
-#    clf = self.clf_dict.get(parent_coicop_label)
-#
-#    if clf is None:
-#      return parent_coicop_label
-#
-#    y_pred = clf.predict(X)
-#    return self.__predict(X, y_pred)
-
-      
-
   def predict_proba(self, X):
     pass
 
@@ -94,7 +83,6 @@ class HierarchicalClassifier():
     y = df[y_col]
 
     return X, y
-
 
 
 if __name__ == "__main__":
