@@ -67,7 +67,7 @@ def preprocess(df: pd.DataFrame, assign_weights=False) -> pd.DataFrame:
 
 def split_dev_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
   # take 2023-05 and 2023-06 as test set
-  query_test = (df["year_month"] == "202307") | (df["year_month"] == "202308")
+  query_test = (df["year_month"] == "202306") | (df["year_month"] == "202307") | (df["year_month"] == "202308")
 
   df_test = df[query_test]
   df_dev  = df[~query_test]
