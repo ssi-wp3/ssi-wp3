@@ -11,18 +11,6 @@ from sklearn.ensemble import BaggingClassifier
 
 import config
 
-def get_X_y(df: pd.DataFrame, predict_coicop_level: int, coicop_code=None) -> tuple[pd.Series, pd.Series]:
-  X_col = "receipt_text" # text column
-  y_col = f"coicop_level_{predict_coicop_level}"
-
-  if coicop_code is not None and predict_coicop_level > 1:
-    parent_coicop_level = predict_coicop_level - 1
-    df = df[df[f"coicop_level_{parent_coicop_level}"] == coicop_code]
-
-  X = df[X_col]
-  y = df[y_col]
-
-  return X, y
 
 def eval_pipeline(pipe: Pipeline, X_test: pd.DataFrame, y_test: pd.Series, sample_weight=None) -> None:
   #pipe.fit(X_dev, y_dev, clf__sample_weight=sample_weight)
@@ -34,39 +22,80 @@ def eval_pipeline(pipe: Pipeline, X_test: pd.DataFrame, y_test: pd.Series, sampl
   print(balanced_accuracy_score(y_test, y_pred))
   print(classification_report(y_test, y_pred))
 
+class HierarchicalClassifier():
+  def __init__(self, depth=4):
+    self.depth = depth
+    self.root_clf = None
+    self.clf_dict = dict()
 
-def fit_hierarchical(df: pd.DataFrame, predict_coicop_level) -> list[Pipeline]:
-  if not ((1 <= predict_coicop_level) and (predict_coicop_level <= 5)):
-    print("Predict_coicop_level must be between 1 and 5")
-    return
+  def fit(self, df):
+    X_root, y_root = self.get_X_y(df, 1)
 
-  if predict_coicop_level == 1:
-    df_parent_coicop = [("root", df)]
-  else:
-    parent_coicop_level = predict_coicop_level - 1 
-    df_parent_coicop = df.groupby(f"coicop_level_{parent_coicop_level}")
+    self.root_clf = Pipeline([
+      ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
+      ("clf", SGDClassifier(loss="log_loss", n_jobs=6)),
+    ]).fit(X_root, y_root)
 
-  models = []
-  for parent_coicop, df_parent_coicop in df_parent_coicop:
+    for coicop_level in range(2, self.depth + 1):
+      parent_coicop_level = coicop_level - 1
+      parent_coicops = df.groupby(f"coicop_level_{parent_coicop_level}")
 
-    if df_parent_coicop.empty: continue
+      for parent_coicop_label, parent_coicop_df in parent_coicops:
+        X, y = self.get_X_y(parent_coicop_df, coicop_level)
 
-    X_dev, y_dev = get_X_y(df_parent_coicop, predict_coicop_level=predict_coicop_level)
+        if y.nunique() < 2: continue
+        
+        self.clf_dict[parent_coicop_label] = Pipeline([
+          ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
+          ("clf", SGDClassifier(loss="log_loss", n_jobs=6)),
+        ]).fit(X, y)
 
-    if y_dev.nunique() < 2: continue
+  def predict(self, X):
+    y_pred = self.root_clf.predict(X)
+    y_pred = pd.Series(y_pred, name="coicop_label")
 
-    pipe = Pipeline([
-      ("hv", HashingVectorizer(input="content", binary=True, dtype=bool, analyzer="word")),
-      #("clf", SGDClassifier(n_jobs=6, loss="perceptron", penalty="l2")),
-      #("clf", BaggingClassifier(estimator=SGDClassifier, loss="perceptron"), n_jobs=4),
-    ])
+    return self.__predict(X, y_pred)
 
-    pipe.fit(X_dev, y_dev)
+  def __predict(self, X, parent_y_pred):
+    df = pd.concat([X, parent_y_pred], axis=1)
 
-    models.append((parent_coicop, pipe))
+    for coicop_level in range(2, self.depth + 1):
+      y_pred_by_coicop = df.groupby("coicop_label")
+      for coicop_label, df_coicop in y_pred_by_coicop:
+        clf = self.clf_dict.get(coicop_label)
 
-  return models
-    
+        if clf is None: continue
+
+        X_coicop = df_coicop.drop("coicop_label", axis=1)
+
+        df.loc[X_coicop.index, "coicop_label"] = clf.predict(X_coicop)
+
+    return df
+
+#  def __predict(self, X, parent_coicop_label: str):
+#    clf = self.clf_dict.get(parent_coicop_label)
+#
+#    if clf is None:
+#      return parent_coicop_label
+#
+#    y_pred = clf.predict(X)
+#    return self.__predict(X, y_pred)
+
+      
+
+  def predict_proba(self, X):
+    pass
+
+  def get_X_y(self, df: pd.DataFrame, predict_coicop_level: int) -> tuple[pd.Series, pd.Series]:
+    X_col = "receipt_text" # text column
+    y_col = f"coicop_level_{predict_coicop_level}"
+
+    X = df[X_col]
+    y = df[y_col]
+
+    return X, y
+
+
 
 if __name__ == "__main__":
   df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
@@ -78,33 +107,20 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
-  coicop = 1
+  hc = HierarchicalClassifier()
+  hc.fit(df_dev)
 
-#  models = fit_hierarchical(df_dev, coicop)
-#
-#  for parent_coicop, model in models:
-#    X_test, y_test = get_X_y(df_test_1, coicop, parent_coicop)
-#    eval_pipeline(model, X_test, y_test)
-#    X_test, y_test = get_X_y(df_test_2, coicop, parent_coicop)
-#    eval_pipeline(model, X_test, y_test)
-#    X_test, y_test = get_X_y(df_test_3, coicop, parent_coicop)
-#    eval_pipeline(model, X_test, y_test)
-#
-  sample_weight = None
+  coicop = 4
 
-  #df_dev = df_dev.sample(frac=1.0, replace=True)
+  X_dev, y_dev   = hc.get_X_y(df_dev, coicop)
+  X_test, y_test = hc.get_X_y(df_test, coicop)
 
-  X_dev, y_dev = get_X_y(df_dev, coicop)
-  #X_test, y_test = get_X_y(df_test)
+  y_pred = hc.predict(X_dev)
 
-  pipe = Pipeline([
-    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
-    #("clf", SGDClassifier(n_jobs=6, loss="perceptron")),
-    ("clf", BaggingClassifier(estimator=SGDClassifier(loss="log_loss"), n_jobs=6, n_estimators=100, max_samples=0.3)),
-  ])
+  import pdb; pdb.set_trace()
 
-  X_test, y_test = get_X_y(df_test, coicop)
-  pipe.fit(X_dev, y_dev, clf__sample_weight=sample_weight)
+
+
   
   eval_pipeline(pipe, X_test, y_test)
 
