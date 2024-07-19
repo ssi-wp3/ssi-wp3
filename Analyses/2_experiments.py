@@ -51,16 +51,14 @@ class HierarchicalClassifier():
         ]).fit(X, y)
 
   def predict(self, X):
-    y_pred = self.root_clf.predict(X)
-    y_pred = pd.Series(y_pred, name="coicop_label")
+    root_y_pred = self.root_clf.predict(X)
+    root_y_pred = pd.Series(y_pred, name="coicop_label")
 
-    return self.__predict(X, y_pred)
-
-  def __predict(self, X, parent_y_pred):
-    df = pd.concat([X, parent_y_pred], axis=1)
+    df = pd.concat([X, root_y_pred], axis=1)
 
     for coicop_level in range(2, self.depth + 1):
       y_pred_by_coicop = df.groupby("coicop_label")
+
       for coicop_label, df_coicop in y_pred_by_coicop:
         clf = self.clf_dict.get(coicop_label)
 
