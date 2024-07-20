@@ -28,6 +28,10 @@ LOAD_COLUMNS = [
  'month',
 ]
 
+COL_NAME_MAPPING = {
+  "coicop_number": "coicop_level_5"
+}
+
 def preprocess(df: pd.DataFrame, assign_weights=False) -> pd.DataFrame:
   df = df[df["receipt_text"].notna()]
   df = df[df["receipt_text"].str.len() > 2]
@@ -132,6 +136,7 @@ if __name__ == "__main__":
     df_stores.append(df)
 
   df_stores = pd.concat(df_stores)
+  df_stores = df_stores.rename(COL_NAME_MAPPING, axis=1)
 
   df_stores_dev, df_stores_test = split_dev_test(df_stores)
 

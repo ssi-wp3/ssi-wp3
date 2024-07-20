@@ -1,4 +1,5 @@
 import os
+from typing import Any, Self
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
@@ -23,36 +24,44 @@ def eval_pipeline(pipe: Pipeline, X_test: pd.DataFrame, y_test: pd.Series, sampl
   print(classification_report(y_test, y_pred))
 
 class HierarchicalClassifier():
-  def __init__(self, depth=4):
+  def __init__(self, depth):
     self.depth = depth
     self.root_clf = None
     self.clf_dict = dict()
 
-  def fit(self, df):
-    X_root, y_root = self.get_X_y(df, 1)
+  def fit(self, X: pd.DataFrame, y: pd.Series) -> Self:
+    y_root = y["coicop_level_1"]
 
-    self.root_clf = Pipeline([
+    root_clf = Pipeline([
       ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
       ("clf", SGDClassifier(loss="log_loss", n_jobs=6)),
-    ]).fit(X_root, y_root)
+    ])
+    root_clf.fit(X, y_root)
 
-    for coicop_level in range(2, self.depth + 1):
-      parent_coicop_level = coicop_level - 1
-      parent_coicops = df.groupby(f"coicop_level_{parent_coicop_level}")
+    self.root_clf = root_clf
 
-      for parent_coicop_label, parent_coicop_df in parent_coicops:
-        X, y = self.get_X_y(parent_coicop_df, coicop_level)
+    for level in range(2, self.depth + 1):
+      parent_level = level - 1
+      parent_labels = pd.concat([X, y], axis=1).groupby(f"coicop_level_{parent_level}")
 
-        if y.nunique() < 2: continue
+      for parent_label, parent_df in parent_labels:
+        y_level = y[f"coicop_level_{level}"]
+
+        if y_level.nunique() < 2: continue
         
-        self.clf_dict[parent_coicop_label] = Pipeline([
+        clf = Pipeline([
           ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
           ("clf", SGDClassifier(loss="log_loss", n_jobs=6)),
-        ]).fit(X, y)
+        ])
+        clf.fit(X, y_level)
+
+        self.clf_dict[parent_label] = clf
+
+    return self
 
   def predict(self, X):
     root_y_pred = self.root_clf.predict(X)
-    root_y_pred = pd.Series(y_pred, name="coicop_label")
+    root_y_pred = pd.Series(root_y_pred, name="coicop_label")
 
     df = pd.concat([X, root_y_pred], axis=1)
 
@@ -68,19 +77,19 @@ class HierarchicalClassifier():
 
         df.loc[X_coicop.index, "coicop_label"] = clf.predict(X_coicop)
 
-    return df
+    return df["coicop_label"]
 
   def predict_proba(self, X):
     pass
 
-  def get_X_y(self, df: pd.DataFrame, predict_coicop_level: int) -> tuple[pd.Series, pd.Series]:
-    X_col = "receipt_text" # text column
-    y_col = f"coicop_level_{predict_coicop_level}"
+def get_X_y(df: pd.DataFrame, predict_depth: int) -> tuple[pd.DataFrame, pd.Series]:
+  X_col = "receipt_text" # text column
+  y_cols = [f"coicop_level_{predict_level}" for predict_level in range(1, predict_depth+1)]
 
-    X = df[X_col]
-    y = df[y_col]
+  X = df[X_col]
+  y = df[y_cols]
 
-    return X, y
+  return X, y
 
 
 if __name__ == "__main__":
@@ -93,21 +102,16 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
-  hc = HierarchicalClassifier()
-  hc.fit(df_dev)
+  predict_coicop = 5
 
-  coicop = 4
+  X_dev, y_dev = get_X_y(df_dev, predict_coicop)
+  X_test, y_test = get_X_y(df_test, predict_coicop)
 
-  X_dev, y_dev   = hc.get_X_y(df_dev, coicop)
-  X_test, y_test = hc.get_X_y(df_test, coicop)
+  hc = HierarchicalClassifier(depth=predict_coicop)
+  hc.fit(X_dev, y_dev)
 
   y_pred = hc.predict(X_dev)
 
-  import pdb; pdb.set_trace()
-
-
-
-  
-  eval_pipeline(pipe, X_test, y_test)
+  eval_pipeline(hc, X_test, y_test[f"coicop_level_{predict_coicop}"])
 
 
