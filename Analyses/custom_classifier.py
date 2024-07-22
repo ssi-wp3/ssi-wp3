@@ -8,9 +8,8 @@ class HierarchicalClassifier(BaseEstimator, ClassifierMixin):
   def __init__(self, clf, depth: int) -> None:
     # TODO add multi core (n_jobs)
     # TODO add checks whether clf has functions fit and predict
-    # TODO remove the need to identify levels by column name, instead do so by index (iloc)
     # TODO integrate sklearn validation steps 
-    # TODO add function pointer as arg in fit to split the subclasses. This way, fit will still only accept the predict labels
+    # TODO remove the need to identify levels by column name: add function pointer as arg in fit to split the subclasses. This way, fit will still only accept the predict labels
     # TODO propagate through the classification tree by predict_proba
     self.depth = depth
     self.root_clf = clf
