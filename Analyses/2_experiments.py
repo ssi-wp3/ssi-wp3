@@ -10,8 +10,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import BaggingClassifier
 
 import config
-from custom_classifier import HierarchicalClassifier 
-
+from hierarhical.models import HierarchicalClassifier 
+from hierarhical.metrics import hierarchical_precision_score, hierarchical_precision_score, hierarchical_f1_score
 
 def eval_pipeline(pipe: Pipeline, X_test: pd.DataFrame, y_test: pd.Series, sample_weight=None) -> None:
   #pipe.fit(X_dev, y_dev, clf__sample_weight=sample_weight)
@@ -23,15 +23,32 @@ def eval_pipeline(pipe: Pipeline, X_test: pd.DataFrame, y_test: pd.Series, sampl
   print(balanced_accuracy_score(y_test, y_pred))
   print(classification_report(y_test, y_pred))
 
-
-def get_X_y(df: pd.DataFrame, predict_depth: int) -> tuple[pd.Series, pd.Series]:
+def get_X_y(df: pd.DataFrame, predict_level: int) -> tuple[pd.Series, pd.Series]:
   X_col = "receipt_text" # text column
-  y_cols = [f"coicop_level_{predict_level}" for predict_level in range(1, predict_depth+1)]
+  y_col = f"coicop_level_{predict_level}"
 
   X = df[X_col]
-  y = df[y_cols]
+  y = df[y_col]
 
   return X, y
+
+def get_coicop_level_label(y: pd.Series, level: int) -> pd.Series:
+  if not isinstance(y, pd.Series):
+    if isinstance(y, np.ndarray):
+      y = pd.Series(y)
+    elif isinstance(y, pd.DataFrame):
+      print("Pandas DataFrame is given instead of Pandas Series.")
+      exit(1)
+    else:
+      print("Unknown type given.")
+      exit(1)
+     
+  if level > 5:
+    print("Undefined COICOP level!")
+    return
+
+  label_pos_stop = level + 1
+  return y.str.slice(start=0, stop=label_pos_stop)
 
 if __name__ == "__main__":
   df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
@@ -43,18 +60,29 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
-  predict_coicop = 2
+  predict_coicop = 4
 
   X_dev, y_dev = get_X_y(df_dev, predict_coicop)
   X_test, y_test = get_X_y(df_test, predict_coicop)
 
-  pipe = Pipeline([
+#  pipe = Pipeline([
+#    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
+#    ("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
+#  ])
+#
+#  hc = HierarchicalClassifier(pipe, depth=predict_coicop)
+#  hc.fit(X_dev, y_dev, get_coicop_level_label)
+
+  hc = Pipeline([
     ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
     ("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
   ])
 
-  hc = HierarchicalClassifier(pipe, depth=predict_coicop)
   hc.fit(X_dev, y_dev)
+
+  y_pred = hc.predict(X_test)
+
+  hierarchical_precision(y_test, y_pred, get_coicop_level_label, predict_coicop)
 
 #  hc = Pipeline([
 #      ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
@@ -62,6 +90,5 @@ if __name__ == "__main__":
 #  ])
 #  hc.fit(X_dev, y_dev[f"coicop_level_{predict_coicop}"])
 
-  eval_pipeline(hc, X_test, y_test[f"coicop_level_{predict_coicop}"])
-
+  #eval_pipeline(hc, X_test, y_test)
 
