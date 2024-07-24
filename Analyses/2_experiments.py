@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 from sklearn.pipeline import Pipeline
 
 from sklearn.dummy import DummyClassifier
@@ -10,18 +11,22 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import BaggingClassifier
 
 import config
-from hierarhical.models import HierarchicalClassifier 
-from hierarhical.metrics import hierarchical_precision_score, hierarchical_precision_score, hierarchical_f1_score
+from hierarchical.models import HierarchicalClassifier 
+from hierarchical.metrics import hierarchical_precision_score, hierarchical_recall_score, hierarchical_f1_score
 
-def eval_pipeline(pipe: Pipeline, X_test: pd.DataFrame, y_test: pd.Series, sample_weight=None) -> None:
+def eval_pipeline(pipe: Pipeline, X_test: pd.DataFrame, y_test: pd.Series, predict_coicop, sample_weight=None) -> None:
   #pipe.fit(X_dev, y_dev, clf__sample_weight=sample_weight)
 
   y_pred = pipe.predict(X_test)
   #y_proba = pipe.predict_proba(X_test)
 
-  print(accuracy_score(y_test, y_pred))
-  print(balanced_accuracy_score(y_test, y_pred))
-  print(classification_report(y_test, y_pred))
+#  print(accuracy_score(y_test, y_pred))
+#  print(balanced_accuracy_score(y_test, y_pred))
+#  print(classification_report(y_test, y_pred))
+
+  print("hr precision:", hierarchical_precision_score(y_test, y_pred, get_coicop_level_label, predict_coicop))
+  print("hr recall:", hierarchical_recall_score(y_test, y_pred, get_coicop_level_label, predict_coicop))
+  print("hr f1:", hierarchical_f1_score(y_test, y_pred, get_coicop_level_label, predict_coicop))
 
 def get_X_y(df: pd.DataFrame, predict_level: int) -> tuple[pd.Series, pd.Series]:
   X_col = "receipt_text" # text column
@@ -60,29 +65,28 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
-  predict_coicop = 4
+  predict_coicop = 5
 
   X_dev, y_dev = get_X_y(df_dev, predict_coicop)
   X_test, y_test = get_X_y(df_test, predict_coicop)
 
-#  pipe = Pipeline([
-#    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
-#    ("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
-#  ])
-#
-#  hc = HierarchicalClassifier(pipe, depth=predict_coicop)
-#  hc.fit(X_dev, y_dev, get_coicop_level_label)
-
-  hc = Pipeline([
+  pipe = Pipeline([
     ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
     ("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
   ])
 
-  hc.fit(X_dev, y_dev)
+  hc = HierarchicalClassifier(pipe, depth=predict_coicop)
+  hc.fit(X_dev, y_dev, get_coicop_level_label)
 
-  y_pred = hc.predict(X_test)
+#  hc = Pipeline([
+#    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
+#    ("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
+#  ])
 
-  hierarchical_precision(y_test, y_pred, get_coicop_level_label, predict_coicop)
+  #hc.fit(X_dev, y_dev)
+
+  eval_pipeline(hc, X_test, y_test, predict_coicop=predict_coicop)
+
 
 #  hc = Pipeline([
 #      ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
@@ -90,5 +94,4 @@ if __name__ == "__main__":
 #  ])
 #  hc.fit(X_dev, y_dev[f"coicop_level_{predict_coicop}"])
 
-  #eval_pipeline(hc, X_test, y_test)
 

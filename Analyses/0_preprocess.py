@@ -37,14 +37,14 @@ def preprocess(df: pd.DataFrame, assign_weights=False) -> pd.DataFrame:
   df = df[df["receipt_text"].str.len() > 2]
 
   # drop 99999 (ununsed category)
-  df = df[df["coicop_number"] != "999999"] 
+  df = df[df["coicop_level_5"] != "999999"] 
 
   df = df.sort_values("year_month", ascending=False)
 
   # 
   # remove duplicate records based on groupby_cols
   # 
-  groupby_cols = ["ean_name", "receipt_text", "coicop_number"] # group by ean name, receipt text, and coicop
+  groupby_cols = ["ean_name", "receipt_text", "coicop_level_5"] # group by ean name, receipt text, and coicop
 
   assert all(col in df.columns for col in groupby_cols)
 
@@ -72,9 +72,10 @@ def preprocess(df: pd.DataFrame, assign_weights=False) -> pd.DataFrame:
 def split_dev_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
   # take 2023-05 and 2023-06 as test set
   query_test = (df["year_month"] == "202306") | (df["year_month"] == "202307") | (df["year_month"] == "202308")
+  query_dev = df["year_month"] < "202306"
 
   df_test = df[query_test]
-  df_dev  = df[~query_test]
+  df_dev  = df[query_dev]
 
   return df_dev, df_test
 

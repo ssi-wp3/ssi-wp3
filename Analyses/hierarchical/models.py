@@ -49,7 +49,6 @@ class HierarchicalClassifier(BaseEstimator, ClassifierMixin):
     ret = pd.Series(ret, index=X.index)
 
     for _ in range(2, self.depth + 1):
-      # @todo fix this for loop
       y_pred_by_label = ret.groupby(ret) # group by values
 
       for label_name, df_label in y_pred_by_label:
