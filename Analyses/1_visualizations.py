@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 
 import config
 
@@ -10,13 +11,14 @@ if __name__ == "__main__":
   dataset_path = os.path.join(config.OUTPUT_DATA_DIR, dataset_fn)
 
   df_stores = pd.read_parquet(dataset_path)
+  import pdb; pdb.set_trace()
 
   # set up output directory for graphics
   if not os.path.isdir(config.OUTPUT_GRAPHICS_DIR):
     os.mkdir(config.OUTPUT_GRAPHICS_DIR)
 
   #
-  # number of records per month for each supermarket
+  # Number of records per month for each supermarket
   # x-axis: months, y-axis stores
   #
   x_axis_col = "year_month"
@@ -49,5 +51,39 @@ if __name__ == "__main__":
   sns.heatmap(graph_data_bin, cmap="Blues")
 
   out_fn = "stores__inventory_per_month_bin.png"
+  plt.savefig(os.path.join(config.OUTPUT_GRAPHICS_DIR, out_fn))
+
+  #
+  # plot svd
+  #
+
+  from sklearn.feature_extraction.text import HashingVectorizer
+  from sklearn.decomposition import TruncatedSVD
+  import seaborn as sns
+
+  text_col = "receipt_text"
+  #text_col = "ean_name"
+  coicop_level = 5
+
+  hv = HashingVectorizer(input="content", binary=True, norm="l2", analyzer="char", ngram_range=(3, 6), n_features=100_000)
+
+  df_stores_sample = df_stores.drop_duplicates(subset=text_col, keep="first")
+  #df_stores_sample = df_stores_sample[df_stores_sample[f"coicop_level_{coicop_level - 1}"] == "01"]
+  df_stores_sample = df_stores_sample.sample(frac=0.1)
+  df_stores_sample = df_stores_sample.sort_values(by="coicop_number")
+
+  texts = df_stores_sample[text_col]
+  #coicop_labels = df_stores_sample[f"coicop_level_{coicop_level}"]
+  coicop_labels = df_stores_sample[f"coicop_number"]
+
+  text_count_matrix = hv.fit_transform(texts)
+  svd = TruncatedSVD(n_components=2)
+
+  svd.fit(text_count_matrix)
+  text_svd = svd.transform(text_count_matrix)
+
+  plt.clf()
+  out_fn = "receipt_text__dimension_reduced.png"
+  sns.scatterplot(x=text_svd[:, 0], y=text_svd[:, 1], hue=coicop_labels)
   plt.savefig(os.path.join(config.OUTPUT_GRAPHICS_DIR, out_fn))
 

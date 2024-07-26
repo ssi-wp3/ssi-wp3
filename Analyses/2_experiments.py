@@ -1,11 +1,14 @@
 import os
 import pandas as pd
 import numpy as np
+import csv
+from datetime import datetime
+
 from sklearn.pipeline import Pipeline
 
 from sklearn.dummy import DummyClassifier
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, classification_report
-from sklearn.feature_extraction.text import HashingVectorizer
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, f1_score 
+from sklearn.feature_extraction.text import HashingVectorizer, TfidfTransformer
 from sklearn.linear_model import SGDClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import BaggingClassifier
@@ -14,19 +17,46 @@ import config
 from hierarchical.models import HierarchicalClassifier 
 from hierarchical.metrics import hierarchical_precision_score, hierarchical_recall_score, hierarchical_f1_score
 
-def eval_pipeline(pipe: Pipeline, X_test: pd.DataFrame, y_test: pd.Series, predict_coicop, sample_weight=None) -> None:
-  #pipe.fit(X_dev, y_dev, clf__sample_weight=sample_weight)
+
+def eval_pipeline(pipe: Pipeline, X_dev: pd.DataFrame, y_dev: pd.Series, X_test: pd.DataFrame, y_test: pd.Series, predict_level: int, get_upper_level_func: callable, sample_weight=None) -> None:
+  pipe.fit(X_dev, y_dev, clf__sample_weight=sample_weight)
+
+  import pdb; pdb.set_trace()
 
   y_pred = pipe.predict(X_test)
-  #y_proba = pipe.predict_proba(X_test)
+  # y_proba = None
 
-#  print(accuracy_score(y_test, y_pred))
-#  print(balanced_accuracy_score(y_test, y_pred))
-#  print(classification_report(y_test, y_pred))
+  #
+  # write results
+  #
+  out_fn = "results.csv"
 
-  print("hr precision:", hierarchical_precision_score(y_test, y_pred, get_coicop_level_label, predict_coicop))
-  print("hr recall:", hierarchical_recall_score(y_test, y_pred, get_coicop_level_label, predict_coicop))
-  print("hr f1:", hierarchical_f1_score(y_test, y_pred, get_coicop_level_label, predict_coicop))
+  pipeline_name = [str(step) for step in pipe.named_steps.values()]
+  pipeline_name = ', '.join(pipeline_name)
+
+  out = {
+    "pipeline"              : pipeline_name,
+    "datetime"              : datetime.now().strftime("%Y-%m-%d, %H:%M:%S"),
+    "predict_level"         : predict_level,
+    "accuracy"              : accuracy_score(y_test, y_pred),
+    "balanced_accuracy"     : balanced_accuracy_score(y_test, y_pred),
+    "precision"             : precision_score(y_test, y_pred, average="macro"),
+    "recall"                : recall_score(y_test, y_pred, average="macro"),
+    "f1"                    : f1_score(y_test, y_pred, average="macro"),
+    "hierarchical_precision": hierarchical_precision_score(y_test, y_pred, get_upper_level_func, predict_level, average="macro"),
+    "hierarchical_recall"   : hierarchical_recall_score(y_test, y_pred, get_upper_level_func, predict_level, average="macro"),
+    "hierarchical_f1"       : hierarchical_f1_score(y_test, y_pred, get_upper_level_func, predict_level, average="macro"),
+  }
+
+  out_exists = os.path.isfile(out_fn)
+  with open(out_fn, "a+") as fp:
+    writer = csv.DictWriter(fp, delimiter=',', fieldnames=out.keys())
+
+    if not out_exists:
+      writer.writeheader()
+
+    writer.writerow(out)
+    
 
 def get_X_y(df: pd.DataFrame, predict_level: int) -> tuple[pd.Series, pd.Series]:
   X_col = "receipt_text" # text column
@@ -70,23 +100,24 @@ if __name__ == "__main__":
   X_dev, y_dev = get_X_y(df_dev, predict_coicop)
   X_test, y_test = get_X_y(df_test, predict_coicop)
 
-  pipe = Pipeline([
-    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
-    ("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
+#  pipe = Pipeline([
+#    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
+#    #("tfidf", TfidfTransformer()),
+#    #("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
+#    ("clf", SGDClassifier(loss="log_loss", n_jobs=6, alpha=0.00000001)),
+#  ])
+#
+#  hc = HierarchicalClassifier(pipe, depth=predict_coicop)
+#  hc.fit(X_dev, y_dev, get_coicop_level_label)
+
+  hc = Pipeline([
+    ("hv", HashingVectorizer(input="content", binary=False, norm=None, analyzer="char", ngram_range=(3, 6), n_features=150_000)),
+    #("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
+    ("clf", SGDClassifier(loss="log_loss", n_jobs=6, alpha=0.00000001)),
   ])
 
-  hc = HierarchicalClassifier(pipe, depth=predict_coicop)
-  hc.fit(X_dev, y_dev, get_coicop_level_label)
 
-#  hc = Pipeline([
-#    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
-#    ("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
-#  ])
-
-  #hc.fit(X_dev, y_dev)
-
-  eval_pipeline(hc, X_test, y_test, predict_coicop=predict_coicop)
-
+  eval_pipeline(hc, X_dev, y_dev, X_test, y_test, predict_level=predict_coicop, get_upper_level_func=get_coicop_level_label)
 
 #  hc = Pipeline([
 #      ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
