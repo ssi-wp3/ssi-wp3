@@ -19,6 +19,9 @@ class Experiment:
     self.results = None
 
   def eval_pipeline(self, df_dev: pd.DataFrame, df_test: pd.DataFrame, get_X_y: callable, hierarchical_split_func: callable = None) -> None:
+    df_dev = df_dev[df_dev["store_name"].isin(self.stores_in_dev)]
+    df_test = df_test[df_test["store_name"].isin(self.stores_in_test)]
+
     X_dev, y_dev = get_X_y(df_dev, self.predict_level)
     X_test, y_test = get_X_y(df_test, self.predict_level)
 
