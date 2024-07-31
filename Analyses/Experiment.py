@@ -41,9 +41,9 @@ class Experiment:
       "predict_level"         : self.predict_level,
       "accuracy"              : accuracy_score(y_test, y_pred),
       "balanced_accuracy"     : balanced_accuracy_score(y_test, y_pred),
-      "precision"             : precision_score(y_test, y_pred, average="macro"),
-      "recall"                : recall_score(y_test, y_pred, average="macro"),
-      "f1"                    : f1_score(y_test, y_pred, average="macro"),
+      "precision"             : precision_score(y_test, y_pred, average="macro", zero_division=1),
+      "recall"                : recall_score(y_test, y_pred, average="macro", zero_division=1),
+      "f1"                    : f1_score(y_test, y_pred, average="macro", zero_division=1),
     }
 
     if hierarchical_split_func is not None:

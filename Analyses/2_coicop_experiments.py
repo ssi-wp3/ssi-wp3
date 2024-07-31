@@ -21,7 +21,7 @@ def get_X_y(df: pd.DataFrame, predict_level: int) -> tuple[pd.Series, pd.Series]
 
   return X, y
 
-def get_coicop_level_label(y: pd.Series, level: int) -> pd.Series:
+def get_coicop_level_label(y: pd.Series, level: int) -> np.ndarray:
   if not isinstance(y, pd.Series):
     if isinstance(y, np.ndarray):
       y = pd.Series(y)
@@ -37,7 +37,9 @@ def get_coicop_level_label(y: pd.Series, level: int) -> pd.Series:
     return
 
   label_pos_stop = level + 1
-  return y.str.slice(start=0, stop=label_pos_stop)
+  ret = y.str.slice(start=0, stop=label_pos_stop) # @todo do this in numpy only
+  ret = ret.to_numpy()
+  return ret
 
 if __name__ == "__main__":
   df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
@@ -49,37 +51,13 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
-  for exp in experiments:
+  results_fn = "results.csv"
+
+  while len(experiments) > 0:
+    exp = experiments.pop(0)
+
     exp.eval_pipeline(df_dev, df_test, get_X_y, hierarchical_split_func=get_coicop_level_label)
-    exp.write_results(out_fn="results.csv")
+    exp.write_results(out_fn=results_fn)
 
   exit(0)
-
-
-#  pipe = Pipeline([
-#    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
-#    #("tfidf", TfidfTransformer()),
-#    #("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
-#    ("clf", SGDClassifier(loss="log_loss", n_jobs=6, alpha=0.00000001)),
-#  ])
-#
-#  hc = HierarchicalClassifier(pipe, depth=predict_coicop)
-#  hc.fit(X_dev, y_dev, get_coicop_level_label)
-
-  hc = Pipeline([
-    #("hv", HashingVectorizer(input="content", binary=False, norm=None, analyzer="char", ngram_range=(3, 6), n_features=150_000)),
-    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
-    ("clf", SGDClassifier(loss="perceptron", n_jobs=8, random_state=config.SEED)),
-    #("clf", SGDClassifier(loss="log_loss", n_jobs=6, alpha=0.00000001)),
-  ])
-
-
-  eval_pipeline(hc, df_dev, df_test, predict_level=predict_coicop, get_upper_level_func=get_coicop_level_label)
-
-#  hc = Pipeline([
-#      ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
-#      ("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
-#  ])
-#  hc.fit(X_dev, y_dev[f"coicop_level_{predict_coicop}"])
-
 
