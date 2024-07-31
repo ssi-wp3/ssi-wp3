@@ -18,10 +18,11 @@ from hierarchical.models import HierarchicalClassifier
 from hierarchical.metrics import hierarchical_precision_score, hierarchical_recall_score, hierarchical_f1_score
 
 
-def eval_pipeline(pipe: Pipeline, X_dev: pd.DataFrame, y_dev: pd.Series, X_test: pd.DataFrame, y_test: pd.Series, predict_level: int, get_upper_level_func: callable, sample_weight=None) -> None:
-  pipe.fit(X_dev, y_dev, clf__sample_weight=sample_weight)
+def eval_pipeline(pipe: Pipeline, df_dev: pd.DataFrame, df_test: pd.DataFrame, predict_level: int, get_upper_level_func: callable, sample_weight=None) -> None:
+  X_dev, y_dev = get_X_y(df_dev, predict_coicop)
+  X_test, y_test = get_X_y(df_test, predict_coicop)
 
-  import pdb; pdb.set_trace()
+  pipe.fit(X_dev, y_dev, clf__sample_weight=sample_weight)
 
   y_pred = pipe.predict(X_test)
   # y_proba = None
@@ -34,9 +35,17 @@ def eval_pipeline(pipe: Pipeline, X_dev: pd.DataFrame, y_dev: pd.Series, X_test:
   pipeline_name = [str(step) for step in pipe.named_steps.values()]
   pipeline_name = ', '.join(pipeline_name)
 
+  stores_in_dev = df_dev["store_name"].unique()
+  stores_in_dev = ', '.join(stores_in_dev)
+
+  stores_in_test = df_test["store_name"].unique()
+  stores_in_test = ', '.join(stores_in_test)
+
   out = {
     "pipeline"              : pipeline_name,
     "datetime"              : datetime.now().strftime("%Y-%m-%d, %H:%M:%S"),
+    "stores_in_dev"         : stores_in_dev,
+    "stores_in_test"        : stores_in_test,
     "predict_level"         : predict_level,
     "accuracy"              : accuracy_score(y_test, y_pred),
     "balanced_accuracy"     : balanced_accuracy_score(y_test, y_pred),
@@ -95,10 +104,12 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
+  # filter stores
+  df_dev = df_dev[df_dev["store_name"] == "ah"]
+  df_test = df_test[df_test["store_name"] == "ah"]
+
   predict_coicop = 5
 
-  X_dev, y_dev = get_X_y(df_dev, predict_coicop)
-  X_test, y_test = get_X_y(df_test, predict_coicop)
 
 #  pipe = Pipeline([
 #    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
@@ -111,13 +122,14 @@ if __name__ == "__main__":
 #  hc.fit(X_dev, y_dev, get_coicop_level_label)
 
   hc = Pipeline([
-    ("hv", HashingVectorizer(input="content", binary=False, norm=None, analyzer="char", ngram_range=(3, 6), n_features=150_000)),
-    #("clf", SGDClassifier(loss="perceptron", n_jobs=6)),
-    ("clf", SGDClassifier(loss="log_loss", n_jobs=6, alpha=0.00000001)),
+    #("hv", HashingVectorizer(input="content", binary=False, norm=None, analyzer="char", ngram_range=(3, 6), n_features=150_000)),
+    ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),
+    ("clf", SGDClassifier(loss="perceptron", n_jobs=8, random_state=config.SEED)),
+    #("clf", SGDClassifier(loss="log_loss", n_jobs=6, alpha=0.00000001)),
   ])
 
 
-  eval_pipeline(hc, X_dev, y_dev, X_test, y_test, predict_level=predict_coicop, get_upper_level_func=get_coicop_level_label)
+  eval_pipeline(hc, df_dev, df_test, predict_level=predict_coicop, get_upper_level_func=get_coicop_level_label)
 
 #  hc = Pipeline([
 #      ("hv", HashingVectorizer(input="content", binary=True, dtype=bool)),

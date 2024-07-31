@@ -6,3 +6,5 @@ SOURCE_DATA_DIR = os.path.join('/', "netappdata", "ssi_tdjg", "data", "ssi", "pr
 OUTPUT_DATA_DIR = os.path.join('.', "data")
 OUTPUT_GRAPHICS_DIR = os.path.join('.', "graphics")
 
+SEED = 42
+
