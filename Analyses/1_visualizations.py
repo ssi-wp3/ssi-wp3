@@ -11,7 +11,6 @@ if __name__ == "__main__":
   dataset_path = os.path.join(config.OUTPUT_DATA_DIR, dataset_fn)
 
   df_stores = pd.read_parquet(dataset_path)
-  import pdb; pdb.set_trace()
 
   # set up output directory for graphics
   if not os.path.isdir(config.OUTPUT_GRAPHICS_DIR):

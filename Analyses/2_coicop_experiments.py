@@ -42,16 +42,23 @@ def get_coicop_level_label(y: pd.Series, level: int) -> np.ndarray:
   return ret
 
 if __name__ == "__main__":
-  df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
-  df_test_fn = "test_lidl_ah_jumbo_plus.parquet"
+  if config.SAMPLE_N is not None:
+    df_dev_fn  = "sample_dev_lidl_ah_jumbo_plus.parquet"
+    df_test_fn = "sample_test_lidl_ah_jumbo_plus.parquet"
+
+    results_fn = "sample_results.csv"
+
+  else:
+    df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
+    df_test_fn = "test_lidl_ah_jumbo_plus.parquet"
+
+    results_fn = "results.csv"
 
   df_dev_path  = os.path.join(config.OUTPUT_DATA_DIR, df_dev_fn)
   df_test_path = os.path.join(config.OUTPUT_DATA_DIR, df_test_fn)
 
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
-
-  results_fn = "results.csv"
 
   while len(experiments) > 0:
     exp = experiments.pop(0)

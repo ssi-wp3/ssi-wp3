@@ -11,6 +11,7 @@ import config
 # 'coicop_name', 'coicop_number', 'coicop_level_1', 'coicop_level_2', 'coicop_level_3', 'coicop_level_4', 'store_name',
 # 'receipt_text'
 
+
 LOAD_COLUMNS = [
  'ean_name',
  'product_id',
@@ -38,6 +39,9 @@ def preprocess(df: pd.DataFrame, assign_weights=False) -> pd.DataFrame:
 
   # drop 99999 (ununsed category)
   df = df[df["coicop_level_5"] != "999999"] 
+
+  # merge ah_franchise (i.e. ah-to-go) which ah
+  df["store_name"] = df["store_name"].replace(to_replace={"ah_franchise": "ah"})
 
   df = df.sort_values("year_month", ascending=False)
 
@@ -122,9 +126,31 @@ def write_dataset(df: pd.DataFrame, out_fn: str, write_metadata=True) -> None:
     for coicop_level, counts in coicop_counts.items():
       out += f"\t{coicop_level}: {counts:<10} {(counts / df.shape[0]):.4f}\n"
 
+    out += (
+    "\n----------------------------------\n"
+    "Rows per Store\n"
+    "----------------------------------\n"
+    )
+
+    # add coicop data
+    store_counts = df["store_name"].value_counts()
+    store_counts = store_counts.sort_index()
+
+    for store_name, counts in store_counts.items():
+      out += f"\t{store_name:<15}: {counts:<10} {(counts / df.shape[0]):.4f}\n"
+
     with open(metadata_output_path, 'w') as fp:
       fp.write(out)
       
+def stratified_sample(df: pd.DataFrame, stratify_col_name: str , n: int = None, frac: float = None, replace=False, **args):
+  if n is None and frac is None:
+    print("Either n or frac must be not None!")
+    return
+
+  ret = df.groupby(by=stratify_col_name)
+  ret = ret.sample(n=n, frac=frac, replace=replace, **args)
+  return ret
+
 if __name__ == "__main__":
   df_stores = [] # all stores
 
@@ -142,13 +168,21 @@ if __name__ == "__main__":
   df_stores_dev, df_stores_test = split_dev_test(df_stores)
 
   print("Preprocessing datasets...")
-  df_stores_dev  = preprocess(df_stores_dev, assign_weights=True)
+  df_stores_dev  = preprocess(df_stores_dev)
   df_stores_test = preprocess(df_stores_test)
+
+  if config.SAMPLE_N is not None:
+    df_stores_dev = stratified_sample(df_stores_dev, "store_name", n=config.SAMPLE_N, replace=True, random_state=config.SEED)
+    df_stores_test = stratified_sample(df_stores_test, "store_name", n=config.SAMPLE_N, replace=True, random_state=config.SEED)
 
   print("Saving datasets...")
   out_dev_fn = f"dev_{'_'.join(config.STORES)}.parquet"
-  write_dataset(df_stores_dev, out_fn=out_dev_fn)
-
   out_test_fn = f"test_{'_'.join(config.STORES)}.parquet"
+
+  if config.SAMPLE_N is not None:
+    out_dev_fn = f"sample_{out_dev_fn}"
+    out_test_fn = f"sample_{out_test_fn}"
+
+  write_dataset(df_stores_dev, out_fn=out_dev_fn)
   write_dataset(df_stores_test, out_fn=out_test_fn)
 
