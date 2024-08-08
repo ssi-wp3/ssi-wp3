@@ -1,29 +1,33 @@
 import os
-import pandas as pd
+from itertools import permutations
+
 import numpy as np
-
-
+import pandas as pd
+from sklearn.base import clone
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
-from Experiment import Experiment
+from sklearn.model_selection import ParameterGrid
 
+# local imports
 import config
+from MLExperiment import MLExperiment
+import experiment_parameters as exp_params
 
 class CoicopExperiment:
-  def __init__(self, pipeline: Pipeline, predict_level: int, sample_weight: str, stores_in_dev: list[str], stores_in_test: list[str]):
-    self.experiment = Experiment(pipeline, predict_level, sample_weight)
+  def __init__(self, experiment: MLExperiment, stores_in_dev: list[str], stores_in_test: list[str]):
+    self.experiment = experiment
     self.stores_in_dev = stores_in_dev
     self.stores_in_test = stores_in_test
 
   def eval_pipeline(self, df_dev: pd.DataFrame, df_test: pd.DataFrame):
-    df_dev  = df_dev["store_name"].isin(self.stores_in_dev)
-    df_test = df_test["store_name"].isin(self.stores_in_test)
+    df_dev  = df_dev[df_dev["store_name"].isin(self.stores_in_dev)]
+    df_test = df_test[df_test["store_name"].isin(self.stores_in_test)]
 
-    X_dev, y_dev = _get_X_y(df_dev, exp.predict_level)
-    X_test, y_test = _get_X_y(df_test, exp.predict_level)
+    X_dev, y_dev = _get_X_y(df_dev, self.experiment.predict_level)
+    X_test, y_test = _get_X_y(df_test, self.experiment.predict_level)
     
-    self.experiment.eval_pipeline(X_dev, y_dev, X_test, y_test, hierarchical_split_func=get_coicop_level_label)
+    self.experiment.eval_pipeline(X_dev, y_dev, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
     
     stores_in_data = {
       "stores_in_dev" : ', '.join(self.stores_in_dev),
@@ -64,6 +68,33 @@ def _get_coicop_level_label(y: pd.Series, level: int) -> np.ndarray:
   ret = ret.to_numpy()
   return ret
 
+def make_coicop_experiments(estimator, param_grid: dict, predict_level: int, sample_weight: str) -> list[CoicopExperiment]:
+  ret = []
+
+  param_combinations = ParameterGrid(param_grid)
+  estimator_ = clone(estimator)
+
+  for params in param_combinations:
+    estimator_.set_params(**params)
+    base_experiment = MLExperiment(estimator_, predict_level, sample_weight)
+
+    # dev: store 1, test: store 2
+    for store_1, store_2 in permutations(config.STORES, 2):
+      exp = CoicopExperiment(base_experiment, stores_in_dev=[store_1], stores_in_test=[store_2])
+      ret.append(exp)
+
+    # dev: all stores, test: all stores
+    ret.append(CoicopExperiment(base_experiment, stores_in_dev=config.STORES, stores_in_test=config.STORES))
+
+    # dev: (all stores) - store, test: store 
+    for store in config.STORES:
+      other_stores = config.STORES.copy()
+      other_stores.remove(store)
+
+      ret.append(CoicopExperiment(base_experiment, stores_in_dev=other_stores, stores_in_test=[store]))
+
+  return ret
+
 if __name__ == "__main__":
   if config.SAMPLE_N is not None:
     df_dev_fn  = "sample_dev_lidl_ah_jumbo_plus.parquet"
@@ -75,21 +106,12 @@ if __name__ == "__main__":
     df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
     df_test_fn = "test_lidl_ah_jumbo_plus.parquet"
 
-    results_fn = "results.csv"
+    results_fn = "1_results.csv"
 
   base_pipeline = Pipeline([
     ("hv", HashingVectorizer(input="content", binary=True)),
     ("clf", SGDClassifier(n_jobs=8, random_state=config.SEED))]
   )
-
-  import hyperparameters
-
-  for (_, step) in base_pipeline.steps:
-    step_class = step.__class__
-
-    step_hp = hyperparameters.clf_hyperparameters[step_class]
-
-  import pdb; pdb.set_trace()
 
   df_dev_path  = os.path.join(config.OUTPUT_DATA_DIR, df_dev_fn)
   df_test_path = os.path.join(config.OUTPUT_DATA_DIR, df_test_fn)
@@ -97,11 +119,19 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
+  experiments = make_coicop_experiments(
+    exp_params.estimator,
+    exp_params.param_grid,
+    exp_params.predict_level,
+    exp_params.sample_weight,
+  )
+
   while len(experiments) > 0:
     exp = experiments.pop(0)
 
     exp.eval_pipeline(df_dev, df_test)
     exp.write_results(out_fn=results_fn)
+    exit()
 
   exit(0)
 

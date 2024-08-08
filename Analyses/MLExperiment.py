@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_s
 
 from hierarchical.metrics import hierarchical_precision_score, hierarchical_recall_score, hierarchical_f1_score
 
-class Experiment:
+class MLExperiment:
   def __init__(self, pipeline: Pipeline, predict_level: int, sample_weight: str):
     self.pipeline = pipeline 
     self.predict_level = predict_level
@@ -35,13 +35,13 @@ class Experiment:
       "f1"                    : f1_score(y_test, y_pred, average="macro", zero_division=1),
     }
 
-    if hasattr(self.pipeline, "predict_proba"):
-      y_proba = self.pipeline.predict_proba(X_test)
-
-      proba_metrics = {
-        "roc_auc": roc_auc_score(y_true, y_proba, multiclass="ovo", average="macro")
-      }
-      self.results.update(proba_metrics)
+#    if hasattr(self.pipeline, "predict_proba"):
+#      y_proba = self.pipeline.predict_proba(X_test)
+#
+#      proba_metrics = {
+#        "roc_auc": roc_auc_score(y_test, y_proba, multi_class="ovo", average="macro")
+#      }
+#      self.results.update(proba_metrics)
 
     if hierarchical_split_func is not None:
       hierarchical_scores = {
