@@ -68,30 +68,32 @@ def _get_coicop_level_label(y: pd.Series, level: int) -> np.ndarray:
   ret = ret.to_numpy()
   return ret
 
-def make_coicop_experiments(estimator, param_grid: dict, predict_level: int, sample_weight: str) -> list[CoicopExperiment]:
+def make_coicop_experiments(estimator, param_grid: dict, predict_level: int, sample_weight_col_name: str) -> list[CoicopExperiment]:
   ret = []
 
   param_combinations = ParameterGrid(param_grid)
-  estimator_ = clone(estimator)
 
   for params in param_combinations:
+    estimator_ = clone(estimator)
     estimator_.set_params(**params)
-    base_experiment = MLExperiment(estimator_, predict_level, sample_weight)
+    base_experiment = MLExperiment(estimator_, predict_level, sample_weight_col_name)
 
     # dev: store 1, test: store 2
     for store_1, store_2 in permutations(config.STORES, 2):
-      exp = CoicopExperiment(base_experiment, stores_in_dev=[store_1], stores_in_test=[store_2])
-      ret.append(exp)
+      exp_one_on_one = CoicopExperiment(base_experiment, stores_in_dev=[store_1], stores_in_test=[store_2])
+      ret.append(exp_one_on_one)
 
     # dev: all stores, test: all stores
-    ret.append(CoicopExperiment(base_experiment, stores_in_dev=config.STORES, stores_in_test=config.STORES))
+    exp_all_on_all = CoicopExperiment(base_experiment, stores_in_dev=config.STORES, stores_in_test=config.STORES)
+    ret.append(exp_all_on_all)
 
     # dev: (all stores) - store, test: store 
     for store in config.STORES:
       other_stores = config.STORES.copy()
       other_stores.remove(store)
 
-      ret.append(CoicopExperiment(base_experiment, stores_in_dev=other_stores, stores_in_test=[store]))
+      exp_rest_on_one = CoicopExperiment(base_experiment, stores_in_dev=other_stores, stores_in_test=[store])
+      ret.append(exp_rest_on_one)
 
   return ret
 
@@ -123,7 +125,7 @@ if __name__ == "__main__":
     exp_params.estimator,
     exp_params.param_grid,
     exp_params.predict_level,
-    exp_params.sample_weight,
+    exp_params.sample_weight_col_name,
   )
 
   while len(experiments) > 0:
