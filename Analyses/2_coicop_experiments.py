@@ -98,17 +98,10 @@ def make_coicop_experiments(pipeline, param_grid: dict, predict_level: int, samp
   return ret
 
 if __name__ == "__main__":
-  if config.SAMPLE_N is not None:
-    df_dev_fn  = "sample_dev_lidl_ah_jumbo_plus.parquet"
-    df_test_fn = "sample_test_lidl_ah_jumbo_plus.parquet"
+  df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
+  df_test_fn = "test_lidl_ah_jumbo_plus.parquet"
 
-    results_fn = "sample_results.csv"
-
-  else:
-    df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
-    df_test_fn = "test_lidl_ah_jumbo_plus.parquet"
-
-    results_fn = "1_results.csv"
+  results_fn = "results.csv"
 
   base_pipeline = Pipeline([
     ("hv", HashingVectorizer(input="content", binary=True)),
@@ -121,15 +114,15 @@ if __name__ == "__main__":
   df_dev  = pd.read_parquet(df_dev_path)
   df_test = pd.read_parquet(df_test_path)
 
-  experiments = make_coicop_experiments(
+  coicop_experiments = make_coicop_experiments(
     exp_params.pipeline,
     exp_params.param_grid,
     exp_params.predict_level,
     exp_params.sample_weight_col_name,
   )
 
-  while len(experiments) > 0:
-    exp = experiments.pop(0)
+  while len(coicop_experiments) > 0:
+    exp = coicop_experiments.pop(0)
 
     exp.eval_pipeline(df_dev, df_test)
     exp.write_results(out_fn=results_fn)

@@ -171,9 +171,8 @@ if __name__ == "__main__":
   df_stores_dev  = preprocess(df_stores_dev)
   df_stores_test = preprocess(df_stores_test)
 
-  if config.SAMPLE_N is not None:
-    df_stores_dev = stratified_sample(df_stores_dev, "store_name", n=config.SAMPLE_N, replace=True, random_state=config.SEED)
-    df_stores_test = stratified_sample(df_stores_test, "store_name", n=config.SAMPLE_N, replace=True, random_state=config.SEED)
+  # df_stores_dev = stratified_sample(df_stores_dev, "store_name", n=config.SAMPLE_N, replace=True, random_state=config.SEED)
+  # df_stores_test = stratified_sample(df_stores_test, "store_name", n=config.SAMPLE_N, replace=True, random_state=config.SEED)
 
   print("Saving datasets...")
   out_dev_fn = f"dev_{'_'.join(config.STORES)}.parquet"
@@ -185,4 +184,3 @@ if __name__ == "__main__":
 
   write_dataset(df_stores_dev, out_fn=out_dev_fn)
   write_dataset(df_stores_test, out_fn=out_test_fn)
-
