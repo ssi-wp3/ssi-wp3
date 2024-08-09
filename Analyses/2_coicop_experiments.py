@@ -68,15 +68,15 @@ def _get_coicop_level_label(y: pd.Series, level: int) -> np.ndarray:
   ret = ret.to_numpy()
   return ret
 
-def make_coicop_experiments(estimator, param_grid: dict, predict_level: int, sample_weight_col_name: str) -> list[CoicopExperiment]:
+def make_coicop_experiments(pipeline, param_grid: dict, predict_level: int, sample_weight_col_name: str) -> list[CoicopExperiment]:
   ret = []
 
   param_combinations = ParameterGrid(param_grid)
 
   for params in param_combinations:
-    estimator_ = clone(estimator)
-    estimator_.set_params(**params)
-    base_experiment = MLExperiment(estimator_, predict_level, sample_weight_col_name)
+    pipeline_ = clone(pipeline)
+    pipeline_.set_params(**params)
+    base_experiment = MLExperiment(pipeline_, predict_level, sample_weight_col_name)
 
     # dev: store 1, test: store 2
     for store_1, store_2 in permutations(config.STORES, 2):
@@ -122,7 +122,7 @@ if __name__ == "__main__":
   df_test = pd.read_parquet(df_test_path)
 
   experiments = make_coicop_experiments(
-    exp_params.estimator,
+    exp_params.pipeline,
     exp_params.param_grid,
     exp_params.predict_level,
     exp_params.sample_weight_col_name,
@@ -133,7 +133,4 @@ if __name__ == "__main__":
 
     exp.eval_pipeline(df_dev, df_test)
     exp.write_results(out_fn=results_fn)
-    exit()
-
-  exit(0)
 
