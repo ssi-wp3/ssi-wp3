@@ -233,7 +233,8 @@ class FeatureExtractorFactory:
                     f"Encoding batch {i // batch_size} out of {math.ceil(len(dataframe) / batch_size)} for {feature_extractor_type}")
 
             batch_df = dataframe.iloc[i:i+batch_size].copy()
-            vectors = feature_extractor.fit_transform(batch_df[source_column])
+            vectors = feature_extractor.fit_transform(
+                batch_df[source_column].fillna(''))
 
             batch_df[destination_column] = list(
                 vectors.toarray()) if issparse(vectors) else list(vectors)
