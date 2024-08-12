@@ -115,6 +115,7 @@ class HuggingFaceFeatureExtractor:
         """
         self.__model = model_name
         self.__device = device
+        self.__embedding_model = None
 
     @property
     def model(self):
@@ -123,6 +124,13 @@ class HuggingFaceFeatureExtractor:
     @property
     def device(self):
         return self.__device
+
+    @property
+    def embedding_model(self):
+        if not self.__embedding_model:
+            self.__embedding_model = SentenceTransformer(self.model)
+            self.__embedding_model.to(self.device)
+        return self.__embedding_model
 
     def fit(self, X, y, **fit_params):
         pass
@@ -140,9 +148,7 @@ class HuggingFaceFeatureExtractor:
         List[np.array[float]]
             A list of lists containing the feature vectors for each input string.
         """
-        embedding_model = SentenceTransformer(self.model)
-        embedding_model.to(self.device)
-        embedding = embedding_model.encode(
+        embedding = self.embedding_model.encode(
             X.values.tolist(), convert_to_tensor=True, batch_size=len(X))
         return embedding.cpu().detach().numpy()
 
