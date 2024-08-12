@@ -142,6 +142,9 @@ class HuggingFaceFeatureExtractor:
         """
         embedding_model = SentenceTransformer(self.model)
         embedding_model.to(self.device)
+        print(
+            "X", X
+        )
         embedding = embedding_model.encode(
             X.values.tolist(), convert_to_tensor=True, batch_size=len(X))
         return embedding.cpu().detach().numpy()
