@@ -2,8 +2,7 @@ from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile,  create_co
 from typing import Any, Dict, List
 from enum import Enum
 from abc import ABC, abstractmethod
-from transformers import AutoModelForSequenceClassification
-from datasets import Dataset
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, TextClassificationPipeline
 import joblib
 
 
@@ -53,22 +52,18 @@ class HuggingFacePipeline(Pipeline):
         self.model = None
 
     def load(self, pipeline_path: str):
-        self.model = AutoModelForSequenceClassification.from_pretrained(
+        # TODO check whether COICOP labels are loaded when we save them in the training script
+        tokenizer = AutoTokenizer.from_pretrained(pipeline_path)
+        classification_model = AutoModelForSequenceClassification.from_pretrained(
             pipeline_path)
+        self.model = TextClassificationPipeline(
+            model=classification_model, tokenizer=tokenizer, top_k=None)
 
     def predict(self, inputs: List[str]) -> List[str]:
-        return self.model.predict(inputs)["label"]
+        return self.model(inputs, return_all_scores=False)
 
     def predict_proba(self, inputs: List[str]) -> List[Dict[str, Any]]:
-        predictions = self.model.predict_proba(inputs)
-        prediction_labels = []
-        for prediction in predictions:
-            label_predictions = dict()
-            for index, probability in enumerate(prediction):
-                label = self.model.classes_[index]
-                label_predictions[label] = probability
-            prediction_labels.append(label_predictions)
-        return prediction_labels
+        return self.model(inputs, return_all_scores=True)
 
 
 class PipelineFactory:
