@@ -149,7 +149,6 @@ if not os.path.exists(final_result_directory):
 # Save tokenizer too
 tokenizer.save_pretrained(final_result_directory)
 
-# trainer.save_metrics(os.path.join(final_result_directory, "metrics.json"))
 trainer.save_model(final_result_directory)
 trainer.save_state()
 
