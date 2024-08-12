@@ -24,5 +24,5 @@ batch_size=${batch_size:-96}
 
 for label_column in coicop_level_1 coicop_level_2 coicop_level_3 coicop_level_4 coicop_number
 do
-    python ssi/train_embedding.py -o $output_dir -m $model -e $epochs -b $batch_size -lc $label_column
+    python -m ssi.train_embedding -o $output_dir -m $model -e $epochs -b $batch_size -lc $label_column
 done

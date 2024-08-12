@@ -1,5 +1,4 @@
 # %%
-from .constants import Constants
 from transformers import Trainer
 from transformers import TrainingArguments
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, AutoConfig
@@ -9,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 from typing import Tuple
 from machine_learning.evaluate import plot_confusion_matrix
+from .constants import Constants
 import pandas as pd
 import numpy as np
 import evaluate
