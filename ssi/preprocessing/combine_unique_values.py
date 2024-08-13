@@ -10,8 +10,10 @@ import tqdm
 def combine_unique_column_values(filenames: List[str],
                                  output_filename: str,
                                  key_columns: List[str],
+                                 receipt_text_column: str,
                                  parquet_engine: str = "pyarrow",
-                                 batch_size: int = 1024
+                                 batch_size: int = 1024,
+                                 drop_empty_receipts: bool = True
                                  ):
     """ Combine unique column values from multiple files into a single file.
     """
@@ -22,6 +24,9 @@ def combine_unique_column_values(filenames: List[str],
             filename, columns=key_columns, engine=parquet_engine)
         df["file_index"] = file_index
         df = df.drop_duplicates(subset=key_columns)
+        if drop_empty_receipts:
+            df = df[df[receipt_text_column] != '']
+
         df.index.name = "row_index"
         df = df.reset_index()
         unique_column_values.append(df)
