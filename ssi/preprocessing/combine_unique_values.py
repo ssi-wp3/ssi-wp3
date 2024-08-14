@@ -34,8 +34,6 @@ def combine_unique_column_values(filenames: List[str],
     # Drop the duplicates in the combined DataFrame
     combined_df = pd.concat(unique_column_values)
     combined_df = combined_df.drop_duplicates(subset=key_columns)
-    print(combined_df["file_index"].value_counts())
-    print(combined_df.head(10))
 
     print("Number of unique values for all files:", len(combined_df))
 
@@ -60,7 +58,6 @@ def combine_unique_column_values(filenames: List[str],
                                             (row_indices < number_file_rows_read + len(batch_df))]
                 batch_indices = batch_indices - number_file_rows_read
 
-                print(batch_indices)
                 # Retrieve the rows in the range of this batch
                 batch_rows = batch_df.loc[batch_indices]
 
@@ -90,7 +87,7 @@ def combine_unique_column_values(filenames: List[str],
                 if pq_writer:
                     batch_table = batch_table.cast(pq_writer.schema)
 
-                if total_number_of_rows_written == 0:
+                if total_number_of_rows_read == 0:
                     pq_writer = pq.ParquetWriter(
                         output_filename, batch_table.schema, write_batch_size=batch_size)
 
