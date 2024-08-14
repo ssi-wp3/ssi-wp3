@@ -1,5 +1,5 @@
 # %%
-from .constants import Constants
+from constants import Constants
 from transformers import Trainer
 from transformers import TrainingArguments
 from transformers import AutoModelForSequenceClassification
