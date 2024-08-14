@@ -79,6 +79,7 @@ def combine_unique_column_values(filenames: List[str],
 
                 if len(batch_rows) == 0:
                     progress_bar.set_description("Batch with empty rows")
+                    progress_bar.update(len(batch))
                     continue
 
                 progress_bar.set_description(
