@@ -25,7 +25,10 @@ def combine_unique_column_values(filenames: List[str],
         df["file_index"] = file_index
         df = df.drop_duplicates(subset=key_columns)
         if drop_empty_receipts:
+            before = len(df)
             df = df[df[receipt_text_column] != '']
+            print(f"Removed {before - len(df)} empty receipts from {filename}")
+
             # df = df[~df[list(key_columns)].isnull().all(axis=1)]
 
         df.index.name = "row_index"
