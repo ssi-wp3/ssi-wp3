@@ -78,6 +78,8 @@ def combine_unique_column_values(filenames: List[str],
                 if len(batch_rows) == 0:
                     progress_bar.set_description("Skipping empty batch")
                     progress_bar.update(len(batch))
+                    number_file_rows_read += len(batch_df)
+                    total_number_of_rows_read += len(batch)
                     continue
 
                 progress_bar.set_description(
