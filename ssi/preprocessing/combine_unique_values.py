@@ -73,6 +73,9 @@ def combine_unique_column_values(filenames: List[str],
                     batch_rows = batch_rows.drop(
                         columns=["isba_description"])
 
+                # Hack to get string values for all empty cells
+                batch_rows = batch_rows.fillna("")
+
                 progress_bar.set_description(
                     f"Wrote {len(batch_rows)} rows for {len(batch_indices)} unique values")
                 batch_table = pa.Table.from_pandas(
