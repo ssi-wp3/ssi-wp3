@@ -73,12 +73,8 @@ def combine_unique_column_values(filenames: List[str],
                     batch_rows = batch_rows.drop(
                         columns=["isba_description"])
 
-                # Drop rows with missing values
-                batch_rows = batch_rows[~batch_rows.isnull(
-                ).values.all(axis=1)]
-
                 if len(batch_rows) == 0:
-                    progress_bar.set_description("Batch with empty rows")
+                    progress_bar.set_description("Skipping empty batch")
                     progress_bar.update(len(batch))
                     continue
 
