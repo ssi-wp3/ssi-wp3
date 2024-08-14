@@ -29,6 +29,7 @@ def combine_unique_column_values(filenames: List[str],
             df = df[df[receipt_text_column] != '']
             print(df.head())
             df = df[df[key_columns].notnull().all(axis=1)]
+            print(df.head())
 
         df.index.name = "row_index"
         df = df.reset_index()
