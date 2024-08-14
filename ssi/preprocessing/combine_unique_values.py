@@ -35,6 +35,7 @@ def combine_unique_column_values(filenames: List[str],
     combined_df = pd.concat(unique_column_values)
     combined_df = combined_df.drop_duplicates(subset=key_columns)
     print(combined_df["file_index"].value_counts())
+    print(combined_df.head(10))
 
     print("Number of unique values for all files:", len(combined_df))
 
