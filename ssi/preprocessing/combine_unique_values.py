@@ -24,12 +24,9 @@ def combine_unique_column_values(filenames: List[str],
             filename, columns=key_columns, engine=parquet_engine)
         df["file_index"] = file_index
         df = df.drop_duplicates(subset=key_columns)
-        print(df.head())
         if drop_empty_receipts:
             df = df[df[receipt_text_column] != '']
-            print(df.head())
             df = df[df[list(key_columns)].notnull().all(axis=1)]
-            print(df.head())
 
         df.index.name = "row_index"
         df = df.reset_index()
