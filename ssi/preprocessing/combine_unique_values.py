@@ -90,7 +90,7 @@ def combine_unique_column_values(filenames: List[str],
                 if pq_writer:
                     batch_table = batch_table.cast(pq_writer.schema)
 
-                if total_number_of_rows_read == 0:
+                if total_number_of_rows_written == 0:
                     pq_writer = pq.ParquetWriter(
                         output_filename, batch_table.schema, write_batch_size=batch_size)
 
