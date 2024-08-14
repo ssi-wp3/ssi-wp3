@@ -245,6 +245,7 @@ class FeatureExtractorFactory:
                 vectors.toarray()) if issparse(vectors) else list(vectors)
 
             table = pa.Table.from_pandas(batch_df)
+            print(table.schema)
             if i == 0:
                 pq_writer = pq.ParquetWriter(filename, table.schema)
             pq_writer.write_table(table)
