@@ -29,8 +29,9 @@ class SklearnPipeline(Pipeline):
     def __init__(self):
         self.model = None
 
-    def load(self, pipeline_path: str):
+    def load(self, pipeline_path: str) -> Pipeline:
         self.model = joblib.load(pipeline_path)
+        return self
 
     def predict(self, inputs: List[str]) -> List[str]:
         return self.model.predict(inputs)
@@ -51,13 +52,14 @@ class HuggingFacePipeline(Pipeline):
     def __init__(self):
         self.model = None
 
-    def load(self, pipeline_path: str):
+    def load(self, pipeline_path: str) -> Pipeline:
         # TODO check whether COICOP labels are loaded when we save them in the training script
         tokenizer = AutoTokenizer.from_pretrained(pipeline_path)
         classification_model = AutoModelForSequenceClassification.from_pretrained(
             pipeline_path)
         self.model = TextClassificationPipeline(
             model=classification_model, tokenizer=tokenizer, top_k=None)
+        return self
 
     def predict(self, inputs: List[str]) -> List[str]:
         return self.model(inputs, return_all_scores=False)
