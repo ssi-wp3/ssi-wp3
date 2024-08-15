@@ -8,6 +8,8 @@ import json
 def main(args):
     try:
         pipeline = CoicopPipeline(args.pipeline_path, args.pipeline_type)
+        print(
+            f"Loading pipeline from {args.pipeline_path} with type {args.pipeline_type}")
         coicop_input_file = load_input_file(args.input_data)
         coicop_output_file = pipeline.predict_receipt(coicop_input_file)
 
