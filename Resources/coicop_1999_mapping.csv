@@ -1,0 +1,115 @@
+coicop_number;coicop_name
+011110; Rijst
+011120; Bloem en andere granen
+011130; Brood 
+011140; Overige bakkerijproducten 
+011150; Pizza en quiche 
+011160; Pastaproducten en couscous 
+011170; Ontbijtgranen 
+011180; Overige graanproducten 
+011210; Rund- en kalfsvlees 
+011220; Varkensvlees 
+011230; Schapen- en geitenvlees 
+011240; Pluimveevlees 
+011250; Overig vlees 
+011270; Gedroogd, gezouten of gerookt vlees 
+011280; Overige vleesbereidingen 
+011310; Verse of gekoelde vis 
+011320; Diepvries vis 
+011330; Verse of gekoelde schaal- en schelpdieren 
+011340; Diepvries schaal- en schelpdieren 
+011350; Gedroogde, gezouten of gerookte vis en schaal- en schelpdieren 
+011360; Overige bereidingen en conserven van vis en schaal-en schelpdieren 
+011410; Verse volle melk 
+011420; Verse halfvolle en magere melk 
+011430; Houdbare melk 
+011440; Yoghurt 
+011450; Kaas en kwark 
+011460; Overige zuivelproducten 
+011470; Eieren 
+011510; Boter 
+011520; Margarine en andere plantaardige vetten 
+011530; Olijfolie 
+011540; Overige eetbare olie 
+011610; Vers of gekoeld fruit 
+011620; Diepvries fruit 
+011630; Gedroogd fruit en noten 
+011640; Conserven van fruit en producten op basis van fruit 
+011710; Verse of gekoelde groenten behalve aardappelen en andere knollen 
+011720; Diepvries groenten behalve aardappelen en andere knollen 
+011730; Gedroogde groenten, andere bereidingen en conserven van groenten 
+011740; Aardappelen 
+011750; Chips 
+011810; Suiker 
+011820; Jam, marmelade en honing 
+011830; Chocolade 
+011840; Snoepgoed 
+011850; Consumptie-ijs en roomijs 
+011860; Kunstmatige zoetstoffen 
+011910; Sausen en dressings 
+011920; Zout, specerijen en keukenkruiden 
+011930; Babyvoeding 
+011940; Kant-en-klaarmaaltijden 
+011990; Overige voedingsmiddelen n.e.g. 
+012110; Koffie 
+012120; Thee 
+012130; Cacao en chocolade in poedervorm 
+012210; Mineraalwater of bronwater 
+012220; Frisdranken 
+012230; Vruchten- en groentesappen
+021110; Gedistilleerde dranken en likeuren 
+021120; Alcoholhoudende frisdranken 
+021210; Wijn van druiven 
+021230; Distillatiewijn 
+021240; Overige dranken op basis van wijn 
+021310; Pils 
+021320; Overig alcoholhoudend bier 
+021330; Licht alcoholisch en alcoholvrij bier 
+022010; Sigaretten 
+022020; Sigaren 
+022030; Shag en andere tabaksproducten 
+031210; Herenkleding 
+031220; Dameskleding 
+031230; Baby- en kinderkleding 
+031310; Overige kledingartikelen 
+031410; Wasserijen en stomerijen 
+032110; Herenschoenen 
+032120; Damesschoenen 
+032130; Kinderschoenen 
+052020; Beddengoed 
+052030; Tafel- en toiletlinnen 
+052090; Overig huishoudtextiel 
+053220; Koffiezetapparaten, waterkokers en dergelijke 
+054010; Glaswerk, kristal en aardewerk of porselein 
+054020; Messen, bestek en zilverwerk 
+054030; Niet-elektrische keukenartikelen 
+055110; Grote gereedschappen en werktuigen met motor 
+055210; Kleine handgereedschappen 
+055220; Diverse losse onderdelen
+056110; Schoonmaak- en onderhoudsproducten 
+056120; Overige niet-duurzame kleine huishoudproducten   
+061100; Farmaceutische producten       
+061210; Zwangerschapstests, condooms en andere mechanische contraceptiva  
+061290; Overige medische producten n.e.g. 
+081010; Bezorging van brieven 
+083020; Mobiele telefoondiensten
+091410; Voorbespeelde dragers van beeld of geluid
+093110; Spellen en hobby’s 
+093120; Speelgoed en feestartikelen 
+093310; Tuinproducten
+093320; Planten en bloemen 
+093420; Producten voor huisdieren 
+094250; Diensten op het gebied van fotografie
+095110; Fictieboeken 
+095130; Overige non-fictieboeken 
+095210; Kranten 
+095220; Tijdschriften 
+095300; Divers drukwerk 
+095410; Producten van papier
+095490; Overige schrijfwaren en tekenartikelen 
+121210; Elektrische apparaten voor lichaamsverzorging  
+121310; Niet-elektrische apparaten 
+121320; Artikelen voor persoonlijke hygiëne en wellness, esoterische en schoonheidsproducten 
+123290; Overige artikelen voor persoonlijk gebruik n.e.g. 
+999999;Onbekend
+999999;Divers
