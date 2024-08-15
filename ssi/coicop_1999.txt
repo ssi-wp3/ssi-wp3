@@ -1,5 +1,5 @@
 Code          Description
-01-12         Individual consumption expenditure of households
+01.12         Individual consumption expenditure of households
 01            Food and non-alcoholic beverages
 01.1          Food
 01.1.1        Bread and cereals (ND)

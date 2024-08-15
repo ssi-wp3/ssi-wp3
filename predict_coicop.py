@@ -28,6 +28,8 @@ if __name__ == "__main__":
                         required=True, help="Path to the input json file")
     parser.add_argument("-o", "--output_data", type=str,
                         required=True, help="Path to the output json file")
+    parser.add_argument("-c", "--coicop-code-list", type=str,
+                        default=None, help="Path to the COICOP code list")
     parser.add_argument("-p", "--params", type=str,
                         default=None, help="Path to the params json file (optional)")
     args = parser.parse_args()
