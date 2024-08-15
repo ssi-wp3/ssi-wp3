@@ -65,13 +65,10 @@ class HuggingFacePipeline(Pipeline):
         return self.model(inputs, top_k=1)
 
     def predict_proba(self, inputs: List[str]) -> List[Dict[str, Any]]:
-        scores = self.model(inputs, return_all_scores=True)
-        print("scores", scores)
-        score_dict = {score['label']: score['score']
-                      for score in scores[0]}
-        print("score_dict", score_dict)
-
-        return score_dict
+        scores_all_receipts = self.model(inputs, return_all_scores=True)
+        return [{score['label']: score['score']
+                for score in scores}
+                for scores in scores_all_receipts]
 
 
 class PipelineFactory:
