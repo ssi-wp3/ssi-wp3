@@ -33,7 +33,7 @@ class CoicopExperiment:
     sample_size = 10_000
     sample_replace = True
     
-    sample_results: list[dict] = []
+    sample_results = []
     for sample_idx in range(self.n_train_samples):
       sample_seed = config.SEED + sample_idx # have different seed for each sample, otherwise we'll get same samples
       X_dev_, y_dev_ = resample(X_dev, y_dev, replace=sample_replace, random_state=sample_seed)
@@ -43,18 +43,9 @@ class CoicopExperiment:
       sample_result = self.experiment.results
       sample_results.append(sample_result)
     
-    # get the mean of all sample results
-    sample_results_means: dict = sample_results[0].copy()
-    for sample_result in sample_results:
-      for key, value in sample_result.items():
-        if value is not None:
-          sample_results_means[key] += value
+    sample_results = pd.DataFrame.from_records(sample_results)
+    self.experiment.results = sample_results
 
-    import pdb; pdb.set_trace()
-    sample_results_means = {key: value / self.n_train_samples for key, value in sample_results_means.items() if value is not None}
-    self.experiment.results = sample_results_means
-    import pdb; pdb.set_trace()
-    
     stores_in_data = {
       "stores_in_dev" : ', '.join(self.stores_in_dev),
       "stores_in_test": ', '.join(self.stores_in_test)
