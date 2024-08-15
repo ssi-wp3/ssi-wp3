@@ -68,7 +68,7 @@ class HuggingFacePipeline(Pipeline):
         scores = self.model(inputs, return_all_scores=True)
         print("scores", scores)
         score_dict = {score['label']: score['score']
-                      for score in scores}
+                      for score in scores[0]}
         print("score_dict", score_dict)
 
         return score_dict
