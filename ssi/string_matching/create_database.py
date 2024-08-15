@@ -18,9 +18,9 @@ parser.add_argument("-r", "--receipt-text-column", type=str, default="receipt_te
 args = parser.parse_args()
 
 con = duckdb.connect(args.output_filename)
-con.sql("""INSTALL fts;
-        LOAD fts;
-""")
+# con.sql("""INSTALL fts;
+#        LOAD fts;
+# """)
 con.sql(f"""drop table if exists {args.receipt_text_table};
             create table {args.receipt_text_table} as select *
             from read_parquet('{args.input_filename}');
