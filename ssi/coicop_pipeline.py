@@ -82,6 +82,7 @@ class CoicopPipeline:
         # load the model
         self.model = PipelineFactory.pipeline_for(
             pipeline_type).load(pipeline_path)
+        print("Model in init", self.model)
 
     def __call__(self, inputs: List[str]):
         return self.model.predict_proba(inputs)
