@@ -44,12 +44,12 @@ args = parser.parse_args()
 
 # From: https://huggingface.co/docs/transformers/training
 
-def drop_unknown(dataframe: pd.DataFrame, label_column: str = "coicop_level_1") -> pd.DataFrame:
+def drop_unknown(dataframe: pd.DataFrame, label_column: str) -> pd.DataFrame:
     return dataframe[~dataframe[label_column].str.startswith("99")]
 
 
 def split_data(dataframe: pd.DataFrame,
-               coicop_level: str = "coicop_level_1",
+               coicop_level: str,
                val_size: float = 0.1,
                test_size: float = 0.2,
                random_state: int = 42) -> Tuple[Dataset, Dataset]:
@@ -92,9 +92,6 @@ if not args.keep_unknown:
     hf_labse_features = drop_unknown(
         hf_labse_features, label_column=args.label_column)
 
-print(hf_labse_features.head())
-
-
 sample_size = args.sample_size
 if sample_size is not None:
     hf_labse_features = hf_labse_features.sample(sample_size)
@@ -123,7 +120,10 @@ number_of_categories
 # See: https://discuss.huggingface.co/t/get-label-to-id-id-to-label-mapping/11457
 label_features = train_df.features["label"]
 model_config = AutoConfig.from_pretrained(
-    args.model_name, label2id=label_features._str2int, id2label=label_features._int2str)
+    args.model_name,
+    label2id=label_features._str2int,
+    id2label=label_features._int2str,
+    num_labels=number_of_categories)
 model = AutoModelForSequenceClassification.from_pretrained(
     args.model_name, config=model_config)
 
