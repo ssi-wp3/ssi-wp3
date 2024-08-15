@@ -98,10 +98,18 @@ class CoicopPipeline:
     def predict_proba(self, inputs: List[str]) -> List[Dict[str, Any]]:
         return self.model.predict_proba(inputs)
 
-    def predict_receipt(self, receipt_input: CoicopInputFile, coicop_mapping: Optional[pd.DataFrame] = None) -> CoicopOutputFile:
+    def predict_receipt(self,
+                        receipt_input: CoicopInputFile,
+                        coicop_mapping: Optional[pd.DataFrame] = None,
+                        coicop_description_column: str = "coicop_name"
+                        ) -> CoicopOutputFile:
         receipt_ids = [item.id for item in receipt_input.receipt.items]
         receipt_descriptions = [item.description
                                 for item in receipt_input.receipt.items]
         predicted_probabilities = self.predict_proba(receipt_descriptions)
 
-        return create_coicop_output_file(receipt_input, receipt_ids, predicted_probabilities, coicop_mapping)
+        return create_coicop_output_file(receipt_input,
+                                         receipt_ids,
+                                         predicted_probabilities,
+                                         coicop_mapping,
+                                         coicop_description_column)

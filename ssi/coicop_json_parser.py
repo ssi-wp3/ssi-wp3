@@ -58,16 +58,17 @@ def load_input_file(filename: str) -> CoicopInputFile:
         return CoicopInputFile.model_validate_json(json_file.read())
 
 
-def get_description(coicop_code: str, coicop_mapping: Optional[pd.DataFrame]) -> str:
+def get_description(coicop_code: str, coicop_mapping: Optional[pd.DataFrame], coicop_description_column: str) -> str:
     if coicop_mapping is None:
         return ""
-    return "test"  # coicop_mapping[coicop_code]["coicop_name"]
+    return coicop_mapping.loc[coicop_code][coicop_description_column]
 
 
 def create_coicop_output_file(receipt_input: CoicopInputFile,
                               receipt_ids: List[str],
                               predicted_probabilities: Dict[str, np.array],
-                              coicop_mapping: Optional[pd.DataFrame] = None
+                              coicop_mapping: Optional[pd.DataFrame],
+                              coicop_description_column: str
                               ) -> CoicopOutputFile:
 
     coicop_classification = []
@@ -75,7 +76,8 @@ def create_coicop_output_file(receipt_input: CoicopInputFile,
         coicop_codes = [
             CoicopClassification(
                 code=coicop_code,
-                description=get_description(coicop_code, coicop_mapping),
+                description=get_description(
+                    coicop_code, coicop_mapping, coicop_description_column),
                 confidence=probability
             )
             for coicop_code, probability in probabilities.items()

@@ -14,9 +14,9 @@ def main(args):
         coicop_mapping = None
         if args.coicop_code_list is not None:
             coicop_mapping = pd.read_csv(
-                args.coicop_code_list, delimiter=args.delimiter, index_col=0)
+                args.coicop_code_list, delimiter=args.delimiter, index_col=0, dtype={args.coicop_column: str, args.coicop_description_column: str})
         coicop_output_file = pipeline.predict_receipt(
-            coicop_input_file, coicop_mapping)
+            coicop_input_file, coicop_mapping, args.coicop_description_column)
 
         with open(args.output_data, "w") as json_file:
             output_json = coicop_output_file.model_dump()
@@ -39,6 +39,10 @@ if __name__ == "__main__":
                         default=None, help="Path to the COICOP code list")
     parser.add_argument("-d", "--delimiter", type=str,
                         default=";", help="Delimiter for the COICOP code list")
+    parser.add_argument("-cc", "--coicop-column", type=str,
+                        default="coicop_number", help="Column name for the COICOP code")
+    parser.add_argument("-cn", "--coicop-description-column", type=str,
+                        default="coicop_name", help="Column name for the COICOP name")
     parser.add_argument("-p", "--params", type=str,
                         default=None, help="Path to the params json file (optional)")
     args = parser.parse_args()
