@@ -3,6 +3,8 @@ import csv
 import pandas as pd
 from datetime import datetime
 
+from sklearn.base import clone
+from sklearn.utils import resample
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
@@ -23,7 +25,7 @@ class MLExperiment:
       "fit_time": None,
     }
 
-    self._results_metrics = [
+    results_metrics = [
       "accuracy",
       "balanced_accuracy",
       "precision",
@@ -35,7 +37,7 @@ class MLExperiment:
       "hierarchical_f1",
     ]
 
-    self._results: list[dict] = []
+    self._results = dict.fromkeys(results_metrics)
 
   def eval_pipeline(self, X_dev: pd.DataFrame, y_dev: pd.Series, X_test: pd.DataFrame, y_test: pd.Series, hierarchical_split_func: callable = None) -> None:
     # todo: add support for sample weight during fit
@@ -62,31 +64,46 @@ class MLExperiment:
 #      y_proba = self.pipeline.predict_proba(X_test)
 #      exp_results["roc_auc"] = roc_auc_score(y_test, y_proba, multi_class="ovr", average="macro")
 
-    assert all(exp_metric in self._results_metrics for exp_metric in exp_results), "Found key(s) not declared in self._results."
-    self._results.append(exp_results)
+    assert all(exp_metric in self._results.keys() for exp_metric in exp_results), "Found key(s) not declared in self._results."
+    self._results.update(exp_results)
 
   def write_results(self, out_fn: str) -> None:
     if len(self._results) == 0:
       print("Experiment has not been evaluated! No results written.")
       return
 
-    results_df  = pd.DataFrame(self._results, columns=self._results_metrics)
-    metadata_df = pd.DataFrame.from_records([self.metadata], index=results_df.index)
-    metadata_df = metadata_df.ffill()
+    out = self.metadata | self._results
 
-    out = pd.concat([results_df, metadata_df], axis=1)
+    out_exists = os.path.isfile(out_fn)
+    with open(out_fn, "a+") as fp:
+      writer = csv.DictWriter(fp, delimiter=',', fieldnames=out.keys())
 
-    out.to_csv(out_fn, mode='a')
-#    out_exists = os.path.isfile(out_fn)
-#    with open(out_fn, "a+") as fp:
-#      writer = csv.DictWriter(fp, delimiter=',', fieldnames=out.keys())
-#
-#      if not out_exists:
-#        writer.writeheader()
-#
-#      writer.writerow(out)
+      if not out_exists:
+        writer.writeheader()
+
+      writer.writerow(out)
+  
+  def __copy__(self):
+    pipeline_copy = clone(self.pipeline)
+    return type(self)(pipeline_copy, self.predict_level, sample_weight_col_name)
 
 
 class BootstrapExperiment:
-  def __init__(self, ml_experiment: MLExperiment):
-    pass
+  def __init__(self, ml_experiment: MLExperiment, n_estimators=5, sample_size=10_000, random_state: int = None):
+    self.base_experiment = MLExperiment
+    self.n_estimators = n_estimators
+    self.sample_size = sample_size
+    self.random_state = random_state
+    self.experiments: list[MLExperiment] = []
+  
+  def eval_pipeline(self, X_dev: pd.DataFrame, y_dev: pd.Series, X_test: pd.DataFrame, y_test: pd.Series, hierarchical_split_func: callable = None) -> None:
+    for sample_idx in range(self.n_estimators):
+      sample_exp = self.base_experiment.copy()
+      X_dev_, y_dev_ = resample(X_dev, y_dev, n_samples=self.n_estimators, random_state=self.random_state)
+
+      sample_exp.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func)
+      self.experiments.append(sample_exp)
+
+  def write_results(self, out_fn: str) -> None:
+    for exp in self.experiments:
+      exp.write_results(out_fn)
