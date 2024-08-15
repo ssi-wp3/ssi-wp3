@@ -45,6 +45,9 @@ args = parser.parse_args()
 
 # From: https://huggingface.co/docs/transformers/training
 
+def drop_unknown(dataframe: pd.DataFrame, label_column: str = "coicop_level_1") -> pd.DataFrame:
+    return dataframe[~dataframe[label_column].str.startswith("99")]
+
 
 def split_data(dataframe: pd.DataFrame,
                coicop_level: str = "coicop_level_1",
@@ -86,7 +89,11 @@ def compute_metrics(eval_pred):
 hf_labse_features = pd.read_parquet(
     args.input_filename, engine="pyarrow")
 hf_labse_features = hf_labse_features[[args.input_column, args.label_column]]
+if not args.keep_unknown:
+    hf_labse_features = drop_unknown(hf_labse_features)
+
 hf_labse_features.head()
+
 
 sample_size = args.sample_size
 if sample_size is not None:
