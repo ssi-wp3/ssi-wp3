@@ -3,12 +3,14 @@ import argparse
 import os
 
 data_directory = os.getenv("data_directory", default=".")
+db_directory = os.path.join(data_directory, "string_matching")
+os.makedirs(db_directory, exist_ok=True)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-filename", type=str, required=True,
                     help="The parquet file containing the receipt texts and their corresponding COICOP labels.")
 parser.add_argument("-o", "--output-filename", type=str, default=os.path.join(
-    data_directory, "string_matching/coicop.db"), help="The output database file.")
+    db_directory, "coicop.db"), help="The output database file.")
 parser.add_argument("-t", "--receipt-text-table", type=str, default="receipt_text",
                     help="The name of the table containing the receipt texts.")
 parser.add_argument("-r", "--receipt-text-column", type=str, default="receipt_text",
