@@ -119,10 +119,14 @@ number_of_categories
 # Save COICOP label mappings.
 # See: https://discuss.huggingface.co/t/get-label-to-id-id-to-label-mapping/11457
 label_features = train_df.features["label"]
+
+# Apparently the _int2str does not return a dict but a list, and needs to be converted before saving.
+int2label = {index: value for index,
+             value in enumerate(label_features._int2str)}
 model_config = AutoConfig.from_pretrained(
     args.model_name,
     label2id=label_features._str2int,
-    id2label=label_features._int2str,
+    id2label=int2label,
     num_labels=number_of_categories)
 print(label_features._int2str)
 
