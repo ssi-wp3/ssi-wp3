@@ -1,7 +1,6 @@
 # %%
-from transformers import Trainer
-from transformers import TrainingArguments
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, AutoConfig
+from constants import Constants
+from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments, AutoConfig, AutoTokenizer
 from functools import partial
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
@@ -17,11 +16,16 @@ import os
 import json
 
 # %%
+# "/netappdata/ssi_tdjg/data/ssi/"
+data_directory = os.getenv("data_directory", default=".")
+print(f"Using data directory: {data_directory}")
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-filename",
-                    default="/netappdata/ssi_tdjg/data/ssi/feature_extraction/ssi_hf_labse_unique_values.parquet")
+                    default=os.path.join(
+                        data_directory, "feature_extraction/ssi_hf_labse_unique_values.parquet"))
 parser.add_argument("-o", "--output-directory",
-                    type=str, default="./hf_output")
+                    type=str, default=os.path.join(data_directory, "models"))
 parser.add_argument("-m", "--model-name", type=str,
                     default="sentence-transformers/LaBSE", help="Huggingface sentence transformers model name")
 parser.add_argument("-s", "--sample-size", type=int, default=None,
@@ -34,10 +38,14 @@ parser.add_argument("-lc", "--label-column", type=str,
                     default="coicop_level_1")
 parser.add_argument("-ef", "--evaluation-function", type=str, default="f1")
 parser.add_argument("-es", "--evaluation-strategy", type=str, default="epoch")
+parser.add_argument("-u", "--keep-unknown", action="store_true")
 args = parser.parse_args()
 
 
 # From: https://huggingface.co/docs/transformers/training
+
+def drop_unknown(dataframe: pd.DataFrame, label_column: str = "coicop_level_1") -> pd.DataFrame:
+    return dataframe[~dataframe[label_column].str.startswith("99")]
 
 
 def split_data(dataframe: pd.DataFrame,
@@ -80,7 +88,12 @@ def compute_metrics(eval_pred):
 hf_labse_features = pd.read_parquet(
     args.input_filename, engine="pyarrow")
 hf_labse_features = hf_labse_features[[args.input_column, args.label_column]]
-hf_labse_features.head()
+if not args.keep_unknown:
+    hf_labse_features = drop_unknown(
+        hf_labse_features, label_column=args.label_column)
+
+print(hf_labse_features.head())
+
 
 sample_size = args.sample_size
 if sample_size is not None:
@@ -112,7 +125,8 @@ label_features = train_df.features["label"]
 model_config = AutoConfig.from_pretrained(
     args.model_name, label2id=label_features._str2int, id2label=label_features._int2str)
 model = AutoModelForSequenceClassification.from_pretrained(
-    args.model_name, num_labels=number_of_categories, config=model_config)
+    args.model_name, config=model_config)
+
 
 # Create output directory
 model_directory = os.path.join(args.output_directory, args.model_name)
@@ -146,9 +160,8 @@ final_result_directory = os.path.join(model_directory, "final")
 if not os.path.exists(final_result_directory):
     os.makedirs(final_result_directory)
 
-# Save tokenizer too
 tokenizer.save_pretrained(final_result_directory)
-
+# trainer.save_metrics(os.path.join(final_result_directory, "metrics.json"))
 trainer.save_model(final_result_directory)
 trainer.save_state()
 

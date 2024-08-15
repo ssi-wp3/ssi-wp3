@@ -10,8 +10,10 @@ import tqdm
 def combine_unique_column_values(filenames: List[str],
                                  output_filename: str,
                                  key_columns: List[str],
+                                 receipt_text_column: str,
                                  parquet_engine: str = "pyarrow",
-                                 batch_size: int = 1024
+                                 batch_size: int = 1024,
+                                 drop_empty_receipts: bool = True
                                  ):
     """ Combine unique column values from multiple files into a single file.
     """
@@ -22,6 +24,9 @@ def combine_unique_column_values(filenames: List[str],
             filename, columns=key_columns, engine=parquet_engine)
         df["file_index"] = file_index
         df = df.drop_duplicates(subset=key_columns)
+        if drop_empty_receipts:
+            df = df[df[receipt_text_column] != '']
+
         df.index.name = "row_index"
         df = df.reset_index()
         unique_column_values.append(df)
@@ -67,14 +72,22 @@ def combine_unique_column_values(filenames: List[str],
                     batch_rows = batch_rows.drop(
                         columns=["isba_description"])
 
+                if len(batch_rows) == 0:
+                    progress_bar.set_description("Skipping empty batch")
+                    progress_bar.update(len(batch))
+                    number_file_rows_read += len(batch_df)
+                    total_number_of_rows_read += len(batch)
+                    continue
+
                 progress_bar.set_description(
                     f"Wrote {len(batch_rows)} rows for {len(batch_indices)} unique values")
                 batch_table = pa.Table.from_pandas(
                     batch_rows)
+
                 if pq_writer:
                     batch_table = batch_table.cast(pq_writer.schema)
 
-                if total_number_of_rows_read == 0:
+                if total_number_of_rows_written == 0:
                     pq_writer = pq.ParquetWriter(
                         output_filename, batch_table.schema, write_batch_size=batch_size)
 

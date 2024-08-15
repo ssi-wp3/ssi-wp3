@@ -177,6 +177,7 @@ class CombineUniqueValues(luigi.Task):
         [Constants.RECEIPT_TEXT_COLUMN, Constants.COICOP_LABEL_COLUMN])
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     parquet_engine = luigi.Parameter()
+    drop_empty_receipts = luigi.BoolParameter(default=True)
 
     def requires(self):
         store_filenames = [os.path.join(self.input_directory, filename)
@@ -199,7 +200,9 @@ class CombineUniqueValues(luigi.Task):
         combine_unique_column_values(filenames=input_files,
                                      output_filename=self.output_filename + ".tmp",
                                      key_columns=self.key_columns,
-                                     parquet_engine=self.parquet_engine
+                                     receipt_text_column=Constants.RECEIPT_TEXT_COLUMN,
+                                     parquet_engine=self.parquet_engine,
+                                     drop_empty_receipts=self.drop_empty_receipts
                                      )
 
         with self.output().open('w') as output_file:
