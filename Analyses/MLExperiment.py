@@ -23,7 +23,7 @@ class MLExperiment:
       "fit_time": None,
     }
 
-    results_metrics = [
+    self._results_metrics = [
       "accuracy",
       "balanced_accuracy",
       "precision",
@@ -62,7 +62,7 @@ class MLExperiment:
 #      y_proba = self.pipeline.predict_proba(X_test)
 #      exp_results["roc_auc"] = roc_auc_score(y_test, y_proba, multi_class="ovr", average="macro")
 
-    assert all(exp_metric in results_metrics for exp_metric in exp_results), "Found key(s) not declared in self._results."
+    assert all(exp_metric in self._results_metrics for exp_metric in exp_results), "Found key(s) not declared in self._results."
     self._results.append(exp_results)
 
   def write_results(self, out_fn: str) -> None:
@@ -70,7 +70,7 @@ class MLExperiment:
       print("Experiment has not been evaluated! No results written.")
       return
 
-    results_df  = pd.DataFrame(self._results, columns=results_metrics)
+    results_df  = pd.DataFrame(self._results, columns=self._results_metrics)
     metadata_df = pd.DataFrame.from_records([self.metadata], index=results_df.index)
     metadata_df = metadata_df.ffill()
 
