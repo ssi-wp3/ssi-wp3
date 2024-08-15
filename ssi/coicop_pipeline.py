@@ -102,8 +102,6 @@ class CoicopPipeline:
         receipt_ids = [item.id for item in receipt_input.receipt.items]
         receipt_descriptions = [item.description
                                 for item in receipt_input.receipt.items]
-        print("predicting receipt_descriptions")
         predicted_probabilities = self.predict_proba(receipt_descriptions)
-        print("Finished predicting receipt_descriptions")
 
         return create_coicop_output_file(receipt_input, receipt_ids, predicted_probabilities, coicop_mapping)
