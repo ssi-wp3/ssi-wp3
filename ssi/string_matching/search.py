@@ -23,7 +23,7 @@ print("-"*80)
 for query_string in args.receipt_texts:
     con.sql(f"""select index, {args.receipt_text_column}, score from 
             (
-            SELECT *, fts_main_documents.match_bm25(
+            SELECT *, fts_main_{args.receipt_text_table}.match_bm25(
                 index,
                 '{query_string}',
                 fields := '{args.receipt_text_column}'
