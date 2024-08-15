@@ -1,10 +1,7 @@
 # %%
 from constants import Constants
-from transformers import Trainer
-from transformers import TrainingArguments
-from transformers import AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments, AutoConfig, AutoTokenizer
 from functools import partial
-from transformers import AutoTokenizer
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
@@ -121,8 +118,14 @@ print(
 number_of_categories = hf_labse_features[args.label_column].nunique()
 number_of_categories
 
+# Save COICOP label mappings.
+# See: https://discuss.huggingface.co/t/get-label-to-id-id-to-label-mapping/11457
+label_features = train_df.features["label"]
+model_config = AutoConfig.from_pretrained(
+    args.model_name, label2id=label_features._str2int, id2label=label_features._int2str)
 model = AutoModelForSequenceClassification.from_pretrained(
-    args.model_name, num_labels=number_of_categories)
+    args.model_name, num_labels=number_of_categories, config=model_config)
+
 
 # Create output directory
 model_directory = os.path.join(args.output_directory, args.model_name)
