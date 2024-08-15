@@ -15,10 +15,11 @@ from MLExperiment import MLExperiment
 import experiment_parameters as exp_params
 
 class CoicopExperiment:
-  def __init__(self, experiment: MLExperiment, stores_in_dev: list[str], stores_in_test: list[str]):
+  def __init__(self, experiment: MLExperiment, stores_in_dev: list[str], stores_in_test: list[str], n_train_samples: int = 1):
     self.experiment = experiment
     self.stores_in_dev = stores_in_dev
     self.stores_in_test = stores_in_test
+    self.n_train_samples = n_train_samples
 
   def eval_pipeline(self, df_dev: pd.DataFrame, df_test: pd.DataFrame):
     df_dev  = df_dev[df_dev["store_name"].isin(self.stores_in_dev)]
@@ -26,8 +27,32 @@ class CoicopExperiment:
 
     X_dev, y_dev = _get_X_y(df_dev, self.experiment.predict_level)
     X_test, y_test = _get_X_y(df_test, self.experiment.predict_level)
+
+    # sample params
+    sample_size = 10_000
+    sample_replace = False
     
-    self.experiment.eval_pipeline(X_dev, y_dev, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
+    sample_results: list[dict] = []
+    for sample_idx in range(self.n_train_samples):
+      sample_seed = config.seed + sample_idx # have different seed for each sample, otherwise we'll get same samples
+      sample_idx = y_dev.sample(n=sample_size, replace=sample_replace, seed=sample_seed)
+
+      X_dev_ = X_dev[sample_idx]
+      y_dev_ = y_dev[sample_idx]
+
+      self.experiment.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
+
+      sample_result = self.experiment.results
+      sample_results.append(sample_result)
+    
+    # get the mean of all sample results
+    sample_results_means: dict = sample_results[0].copy()
+    for sample_result in samples_results:
+      for key, value in sample_results.items()
+        sample_results_means[key] += value
+
+    sample_results_means = {key: value / len(self.n_train_samples) for key, value in sample_results_means}
+    self.experiment.results = sample_results_means
     
     stores_in_data = {
       "stores_in_dev" : ', '.join(self.stores_in_dev),
