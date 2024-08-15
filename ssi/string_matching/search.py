@@ -21,7 +21,7 @@ con = duckdb.connect(args.input_filename)
 
 print("-"*80)
 for query_string in args.receipt_texts:
-    con.sql(f"""select index, {args.receipt_text_column}, score from 
+    print(con.sql(f"""select index, {args.receipt_text_column}, score from 
             (
             SELECT *, fts_main_{args.receipt_text_table}.match_bm25(
                 index,
@@ -32,6 +32,5 @@ for query_string in args.receipt_texts:
             )
             where score is not null
             order by score desc;        
-            """)
-    print(con.fetchmany(5))
+            """).fetchmany(5))
     print("-"*80)
