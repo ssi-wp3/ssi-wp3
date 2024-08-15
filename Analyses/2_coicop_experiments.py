@@ -4,6 +4,7 @@ from itertools import permutations
 import numpy as np
 import pandas as pd
 from sklearn.base import clone
+from sklearn.utils import resample
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
@@ -30,15 +31,12 @@ class CoicopExperiment:
 
     # sample params
     sample_size = 10_000
-    sample_replace = False
+    sample_replace = True
     
     sample_results: list[dict] = []
     for sample_idx in range(self.n_train_samples):
       sample_seed = config.SEED + sample_idx # have different seed for each sample, otherwise we'll get same samples
-      sample_idx = y_dev.sample(n=sample_size, replace=sample_replace, random_state=sample_seed).index
-
-      X_dev_ = X_dev.loc[sample_idx]
-      y_dev_ = y_dev.loc[sample_idx]
+      X_dev_, y_dev_ = resample(X_dev, y_dev, replace=sample_replace, random_state=sample_seed)
 
       self.experiment.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
 
@@ -125,7 +123,12 @@ def make_coicop_experiments(pipeline, param_grid: dict, predict_level: int, samp
 
   return ret
 
+class testtt:
+  def __init__(self):
+    pass
+
 if __name__ == "__main__":
+  import pdb; pdb.set_trace()
   df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
   df_test_fn = "test_lidl_ah_jumbo_plus.parquet"
 

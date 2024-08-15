@@ -8,6 +8,10 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_s
 
 from hierarchical.metrics import hierarchical_precision_score, hierarchical_recall_score, hierarchical_f1_score
 
+class BootstrapExperiment:
+  def __init__(self, ml_experiment: MLExperiment):
+    pass
+
 class MLExperiment:
   def __init__(self, pipeline: Pipeline, predict_level: int, sample_weight_col_name: str) -> None:
     self.pipeline = pipeline 
@@ -19,8 +23,8 @@ class MLExperiment:
 
     self.metadata = {
       "pipeline": pipeline_name,
-      "datetime": None,
       "predict_level": predict_level,
+      "fit_time": None,
     }
 
     results_metrics = [
@@ -43,7 +47,7 @@ class MLExperiment:
 
     y_pred = self.pipeline.predict(X_test)
 
-    self.metadata["datetime"] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    self.metadata["fit_time"] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
 
     exp_results = dict()
 
