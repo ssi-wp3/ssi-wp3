@@ -124,7 +124,7 @@ label_features = train_df.features["label"]
 model_config = AutoConfig.from_pretrained(
     args.model_name, label2id=label_features._str2int, id2label=label_features._int2str)
 model = AutoModelForSequenceClassification.from_pretrained(
-    args.model_name, num_labels=number_of_categories, config=model_config)
+    args.model_name, config=model_config)
 
 
 # Create output directory
