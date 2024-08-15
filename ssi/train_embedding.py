@@ -25,7 +25,7 @@ print(f"Using data directory: {data_directory}")
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-filename",
                     default=os.path.join(
-                        data_directory, "/feature_extraction/ssi_hf_labse_unique_values.parquet"))
+                        data_directory, "feature_extraction/ssi_hf_labse_unique_values.parquet"))
 parser.add_argument("-o", "--output-directory",
                     type=str, default=os.path.join(data_directory, "models"))
 parser.add_argument("-m", "--model-name", type=str,
