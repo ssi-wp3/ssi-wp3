@@ -18,11 +18,15 @@ import os
 import json
 
 # %%
+# "/netappdata/ssi_tdjg/data/ssi/"
+data_directory = os.getenv("data_directory", default=".")
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-filename",
-                    default="/netappdata/ssi_tdjg/data/ssi/feature_extraction/ssi_hf_labse_unique_values.parquet")
+                    default=os.path.join(
+                        data_directory, "/feature_extraction/ssi_hf_labse_unique_values.parquet"))
 parser.add_argument("-o", "--output-directory",
-                    type=str, default="./hf_output")
+                    type=str, default=os.path.join(data_directory, "models"))
 parser.add_argument("-m", "--model-name", type=str,
                     default="sentence-transformers/LaBSE", help="Huggingface sentence transformers model name")
 parser.add_argument("-s", "--sample-size", type=int, default=None,
@@ -35,6 +39,7 @@ parser.add_argument("-lc", "--label-column", type=str,
                     default="coicop_level_1")
 parser.add_argument("-ef", "--evaluation-function", type=str, default="f1")
 parser.add_argument("-es", "--evaluation-strategy", type=str, default="epoch")
+parser.add_argument("-u", "--keep-unknown", action="store_true")
 args = parser.parse_args()
 
 
