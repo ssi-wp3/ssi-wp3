@@ -121,10 +121,6 @@ def make_coicop_experiments(pipeline, param_grid: dict, predict_level: int, samp
 
   return ret
 
-class testtt:
-  def __init__(self):
-    pass
-
 if __name__ == "__main__":
   df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
   df_test_fn = "test_lidl_ah_jumbo_plus.parquet"

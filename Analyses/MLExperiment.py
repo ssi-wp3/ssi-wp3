@@ -99,9 +99,13 @@ class BootstrapExperiment:
   def eval_pipeline(self, X_dev: pd.DataFrame, y_dev: pd.Series, X_test: pd.DataFrame, y_test: pd.Series, hierarchical_split_func: callable = None) -> None:
     for sample_idx in range(self.n_estimators):
       sample_exp = self.base_experiment.copy()
-      X_dev_, y_dev_ = resample(X_dev, y_dev, n_samples=self.n_estimators, random_state=self.random_state)
+      sample_seed = self.random_state + sample_idx
+
+      X_dev_, y_dev_ = resample(X_dev, y_dev, n_samples=self.n_estimators, random_state=sample_seed)
 
       sample_exp.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func)
+      sample_exp.metadata["sample_index"] = sample_idx
+
       self.experiments.append(sample_exp)
 
   def write_results(self, out_fn: str) -> None:
