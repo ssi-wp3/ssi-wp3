@@ -29,28 +29,30 @@ class CoicopExperiment:
     X_dev, y_dev = _get_X_y(df_dev, self.experiment.predict_level)
     X_test, y_test = _get_X_y(df_test, self.experiment.predict_level)
 
-    # sample params
-    sample_size = 10_000
-    sample_replace = True
-    
-    sample_results = []
-    for sample_idx in range(self.n_train_samples):
-      sample_seed = config.SEED + sample_idx # have different seed for each sample, otherwise we'll get same samples
-      X_dev_, y_dev_ = resample(X_dev, y_dev, replace=sample_replace, random_state=sample_seed)
-
-      self.experiment.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
-
-      sample_result = self.experiment.results
-      sample_results.append(sample_result)
-    
-    sample_results = pd.DataFrame.from_records(sample_results)
-    self.experiment.results = sample_results
-
-    stores_in_data = {
-      "stores_in_dev" : ', '.join(self.stores_in_dev),
-      "stores_in_test": ', '.join(self.stores_in_test)
-    }
+    self.experiment.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
     self.experiment.metadata.update(stores_in_data)
+
+#    # sample params
+#    sample_size = 10_000
+#    sample_replace = True
+#    
+#    sample_results = []
+#    for sample_idx in range(self.n_train_samples):
+#      sample_seed = config.SEED + sample_idx # have different seed for each sample, otherwise we'll get same samples
+#      X_dev_, y_dev_ = resample(X_dev, y_dev, replace=sample_replace, random_state=sample_seed)
+#
+#      self.experiment.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
+#
+#      sample_result = self.experiment.results
+#      sample_results.append(sample_result)
+#    
+#    sample_results = pd.DataFrame.from_records(sample_results)
+#    self.experiment.results = sample_results
+#
+#    stores_in_data = {
+#      "stores_in_dev" : ', '.join(self.stores_in_dev),
+#      "stores_in_test": ', '.join(self.stores_in_test)
+#    }
 
   def write_results(self, out_fn: str) -> None:
     self.experiment.write_results(out_fn)
@@ -119,7 +121,6 @@ class testtt:
     pass
 
 if __name__ == "__main__":
-  import pdb; pdb.set_trace()
   df_dev_fn  = "dev_lidl_ah_jumbo_plus.parquet"
   df_test_fn = "test_lidl_ah_jumbo_plus.parquet"
 

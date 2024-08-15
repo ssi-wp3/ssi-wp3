@@ -8,7 +8,6 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_s
 
 from hierarchical.metrics import hierarchical_precision_score, hierarchical_recall_score, hierarchical_f1_score
 
-
 class MLExperiment:
   def __init__(self, pipeline: Pipeline, predict_level: int, sample_weight_col_name: str) -> None:
     self.pipeline = pipeline 
@@ -36,7 +35,7 @@ class MLExperiment:
       "hierarchical_f1",
     ]
 
-    self.results: dict = dict.fromkeys(results_metrics)
+    self._results: list[dict] = []
 
   def eval_pipeline(self, X_dev: pd.DataFrame, y_dev: pd.Series, X_test: pd.DataFrame, y_test: pd.Series, hierarchical_split_func: callable = None) -> None:
     # todo: add support for sample weight during fit
@@ -62,25 +61,30 @@ class MLExperiment:
 #    if hasattr(self.pipeline, "predict_proba"):
 #      y_proba = self.pipeline.predict_proba(X_test)
 #      exp_results["roc_auc"] = roc_auc_score(y_test, y_proba, multi_class="ovr", average="macro")
-    
-    assert all(exp_metric in self.results.keys() for exp_metric in exp_results.keys()), "Found key(s) not declared in self.results."
-    self.results.update(exp_results)
+
+    assert all(exp_metric in results_metrics for exp_metric in exp_results), "Found key(s) not declared in self._results."
+    self._results.append(exp_results)
 
   def write_results(self, out_fn: str) -> None:
-    can_write = len(self.results) == 0
-    if can_write:
+    if len(self._results) == 0:
       print("Experiment has not been evaluated! No results written.")
       return
 
-    out = self.metadata.update(self.results)
-    out_exists = os.path.isfile(out_fn)
-    with open(out_fn, "a+") as fp:
-      writer = csv.DictWriter(fp, delimiter=',', fieldnames=out.keys())
+    results_df  = pd.DataFrame(self._results, columns=results_metrics)
+    metadata_df = pd.DataFrame.from_records([self.metadata], index=results_df.index)
+    metadata_df = metadata_df.ffill()
 
-      if not out_exists:
-        writer.writeheader()
+    out = pd.concat([results_df, metadata_df], axis=1)
 
-      writer.writerow(out)
+    out.to_csv(out_fn, mode='a')
+#    out_exists = os.path.isfile(out_fn)
+#    with open(out_fn, "a+") as fp:
+#      writer = csv.DictWriter(fp, delimiter=',', fieldnames=out.keys())
+#
+#      if not out_exists:
+#        writer.writeheader()
+#
+#      writer.writerow(out)
 
 
 class BootstrapExperiment:
