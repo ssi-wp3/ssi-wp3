@@ -32,6 +32,7 @@ con.sql(f"""drop table if exists {args.receipt_text_table};
                 from read_parquet('{args.input_filename}')
                 {where_clause};
         """)
+con.sql(f"PRAGMA drop_fts_index({args.receipt_text_table});")
 con.sql(
     f"""PRAGMA create_fts_index({args.receipt_text_table}, 'index', {args.receipt_text_column}); """)
 
