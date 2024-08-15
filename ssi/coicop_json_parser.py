@@ -61,7 +61,7 @@ def load_input_file(filename: str) -> CoicopInputFile:
 def get_description(coicop_code: str, coicop_mapping: Optional[pd.DataFrame]) -> str:
     if coicop_mapping is None:
         return ""
-    return coicop_mapping[coicop_code]["coicop_name"]
+    return "test"  # coicop_mapping[coicop_code]["coicop_name"]
 
 
 def create_coicop_output_file(receipt_input: CoicopInputFile,
