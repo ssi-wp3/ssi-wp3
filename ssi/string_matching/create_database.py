@@ -22,7 +22,8 @@ con = duckdb.connect(args.output_filename)
 #        LOAD fts;
 # """)
 con.sql(f"""drop table if exists {args.receipt_text_table};
-            create table {args.receipt_text_table} as select *
+            create sequence seq_row_id start 1;
+            create table {args.receipt_text_table} as select next_val('seq_row_id') as index,  *
             from read_parquet('{args.input_filename}');
         """)
 con.sql(
