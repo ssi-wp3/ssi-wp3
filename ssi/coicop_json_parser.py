@@ -59,7 +59,7 @@ def load_input_file(filename: str) -> CoicopInputFile:
 
 
 def get_description(coicop_code: str, coicop_mapping: Optional[pd.DataFrame]) -> str:
-    if not coicop_mapping:
+    if coicop_mapping is None:
         return ""
     return coicop_mapping.iloc[coicop_code]
 
