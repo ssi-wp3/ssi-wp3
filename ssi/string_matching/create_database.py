@@ -15,16 +15,21 @@ parser.add_argument("-t", "--receipt-text-table", type=str, default="receipt_tex
                     help="The name of the table containing the receipt texts.")
 parser.add_argument("-r", "--receipt-text-column", type=str, default="receipt_text",
                     help="The name of the column containing the receipt texts.")
+parser.add_argument("-u", "--keep-unknown", action="store_true")
 args = parser.parse_args()
 
 con = duckdb.connect(args.output_filename)
 # con.sql("""INSTALL fts;
 #        LOAD fts;
 # """)
+where_clause = "" if args.keep_unknown else "where coicop_number not like '99%'"
+
 con.sql(f"""drop table if exists {args.receipt_text_table};
+            drop sequence if exists seq_row_id;
             create sequence seq_row_id start 1;
             create table {args.receipt_text_table} as select nextval('seq_row_id') as index,  *
-            from read_parquet('{args.input_filename}');
+            from read_parquet('{args.input_filename}
+            {where_clause}');
         """)
 con.sql(
     f"""PRAGMA create_fts_index({args.receipt_text_table}, 'index', {args.receipt_text_column}); """)
