@@ -90,6 +90,7 @@ class CoicopPipeline:
         return self.model.predict(inputs)
 
     def predict_proba(self, inputs: List[str]) -> List[Dict[str, Any]]:
+        print(self.model)
         return self.model.predict_proba(inputs)
 
     def predict_receipt(self, receipt_input: CoicopInputFile) -> CoicopOutputFile:
