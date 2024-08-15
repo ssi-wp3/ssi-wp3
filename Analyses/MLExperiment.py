@@ -1,3 +1,4 @@
+import copy
 import os
 import csv
 import pandas as pd
@@ -11,7 +12,7 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_s
 from hierarchical.metrics import hierarchical_precision_score, hierarchical_recall_score, hierarchical_f1_score
 
 class MLExperiment:
-  def __init__(self, pipeline: Pipeline, predict_level: int, sample_weight_col_name: str) -> None:
+  def __init__(self, pipeline: Pipeline, predict_level: int, sample_weight_col_name: str, **kwargs) -> None:
     self.pipeline = pipeline 
     self.predict_level = predict_level
     self.sample_weight_col_name = sample_weight_col_name
@@ -24,6 +25,7 @@ class MLExperiment:
       "predict_level": predict_level,
       "fit_time": None,
     }
+    self.metadata.update(kwargs)
 
     results_metrics = [
       "accuracy",
@@ -85,12 +87,14 @@ class MLExperiment:
   
   def __copy__(self):
     pipeline_copy = clone(self.pipeline)
-    return type(self)(pipeline_copy, self.predict_level, sample_weight_col_name)
+    ret = type(self)(pipeline_copy, self.predict_level, self.sample_weight_col_name)
+    ret.metadata.update(self.metadata)
+    return ret
 
 
 class BootstrapExperiment:
   def __init__(self, ml_experiment: MLExperiment, n_estimators=5, sample_size=10_000, random_state: int = None):
-    self.base_experiment = MLExperiment
+    self.base_experiment = ml_experiment
     self.n_estimators = n_estimators
     self.sample_size = sample_size
     self.random_state = random_state
@@ -98,7 +102,7 @@ class BootstrapExperiment:
   
   def eval_pipeline(self, X_dev: pd.DataFrame, y_dev: pd.Series, X_test: pd.DataFrame, y_test: pd.Series, hierarchical_split_func: callable = None) -> None:
     for sample_idx in range(self.n_estimators):
-      sample_exp = self.base_experiment.copy()
+      sample_exp = copy.copy(self.base_experiment)
       sample_seed = self.random_state + sample_idx
 
       X_dev_, y_dev_ = resample(X_dev, y_dev, n_samples=self.n_estimators, random_state=sample_seed)
@@ -117,5 +121,5 @@ class BootstrapExperiment:
       exp.write_results(out_fn)
 
   def __copy__(self):
-    base_exp_copy = self.base_experiment.copy()
+    base_exp_copy = copy.copy(self.base_experiment)
     return type(self)(base_exp_copy, self.n_estimators, self.sample_size, self.random_state)
