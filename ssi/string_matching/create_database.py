@@ -26,5 +26,5 @@ con.sql(f"""drop table if exists {args.receipt_text_table};
             from read_parquet('{args.input_filename}');
         """)
 con.sql(f"""PRAGMA create_fts_index({args.receipt_text_table}, 'index', {args.receipt_text_column},
-        stemmer='dutch', stop_words='dutch'); 
+        stemmer:='dutch', stop_words:='dutch'); 
 """)
