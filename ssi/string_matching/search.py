@@ -17,7 +17,7 @@ parser.add_argument('receipt_texts', nargs=argparse.REMAINDER)
 
 args = parser.parse_args()
 
-con = duckdb.connect(args.output_filename)
+con = duckdb.connect(args.input_filename)
 
 print("-"*80)
 for query_string in args.receipt_texts:
