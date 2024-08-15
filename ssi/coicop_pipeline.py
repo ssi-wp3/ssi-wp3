@@ -62,9 +62,11 @@ class HuggingFacePipeline(Pipeline):
         return self
 
     def predict(self, inputs: List[str]) -> List[str]:
+        print("predict")
         return self.model(inputs, top_k=1)
 
     def predict_proba(self, inputs: List[str]) -> List[Dict[str, Any]]:
+        print("predict_proba")
         return self.model(inputs, return_all_scores=True)
 
 
@@ -98,6 +100,8 @@ class CoicopPipeline:
         receipt_ids = [item.id for item in receipt_input.receipt.items]
         receipt_descriptions = [item.description
                                 for item in receipt_input.receipt.items]
+        print("predicting receipt_descriptions")
         predicted_probabilities = self.predict_proba(receipt_descriptions)
+        print("Finished predicting receipt_descriptions")
 
         return create_coicop_output_file(receipt_input, receipt_ids, predicted_probabilities)
