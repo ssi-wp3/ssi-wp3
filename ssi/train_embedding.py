@@ -94,7 +94,7 @@ if not args.keep_unknown:
     hf_labse_features = drop_unknown(
         hf_labse_features, label_column=args.label_column)
 
-hf_labse_features.head()
+print(hf_labse_features.head())
 
 
 sample_size = args.sample_size
