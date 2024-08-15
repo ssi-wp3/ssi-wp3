@@ -20,6 +20,7 @@ import json
 # %%
 # "/netappdata/ssi_tdjg/data/ssi/"
 data_directory = os.getenv("data_directory", default=".")
+print(f"Using data directory: {data_directory}")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input-filename",
