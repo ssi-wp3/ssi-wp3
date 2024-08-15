@@ -1,11 +1,11 @@
-from typing import Tuple
+from typing import Tuple, Dict, Any, Union, Optional, Callable, List
 from sklearn.utils import resample
 import pandas as pd
 
 
 def bootstrap_sample(dataframe: pd.DataFrame,
-                     replace: bool = True,
                      n_samples: int = None,
+                     replace: bool = True,
                      random_state: int = 42,
                      ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Use sklearn.utils.resample to return a bootstrapped sample of the input dataframe.
@@ -65,4 +65,51 @@ def bootstrap_sample_with_ratio(dataframe: pd.DataFrame,
 
     """
     n_samples = int(len(dataframe) * sample_ratio)
-    return bootstrap_sample(dataframe, replace=replace, n_samples=n_samples, random_state=random_state)
+    return bootstrap_sample(dataframe, n_samples=n_samples, replace=replace, random_state=random_state)
+
+
+def perform_bootstrap(dataframe: pd.DataFrame,
+                      n_bootstraps: int,
+                      n_samples_per_bootstrap: Union[Optional[int], float],
+                      evaluation_function: Callable[[int, int, pd.DataFrame, pd.DataFrame], Any],
+                      replace: bool = True,
+                      random_state: int = 42,
+                      ) -> List[Dict[str, Any]]:
+    """Perform bootstrapping on the input dataframe. The bootstrap will take n_bootstraps samples from the input dataframe and evaluate the evaluation_function on each of the bootstrapped samples.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    n_bootstraps : int
+        The number of bootstraps to perform.
+
+    n_samples_per_bootstrap : Union[Optional[int], float]
+        The number of samples to draw for each bootstrap. If None, it will be the same as the size of the input dataframe. If an integer it will be the number of samples. If a float, it will be the ratio of samples to draw.
+
+    evaluation_function : Callable[[int, int, pd.DataFrame, pd.DataFrame], Any]
+        The function to evaluate on each bootstrapped sample. The function takes two integers and two dataframes as input and return a dictionary with evaluation metrics:
+        - The first int is the number of the bootstrap currently being evaluated. 
+        - The second int is the total number of bootstraps.
+        - The first dataframe is the bootstrapped sample 
+        - The second dataframe is the out of bag sample.
+
+    replace : bool
+        Whether to sample with replacement.
+
+    random_state : int
+        The random seed.
+
+    Returns
+    -------
+    List[Dict[str, Any]]
+        A list of dictionaries with the evaluation results for each bootstrap.
+    """
+    results = []
+    for bootstrap_index in range(n_bootstraps):
+        bootstrap_sample_df, out_of_bag_sample_df = bootstrap_sample_with_ratio(
+            dataframe, sample_ratio=n_samples_per_bootstrap, replace=replace, random_state=random_state)
+        results.append(evaluation_function(bootstrap_index, n_bootstraps,
+                                           bootstrap_sample_df, out_of_bag_sample_df))
+    return results
