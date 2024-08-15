@@ -15,7 +15,7 @@ from MLExperiment import MLExperiment
 import experiment_parameters as exp_params
 
 class CoicopExperiment:
-  def __init__(self, experiment: MLExperiment, stores_in_dev: list[str], stores_in_test: list[str], n_train_samples: int = 1):
+  def __init__(self, experiment: MLExperiment, stores_in_dev: list[str], stores_in_test: list[str], n_train_samples: int = 5):
     self.experiment = experiment
     self.stores_in_dev = stores_in_dev
     self.stores_in_test = stores_in_test
@@ -34,11 +34,11 @@ class CoicopExperiment:
     
     sample_results: list[dict] = []
     for sample_idx in range(self.n_train_samples):
-      sample_seed = config.seed + sample_idx # have different seed for each sample, otherwise we'll get same samples
-      sample_idx = y_dev.sample(n=sample_size, replace=sample_replace, seed=sample_seed)
+      sample_seed = config.SEED + sample_idx # have different seed for each sample, otherwise we'll get same samples
+      sample_idx = y_dev.sample(n=sample_size, replace=sample_replace, random_state=sample_seed).index
 
-      X_dev_ = X_dev[sample_idx]
-      y_dev_ = y_dev[sample_idx]
+      X_dev_ = X_dev.loc[sample_idx]
+      y_dev_ = y_dev.loc[sample_idx]
 
       self.experiment.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
 
@@ -47,18 +47,21 @@ class CoicopExperiment:
     
     # get the mean of all sample results
     sample_results_means: dict = sample_results[0].copy()
-    for sample_result in samples_results:
-      for key, value in sample_results.items()
-        sample_results_means[key] += value
+    for sample_result in sample_results:
+      for key, value in sample_result.items():
+        if value is not None:
+          sample_results_means[key] += value
 
-    sample_results_means = {key: value / len(self.n_train_samples) for key, value in sample_results_means}
+    import pdb; pdb.set_trace()
+    sample_results_means = {key: value / self.n_train_samples for key, value in sample_results_means.items() if value is not None}
     self.experiment.results = sample_results_means
+    import pdb; pdb.set_trace()
     
     stores_in_data = {
       "stores_in_dev" : ', '.join(self.stores_in_dev),
       "stores_in_test": ', '.join(self.stores_in_test)
     }
-    self.experiment.results.update(stores_in_data)
+    self.experiment.metadata.update(stores_in_data)
 
   def write_results(self, out_fn: str) -> None:
     self.experiment.write_results(out_fn)

@@ -14,10 +14,16 @@ class MLExperiment:
     self.predict_level = predict_level
     self.sample_weight_col_name = sample_weight_col_name
 
+    pipeline_name = [str(step) for step in self.pipeline.named_steps.values()]
+    pipeline_name = ', '.join(pipeline_name)
+
+    self.metadata = {
+      "pipeline": pipeline_name,
+      "datetime": None,
+      "predict_level": predict_level,
+    }
+
     results_metrics = [
-      "pipeline",
-      "datetime",
-      "predict_level",
       "accuracy",
       "balanced_accuracy",
       "precision",
@@ -37,14 +43,10 @@ class MLExperiment:
 
     y_pred = self.pipeline.predict(X_test)
 
-    pipeline_name = [str(step) for step in self.pipeline.named_steps.values()]
-    pipeline_name = ', '.join(pipeline_name)
+    self.metadata["datetime"] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
 
     exp_results = dict()
 
-    exp_results["pipeline"] = pipeline_name
-    exp_results["datetime"] = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
-    exp_results["predict_level"] = self.predict_level
     exp_results["accuracy"] = accuracy_score(y_test, y_pred)
     exp_results["balanced_accuracy"] = balanced_accuracy_score(y_test, y_pred)
     exp_results["precision"] = precision_score(y_test, y_pred, average="macro", zero_division=1)
@@ -64,16 +66,18 @@ class MLExperiment:
     self.results.update(exp_results)
 
   def write_results(self, out_fn: str) -> None:
-    if len(self.results) == 0:
+    can_write = len(self.results) == 0
+    if can_write:
       print("Experiment has not been evaluated! No results written.")
       return
 
+    out = self.metadata.update(self.results)
     out_exists = os.path.isfile(out_fn)
     with open(out_fn, "a+") as fp:
-      writer = csv.DictWriter(fp, delimiter=',', fieldnames=self.results.keys())
+      writer = csv.DictWriter(fp, delimiter=',', fieldnames=out.keys())
 
       if not out_exists:
         writer.writeheader()
 
-      writer.writerow(self.results)
+      writer.writerow(out)
 
