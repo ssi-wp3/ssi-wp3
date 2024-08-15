@@ -159,6 +159,7 @@ final_result_directory = os.path.join(model_directory, "final")
 if not os.path.exists(final_result_directory):
     os.makedirs(final_result_directory)
 
+tokenizer.save_pretrained(final_result_directory)
 # trainer.save_metrics(os.path.join(final_result_directory, "metrics.json"))
 trainer.save_model(final_result_directory)
 trainer.save_state()
