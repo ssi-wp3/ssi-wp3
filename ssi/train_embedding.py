@@ -91,7 +91,8 @@ hf_labse_features = pd.read_parquet(
     args.input_filename, engine="pyarrow")
 hf_labse_features = hf_labse_features[[args.input_column, args.label_column]]
 if not args.keep_unknown:
-    hf_labse_features = drop_unknown(hf_labse_features)
+    hf_labse_features = drop_unknown(
+        hf_labse_features, label_column=args.label_column)
 
 hf_labse_features.head()
 
