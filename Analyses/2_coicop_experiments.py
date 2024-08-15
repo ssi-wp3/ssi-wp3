@@ -100,15 +100,15 @@ def make_coicop_experiments(pipeline, param_grid: dict, predict_level: int, samp
   for params in param_combinations:
     pipeline_ = clone(pipeline)
     pipeline_.set_params(**params)
-    base_experiment = MLExperiment(pipeline_, predict_level, sample_weight_col_name)
+    base_experiment = BootstrapExperiment(pipeline_, predict_level, sample_weight_col_name, random_state=config.SEED)
 
     # dev: store 1, test: store 2
     for store_1, store_2 in permutations(config.STORES, 2):
-      exp_one_on_one = CoicopExperiment(base_experiment, stores_in_dev=[store_1], stores_in_test=[store_2])
+      exp_one_on_one = CoicopExperiment(base_experiment.copy(), stores_in_dev=[store_1], stores_in_test=[store_2])
       ret.append(exp_one_on_one)
 
     # dev: all stores, test: all stores
-    exp_all_on_all = CoicopExperiment(base_experiment, stores_in_dev=config.STORES, stores_in_test=config.STORES)
+    exp_all_on_all = CoicopExperiment(base_experiment.copy(), stores_in_dev=config.STORES, stores_in_test=config.STORES)
     ret.append(exp_all_on_all)
 
     # dev: (all stores) - store, test: store 
@@ -116,7 +116,7 @@ def make_coicop_experiments(pipeline, param_grid: dict, predict_level: int, samp
       other_stores = config.STORES.copy()
       other_stores.remove(store)
 
-      exp_rest_on_one = CoicopExperiment(base_experiment, stores_in_dev=other_stores, stores_in_test=[store])
+      exp_rest_on_one = CoicopExperiment(base_experiment.copy(), stores_in_dev=other_stores, stores_in_test=[store])
       ret.append(exp_rest_on_one)
 
   return ret

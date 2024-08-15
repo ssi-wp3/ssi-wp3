@@ -109,5 +109,13 @@ class BootstrapExperiment:
       self.experiments.append(sample_exp)
 
   def write_results(self, out_fn: str) -> None:
+    if len(self.experiments) == 0:
+      print("No experiments have been evaluated yet.")
+      return
+
     for exp in self.experiments:
       exp.write_results(out_fn)
+
+  def __copy__(self):
+    base_exp_copy = self.base_experiment.copy()
+    return type(self)(base_exp_copy, self.n_estimators, self.sample_size, self.random_state)
