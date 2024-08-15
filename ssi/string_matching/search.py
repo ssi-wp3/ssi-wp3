@@ -29,7 +29,9 @@ for query_string in args.receipt_texts:
                 fields := '{args.receipt_text_column}'
             ) AS score
             FROM {args.receipt_text_table}
-            )        
+            )
+            where score is not null
+            order by score desc;        
             """)
     print(con.fetchmany(5))
     print("-"*80)
