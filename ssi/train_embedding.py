@@ -124,6 +124,8 @@ model_config = AutoConfig.from_pretrained(
     label2id=label_features._str2int,
     id2label=label_features._int2str,
     num_labels=number_of_categories)
+print(label_features._int2str)
+
 model = AutoModelForSequenceClassification.from_pretrained(
     args.model_name, config=model_config)
 
