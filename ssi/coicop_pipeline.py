@@ -1,9 +1,10 @@
 from ssi.coicop_json_parser import CoicopInputFile, CoicopOutputFile,  create_coicop_output_file
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from enum import Enum
 from abc import ABC, abstractmethod
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, TextClassificationPipeline
 import joblib
+import pandas as pd
 
 
 class CoicopPipelineType(Enum):
@@ -97,7 +98,7 @@ class CoicopPipeline:
     def predict_proba(self, inputs: List[str]) -> List[Dict[str, Any]]:
         return self.model.predict_proba(inputs)
 
-    def predict_receipt(self, receipt_input: CoicopInputFile) -> CoicopOutputFile:
+    def predict_receipt(self, receipt_input: CoicopInputFile, coicop_mapping: Optional[pd.DataFrame] = None) -> CoicopOutputFile:
         receipt_ids = [item.id for item in receipt_input.receipt.items]
         receipt_descriptions = [item.description
                                 for item in receipt_input.receipt.items]
@@ -105,4 +106,4 @@ class CoicopPipeline:
         predicted_probabilities = self.predict_proba(receipt_descriptions)
         print("Finished predicting receipt_descriptions")
 
-        return create_coicop_output_file(receipt_input, receipt_ids, predicted_probabilities)
+        return create_coicop_output_file(receipt_input, receipt_ids, predicted_probabilities, coicop_mapping)

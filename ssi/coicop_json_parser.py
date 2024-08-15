@@ -3,6 +3,7 @@ from pydantic import BaseModel, field_serializer
 from datetime import date
 from typing import List, Dict, Optional
 import numpy as np
+import pandas as pd
 
 
 class ReceiptItem(BaseModel):
@@ -31,6 +32,7 @@ class CoicopInputFile(BaseModel):
     coicop_classification_request: List[str]
     receipt: Receipt
 
+
 class CoicopClassification(BaseModel):
     code: str
     description: Optional[str]
@@ -50,16 +52,32 @@ class CoicopOutputFile(CoicopInputFile):
     coicop_classification_result: ClassificationResult
     metadata: Optional[dict]
 
+
 def load_input_file(filename: str) -> CoicopInputFile:
     with open(filename, "r") as json_file:
         return CoicopInputFile.model_validate_json(json_file.read())
 
 
-def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[str], predicted_probabilities: Dict[str, np.array]) -> CoicopOutputFile:
-    coicop_classification = [] 
+def get_description(coicop_code: str, coicop_mapping: Optional[pd.DataFrame]) -> str:
+    if not coicop_mapping:
+        return ""
+    return coicop_mapping.iloc[coicop_code]
+
+
+def create_coicop_output_file(receipt_input: CoicopInputFile,
+                              receipt_ids: List[str],
+                              predicted_probabilities: Dict[str, np.array],
+                              coicop_mapping: Optional[pd.DataFrame] = None
+                              ) -> CoicopOutputFile:
+
+    coicop_classification = []
     for receipt_id, probabilities in zip(receipt_ids, predicted_probabilities):
         coicop_codes = [
-            CoicopClassification(code=coicop_code, description="", confidence=probability)
+            CoicopClassification(
+                code=coicop_code,
+                description=get_description(coicop_code, coicop_mapping),
+                confidence=probability
+            )
             for coicop_code, probability in probabilities.items()
         ]
         classification_result = ProductClassificationResult(
@@ -72,7 +90,7 @@ def create_coicop_output_file(receipt_input: CoicopInputFile, receipt_ids: List[
         coicop_classification_request=receipt_input.coicop_classification_request,
         receipt=receipt_input.receipt,
         coicop_classification_result=classification_result,
-        metadata=dict() 
+        metadata=dict()
     )
 
     return classification_output
