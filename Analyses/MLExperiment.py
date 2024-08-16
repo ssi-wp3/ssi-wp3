@@ -106,7 +106,6 @@ class BootstrapExperiment:
       sample_seed = self.random_state + sample_idx
 
       X_dev_, y_dev_ = resample(X_dev, y_dev, n_samples=self.sample_size, random_state=sample_seed)
-      import pdb; pdb.set_trace()
 
       sample_exp.eval_pipeline(X_dev_, y_dev_, X_test, y_test, hierarchical_split_func)
       sample_exp.metadata["sample_index"] = sample_idx
