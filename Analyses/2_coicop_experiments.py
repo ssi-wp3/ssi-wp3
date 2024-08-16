@@ -26,15 +26,15 @@ class CoicopExperiment:
       "stores_in_dev" : ', '.join(self.stores_in_dev),
       "stores_in_test": ', '.join(self.stores_in_test)
     }
-    experiment.base_experiment.metadata.update(stores_in_data)
+    experiment._base_experiment.metadata.update(stores_in_data)
     self.experiment = experiment
 
   def eval_pipeline(self, df_dev: pd.DataFrame, df_test: pd.DataFrame):
     df_dev  = df_dev[df_dev["store_name"].isin(self.stores_in_dev)]
     df_test = df_test[df_test["store_name"].isin(self.stores_in_test)]
 
-    X_dev, y_dev = _get_X_y(df_dev, self.experiment.base_experiment.predict_level)
-    X_test, y_test = _get_X_y(df_test, self.experiment.base_experiment.predict_level)
+    X_dev, y_dev = _get_X_y(df_dev, self.experiment._base_experiment.predict_level)
+    X_test, y_test = _get_X_y(df_test, self.experiment._base_experiment.predict_level)
 
     self.experiment.eval_pipeline(X_dev, y_dev, X_test, y_test, hierarchical_split_func=_get_coicop_level_label)
 
