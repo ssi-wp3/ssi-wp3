@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 
 BootstrapSample = namedtuple(
-    "BootstrapSample", ["bootstrap_sample", "out_of_bag_sample"])
+    "BootstrapSample", ["bootstrap_sample", "oob_sample"])
 
 
 def bootstrap_sample(dataframe: pd.DataFrame,
