@@ -8,7 +8,7 @@ import luigi
 import pandas as pd
 
 
-class BootstapModelTask(luigi.Task):
+class BootstrapModelTask(luigi.Task):
     input_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     number_of_bootstraps = luigi.IntParameter(default=10)
