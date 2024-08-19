@@ -79,7 +79,6 @@ def bootstrap_model(sklearn_model,
                     random_state: int = 42) -> pd.DataFrame:
     with tqdm.tqdm(total=n_bootstraps) as progress_bar:
         return perform_bootstrap(dataframe,
-                                 parameter_sampler,
                                  n_bootstraps,
                                  n_samples_per_bootstrap,
                                  sklearn_evaluation_function,
@@ -87,5 +86,6 @@ def bootstrap_model(sklearn_model,
                                  feature_column=feature_column,
                                  label_column=label_column,
                                  random_state=random_state,
-                                 progress_bar=progress_bar
+                                 progress_bar=progress_bar,
+                                 parameter_sampler=parameter_sampler,
                                  )
