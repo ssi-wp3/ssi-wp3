@@ -7,7 +7,6 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
     """ Perform OCR preprocessing augmentation.
 
     """
-
     def ocr_augment(dataframe: pd.DataFrame, receipt_text_column: str, number_of_texts: int) -> pd.DataFrame:
         aug = nac.OcrAug()
         return aug.augment(dataframe[receipt_text_column], n=number_of_texts)
