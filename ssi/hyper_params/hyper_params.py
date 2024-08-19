@@ -37,7 +37,7 @@ class ParamDistributions:
 
     @staticmethod
     def add_prefix_to_dict_keys(dictionary: Dict[str, Any], prefix: str) -> Dict[str, Any]:
-        return {f"{prefix}_{key}": value for key, value in dictionary.items()}
+        return {f"{prefix}{key}": value for key, value in dictionary.items()}
 
     @ staticmethod
     def distributions_for_model(model_type: str, prefix: str = "") -> Dict[str, Any]:
