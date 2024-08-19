@@ -21,10 +21,10 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
     return BootstrapSample(augmented_bootstrap_sample, augmented_oob_sample)
 
 
-def sklearn_evaluation_function(sklearn_pipeline,
-                                bootstrap_index: int,
+def sklearn_evaluation_function(bootstrap_index: int,
                                 total_number_bootstraps: int,
                                 sample: BootstrapSample,
+                                sklearn_pipeline,
                                 parameter_sampler,
                                 feature_column: str,
                                 label_column: str,
