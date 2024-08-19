@@ -1,6 +1,6 @@
 from typing import Any, Dict
 from .bootstrap import BootstrapSample, perform_bootstrap
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, balanced_accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, balanced_accuracy_score, confusion_matrix, classification_report
 import nlpaug.augmenter.char as nac
 import pandas as pd
 import tqdm
@@ -41,6 +41,9 @@ def sklearn_evaluation_function(sklearn_model,
     y_true = test_sample_df[label_column]
     eval_dict = {'bootstrap_index': bootstrap_index}
 
+    classification_report_dict = classification_report(
+        y_true, y_pred, output_dict=True)
+
     metrics = {
         'accuracy': accuracy_score,
         'balanced_accuracy': balanced_accuracy_score,
@@ -48,9 +51,14 @@ def sklearn_evaluation_function(sklearn_model,
         'recall': recall_score,
         'f1': f1_score,
         'roc_auc': roc_auc_score,
+        'confusion_matrix': confusion_matrix
     }
     for metric_name, metric_function in metrics.items():
         eval_dict[metric_name] = metric_function(y_true, y_pred)
+
+    for class_name, class_metrics in classification_report_dict.items():
+        for metric_name, metric_value in class_metrics.items():
+            eval_dict[f'{class_name}_{metric_name}'] = metric_value
 
     progress_bar.update(1)
     return eval_dict
