@@ -31,7 +31,7 @@ def bootstrap_sample(dataframe: pd.DataFrame,
 
     Returns
     -------
-    Tuple[pd.DataFrame, pd.DataFrame]
+    BootstrapSample
         The dataframe with the bootstrapped sample and a dataframe with the out of bag sample.
 
     """
@@ -65,12 +65,42 @@ def bootstrap_sample_with_ratio(dataframe: pd.DataFrame,
 
     Returns
     -------
-    Tuple[pd.DataFrame, pd.DataFrame]
+    BootstrapSample
         The dataframe with the bootstrapped sample and a dataframe with the out of bag sample.
 
     """
     n_samples = int(len(dataframe) * sample_ratio)
     return bootstrap_sample(dataframe, n_samples=n_samples, replace=replace, random_state=random_state)
+
+
+def bootstrap(dataframe: pd.DataFrame,
+              sample_ratio: Union[Optional[int], float],
+              replace: bool = True,
+              random_state: int = 42) -> BootstrapSample:
+    """Bootstrap the input dataframe. This function is a wrapper around the bootstrap_sample and bootstrap_sample_with_ratio functions. If the sample_ratio is an integer, it will call the bootstrap_sample function. If the sample_ratio is a float, it will call the bootstrap_sample_with_ratio function.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The input dataframe.
+
+    sample_ratio : Union[Optional[int], float]
+        The number of samples to draw for each bootstrap. If None, it will be the same as the size of the input dataframe. If an integer it will be the number of samples. If a float, it will be the ratio of samples to draw.
+
+    replace : bool
+        Whether to sample with replacement.
+
+    random_state : int
+        The random seed.
+
+    Returns
+    -------
+    BootstrapSample
+        The dataframe with the bootstrapped sample and a dataframe with the out of bag sample.
+    """
+    if sample_ratio is None or isinstance(sample_ratio, int):
+        return bootstrap_sample(dataframe, n_samples=sample_ratio, replace=replace, random_state=random_state)
+    return bootstrap_sample_with_ratio(dataframe, sample_ratio=sample_ratio, replace=replace, random_state=random_state)
 
 
 def perform_bootstrap(dataframe: pd.DataFrame,
@@ -82,7 +112,7 @@ def perform_bootstrap(dataframe: pd.DataFrame,
                       replace: bool = True,
                       random_state: int = 42,
                       **kwargs: Dict[str, Any]
-                      ) -> List[Dict[str, Any]]:
+                      ) -> pd.DataFrame:
     """Perform bootstrapping on the input dataframe. The bootstrap will take n_bootstraps samples from the input dataframe and evaluate the evaluation_function on each of the bootstrapped samples. This function trains the
     model on the bootstrapped sample and evaluates it on the out of bag sample. This gives an estimate of the model's performance on unseen data.
 
@@ -120,20 +150,20 @@ def perform_bootstrap(dataframe: pd.DataFrame,
 
     Returns
     -------
-    List[Dict[str, Any]]
-        A list of dictionaries with the evaluation results for each bootstrap.
+    pd.DataFrame
+        A dataframe with the evaluation metrics for each bootstrap.
     """
     results = []
     for bootstrap_index in range(n_bootstraps):
 
-        bootstrap_sample = bootstrap_sample_with_ratio(
+        bootstrap_sample = bootstrap(
             dataframe, sample_ratio=n_samples_per_bootstrap, replace=replace, random_state=random_state)
         if preprocess_function is not None:
             bootstrap_sample = preprocess_function(bootstrap_sample, **kwargs)
 
         results.append(evaluation_function(bootstrap_index, n_bootstraps,
                                            bootstrap_sample, **kwargs))
-    return results
+    return pd.DataFrame(results)
 
 
 def perform_separate_bootstraps(dataframe: pd.DataFrame,
@@ -145,7 +175,7 @@ def perform_separate_bootstraps(dataframe: pd.DataFrame,
                                 replace: bool = True,
                                 random_state: int = 42,
                                 **kwargs: Dict[str, Any]
-                                ) -> List[Dict[str, Any]]:
+                                ) -> pd.DataFrame:
     """Perform bootstrapping on the input dataframe. The bootstrap will take n_bootstraps samples from the input dataframe and evaluate the evaluation_function on each of the bootstrapped samples. This function takes two samples: one for the training data and one for the test data. Both samples are taken from the complete input
     dataframe and if replace is True with replacement. This function evaluates the model on test data that has an
     overlap with the training data. This is useful to evaluate the model in a more realistic scenario where some
@@ -185,11 +215,24 @@ def perform_separate_bootstraps(dataframe: pd.DataFrame,
 
     Returns
     -------
-    List[Dict[str, Any]]
+    pd.DataFrame
         A list of dictionaries with the evaluation results for each bootstrap.
     """
     results = []
     for bootstrap_index in range(n_bootstraps):
+        training_sample = bootstrap(
+            dataframe, sample_ratio=n_samples_per_bootstrap, replace=replace, random_state=random_state)
+        if preprocess_function is not None:
+            training_sample = preprocess_function(training_sample, **kwargs)
+        training_sample = training_sample.bootstrap_sample
 
-        bootstrap_sample = bootstrap_sample_with_ratio(
-            dataframe, sample_ratio=n_samples_per_bootstrap, replace=
+        test_sample = bootstrap(
+            dataframe, sample_ratio=n_samples_per_bootstrap, replace=replace, random_state=random_state)
+        if preprocess_function is not None:
+            test_sample = preprocess_function(test_sample, **kwargs)
+        test_sample = test_sample.bootstrap_sample
+
+        train_test_sample = BootstrapSample(training_sample, test_sample)
+        results.append(evaluation_function(bootstrap_index, n_bootstraps,
+                                           train_test_sample.bootstrap_sample, train_test_sample.out_of_bag_sample, **kwargs))
+    return pd.DataFrame(results)
