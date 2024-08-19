@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from .bootstrap import BootstrapSample, perform_bootstrap
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, balanced_accuracy_score, confusion_matrix, classification_report
+from functools import partial
 import nlpaug.augmenter.char as nac
 import pandas as pd
 import tqdm
@@ -52,12 +53,23 @@ def sklearn_evaluation_function(bootstrap_index: int,
     metrics = {
         'accuracy': accuracy_score,
         'balanced_accuracy': balanced_accuracy_score,
-        'precision': precision_score,
-        'recall': recall_score,
-        'f1': f1_score,
+
+        "precision_micro": partial(precision_score, average="micro"),
+        "precision_macro": partial(precision_score, average="macro"),
+        "precision_weighted": partial(precision_score, average="weighted"),
+
+        "recall_micro": partial(recall_score, average="micro"),
+        "recall_macro": partial(recall_score, average="macro"),
+        "recall_weighted": partial(recall_score, average="weighted"),
+
+        "f1_micro": partial(f1_score, average="micro"),
+        "f1_macro": partial(f1_score, average="macro"),
+        "f1_weighted": partial(f1_score, average="weighted"),
+
         'roc_auc': roc_auc_score,
         'confusion_matrix': confusion_matrix
     }
+
     for metric_name, metric_function in metrics.items():
         eval_dict[metric_name] = metric_function(y_true, y_pred)
 
