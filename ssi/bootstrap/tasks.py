@@ -33,8 +33,9 @@ class BootstrapModelTask(luigi.Task):
         with self.input().open('r') as input_file:
             dataframe = pd.read_parquet(input_file, engine=self.engine)
 
-            param_sampler = list(create_sampler_for_pipeline(
-                'CountVectorizer', 'LogisticRegression', self.number_of_bootstraps, self.random_state))
+            param_sampler = (value for value in create_sampler_for_pipeline(
+                'CountVectorizer', 'LogisticRegression', self.number_of_bootstraps, self.random_state)
+            )
             bootstrap_df = bootstrap_model(sklearn_pipeline,
                                            param_sampler,
                                            dataframe,
