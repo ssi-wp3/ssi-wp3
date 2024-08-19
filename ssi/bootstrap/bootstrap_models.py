@@ -22,6 +22,7 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
 
 
 def sklearn_evaluation_function(sklearn_pipeline,
+                                parameter_sampler,
                                 bootstrap_index: int,
                                 total_number_bootstraps: int,
                                 sample: BootstrapSample,
@@ -33,6 +34,8 @@ def sklearn_evaluation_function(sklearn_pipeline,
     train_sample_df = sample.bootstrap_sample
 
     # Get new parameter combinations from parameter sampler
+    params = next(parameter_sampler)
+    sklearn_pipeline.set_params(**params)
 
     sklearn_pipeline.fit(
         train_sample_df[feature_column], train_sample_df[label_column])
@@ -67,6 +70,7 @@ def sklearn_evaluation_function(sklearn_pipeline,
 
 
 def bootstrap_model(sklearn_model,
+                    parameter_sampler,
                     dataframe: pd.DataFrame,
                     n_bootstraps: int,
                     n_samples_per_bootstrap: int,
@@ -75,6 +79,7 @@ def bootstrap_model(sklearn_model,
                     random_state: int = 42) -> pd.DataFrame:
     with tqdm.tqdm(total=n_bootstraps) as progress_bar:
         return perform_bootstrap(dataframe,
+                                 parameter_sampler,
                                  n_bootstraps,
                                  n_samples_per_bootstrap,
                                  sklearn_evaluation_function,
