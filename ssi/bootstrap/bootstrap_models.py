@@ -12,4 +12,8 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
         aug = nac.OcrAug()
         return aug.augment(dataframe[receipt_text_column], n=number_of_texts)
 
-    return BootstrapSample
+    augmented_bootstrap_sample = ocr_augment(
+        bootstrap_sample.training_sample, receipt_text_column, number_of_texts)
+    augmented_oob_sample = ocr_augment(
+        bootstrap_sample.oob_sample, receipt_text_column, number_of_texts)
+    return BootstrapSample(augmented_bootstrap_sample, augmented_oob_sample)
