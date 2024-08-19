@@ -1,13 +1,17 @@
 from typing import Tuple, Dict, Any, Union, Optional, Callable, List
 from sklearn.utils import resample
+from collections import namedtuple
 import pandas as pd
+
+BootstrapSample = namedtuple(
+    "BootstrapSample", ["bootstrap_sample", "out_of_bag_sample"])
 
 
 def bootstrap_sample(dataframe: pd.DataFrame,
                      n_samples: int = None,
                      replace: bool = True,
                      random_state: int = 42,
-                     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+                     ) -> BootstrapSample:
     """Use sklearn.utils.resample to return a bootstrapped sample of the input dataframe.
 
     Parameters
@@ -33,14 +37,14 @@ def bootstrap_sample(dataframe: pd.DataFrame,
     sample_indices = resample(
         dataframe.index, replace=replace, n_samples=n_samples, random_state=random_state)
     out_of_bag_indices = dataframe.index.difference(sample_indices)
-    return dataframe.loc[sample_indices], dataframe.loc[out_of_bag_indices]
+    return BootstrapSample(dataframe.loc[sample_indices], dataframe.loc[out_of_bag_indices])
 
 
 def bootstrap_sample_with_ratio(dataframe: pd.DataFrame,
                                 sample_ratio: float = 1.0,
                                 replace: bool = True,
                                 random_state: int = 42,
-                                ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+                                ) -> BootstrapSample:
     """Use sklearn.utils.resample to return a bootstrapped sample of the input dataframe.
     Instead of specifying the number of samples, the sample_ratio is used in this function to determine the number of samples. This function calculates the number of samples for the sample_ratio and calls the bootstrap_sample function.
 
@@ -71,7 +75,9 @@ def bootstrap_sample_with_ratio(dataframe: pd.DataFrame,
 def perform_bootstrap(dataframe: pd.DataFrame,
                       n_bootstraps: int,
                       n_samples_per_bootstrap: Union[Optional[int], float],
-                      evaluation_function: Callable[[int, int, pd.DataFrame, pd.DataFrame], Any],
+                      evaluation_function: Callable[[int, int, BootstrapSample], Any],
+                      preprocess_function: Optional[Callable[[
+                          BootstrapSample], BootstrapSample]] = None,
                       replace: bool = True,
                       random_state: int = 42,
                       ) -> List[Dict[str, Any]]:
@@ -88,12 +94,15 @@ def perform_bootstrap(dataframe: pd.DataFrame,
     n_samples_per_bootstrap : Union[Optional[int], float]
         The number of samples to draw for each bootstrap. If None, it will be the same as the size of the input dataframe. If an integer it will be the number of samples. If a float, it will be the ratio of samples to draw.
 
-    evaluation_function : Callable[[int, int, pd.DataFrame, pd.DataFrame], Any]
+    evaluation_function : Callable[[int, int, BootstrapSample], Any]
         The function to evaluate on each bootstrapped sample. The function takes two integers and two dataframes as input and return a dictionary with evaluation metrics:
         - The first int is the number of the bootstrap currently being evaluated. 
         - The second int is the total number of bootstraps.
         - The first dataframe is the bootstrapped sample 
         - The second dataframe is the out of bag sample.
+
+    preprocess_function : Optional[Callable[[BootstrapSample], BootstrapSample]]
+        A function to preprocess the bootstrapped sample before evaluating the evaluation_function.
 
     replace : bool
         Whether to sample with replacement.
@@ -108,8 +117,12 @@ def perform_bootstrap(dataframe: pd.DataFrame,
     """
     results = []
     for bootstrap_index in range(n_bootstraps):
-        bootstrap_sample_df, out_of_bag_sample_df = bootstrap_sample_with_ratio(
+
+        bootstrap_sample = bootstrap_sample_with_ratio(
             dataframe, sample_ratio=n_samples_per_bootstrap, replace=replace, random_state=random_state)
+        if preprocess_function is not None:
+            bootstrap_sample = preprocess_function(bootstrap_sample)
+
         results.append(evaluation_function(bootstrap_index, n_bootstraps,
-                                           bootstrap_sample_df, out_of_bag_sample_df))
+                                           bootstrap_sample))
     return results
