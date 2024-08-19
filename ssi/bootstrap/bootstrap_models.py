@@ -21,7 +21,7 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
     return BootstrapSample(augmented_bootstrap_sample, augmented_oob_sample)
 
 
-def sklearn_evaluation_function(sklearn_model,
+def sklearn_evaluation_function(sklearn_pipeline,
                                 bootstrap_index: int,
                                 total_number_bootstraps: int,
                                 sample: BootstrapSample,
@@ -32,12 +32,14 @@ def sklearn_evaluation_function(sklearn_model,
     # Train the model
     train_sample_df = sample.bootstrap_sample
 
-    sklearn_model.fit(
+    # Get new parameter combinations from parameter sampler
+
+    sklearn_pipeline.fit(
         train_sample_df[feature_column], train_sample_df[label_column])
 
     # Evaluate the model on the out-of-bag sample
     test_sample_df = sample.oob_sample
-    y_pred = sklearn_model.predict(test_sample_df[feature_column])
+    y_pred = sklearn_pipeline.predict(test_sample_df[feature_column])
     y_true = test_sample_df[label_column]
     eval_dict = {'bootstrap_index': bootstrap_index}
 
