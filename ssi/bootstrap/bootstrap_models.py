@@ -1,6 +1,9 @@
+from typing import Any, Dict
 from .bootstrap import BootstrapSample, perform_bootstrap
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, balanced_accuracy_score
 import nlpaug.augmenter.char as nac
 import pandas as pd
+import tqdm
 
 
 def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: str, number_of_texts: int) -> BootstrapSample:
@@ -16,3 +19,58 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
     augmented_oob_sample = ocr_augment(
         bootstrap_sample.oob_sample, receipt_text_column, number_of_texts)
     return BootstrapSample(augmented_bootstrap_sample, augmented_oob_sample)
+
+
+def sklearn_evaluation_function(sklearn_model,
+                                bootstrap_index: int,
+                                total_number_bootstraps: int,
+                                sample: BootstrapSample,
+                                feature_column: str,
+                                label_column: str,
+                                progress_bar: tqdm.tqdm) -> Dict[str, Any]:
+
+    # Train the model
+    train_sample_df = sample.bootstrap_sample
+
+    sklearn_model.fit(
+        train_sample_df[feature_column], train_sample_df[label_column])
+
+    # Evaluate the model on the out-of-bag sample
+    test_sample_df = sample.oob_sample
+    y_pred = sklearn_model.predict(test_sample_df[feature_column])
+    y_true = test_sample_df[label_column]
+    eval_dict = {'bootstrap_index': bootstrap_index}
+
+    metrics = {
+        'accuracy': accuracy_score,
+        'balanced_accuracy': balanced_accuracy_score,
+        'precision': precision_score,
+        'recall': recall_score,
+        'f1': f1_score,
+        'roc_auc': roc_auc_score,
+    }
+    for metric_name, metric_function in metrics.items():
+        eval_dict[metric_name] = metric_function(y_true, y_pred)
+
+    progress_bar.update(1)
+    return eval_dict
+
+
+def bootstrap_model(sklearn_model,
+                    dataframe: pd.DataFrame,
+                    n_bootstraps: int,
+                    n_samples_per_bootstrap: int,
+                    feature_column: str,
+                    label_column: str,
+                    random_state: int = 42) -> pd.DataFrame:
+    with tqdm.tqdm(total=n_bootstraps) as progress_bar:
+        return perform_bootstrap(dataframe,
+                                 n_bootstraps,
+                                 n_samples_per_bootstrap,
+                                 sklearn_evaluation_function,
+                                 sklearn_model=sklearn_model,
+                                 feature_column=feature_column,
+                                 label_column=label_column,
+                                 random_state=random_state,
+                                 progress_bar=progress_bar
+                                 )
