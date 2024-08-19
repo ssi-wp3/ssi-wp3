@@ -82,10 +82,11 @@ def bootstrap_model(sklearn_pipeline,
                                  n_bootstraps,
                                  n_samples_per_bootstrap,
                                  sklearn_evaluation_function,
+                                 replace=True,
+                                 random_state=random_state,
                                  sklearn_pipeline=sklearn_pipeline,
+                                 parameter_sampler=parameter_sampler,
                                  feature_column=feature_column,
                                  label_column=label_column,
-                                 random_state=random_state,
-                                 progress_bar=progress_bar,
-                                 parameter_sampler=parameter_sampler
+                                 progress_bar=progress_bar
                                  )
