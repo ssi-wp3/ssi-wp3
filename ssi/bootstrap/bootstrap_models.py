@@ -22,10 +22,10 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
 
 
 def sklearn_evaluation_function(sklearn_pipeline,
-                                parameter_sampler,
                                 bootstrap_index: int,
                                 total_number_bootstraps: int,
                                 sample: BootstrapSample,
+                                parameter_sampler,
                                 feature_column: str,
                                 label_column: str,
                                 progress_bar: tqdm.tqdm) -> Dict[str, Any]:
@@ -87,5 +87,5 @@ def bootstrap_model(sklearn_pipeline,
                                  label_column=label_column,
                                  random_state=random_state,
                                  progress_bar=progress_bar,
-                                 parameter_sampler=parameter_sampler,
+                                 parameter_sampler=parameter_sampler
                                  )
