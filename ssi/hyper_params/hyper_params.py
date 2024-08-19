@@ -35,13 +35,17 @@ DISTRIBUTIONS_FOR_ALL_MODELS = {
 
 class ParamDistributions:
 
+    @staticmethod
+    def add_prefix_to_dict_keys(dictionary: Dict[str, Any], prefix: str) -> Dict[str, Any]:
+        return {f"{prefix}_{key}": value for key, value in dictionary.items()}
+
     @ staticmethod
-    def distributions_for_model(model_type: str) -> Dict[str, Any]:
-        return DISTRIBUTIONS_FOR_ALL_MODELS[model_type]
+    def distributions_for_model(model_type: str, prefix: str = "") -> Dict[str, Any]:
+        return ParamDistributions.add_prefix_to_dict_keys(DISTRIBUTIONS_FOR_ALL_MODELS[model_type], prefix)
 
     @staticmethod
-    def distributions_for_feature_extraction(feature_extraction_type: str) -> Dict[str, Any]:
-        return FEATURE_EXTRACTION_PARAMS[feature_extraction_type]
+    def distributions_for_feature_extraction(feature_extraction_type: str, prefix: str = "") -> Dict[str, Any]:
+        return ParamDistributions.add_prefix_to_dict_keys(FEATURE_EXTRACTION_PARAMS[feature_extraction_type], prefix)
 
     @staticmethod
     def distributions_for_pipeline(feature_extraction_type: str,
@@ -49,7 +53,5 @@ class ParamDistributions:
                                    feature_pipeline_prefix: str = "vectorizer__",
                                    model_prefix: str = "clf__"
                                    ) -> Dict[str, Any]:
-        return {
-            **{f"{feature_pipeline_prefix}_{param_name}": param_settings for param_name, param_settings in FEATURE_EXTRACTION_PARAMS[feature_extraction_type].items()},
-            **{f"{model_prefix}_{param_name}": param_settings for param_name, param_settings in DISTRIBUTIONS_FOR_ALL_MODELS[model_type].items()}
-        }
+        return {**ParamDistributions.distributions_for_feature_extraction(feature_extraction_type, feature_pipeline_prefix),
+                **ParamDistributions.distributions_for_model(model_type, model_prefix)}
