@@ -1,13 +1,30 @@
 from typing import Dict, Any
 import scipy.stats as stats
 
+# Feature extraction parameters
+
+COUNT_VECTORIZER = {
+    'lowercase': [True, False],
+    'ngram_range': [(1, 1), (1, 2), (1, 3)],
+    'analyzer': ['word', 'char', 'char_wb'],
+    'min_df': stats.uniform(0, 0.2),
+    'max_df': stats.uniform(0.8, 0.2),
+    'max_features': range(100, 10000),
+}
+
+FEATURE_EXTRACTION_PARAMS = {
+    'CountVectorizer': COUNT_VECTORIZER,
+    'TfidfVectorizer': COUNT_VECTORIZER,
+}
+
+# Model parameters
 
 LOGISTIC_REGRESSION = {
-    "C": stats.loguniform(1e-4, 1e4),
-    "penalty": ["l1", "l2"],
-    "solver": ["liblinear"],
-    "max_iter": [100, 200, 300, 400, 500],
-    "class_weight": ["balanced", None],
+    'penalty': ['l1', 'l2'],
+    'C': stats.loguniform(0.1, 1),
+    'fit_intercept': [True, False],
+    'max_iter': [100, 200, 300],
+    'solver': ['liblinear', 'saga'],
 }
 
 
