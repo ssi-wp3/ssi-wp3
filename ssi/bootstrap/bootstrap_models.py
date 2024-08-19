@@ -69,7 +69,7 @@ def sklearn_evaluation_function(sklearn_pipeline,
     return eval_dict
 
 
-def bootstrap_model(sklearn_model,
+def bootstrap_model(sklearn_pipeline,
                     parameter_sampler,
                     dataframe: pd.DataFrame,
                     n_bootstraps: int,
@@ -82,7 +82,7 @@ def bootstrap_model(sklearn_model,
                                  n_bootstraps,
                                  n_samples_per_bootstrap,
                                  sklearn_evaluation_function,
-                                 sklearn_model=sklearn_model,
+                                 sklearn_pipeline=sklearn_pipeline,
                                  feature_column=feature_column,
                                  label_column=label_column,
                                  random_state=random_state,
