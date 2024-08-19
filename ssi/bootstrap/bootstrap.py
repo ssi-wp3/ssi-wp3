@@ -76,11 +76,12 @@ def bootstrap_sample_with_ratio(dataframe: pd.DataFrame,
 def perform_bootstrap(dataframe: pd.DataFrame,
                       n_bootstraps: int,
                       n_samples_per_bootstrap: Union[Optional[int], float],
-                      evaluation_function: Callable[[int, int, BootstrapSample], Any],
+                      evaluation_function: Callable[[int, int, BootstrapSample, Optional[Dict[str, Any]]], Any],
                       preprocess_function: Optional[Callable[[
-                          BootstrapSample], BootstrapSample]] = None,
+                          BootstrapSample, Optional[Dict[str, Any]]], BootstrapSample]] = None,
                       replace: bool = True,
                       random_state: int = 42,
+                      **kwargs: Dict[str, Any]
                       ) -> List[Dict[str, Any]]:
     """Perform bootstrapping on the input dataframe. The bootstrap will take n_bootstraps samples from the input dataframe and evaluate the evaluation_function on each of the bootstrapped samples.
 
@@ -97,13 +98,14 @@ def perform_bootstrap(dataframe: pd.DataFrame,
 
     evaluation_function : Callable[[int, int, BootstrapSample], Any]
         The function to evaluate on each bootstrapped sample. The function takes two integers and two dataframes as input and return a dictionary with evaluation metrics:
-        - The first int is the number of the bootstrap currently being evaluated. 
+        - The first int is the number of the bootstrap currently being evaluated.
         - The second int is the total number of bootstraps.
         - A namedtuple called BootStrapSample:
-            - The first dataframe is the bootstrapped sample 
+            - The first dataframe is the bootstrapped sample
             - The second dataframe is the out of bag sample.
 
-    preprocess_function : Optional[Callable[[BootstrapSample], BootstrapSample]]
+    preprocess_function : Optional[Callable[[
+        BootstrapSample], BootstrapSample]]
         A function to preprocess the bootstrapped sample before evaluating the evaluation_function.
 
     replace : bool
@@ -111,6 +113,9 @@ def perform_bootstrap(dataframe: pd.DataFrame,
 
     random_state : int
         The random seed.
+
+    kwargs : Dict[str, Any]
+        Additional keyword arguments to pass to the evaluation function.
 
     Returns
     -------
@@ -121,12 +126,12 @@ def perform_bootstrap(dataframe: pd.DataFrame,
     for bootstrap_index in range(n_bootstraps):
 
         bootstrap_sample = bootstrap_sample_with_ratio(
-            dataframe, sample_ratio=n_samples_per_bootstrap, replace=replace, random_state=random_state)
+            dataframe, sample_ratio=n_samples_per_bootstrap, replace=replace, random_state=random_state, **kwargs)
         if preprocess_function is not None:
             bootstrap_sample = preprocess_function(bootstrap_sample)
 
         results.append(evaluation_function(bootstrap_index, n_bootstraps,
-                                           bootstrap_sample))
+                                           bootstrap_sample, **kwargs))
     return results
 
 
@@ -138,8 +143,8 @@ def perform_bootstrap_with_train_test_split(dataframe: pd.DataFrame,
                                                 BootstrapSample], BootstrapSample]] = None,
                                             replace: bool = True,
                                             test_size: float = 0.2,
-                                            random_state: int = 42) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    """ Perform bootstrapping on a dataset after performing a train-test split. The bootstrap will be performed on the training set and the final evaluation will be done on a hold out test set. The evaluation_function will be called on each bootstrapped sample and the results will be returned. 
+                                            random_state: int = 42, **kwargs: Optional[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """ Perform bootstrapping on a dataset after performing a train-test split. The bootstrap will be performed on the training set and the final evaluation will be done on a hold out test set. The evaluation_function will be called on each bootstrapped sample and the results will be returned.
 
     Parameters
     ----------
@@ -154,13 +159,14 @@ def perform_bootstrap_with_train_test_split(dataframe: pd.DataFrame,
 
     evaluation_function : Callable[[int, int, BootstrapSample], Any]
         The function to evaluate on each bootstrapped sample. The function takes two integers and two dataframes as input and return a dictionary with evaluation metrics:
-        - The first int is the number of the bootstrap currently being evaluated. 
+        - The first int is the number of the bootstrap currently being evaluated.
         - The second int is the total number of bootstraps.
         - A namedtuple called BootStrapSample:
-            - The first dataframe is the bootstrapped sample 
+            - The first dataframe is the bootstrapped sample
             - The second dataframe is the out of bag sample.
 
-    preprocess_function : Optional[Callable[[BootstrapSample], BootstrapSample]]
+    preprocess_function : Optional[Callable[[
+        BootstrapSample], BootstrapSample]]
         A function to preprocess the bootstrapped sample before evaluating the evaluation_function.
 
     replace : bool
@@ -172,8 +178,11 @@ def perform_bootstrap_with_train_test_split(dataframe: pd.DataFrame,
     random_state : int
         The random seed.
 
+    kwargs : Dict[str, Any]
+        Additional keyword arguments to pass to the evaluation function.
+
     Returns
-    -------    
+    -------
     Tuple[List[Dict[str, Any]], Dict[str, Any]]
         A tuple of with the evaluation results. The first paramater, a list, contains the evaluation results for the bootstraps on training set and the second parameter, a dict, contains the evaluation results for the test set.
     """
