@@ -5,6 +5,7 @@ from functools import partial
 import nlpaug.augmenter.char as nac
 import pandas as pd
 import tqdm
+import numpy as np
 
 
 def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: str, number_of_texts: int) -> BootstrapSample:
@@ -22,7 +23,7 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
     return BootstrapSample(augmented_bootstrap_sample, augmented_oob_sample)
 
 
-def evaluate_model(y_pred, y_true) -> Dict[str, Any]:
+def evaluate_model(y_true: np.array, y_pred: np.array) -> Dict[str, Any]:
     eval_dict = dict()
     metrics = {
         'accuracy': accuracy_score,
@@ -83,7 +84,7 @@ def sklearn_evaluation_function(bootstrap_index: int,
     y_pred = sklearn_pipeline.predict(test_sample_df[feature_column])
     y_true = test_sample_df[label_column].values
 
-    eval_dict = evaluate_model(y_pred, y_true)
+    eval_dict = evaluate_model(y_true, y_pred)
     eval_dict['bootstrap_index'] = bootstrap_index
 
     progress_bar.update(1)
