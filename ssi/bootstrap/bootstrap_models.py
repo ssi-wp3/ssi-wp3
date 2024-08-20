@@ -77,6 +77,10 @@ def sklearn_evaluation_function(bootstrap_index: int,
         eval_dict[metric_name] = metric_function(y_true, y_pred)
 
     for class_name, class_metrics in classification_report_dict.items():
+        if class_name == 'accuracy':
+            eval_dict['accuracy'] = class_metrics
+            continue
+
         for metric_name, metric_value in class_metrics.items():
             eval_dict[f'{class_name}_{metric_name}'] = metric_value
 
