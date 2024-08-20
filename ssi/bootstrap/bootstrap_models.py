@@ -66,10 +66,10 @@ def sklearn_evaluation_function(bootstrap_index: int,
         "f1_macro": partial(f1_score, average="macro"),
         "f1_weighted": partial(f1_score, average="weighted"),
 
-        'roc_auc_macro_ovr': partial(roc_auc_score, average='macro', multi_class='ovr'),
-        'roc_auc_weighted_ovr': partial(roc_auc_score, average='weighted', multi_class='ovr'),
-        'roc_auc_marco_ovo': partial(roc_auc_score, average='macro', multi_class='ovo'),
-        'roc_auc_weighted_ovo': partial(roc_auc_score, average='weighted', multi_class='ovo'),
+        # 'roc_auc_macro_ovr': partial(roc_auc_score, average='macro', multi_class='ovr'),
+        # 'roc_auc_weighted_ovr': partial(roc_auc_score, average='weighted', multi_class='ovr'),
+        # 'roc_auc_marco_ovo': partial(roc_auc_score, average='macro', multi_class='ovo'),
+        # 'roc_auc_weighted_ovo': partial(roc_auc_score, average='weighted', multi_class='ovo'),
         'confusion_matrix': confusion_matrix
     }
 
