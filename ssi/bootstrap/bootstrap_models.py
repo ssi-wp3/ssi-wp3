@@ -44,7 +44,7 @@ def sklearn_evaluation_function(bootstrap_index: int,
     # Evaluate the model on the out-of-bag sample
     test_sample_df = sample.oob_sample
     y_pred = sklearn_pipeline.predict(test_sample_df[feature_column])
-    y_true = test_sample_df[label_column]
+    y_true = test_sample_df[label_column].values
     eval_dict = {'bootstrap_index': bootstrap_index}
 
     classification_report_dict = classification_report(
