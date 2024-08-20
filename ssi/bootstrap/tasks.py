@@ -1,5 +1,5 @@
 from ..parquet_file import ParquetFile
-from ..hyper_params.sampler import create_sampler_for_pipeline
+from ..machine_learning.hyper_params.sampler import create_sampler_for_pipeline
 from .bootstrap_models import bootstrap_model
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer
