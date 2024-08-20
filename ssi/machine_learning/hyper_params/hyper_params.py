@@ -7,7 +7,7 @@ COUNT_VECTORIZER = {
     'lowercase': [True, False],
     'ngram_range': [(1, 1), (1, 2), (1, 3)],
     'analyzer': ['word', 'char', 'char_wb'],
-    'min_df': stats.uniform(0.01, 0.1),
+    # 'min_df': stats.uniform(0.01, 0.1),
     'max_df': stats.uniform(0.8, 0.2),
     'max_features': range(100, 10000),
 }
