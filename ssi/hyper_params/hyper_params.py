@@ -21,7 +21,7 @@ FEATURE_EXTRACTION_PARAMS = {
 
 LOGISTIC_REGRESSION = {
     'penalty': ['l1', 'l2'],
-    'C': stats.loguniform(0.1, 1),
+    'C': stats.loguniform(1e-5, 100),
     'fit_intercept': [True, False],
     'max_iter': [100, 200, 300],
     'solver': ['liblinear', 'saga'],
