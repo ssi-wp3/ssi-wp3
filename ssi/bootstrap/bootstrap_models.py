@@ -74,6 +74,8 @@ def sklearn_evaluation_function(bootstrap_index: int,
 
     # Get new parameter combinations from parameter sampler
     params = next(parameter_sampler)
+    print(f"Evaluating model with parameters: \n\n{params}")
+
     sklearn_pipeline.set_params(**params)
 
     sklearn_pipeline.fit(
