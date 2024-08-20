@@ -22,6 +22,43 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
     return BootstrapSample(augmented_bootstrap_sample, augmented_oob_sample)
 
 
+def evaluate_model(y_pred, y_true) -> Dict[str, Any]:
+    eval_dict = dict()
+    metrics = {
+        'accuracy': accuracy_score,
+        'balanced_accuracy': balanced_accuracy_score,
+        "precision_micro": partial(precision_score, average="micro"),
+        "precision_macro": partial(precision_score, average="macro"),
+        "precision_weighted": partial(precision_score, average="weighted"),
+        "recall_micro": partial(recall_score, average="micro"),
+        "recall_macro": partial(recall_score, average="macro"),
+        "recall_weighted": partial(recall_score, average="weighted"),
+        "f1_micro": partial(f1_score, average="micro"),
+        "f1_macro": partial(f1_score, average="macro"),
+        "f1_weighted": partial(f1_score, average="weighted"),
+        # 'roc_auc_macro_ovr': partial(roc_auc_score, average='macro', multi_class='ovr'),
+        # 'roc_auc_weighted_ovr': partial(roc_auc_score, average='weighted', multi_class='ovr'),
+        # 'roc_auc_marco_ovo': partial(roc_auc_score, average='macro', multi_class='ovo'),
+        # 'roc_auc_weighted_ovo': partial(roc_auc_score, average='weighted', multi_class='ovo'),
+        'confusion_matrix': confusion_matrix
+    }
+
+    for metric_name, metric_function in metrics.items():
+        eval_dict[metric_name] = metric_function(y_true, y_pred)
+
+    classification_report_dict = classification_report(
+        y_true, y_pred, output_dict=True)
+
+    for class_name, class_metrics in classification_report_dict.items():
+        if class_name == 'accuracy':
+            eval_dict['accuracy'] = class_metrics
+            continue
+
+        for metric_name, metric_value in class_metrics.items():
+            eval_dict[f'{class_name}_{metric_name}'] = metric_value
+    return eval_dict
+
+
 def sklearn_evaluation_function(bootstrap_index: int,
                                 total_number_bootstraps: int,
                                 sample: BootstrapSample,
@@ -45,44 +82,9 @@ def sklearn_evaluation_function(bootstrap_index: int,
     test_sample_df = sample.oob_sample
     y_pred = sklearn_pipeline.predict(test_sample_df[feature_column])
     y_true = test_sample_df[label_column].values
-    eval_dict = {'bootstrap_index': bootstrap_index}
 
-    classification_report_dict = classification_report(
-        y_true, y_pred, output_dict=True)
-
-    metrics = {
-        'accuracy': accuracy_score,
-        'balanced_accuracy': balanced_accuracy_score,
-
-        "precision_micro": partial(precision_score, average="micro"),
-        "precision_macro": partial(precision_score, average="macro"),
-        "precision_weighted": partial(precision_score, average="weighted"),
-
-        "recall_micro": partial(recall_score, average="micro"),
-        "recall_macro": partial(recall_score, average="macro"),
-        "recall_weighted": partial(recall_score, average="weighted"),
-
-        "f1_micro": partial(f1_score, average="micro"),
-        "f1_macro": partial(f1_score, average="macro"),
-        "f1_weighted": partial(f1_score, average="weighted"),
-
-        # 'roc_auc_macro_ovr': partial(roc_auc_score, average='macro', multi_class='ovr'),
-        # 'roc_auc_weighted_ovr': partial(roc_auc_score, average='weighted', multi_class='ovr'),
-        # 'roc_auc_marco_ovo': partial(roc_auc_score, average='macro', multi_class='ovo'),
-        # 'roc_auc_weighted_ovo': partial(roc_auc_score, average='weighted', multi_class='ovo'),
-        'confusion_matrix': confusion_matrix
-    }
-
-    for metric_name, metric_function in metrics.items():
-        eval_dict[metric_name] = metric_function(y_true, y_pred)
-
-    for class_name, class_metrics in classification_report_dict.items():
-        if class_name == 'accuracy':
-            eval_dict['accuracy'] = class_metrics
-            continue
-
-        for metric_name, metric_value in class_metrics.items():
-            eval_dict[f'{class_name}_{metric_name}'] = metric_value
+    eval_dict = evaluate_model(y_pred, y_true)
+    eval_dict['bootstrap_index'] = bootstrap_index
 
     progress_bar.update(1)
     return eval_dict
