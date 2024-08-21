@@ -1,8 +1,8 @@
 from typing import Tuple, Dict, Any, Union, Optional, Callable, List
 from sklearn.utils import resample
 from collections import namedtuple
-from sklearn.model_selection import train_test_split
 import pandas as pd
+import csv
 
 BootstrapSample = namedtuple(
     "BootstrapSample", ["bootstrap_sample", "oob_sample"])
@@ -106,6 +106,7 @@ def bootstrap(dataframe: pd.DataFrame,
 def perform_bootstrap(dataframe: pd.DataFrame,
                       n_bootstraps: int,
                       n_samples_per_bootstrap: Union[Optional[int], float],
+                      results_file,
                       evaluation_function: Callable[[int, int, BootstrapSample, Optional[Dict[str, Any]]], Any],
                       preprocess_function: Optional[Callable[[
                           BootstrapSample, Optional[Dict[str, Any]]], BootstrapSample]] = None,
@@ -126,6 +127,9 @@ def perform_bootstrap(dataframe: pd.DataFrame,
 
     n_samples_per_bootstrap : Union[Optional[int], float]
         The number of samples to draw for each bootstrap. If None, it will be the same as the size of the input dataframe. If an integer it will be the number of samples. If a float, it will be the ratio of samples to draw.
+
+    results_file
+        The file (already opened) to save the results.
 
     evaluation_function : Callable[[int, int, BootstrapSample], Any]
         The function to evaluate on each bootstrapped sample. The function takes two integers and two dataframes as input and return a dictionary with evaluation metrics:
@@ -153,17 +157,25 @@ def perform_bootstrap(dataframe: pd.DataFrame,
     pd.DataFrame
         A dataframe with the evaluation metrics for each bootstrap.
     """
-    results = []
+    # results = []
+
     for bootstrap_index in range(n_bootstraps):
 
         bootstrap_sample = bootstrap(
             dataframe, sample_ratio=n_samples_per_bootstrap, replace=replace, random_state=random_state)
         if preprocess_function is not None:
-            bootstrap_sample = preprocess_function(bootstrap_sample, **kwargs)
+            bootstrap_sample = preprocess_function(
+                bootstrap_sample, **kwargs)
 
-        results.append(evaluation_function(bootstrap_index, n_bootstraps,
-                                           bootstrap_sample, **kwargs))
-    return pd.DataFrame(results)
+        evaluation_dict = evaluation_function(bootstrap_index, n_bootstraps,
+                                              bootstrap_sample, **kwargs)
+        if bootstrap_index == 0:
+            csv_writer = csv.DictWriter(
+                results_file, fieldnames=evaluation_dict.keys())
+            csv_writer.writeheader()
+        csv_writer.writerow(evaluation_dict)
+
+    # return pd.DataFrame(results)
 
 
 def perform_separate_bootstraps(dataframe: pd.DataFrame,
