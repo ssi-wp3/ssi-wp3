@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from .bootstrap import BootstrapSample, perform_bootstrap
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, balanced_accuracy_score, confusion_matrix, classification_report
+from ..machine_learning.evaluation.metrics import evaluate_model
 from functools import partial
 import nlpaug.augmenter.char as nac
 import pandas as pd
