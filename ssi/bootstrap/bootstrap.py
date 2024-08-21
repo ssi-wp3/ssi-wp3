@@ -174,6 +174,7 @@ def perform_bootstrap(dataframe: pd.DataFrame,
                 results_file, fieldnames=evaluation_dict.keys())
             csv_writer.writeheader()
         csv_writer.writerow(evaluation_dict)
+        results_file.flush()
 
     # return pd.DataFrame(results)
 
