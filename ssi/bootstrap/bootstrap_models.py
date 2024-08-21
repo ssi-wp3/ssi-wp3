@@ -29,10 +29,7 @@ def evaluate_model(y_true: np.array, y_pred: np.array) -> Dict[str, Any]:
     metrics = {
         'accuracy': accuracy_score,
         'balanced_accuracy': balanced_accuracy_score,
-        'confusion_matrix': confusion_matrix,
-        'hierarchical_precision_binary': hierarchical_precision_score,
-        'hierarchical_recall_binary': hierarchical_recall_score,
-        'hierarchical_f1_binary': hierarchical_f1_score
+        'confusion_matrix': confusion_matrix
     }
 
     metric_average_functions = {
