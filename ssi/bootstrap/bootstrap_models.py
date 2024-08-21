@@ -29,24 +29,25 @@ def evaluate_model(y_true: np.array, y_pred: np.array) -> Dict[str, Any]:
     metrics = {
         'accuracy': accuracy_score,
         'balanced_accuracy': balanced_accuracy_score,
-        "precision_micro": partial(precision_score, average="micro"),
-        "precision_macro": partial(precision_score, average="macro"),
-        "precision_weighted": partial(precision_score, average="weighted"),
-        "recall_micro": partial(recall_score, average="micro"),
-        "recall_macro": partial(recall_score, average="macro"),
-        "recall_weighted": partial(recall_score, average="weighted"),
-        "f1_micro": partial(f1_score, average="micro"),
-        "f1_macro": partial(f1_score, average="macro"),
-        "f1_weighted": partial(f1_score, average="weighted"),
-        # 'roc_auc_macro_ovr': partial(roc_auc_score, average='macro', multi_class='ovr'),
-        # 'roc_auc_weighted_ovr': partial(roc_auc_score, average='weighted', multi_class='ovr'),
-        # 'roc_auc_marco_ovo': partial(roc_auc_score, average='macro', multi_class='ovo'),
-        # 'roc_auc_weighted_ovo': partial(roc_auc_score, average='weighted', multi_class='ovo'),
         'confusion_matrix': confusion_matrix,
-        'hierarchical_precision': hierarchical_precision_score,
-        'hierarchical_recall': hierarchical_recall_score,
-        'hierarchical_f1': hierarchical_f1_score
+        'hierarchical_precision_binary': hierarchical_precision_score,
+        'hierarchical_recall_binary': hierarchical_recall_score,
+        'hierarchical_f1_binary': hierarchical_f1_score
     }
+
+    metric_average_functions = {
+        "precision": precision_score,
+        "recall": recall_score,
+        "f1": f1_score,
+        "hierarchical_precision": hierarchical_precision_score,
+        "hierarchical_recall": hierarchical_recall_score,
+        "hierarchical_f1": hierarchical_f1_score
+    }
+
+    for metric_name, metric_function in metric_average_functions.items():
+        for metric_average in ['micro', 'macro', 'weighted']:
+            metrics[f"{metric_name}_{metric_average}"] = partial(
+                metric_function, average=metric_average)
 
     for metric_name, metric_function in metrics.items():
         eval_dict[metric_name] = metric_function(y_true, y_pred)
