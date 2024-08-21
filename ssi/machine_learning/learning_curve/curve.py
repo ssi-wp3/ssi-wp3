@@ -13,38 +13,35 @@ output_directory = os.path.join(
 # Create an ArgumentParser object
 parser = argparse.ArgumentParser(description='Learning Curve Script')
 # Add arguments to the parser
-parser.add_argument('--dataset', type=str, default=os.path.join(data_directory, 'ssi_hf_labse_unique_values.parquet'),
+parser.add_argument('-i', '--input-filename', type=str, default=os.path.join(data_directory, 'ssi_hf_labse_unique_values.parquet'),
                     help='Path to the input dataset parquet file')
-parser.add_argument('--output', type=str, default='learning_curve_results.csv',
+parser.add_argument('-o', '--output-filename', type=str, default='learning_curve_results.csv',
                     help='Filename for the learning curve results')
-parser.add_argument('--input_column', type=str, default='receipt_text',
+parser.add_argument('-rc', '--receipt-text-column', type=str, default='receipt_text',
                     help='Name of the input column in the dataset')
-parser.add_argument('--output_column', type=str, default='coicop_number',
+parser.add_argument('-l', '--label-column', type=str, default='coicop_number',
                     help='Name of the output column in the dataset')
+parser.add_argument('-k', '--number-of-folds', type=int,
+                    default=5, help='Number of folds for cross-validation')
+parser.add_argument('-e', '--engine', type=str,
+                    default='pyarrow', help='Parquet engine to use')
 
 # Parse the command-line arguments
 args = parser.parse_args()
 
 # Load the dataset from the parquet file
-data = pd.read_parquet(args.dataset)
+data = pd.read_parquet(args.input_filename, engine=args.engine)
 
 # Split the data into input (X) and output (y)
-X = data[args.input_column]
-y = data[args.output_column]
-
-# Rest of the code...
-# Load the dataset from the parquet file
-data = pd.read_parquet('/path/to/your/dataset.parquet')
-
-# Split the data into input (X) and output (y)
-X = data['receipt_text']
-y = data['coicop_number']
+X = data[args.receipt_text_column]
+y = data[args.label_column]
 
 # Create an instance of the SGDClassifier
 classifier = SGDClassifier()
 
 # Generate the learning curve
-train_sizes, train_scores, test_scores = learning_curve(classifier, X, y, cv=5)
+train_sizes, train_scores, test_scores = learning_curve(
+    classifier, X, y, cv=args.number_of_folds, exploit_incremental_learning=True)
 
 # Calculate the mean and standard deviation of the training and test scores
 train_scores_mean = train_scores.mean(axis=1)
@@ -71,4 +68,7 @@ plt.plot(train_sizes, test_scores_mean, 'o-', color='g',
          label='Cross-validation score')
 
 plt.legend(loc='best')
-plt.show()
+
+input_filename = os.path.splitext(os.path.basename(args.input_filename))[0]
+plt.savefig(os.path.join(output_directory,
+            f'learning_curve_sgd_{input_filename}.png'))
