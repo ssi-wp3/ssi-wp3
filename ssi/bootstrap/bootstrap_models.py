@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from .bootstrap import BootstrapSample, perform_bootstrap
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, balanced_accuracy_score, confusion_matrix, classification_report
-from ..machine_learning.evaluation.metrics import evaluate_model
+from ..machine_learning.evaluation.metrics import hierarchical_precision_score, hierarchical_recall_score, hierarchical_f1_score
 from functools import partial
 import nlpaug.augmenter.char as nac
 import pandas as pd
@@ -42,7 +42,10 @@ def evaluate_model(y_true: np.array, y_pred: np.array) -> Dict[str, Any]:
         # 'roc_auc_weighted_ovr': partial(roc_auc_score, average='weighted', multi_class='ovr'),
         # 'roc_auc_marco_ovo': partial(roc_auc_score, average='macro', multi_class='ovo'),
         # 'roc_auc_weighted_ovo': partial(roc_auc_score, average='weighted', multi_class='ovo'),
-        'confusion_matrix': confusion_matrix
+        'confusion_matrix': confusion_matrix,
+        'hierarchical_precision': hierarchical_precision_score,
+        'hierarchical_recall': hierarchical_recall_score,
+        'hierarchical_f1': hierarchical_f1_score
     }
 
     for metric_name, metric_function in metrics.items():
