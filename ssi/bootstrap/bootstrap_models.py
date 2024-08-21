@@ -87,10 +87,18 @@ def sklearn_evaluation_function(bootstrap_index: int,
     y_true = test_sample_df[label_column].values
 
     eval_dict = evaluate_model(y_true, y_pred)
-    eval_dict['bootstrap_index'] = bootstrap_index
+
+    eval_params_dict = dict()
+    eval_params_dict['bootstrap_index'] = bootstrap_index
+
+    for key, value in params.items():
+        eval_params_dict[key] = value
+
+    for key, value in eval_dict.items():
+        eval_params_dict[key] = value
 
     progress_bar.update(1)
-    return eval_dict
+    return eval_params_dict
 
 
 def bootstrap_model(sklearn_pipeline,
