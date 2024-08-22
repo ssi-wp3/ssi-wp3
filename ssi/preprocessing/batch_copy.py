@@ -15,6 +15,7 @@ def batch_copy(input_filename: str,
 
     read_dataset = pq.ParquetFile(input_filename)  # , memory_map=True)
 
+    pq_writer = None
     total_number_of_rows_read = 0
     total_number_of_rows_written = 0
     with tqdm.tqdm(total=read_dataset.metadata.num_rows) as progress_bar:
