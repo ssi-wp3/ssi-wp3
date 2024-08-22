@@ -45,11 +45,9 @@ pipeline_params = {
     'vectorizer__max_df': 0.8863890037284232,
     'vectorizer__max_features': 8766,
     'vectorizer__ngram_range': (1, 3),
-    'clf__C': 0.00018740223688836313,
     'clf__fit_intercept': True,
-    'clf__max_iter': 100,
+    'clf__max_iter': 1000,
     'clf__penalty': 'l2',
-    'clf__solver': 'saga',
 }
 
 pipeline = Pipeline([
