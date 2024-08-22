@@ -7,8 +7,20 @@ import pyarrow.parquet as pq
 import tqdm
 
 
-def drop_empty_receipts(dataframe: pd.DataFrame, receipt_text_column: str):
+def drop_empty_receipts(dataframe: pd.DataFrame, receipt_text_column: str) -> pd.DataFrame:
     return dataframe[dataframe[receipt_text_column] != '']
+
+
+def drop_duplicates_and_empty_receipts(dataframe: pd.DataFrame,
+                                       key_columns: List[str],
+                                       receipt_text_column: str,
+                                       drop_empty_receipt_texts: bool) -> pd.DataFrame:
+    dataframe = dataframe.drop_duplicates(subset=key_columns)
+    if drop_empty_receipt_texts:
+        dataframe = drop_empty_receipts(dataframe, receipt_text_column)
+
+    dataframe.index.name = "row_index"
+    return dataframe.reset_index()
 
 
 def combine_unique_column_values(filenames: List[str],
@@ -27,12 +39,10 @@ def combine_unique_column_values(filenames: List[str],
         df = pd.read_parquet(
             filename, columns=key_columns, engine=parquet_engine)
         df["file_index"] = file_index
-        df = df.drop_duplicates(subset=key_columns)
-        if drop_empty_receipts:
-            df = drop_empty_receipts(df, receipt_text_column)
-
-        df.index.name = "row_index"
-        df = df.reset_index()
+        df = drop_duplicates_and_empty_receipts(df,
+                                                key_columns,
+                                                receipt_text_column,
+                                                drop_empty_receipts)
         unique_column_values.append(df)
 
     # Drop the duplicates in the combined DataFrame
