@@ -51,4 +51,3 @@ class BootstrapModelTask(luigi.Task):
                                 self.feature_column,
                                 self.label_column,
                                 self.random_state)
-                # bootstrap_df.to_csv(self.output().path, index=False)
