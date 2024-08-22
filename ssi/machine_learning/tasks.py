@@ -25,7 +25,7 @@ class BootstrapModelTask(luigi.Task):
         return ParquetFile(self.input_filename)
 
     def output(self):
-        return luigi.LocalTarget(self.output_filename)
+        return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
         sklearn_pipeline = Pipeline([
