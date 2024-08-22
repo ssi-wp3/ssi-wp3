@@ -23,7 +23,9 @@ class DropDuplicatesTask(luigi.Task):
 
     def run(self):
         with self.input().open('r') as input_file:
-            dataframe = pd.read_parquet(input_file, engine=self.engine)
+            dataframe = pd.read_parquet(
+                input_file, columns=self.key_columns, engine=self.engine)
+            # Drop duplicates and empty receipts and get the row indices that we need to write later
             dataframe = drop_duplicates_and_empty_receipts(dataframe,
                                                            self.key_columns,
                                                            self.receipt_text_column,
