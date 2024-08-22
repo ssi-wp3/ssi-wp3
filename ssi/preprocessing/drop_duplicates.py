@@ -1,6 +1,7 @@
 from ..parquet_file import ParquetFile
 from .combine_unique_values import drop_duplicates_and_empty_receipts
 from .files import get_store_name_from_combined_filename, get_combined_revenue_files_in_folder
+from .batch_copy import batch_copy
 import pandas as pd
 import luigi
 import os
@@ -13,6 +14,7 @@ class DropDuplicatesTask(luigi.Task):
         default=['receipt_text', 'coicop_number'])
     receipt_text_column = luigi.Parameter(default='receipt_text')
     drop_empty_receipt_texts = luigi.BoolParameter(default=True)
+    batch_size = luigi.IntParameter(default=1024)
     engine = luigi.Parameter(default='pyarrow')
 
     def requires(self):
@@ -32,7 +34,8 @@ class DropDuplicatesTask(luigi.Task):
                                                            self.drop_empty_receipt_texts)
 
             with self.output().open('w') as output_file:
-                dataframe.to_parquet(output_file, engine=self.engine)
+                batch_copy(input_filename=self.input_filename, row_indices_to_copy=dataframe,
+                           output_filename=output_file, batch_size=self.batch_size)
 
 
 class DropDuplicatesForAllFiles(luigi.WrapperTask):
