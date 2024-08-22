@@ -44,13 +44,11 @@ def batch_copy(input_filename: str,
             batch_table = pa.Table.from_pandas(
                 batch_rows)
 
-            if pq_writer:
-                batch_table = batch_table.cast(pq_writer.schema)
-
             if total_number_of_rows_written == 0:
                 pq_writer = pq.ParquetWriter(
                     output_filename, batch_table.schema, write_batch_size=batch_size)
 
+            batch_table = batch_table.cast(pq_writer.schema)
             pq_writer.write_table(batch_table)
             total_number_of_rows_written += len(batch_rows)
 
