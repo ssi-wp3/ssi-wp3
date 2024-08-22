@@ -19,6 +19,7 @@ class BootstrapModelTask(luigi.Task):
     label_column = luigi.Parameter(default='coicop_number')
     random_state = luigi.IntParameter(default=42)
     engine = luigi.Parameter(default='pyarrow')
+    delimiter = luigi.Parameter(default=';')
 
     def requires(self):
         return ParquetFile(self.input_filename)
@@ -42,12 +43,12 @@ class BootstrapModelTask(luigi.Task):
             )
 
             with self.output().open('w') as output_file:
-                bootstrap_model(sklearn_pipeline,
-                                param_sampler,
-                                dataframe,
-                                output_file,
-                                self.number_of_bootstraps,
-                                self.number_of_samples_per_bootstrap,
-                                self.feature_column,
-                                self.label_column,
-                                self.random_state)
+                results_df = bootstrap_model(sklearn_pipeline,
+                                             param_sampler,
+                                             dataframe,
+                                             self.number_of_bootstraps,
+                                             self.number_of_samples_per_bootstrap,
+                                             self.feature_column,
+                                             self.label_column,
+                                             self.random_state)
+                results_df.to_csv(output_file, index=False, sep=self.delimiter)
