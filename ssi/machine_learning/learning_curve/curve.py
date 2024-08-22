@@ -1,6 +1,8 @@
 import pandas as pd
 from sklearn.model_selection import learning_curve
 from sklearn.linear_model import SGDClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import CountVectorizer
 import argparse
 import matplotlib.pyplot as plt
 import os
@@ -37,11 +39,29 @@ X = data[args.receipt_text_column]
 y = data[args.label_column]
 
 # Create an instance of the SGDClassifier
-classifier = SGDClassifier()
+pipeline_params = {
+    'vectorizer__analyzer': 'char',
+    'vectorizer__lowercase': True,
+    'vectorizer__max_df': 0.8863890037284232,
+    'vectorizer__max_features': 8766,
+    'vectorizer__ngram_range': (1, 3),
+    'clf__C': 0.00018740223688836313,
+    'clf__fit_intercept': True,
+    'clf__max_iter': 100,
+    'clf__penalty': 'l2',
+    'clf__solver': 'saga',
+}
+
+pipeline = Pipeline([
+    ('vectorizer', CountVectorizer()),
+    ('clf', SGDClassifier())
+])
+pipeline.set_params(**pipeline_params)
+
 
 # Generate the learning curve
 train_sizes, train_scores, test_scores = learning_curve(
-    classifier, X, y, cv=args.number_of_folds, exploit_incremental_learning=True)
+    pipeline, X, y, cv=args.number_of_folds, exploit_incremental_learning=True)
 
 # Calculate the mean and standard deviation of the training and test scores
 train_scores_mean = train_scores.mean(axis=1)
