@@ -169,6 +169,7 @@ def perform_bootstrap(dataframe: pd.DataFrame,
 
         evaluation_dict = evaluation_function(bootstrap_index, n_bootstraps,
                                               bootstrap_sample, **kwargs)
+        print(evaluation_dict)
         if bootstrap_index == 0:
             csv_writer = csv.DictWriter(
                 results_file, fieldnames=evaluation_dict.keys())
