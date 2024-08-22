@@ -1,3 +1,3 @@
 #!/bin/bash
-PYTHONPATH="." luigi --module ssi.feature_extraction.drop_duplicates  DropDuplicatesForAllFiles --local-scheduler
+PYTHONPATH="." luigi --module ssi.preprocessing.drop_duplicates  DropDuplicatesForAllFiles --local-scheduler
 
