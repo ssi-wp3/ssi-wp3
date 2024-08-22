@@ -50,10 +50,9 @@ def batch_copy(input_filename: str,
 
             batch_table = batch_table.cast(pq_writer.schema)
             pq_writer.write_table(batch_table)
-            total_number_of_rows_written += len(batch_rows)
 
+            total_number_of_rows_written += len(batch_rows)
             total_number_of_rows_read += len(batch_df)
-            total_number_of_rows_read += len(batch)
 
             progress_bar.update(len(batch))
 
