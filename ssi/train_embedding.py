@@ -222,3 +222,6 @@ plot_confusion_matrix(y_true, y_pred, os.path.join(
 with open(os.path.join(final_result_directory, "classification_report.json"), "w") as json_file:
     json.dump(classification_report(
         y_true, y_pred, target_names=labels, output_dict=True), json_file)
+
+write_model_card_markdown(os.path.join(final_result_directory, "model_card.md"),
+                          args, hf_labse_features, train_df.data, val_df.data, test_df.data)
