@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 from typing import Tuple
 from machine_learning.evaluate import plot_confusion_matrix
+from preprocessing.combine_unique_values import drop_unknown
 from constants import Constants
 import pandas as pd
 import numpy as np
@@ -43,10 +44,6 @@ args = parser.parse_args()
 
 
 # From: https://huggingface.co/docs/transformers/training
-
-def drop_unknown(dataframe: pd.DataFrame, label_column: str) -> pd.DataFrame:
-    return dataframe[~dataframe[label_column].str.startswith("99")]
-
 
 def split_data(dataframe: pd.DataFrame,
                coicop_level: str,

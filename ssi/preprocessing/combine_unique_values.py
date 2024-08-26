@@ -7,6 +7,10 @@ import pyarrow.parquet as pq
 import tqdm
 
 
+def drop_unknown(dataframe: pd.DataFrame, label_column: str) -> pd.DataFrame:
+    return dataframe[~dataframe[label_column].str.startswith("99")]
+
+
 def drop_empty_receipts(dataframe: pd.DataFrame, receipt_text_column: str) -> pd.DataFrame:
     return dataframe[dataframe[receipt_text_column] != '']
 

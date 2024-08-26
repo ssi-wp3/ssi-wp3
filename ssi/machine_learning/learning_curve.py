@@ -1,9 +1,8 @@
 import pandas as pd
 from sklearn.model_selection import learning_curve
-from sklearn.linear_model import SGDClassifier
 from .hyper_params.hyper_params import FeatureExtractorType, ModelType
 from .hyper_params.pipeline import pipeline_with
-from ..preprocessing.combine_unique_values import drop_empty_receipts
+from ..preprocessing.combine_unique_values import drop_empty_receipts, drop_unknown
 import argparse
 import matplotlib.pyplot as plt
 import os
@@ -35,6 +34,8 @@ parser.add_argument('-e', '--engine', type=str,
                     default='pyarrow', help='Parquet engine to use')
 parser.add_argument('-d', '--delimiter', type=str, default=';',
                     help='Delimiter to use for the CSV file')
+parser.add_argument('-k', '--keep-unknown',
+                    action='store_true', help='Keep unknown labels')
 
 if not os.path.exists(output_directory):
     os.makedirs(output_directory)
@@ -46,6 +47,9 @@ args = parser.parse_args()
 dataframe = pd.read_parquet(args.input_filename, engine=args.engine)
 dataframe = drop_empty_receipts(
     dataframe, args.receipt_text_column)
+
+if not args.keep_unknown:
+    dataframe = drop_unknown(dataframe, args.label_column)
 
 # Split the data into input (X) and output (y)
 X = dataframe[args.receipt_text_column]
