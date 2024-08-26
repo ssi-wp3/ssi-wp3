@@ -1,8 +1,8 @@
 import pandas as pd
 from sklearn.model_selection import learning_curve
 from sklearn.linear_model import SGDClassifier
-from hyper_params.hyper_params import FeatureExtractorType, ModelType
-from hyper_params.pipeline import pipeline_with
+from ..hyper_params.hyper_params import FeatureExtractorType, ModelType
+from ..hyper_params.pipeline import pipeline_with
 import argparse
 import matplotlib.pyplot as plt
 import os
