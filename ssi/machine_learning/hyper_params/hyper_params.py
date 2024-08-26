@@ -19,8 +19,17 @@ COUNT_VECTORIZER = {
     'max_features': range(100, 10000),
 }
 
+HASHING_VECTORIZER = {
+    'lowercase': [True, False],
+    'ngram_range': [(1, 1), (1, 2), (1, 3)],
+    'analyzer': ['word', 'char', 'char_wb'],
+
+    'norm': ['l1', 'l2'],
+}
+
 FEATURE_EXTRACTION_PARAMS = {
     FeatureExtractorType.count_vectorizer.value: COUNT_VECTORIZER,
+    FeatureExtractorType.hashing_vectorizer.value: HASHING_VECTORIZER,
     FeatureExtractorType.tfidf_vectorizer.value: COUNT_VECTORIZER,
 }
 
