@@ -15,8 +15,8 @@ def feature_extractor_for_type(feature_extractor_type: FeatureExtractorType):
 
 def pipeline_with(feature_extractor_type: FeatureExtractorType,
                   model,
-                  feature_extractor_prefix: str,
-                  model_prefix: str) -> Pipeline:
+                  feature_extractor_prefix: str = 'vectorizer',
+                  model_prefix: str = 'clf') -> Pipeline:
     return Pipeline([
         (feature_extractor_prefix, feature_extractor_for_type(feature_extractor_type)),
         (model_prefix, model)

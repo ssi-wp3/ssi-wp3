@@ -1,11 +1,12 @@
 import pandas as pd
 from sklearn.model_selection import learning_curve
 from sklearn.linear_model import SGDClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import CountVectorizer
+from hyper_params.hyper_params import FeatureExtractorType, ModelType
+from hyper_params.pipeline import pipeline_with
 import argparse
 import matplotlib.pyplot as plt
 import os
+import pandas as pd
 
 data_directory = os.getenv('data_directory', '.')
 features_directory = os.path.join(data_directory, 'features')
@@ -17,8 +18,12 @@ parser = argparse.ArgumentParser(description='Learning Curve Script')
 # Add arguments to the parser
 parser.add_argument('-i', '--input-filename', type=str, default=os.path.join(data_directory, 'ssi_hf_labse_unique_values.parquet'),
                     help='Path to the input dataset parquet file')
-parser.add_argument('-o', '--output-filename', type=str, default='learning_curve_results.csv',
+parser.add_argument('-o', '--output-filename', type=str, default='learning_curve_results',
                     help='Filename for the learning curve results')
+parser.add_argument('-f', '--feature-extractor-type', type=FeatureExtractorType,
+                    choices=list(FeatureExtractorType), default=FeatureExtractorType.count_vectorizer, help='Type of feature extractor to use')
+parser.add_argument('-m', '--model-type', type=ModelType,
+                    choices=list(ModelType), default=ModelType.logistic_regression, help='Type of model to use')
 parser.add_argument('-rc', '--receipt-text-column', type=str, default='receipt_text',
                     help='Name of the input column in the dataset')
 parser.add_argument('-l', '--label-column', type=str, default='coicop_number',
@@ -38,7 +43,7 @@ data = pd.read_parquet(args.input_filename, engine=args.engine)
 X = data[args.receipt_text_column]
 y = data[args.label_column]
 
-# Create an instance of the SGDClassifier
+# Create a classification pipeline
 pipeline_params = {
     'vectorizer__analyzer': 'char',
     'vectorizer__lowercase': True,
@@ -50,10 +55,8 @@ pipeline_params = {
     'clf__penalty': 'l2',
 }
 
-pipeline = Pipeline([
-    ('vectorizer', CountVectorizer()),
-    ('clf', SGDClassifier())
-])
+pipeline = pipeline_with(
+    args.feature_extractor_type, args.model_type)
 pipeline.set_params(**pipeline_params)
 
 
@@ -88,5 +91,6 @@ plt.plot(train_sizes, test_scores_mean, 'o-', color='g',
 plt.legend(loc='best')
 
 input_filename = os.path.splitext(os.path.basename(args.input_filename))[0]
+
 plt.savefig(os.path.join(output_directory,
-            f'learning_curve_sgd_{input_filename}.png'))
+            f'{args.output_filename}_{input_filename}.png'))
