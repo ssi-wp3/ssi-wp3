@@ -224,4 +224,4 @@ with open(os.path.join(final_result_directory, "classification_report.json"), "w
         y_true, y_pred, target_names=labels, output_dict=True), json_file)
 
 write_model_card_markdown(os.path.join(final_result_directory, "model_card.md"),
-                          args, hf_labse_features, train_df.data, val_df.data, test_df.data)
+                          args, hf_labse_features, train_df, val_df, test_df)
