@@ -1,5 +1,5 @@
 from ..parquet_file import ParquetFile
-from .hyper_params.sampler import create_sampler_for_pipeline, FeatureExtractorType
+from .hyper_params.sampler import FeatureExtractorType
 from .bootstrap.bootstrap_models import bootstrap_model
 from ..preprocessing.combine_unique_values import drop_empty_receipts
 from .hyper_params.pipeline import pipeline_and_sampler_for
