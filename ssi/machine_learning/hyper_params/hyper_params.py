@@ -9,6 +9,10 @@ class FeatureExtractorType(Enum):
     tfidf_vectorizer = "TfidfVectorizer"
 
 
+class ModelType(Enum):
+    logistic_regression = "LogisticRegression"
+
+
 # Feature extraction parameters
 COUNT_VECTORIZER = {
     'lowercase': [True, False],
@@ -46,7 +50,7 @@ LOGISTIC_REGRESSION = {
 
 
 DISTRIBUTIONS_FOR_ALL_MODELS = {
-    "LogisticRegression": LOGISTIC_REGRESSION,
+    ModelType.logistic_regression.value: LOGISTIC_REGRESSION,
 }
 
 
