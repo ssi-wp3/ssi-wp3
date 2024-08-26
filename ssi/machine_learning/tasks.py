@@ -2,8 +2,8 @@ from ..parquet_file import ParquetFile
 from .hyper_params.sampler import create_sampler_for_pipeline, FeatureExtractorType
 from .bootstrap.bootstrap_models import bootstrap_model
 from ..preprocessing.combine_unique_values import drop_empty_receipts
+from .hyper_params.pipeline import feature_extractor_for_type
 from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
 from sklearn.linear_model import LogisticRegression
 import luigi
 import pandas as pd
@@ -28,17 +28,9 @@ class BootstrapModelTask(luigi.Task):
     def output(self):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
-    def feature_extractor_for_type(self, feature_extractor_type: FeatureExtractorType):
-        if feature_extractor_type == FeatureExtractorType.count_vectorizer:
-            return CountVectorizer()
-        elif feature_extractor_type == FeatureExtractorType.tfidf_vectorizer:
-            return TfidfVectorizer()
-        elif feature_extractor_type == FeatureExtractorType.hashing_vectorizer:
-            return HashingVectorizer()
-
     def run(self):
         sklearn_pipeline = Pipeline([
-            ('vectorizer', self.feature_extractor_for_type(
+            ('vectorizer', feature_extractor_for_type(
                 self.feature_extractor_type)),
             ('clf', LogisticRegression())
         ])
