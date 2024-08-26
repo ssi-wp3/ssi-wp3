@@ -32,6 +32,8 @@ parser.add_argument('-k', '--number-of-folds', type=int,
                     default=5, help='Number of folds for cross-validation')
 parser.add_argument('-e', '--engine', type=str,
                     default='pyarrow', help='Parquet engine to use')
+parser.add_argument('-d', '--delimiter', type=str, default=';',
+                    help='Delimiter to use for the CSV file')
 
 # Parse the command-line arguments
 args = parser.parse_args()
@@ -65,6 +67,20 @@ train_sizes, train_scores, test_scores = learning_curve(
     pipeline, X, y, cv=args.number_of_folds, exploit_incremental_learning=True)
 
 input_filename = os.path.splitext(os.path.basename(args.input_filename))[0]
+
+# Save the scores including the training sizes to a CSV file
+# Save scores for each fold
+learning_curve_results = pd.DataFrame({
+    'train_sizes': train_sizes
+})
+
+for i in range(args.number_of_folds):
+    learning_curve_results[f'train_scores_{i}'] = train_scores[:, i]
+    learning_curve_results[f'test_scores_{i}'] = test_scores[:, i]
+learning_curve_results.to_csv(os.path.join(output_directory,
+                                           f'{args.output_filename}_{input_filename}.csv'),
+                              sep=args.delimiter,
+                              index=False)
 
 
 # Calculate the mean and standard deviation of the training and test scores
