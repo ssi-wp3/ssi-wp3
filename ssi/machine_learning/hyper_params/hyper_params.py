@@ -61,8 +61,8 @@ class ParamDistributions:
         return {f"{prefix}{key}": value for key, value in dictionary.items()}
 
     @ staticmethod
-    def distributions_for_model(model_type: str, prefix: str = "") -> Dict[str, Any]:
-        return ParamDistributions.add_prefix_to_dict_keys(DISTRIBUTIONS_FOR_ALL_MODELS[model_type], prefix)
+    def distributions_for_model(model_type: ModelType, prefix: str = "") -> Dict[str, Any]:
+        return ParamDistributions.add_prefix_to_dict_keys(DISTRIBUTIONS_FOR_ALL_MODELS[model_type.value], prefix)
 
     @staticmethod
     def distributions_for_feature_extraction(feature_extraction_type: FeatureExtractorType, prefix: str = "") -> Dict[str, Any]:
@@ -70,7 +70,7 @@ class ParamDistributions:
 
     @staticmethod
     def distributions_for_pipeline(feature_extraction_type: FeatureExtractorType,
-                                   model_type: str,
+                                   model_type: ModelType,
                                    feature_pipeline_prefix: str = "vectorizer__",
                                    model_prefix: str = "clf__"
                                    ) -> Dict[str, Any]:
