@@ -1,8 +1,9 @@
 import pandas as pd
 from sklearn.model_selection import learning_curve
 from sklearn.linear_model import SGDClassifier
-from ..hyper_params.hyper_params import FeatureExtractorType, ModelType
-from ..hyper_params.pipeline import pipeline_with
+from .hyper_params.hyper_params import FeatureExtractorType, ModelType
+from .hyper_params.pipeline import pipeline_with
+from ..preprocessing.combine_unique_values import drop_empty_receipts
 import argparse
 import matplotlib.pyplot as plt
 import os
@@ -42,11 +43,13 @@ if not os.path.exists(output_directory):
 args = parser.parse_args()
 
 # Load the dataset from the parquet file
-data = pd.read_parquet(args.input_filename, engine=args.engine)
+dataframe = pd.read_parquet(args.input_filename, engine=args.engine)
+dataframe = drop_empty_receipts(
+    dataframe, args.receipt_text_column)
 
 # Split the data into input (X) and output (y)
-X = data[args.receipt_text_column]
-y = data[args.label_column]
+X = dataframe[args.receipt_text_column]
+y = dataframe[args.label_column]
 
 # Create a classification pipeline
 pipeline_params = {
