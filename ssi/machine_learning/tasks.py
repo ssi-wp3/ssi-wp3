@@ -2,8 +2,7 @@ from ..parquet_file import ParquetFile
 from .hyper_params.sampler import create_sampler_for_pipeline, FeatureExtractorType
 from .bootstrap.bootstrap_models import bootstrap_model
 from ..preprocessing.combine_unique_values import drop_empty_receipts
-from .hyper_params.pipeline import feature_extractor_for_type
-from sklearn.pipeline import Pipeline
+from .hyper_params.pipeline import pipeline_and_sampler_for
 from sklearn.linear_model import LogisticRegression
 import luigi
 import pandas as pd
@@ -29,20 +28,15 @@ class BootstrapModelTask(luigi.Task):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
-        sklearn_pipeline = Pipeline([
-            ('vectorizer', feature_extractor_for_type(
-                self.feature_extractor_type)),
-            ('clf', LogisticRegression())
-        ])
+        param_sampler, sklearn_pipeline = pipeline_and_sampler_for(self.feature_extractor_type,
+                                                                   LogisticRegression(),
+                                                                   self.number_of_bootstraps,
+                                                                   self.random_state)
 
         with self.input().open('r') as input_file:
             dataframe = pd.read_parquet(input_file, engine=self.engine)
             dataframe = drop_empty_receipts(
                 dataframe, self.receipt_text_column)
-
-            param_sampler = (value for value in create_sampler_for_pipeline(
-                self.feature_extractor_type, 'LogisticRegression', self.number_of_bootstraps, self.random_state)
-            )
 
             with self.output().open('w') as output_file:
                 results_df = bootstrap_model(sklearn_pipeline,
