@@ -20,10 +20,11 @@ COUNT_VECTORIZER = {
 }
 
 HASHING_VECTORIZER = {
+    "input": ["content"],
+    "binary": [True],
+    'analyzer': ['word', 'char', 'char_wb'],
     'lowercase': [True, False],
     'ngram_range': [(1, 1), (1, 2), (1, 3)],
-    'analyzer': ['word', 'char', 'char_wb'],
-
     'norm': ['l1', 'l2'],
 }
 
