@@ -67,7 +67,7 @@ pipeline.set_params(**pipeline_params)
 
 # Generate the learning curve
 train_sizes, train_scores, test_scores = learning_curve(
-    pipeline, X, y, cv=args.number_of_folds, exploit_incremental_learning=True)
+    pipeline, X, y, cv=args.number_of_folds)
 
 input_filename = os.path.splitext(os.path.basename(args.input_filename))[0]
 
