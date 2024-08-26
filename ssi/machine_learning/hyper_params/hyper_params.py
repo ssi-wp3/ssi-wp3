@@ -60,11 +60,11 @@ class ParamDistributions:
         return ParamDistributions.add_prefix_to_dict_keys(DISTRIBUTIONS_FOR_ALL_MODELS[model_type], prefix)
 
     @staticmethod
-    def distributions_for_feature_extraction(feature_extraction_type: str, prefix: str = "") -> Dict[str, Any]:
-        return ParamDistributions.add_prefix_to_dict_keys(FEATURE_EXTRACTION_PARAMS[feature_extraction_type], prefix)
+    def distributions_for_feature_extraction(feature_extraction_type: FeatureExtractorType, prefix: str = "") -> Dict[str, Any]:
+        return ParamDistributions.add_prefix_to_dict_keys(FEATURE_EXTRACTION_PARAMS[feature_extraction_type.value], prefix)
 
     @staticmethod
-    def distributions_for_pipeline(feature_extraction_type: str,
+    def distributions_for_pipeline(feature_extraction_type: FeatureExtractorType,
                                    model_type: str,
                                    feature_pipeline_prefix: str = "vectorizer__",
                                    model_prefix: str = "clf__"
