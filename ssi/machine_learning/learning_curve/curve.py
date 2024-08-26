@@ -64,6 +64,9 @@ pipeline.set_params(**pipeline_params)
 train_sizes, train_scores, test_scores = learning_curve(
     pipeline, X, y, cv=args.number_of_folds, exploit_incremental_learning=True)
 
+input_filename = os.path.splitext(os.path.basename(args.input_filename))[0]
+
+
 # Calculate the mean and standard deviation of the training and test scores
 train_scores_mean = train_scores.mean(axis=1)
 train_scores_std = train_scores.std(axis=1)
@@ -89,8 +92,6 @@ plt.plot(train_sizes, test_scores_mean, 'o-', color='g',
          label='Cross-validation score')
 
 plt.legend(loc='best')
-
-input_filename = os.path.splitext(os.path.basename(args.input_filename))[0]
 
 plt.savefig(os.path.join(output_directory,
             f'{args.output_filename}_{input_filename}.png'))
