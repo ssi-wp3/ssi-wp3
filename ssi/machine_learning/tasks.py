@@ -1,7 +1,7 @@
 from ..parquet_file import ParquetFile
 from .hyper_params.sampler import FeatureExtractorType
 from .bootstrap.bootstrap_models import bootstrap_model
-from ..preprocessing.combine_unique_values import drop_empty_receipts
+from ..preprocessing.combine_unique_values import drop_empty_receipts, drop_unknown
 from .hyper_params.pipeline import pipeline_and_sampler_for
 from sklearn.linear_model import LogisticRegression
 import luigi
@@ -17,6 +17,7 @@ class BootstrapModelTask(luigi.Task):
     feature_column = luigi.Parameter(default='features')
     receipt_text_column = luigi.Parameter(default='receipt_text')
     label_column = luigi.Parameter(default='coicop_number')
+    keep_unknown = luigi.BoolParameter(default=False)
     random_state = luigi.IntParameter(default=42)
     engine = luigi.Parameter(default='pyarrow')
     delimiter = luigi.Parameter(default=';')
@@ -37,6 +38,9 @@ class BootstrapModelTask(luigi.Task):
             dataframe = pd.read_parquet(input_file, engine=self.engine)
             dataframe = drop_empty_receipts(
                 dataframe, self.receipt_text_column)
+
+            if not self.keep_unknown:
+                dataframe = drop_unknown(dataframe, self.label_column)
 
             with self.output().open('w') as output_file:
                 results_df = bootstrap_model(sklearn_pipeline,
