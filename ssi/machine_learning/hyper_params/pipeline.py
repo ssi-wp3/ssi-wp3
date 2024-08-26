@@ -1,6 +1,7 @@
-from .hyper_params import FeatureExtractorType
+from .hyper_params import ModelType, FeatureExtractorType
 from .sampler import create_sampler_for_pipeline
 from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
 
 
@@ -13,18 +14,23 @@ def feature_extractor_for_type(feature_extractor_type: FeatureExtractorType):
         return HashingVectorizer()
 
 
+def model_for_type(model_type: ModelType):
+    if model_type == ModelType.logistic_regression:
+        return LogisticRegression()
+
+
 def pipeline_with(feature_extractor_type: FeatureExtractorType,
-                  model,
+                  model: ModelType,
                   feature_extractor_prefix: str = 'vectorizer',
                   model_prefix: str = 'clf') -> Pipeline:
     return Pipeline([
         (feature_extractor_prefix, feature_extractor_for_type(feature_extractor_type)),
-        (model_prefix, model)
+        (model_prefix, model_for_type(model))
     ])
 
 
 def pipeline_and_sampler_for(feature_extractor_type: FeatureExtractorType,
-                             model,
+                             model: ModelType,
                              number_of_iterations: int,
                              feature_extractor_prefix: str = 'vectorizer',
                              model_prefix: str = 'clf',
