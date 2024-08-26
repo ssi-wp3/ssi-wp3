@@ -35,6 +35,9 @@ parser.add_argument('-e', '--engine', type=str,
 parser.add_argument('-d', '--delimiter', type=str, default=';',
                     help='Delimiter to use for the CSV file')
 
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
+
 # Parse the command-line arguments
 args = parser.parse_args()
 
