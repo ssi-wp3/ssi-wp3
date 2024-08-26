@@ -1,8 +1,15 @@
 from typing import Dict, Any
 import scipy.stats as stats
+from enum import Enum
+
+
+class FeatureExtractorType(Enum):
+    count_vectorizer = "CountVectorizer"
+    hashing_vectorizer = "HashingVectorizer"
+    tfidf_vectorizer = "TfidfVectorizer"
+
 
 # Feature extraction parameters
-
 COUNT_VECTORIZER = {
     'lowercase': [True, False],
     'ngram_range': [(1, 1), (1, 2), (1, 3)],
@@ -13,8 +20,8 @@ COUNT_VECTORIZER = {
 }
 
 FEATURE_EXTRACTION_PARAMS = {
-    'CountVectorizer': COUNT_VECTORIZER,
-    'TfidfVectorizer': COUNT_VECTORIZER,
+    FeatureExtractorType.count_vectorizer.value: COUNT_VECTORIZER,
+    FeatureExtractorType.tfidf_vectorizer.value: COUNT_VECTORIZER,
 }
 
 # Model parameters
