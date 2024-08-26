@@ -71,8 +71,8 @@ class ParamDistributions:
     @staticmethod
     def distributions_for_pipeline(feature_extraction_type: FeatureExtractorType,
                                    model_type: ModelType,
-                                   feature_pipeline_prefix: str = "vectorizer__",
-                                   model_prefix: str = "clf__"
+                                   feature_pipeline_prefix: str,
+                                   model_prefix: str
                                    ) -> Dict[str, Any]:
         return {**ParamDistributions.distributions_for_feature_extraction(feature_extraction_type, feature_pipeline_prefix),
                 **ParamDistributions.distributions_for_model(model_type, model_prefix)}
