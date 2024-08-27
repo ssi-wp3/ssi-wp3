@@ -178,9 +178,5 @@ if __name__ == "__main__":
   out_dev_fn = f"dev_{'_'.join(config.STORES)}.parquet"
   out_test_fn = f"test_{'_'.join(config.STORES)}.parquet"
 
-  if config.SAMPLE_N is not None:
-    out_dev_fn = f"sample_{out_dev_fn}"
-    out_test_fn = f"sample_{out_test_fn}"
-
   write_dataset(df_stores_dev, out_fn=out_dev_fn)
   write_dataset(df_stores_test, out_fn=out_test_fn)
