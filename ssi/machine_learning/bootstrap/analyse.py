@@ -3,7 +3,7 @@ import argparse
 
 parser = argparse.ArgumentParser(
     description='Create a boxplot for the given metrics.')
-parser.add_argument('-f', 'files', metavar='files', type=str, nargs='+',
+parser.add_argument('-f', '--files', metavar='files', type=str, nargs='+',
                     help='List of file names.')
 parser.add_argument('-d', '--delimiter', type=str, default=';',
                     help='Delimiter to use for reading the files.')
