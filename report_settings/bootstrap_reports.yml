@@ -49,6 +49,12 @@ report_templates:
       output_filename: "Images/bootstraps/parallel_coordinates_plot_lr_{{metric}}.png" 
       preprocessing:
         bool_to_int: true
+        to_categorical:
+          - "{{store_column}}"
+          - vectorizer__ngram_range
+          - vectorizer__analyzer
+          - clf__penalty
+          - clf__solver
         select_columns: 
           - "{{store_column}}"
           - vectorizer__lowercase 

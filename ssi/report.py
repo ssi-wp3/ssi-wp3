@@ -540,6 +540,12 @@ class ReportEngine:
         if "bool_to_int" in preprocessing_settings:
             if preprocessing_settings["bool_to_int"]:
                 copied_dataframe.replace({False: 0, True: 1}, inplace=True)
+        if "to_categorical" in preprocessing_settings:
+            columns = sort_settings.get("columns", [])
+            for column in columns:
+                copied_dataframe[column] = copied_dataframe[column].astype(
+                    "category")
+
         return copied_dataframe
 
     def create_directory(self, filename: str):
