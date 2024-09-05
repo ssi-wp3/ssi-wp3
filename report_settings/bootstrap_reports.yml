@@ -36,13 +36,13 @@ report_templates:
         plot_type: box_plot
         x_column: "{{store_column}}"
         y_column: "{{metric}}"
-        title: Boxplot of {{metric}} for all stores
+        title: Box plot of {{metric}} for all stores
     - type: plot
       pivot: false 
-      output_filename: "Images/bootstraps/boxplot_lr_bootstraps_{{metric}}.png" 
+      output_filename: "Images/bootstraps/violinlot_lr_bootstraps_{{metric}}.png" 
       settings:
         plot_type: violin_plot
         x_column: "{{store_column}}"
         y_column: "{{metric}}"
-        title: Boxplot of {{metric}} for all stores
+        title: Violin plot of {{metric}} for all stores
     
