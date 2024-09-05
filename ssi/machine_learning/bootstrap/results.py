@@ -21,7 +21,9 @@ def combine_results(stores: List[str], dataframes: List[pd.DataFrame]) -> pd.Dat
     -------
         DataFrame containing the combined results.
     """
-    return pd.concat(dataframes, keys=stores, names=['store'])
+    for store, df in zip(stores, dataframes):
+        df['store'] = store
+    return pd.concat(dataframes)
 
 
 def combine_files(files: List[str], delimiter: str = ";") -> pd.DataFrame:
