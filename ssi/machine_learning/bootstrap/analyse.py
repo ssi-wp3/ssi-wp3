@@ -17,6 +17,6 @@ parser.add_argument('-g', '--group_name', type=str, default='store',
 args = parser.parse_args()
 
 files = [os.path.join(args.input_directory, file)
-         for file in os.listdir(args.input_directory)]
+         for file in os.listdir(args.input_directory) if file.endswith('.csv')]
 boxplot_files(files, args.delimiter, args.plot_filename,
               args.metric_name, args.group_name)
