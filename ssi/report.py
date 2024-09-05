@@ -425,6 +425,7 @@ class ReportEngine:
                 keys, values = zip(*report_id_settings.items())
                 all_report_settings = [dict(zip(keys, combination))
                                        for combination in itertools.product(*values)]
+                print(all_report_settings)
                 for all_report_dict in all_report_settings:
 
                     template_settings = self.report_settings.copy()
@@ -443,7 +444,6 @@ class ReportEngine:
                     self.__all_report_permutations[input_filename] = report_template
 
         # Combine the permutations with the report template settings
-        print(self.__all_report_permutations)
         return self.__all_report_permutations
 
     @property
