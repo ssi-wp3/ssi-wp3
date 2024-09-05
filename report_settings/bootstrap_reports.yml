@@ -76,6 +76,7 @@ report_templates:
           - clf__max_iter
           - clf__solver
           - "{{metric}}"
+        # TODO: dimension titles cause an error, figure out why
         # dimension_titles:
         #   - Store
         #   - Lowercase
