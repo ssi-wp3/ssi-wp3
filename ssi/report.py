@@ -421,6 +421,7 @@ class ReportEngine:
 
         """
         if not self.__all_report_permutations:
+            self.__all_report_permutations = defaultdict(list)
             for report_id, report_id_settings in self.reports_config.items():
                 keys, values = zip(*report_id_settings.items())
                 all_report_settings = [dict(zip(keys, combination))
@@ -428,7 +429,6 @@ class ReportEngine:
                 for all_report_dict in all_report_settings:
                     # Retrieve the generic report settings section
                     template_settings = self.report_settings.copy()
-                    # Update
                     template_settings.update(
                         all_report_dict)
 
@@ -441,7 +441,8 @@ class ReportEngine:
 
                     report_template = all_report_templates[report_id]
                     input_filename = report_template["input_filename"]
-                    self.__all_report_permutations[input_filename] = report_template
+                    self.__all_report_permutations[input_filename].append(
+                        report_template)
 
         # Combine the permutations with the report template settings
         return self.__all_report_permutations
@@ -450,15 +451,16 @@ class ReportEngine:
     def reports(self) -> Dict[str, List['Report']]:
         if not self.__reports:
             self.__reports = defaultdict(list)
-            for report_key, report_settings in self.all_report_permutations.items():
-                report_template = report_settings["reports"]
-                if isinstance(report_template, list):
-                    for settings in report_template:
+            for report_key, report_settings_list in self.all_report_permutations.items():
+                for report_settings in report_settings_list:
+                    report_template = report_settings["reports"]
+                    if isinstance(report_template, list):
+                        for settings in report_template:
+                            self.__reports[report_key].append(
+                                self.report_for(settings))
+                    else:
                         self.__reports[report_key].append(
-                            self.report_for(settings))
-                else:
-                    self.__reports[report_key].append(
-                        self.report_for(report_template))
+                            self.report_for(report_template))
         return self.__reports
 
     def report_for(self, result_settings: Dict[str, Any]) -> 'Report':
