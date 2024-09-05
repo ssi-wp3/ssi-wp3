@@ -90,4 +90,5 @@ report_templates:
         #   - Solver
         #   - "{{metric}}"
         color_column: "{{metric}}"
+        color_continuous_midpoint: 0.5
         title: Parallel coordinates plot of {{metric}} for all stores
