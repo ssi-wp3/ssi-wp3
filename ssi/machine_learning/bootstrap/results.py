@@ -1,6 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
 from typing import List
 
 
@@ -39,7 +40,7 @@ def combine_files(files: List[str], delimiter: str = ";") -> pd.DataFrame:
         DataFrame containing the combined results.
 
     """
-    store_names = [file.split("_")[0] for file in files]
+    store_names = [os.path.basename(file).split("_")[0] for file in files]
     dataframes = [pd.read_csv(file, delimiter=delimiter) for file in files]
 
     return combine_results(store_names, dataframes)
