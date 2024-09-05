@@ -50,29 +50,29 @@ report_templates:
       preprocessing:
         select_columns: 
           - "{{store_column}}"
-          - vectorizer_lowercase 
-          - vectorizer_ngram_range
-          - vectorizer_analyzer
-          - vectorizer_max_df
-          - vectorizer_max_features
-          - clf_penalty
-          - clf_C
-          - clf_fit_intercept
-          - clf_max_iter
-          - clf_solver
+          - vectorizer__lowercase 
+          - vectorizer__ngram_range
+          - vectorizer__analyzer
+          - vectorizer__max_df
+          - vectorizer__max_features
+          - clf__penalty
+          - clf__C
+          - clf__fit_intercept
+          - clf__max_iter
+          - clf__solver
       settings:      
         plot_type: parallel_coordinates
         dimensions: 
           - "{{store_column}}"
-          - vectorizer_lowercase 
-          - vectorizer_ngram_range
-          - vectorizer_analyzer
-          - vectorizer_max_df
-          - vectorizer_max_features
-          - clf_penalty
-          - clf_C
-          - clf_fit_intercept
-          - clf_max_iter
-          - clf_solver
+          - vectorizer__lowercase 
+          - vectorizer__ngram_range
+          - vectorizer__analyzer
+          - vectorizer__max_df
+          - vectorizer__max_features
+          - clf__penalty
+          - clf__C
+          - clf__fit_intercept
+          - clf__max_iter
+          - clf__solver
         color_column: "{{metric}}"
         title: Parallel coordinates plot of {{metric}} for all stores
