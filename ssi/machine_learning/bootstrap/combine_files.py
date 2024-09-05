@@ -20,7 +20,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Call the combine_csv_files function with the provided arguments
-    csv_files = [file for file in os.listdir(
+    csv_files = [os.path.join(args.input_directory, file) for file in os.listdir(
         args.input_directory) if file.endswith('.csv')]
     dataframe = combine_files(csv_files)
     dataframe.to_parquet(args.output_filename, engine=args.engine)
