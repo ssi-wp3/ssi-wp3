@@ -76,18 +76,18 @@ report_templates:
           - clf__max_iter
           - clf__solver
           - "{{metric}}"
-        dimension_titles:
-          - Store
-          - Lowercase
-          - Ngram Range
-          - Analyzer
-          - Max Df
-          - Max Features
-          - Penalty
-          - C
-          - Fit Intercept
-          - Max Iter
-          - Solver
-          - "{{metric}}"
+        # dimension_titles:
+        #   - Store
+        #   - Lowercase
+        #   - Ngram Range
+        #   - Analyzer
+        #   - Max Df
+        #   - Max Features
+        #   - Penalty
+        #   - C
+        #   - Fit Intercept
+        #   - Max Iter
+        #   - Solver
+        #   - "{{metric}}"
         color_column: "{{metric}}"
         title: Parallel coordinates plot of {{metric}} for all stores
