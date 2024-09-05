@@ -31,7 +31,7 @@ reports:
 
 report_templates:
   overall_metrics:
-   input_filename: "{{store_name}}_lr_bootstraps"
+   input_filename: "combined_lr_bootstraps"
    reports:
     - type: plot
       pivot: false 
