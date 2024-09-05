@@ -37,7 +37,7 @@ report_templates:
       pivot: false 
       output_filename: "Images/bootstraps/boxplot_lr_bootstraps_{{metric}}.png" 
       settings:
-        plot_type: boxplot
+        plot_type: box_plot
         x_column: "store"
         y_column: "{{metric}}"
         title: Boxplot of {{metric}} for all stores
