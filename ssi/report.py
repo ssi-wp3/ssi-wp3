@@ -544,7 +544,7 @@ class ReportEngine:
             columns = sort_settings.get("columns", [])
             for column in columns:
                 copied_dataframe[column] = copied_dataframe[column].astype(
-                    "category")
+                    "category").cat.codes
 
         return copied_dataframe
 
