@@ -1,0 +1,52 @@
+report_settings:
+  store_column: "store"
+
+reports:
+  overall_metrics:
+    store_name:
+      - ah 
+      - lidl 
+      - jumbo
+    metric: 
+      - accuracy
+      - balanced_accuracy
+      - f1_macro
+      - f1_weighted
+      - f1_micro
+      - precision_macro
+      - precision_weighted
+      - precision_micro
+      - recall_macro
+      - recall_weighted
+      - recall_micro
+      - hierarchical_f1_macro
+      - hierarchical_f1_weighted
+      - hierarchical_f1_micro
+      - hierarchical_precision_macro
+      - hierarchical_precision_weighted
+      - hierarchical_precision_micro
+      - hierarchical_recall_macro
+      - hierarchical_recall_weighted
+      - hierarchical_recall_micro
+
+report_templates:
+  overall_metrics:
+   input_filename: "{{store_name}}_lr_bootstraps.csv"
+   reports:
+    - type: plot
+      pivot: false 
+      output_filename: "Images/bootstraps/boxplot_lr_bootstraps_{{metric}}.png" 
+      settings:
+        plot_type: boxplot
+        x_column: "store"
+        y_column: "{{metric}}"
+        title: Boxplot of {{metric}} for all stores
+    - type: plot
+      pivot: false 
+      output_filename: "Images/bootstraps/boxplot_lr_bootstraps_{{metric}}.png" 
+      settings:
+        plot_type: violin_plot
+        x_column: "store"
+        y_column: "{{metric}}"
+        title: Boxplot of {{metric}} for all stores
+    
