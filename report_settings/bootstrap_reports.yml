@@ -48,6 +48,7 @@ report_templates:
     - type: plot
       output_filename: "Images/bootstraps/parallel_coordinates_plot_lr_{{metric}}.png" 
       preprocessing:
+        bool_to_int: true
         select_columns: 
           - "{{store_column}}"
           - vectorizer__lowercase 

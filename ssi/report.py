@@ -536,6 +536,10 @@ class ReportEngine:
 
             copied_dataframe = copied_dataframe.sort_values(
                 by=columns, ascending=ascending)
+
+        if "bool_to_int" in preprocessing_settings:
+            if preprocessing_settings["bool_to_int"]:
+                copied_dataframe.replace({False: 0, True: 1}, inplace=True)
         return copied_dataframe
 
     def create_directory(self, filename: str):
