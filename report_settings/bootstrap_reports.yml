@@ -60,6 +60,7 @@ report_templates:
           - clf__fit_intercept
           - clf__max_iter
           - clf__solver
+          - "{{metric}}"
       settings:      
         plot_type: parallel_coordinates_plot
         dimensions: 
@@ -74,5 +75,19 @@ report_templates:
           - clf__fit_intercept
           - clf__max_iter
           - clf__solver
+          - "{{metric}}"
+        dimension_titles:
+          - Store
+          - Lowercase
+          - Ngram Range
+          - Analyzer
+          - Max Df
+          - Max Features
+          - Penalty
+          - C
+          - Fit Intercept
+          - Max Iter
+          - Solver
+          - "{{metric}}"
         color_column: "{{metric}}"
         title: Parallel coordinates plot of {{metric}} for all stores
