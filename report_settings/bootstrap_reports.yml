@@ -46,7 +46,7 @@ report_templates:
         y_column: "{{metric}}"
         title: Violin plot of {{metric}} for all stores
     - type: plot
-      output_filename: "Images/bootstraps/parallel_coordinates_lr_{{metric}}.png" 
+      output_filename: "Images/bootstraps/parallel_coordinates_plot_lr_{{metric}}.png" 
       preprocessing:
         select_columns: 
           - "{{store_column}}"
@@ -61,7 +61,7 @@ report_templates:
           - clf__max_iter
           - clf__solver
       settings:      
-        plot_type: parallel_coordinates
+        plot_type: parallel_coordinates_plot
         dimensions: 
           - "{{store_column}}"
           - vectorizer__lowercase 
