@@ -39,10 +39,40 @@ report_templates:
         title: Box plot of {{metric}} for all stores
     - type: plot
       pivot: false 
-      output_filename: "Images/bootstraps/violinlot_lr_bootstraps_{{metric}}.png" 
+      output_filename: "Images/bootstraps/violinplot_lr_bootstraps_{{metric}}.png" 
       settings:
         plot_type: violin_plot
         x_column: "{{store_column}}"
         y_column: "{{metric}}"
         title: Violin plot of {{metric}} for all stores
-    
+    - type: plot
+      output_filename: "Images/bootstraps/parallel_coordinates_lr_{{metric}}.png" 
+      preprocessing:
+        select_columns: 
+          - "{{store_column}}"
+          - vectorizer_lowercase 
+          - vectorizer_ngram_range
+          - vectorizer_analyzer
+          - vectorizer_max_df
+          - vectorizer_max_features
+          - clf_penalty
+          - clf_C
+          - clf_fit_intercept
+          - clf_max_iter
+          - clf_solver
+      settings:      
+        plot_type: parallel_coordinates
+        dimensions: 
+          - "{{store_column}}"
+          - vectorizer_lowercase 
+          - vectorizer_ngram_range
+          - vectorizer_analyzer
+          - vectorizer_max_df
+          - vectorizer_max_features
+          - clf_penalty
+          - clf_C
+          - clf_fit_intercept
+          - clf_max_iter
+          - clf_solver
+        color_column: "{{metric}}"
+        title: Parallel coordinates plot of {{metric}} for all stores
