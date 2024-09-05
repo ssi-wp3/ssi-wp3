@@ -427,14 +427,15 @@ class ReportEngine:
                                        for combination in itertools.product(*values)]
                 print(all_report_settings)
                 for all_report_dict in all_report_settings:
-
+                    # Retrieve the generic report settings section
                     template_settings = self.report_settings.copy()
+                    # Update
                     template_settings.update(
                         all_report_dict)
 
                     all_report_templates = Settings.load(
                         self.settings_filename, "report_templates", True, **template_settings)
-
+                    print(all_report_templates)
                     if report_id not in all_report_templates:
                         print(f"No report template found for {report_id}")
                         continue
