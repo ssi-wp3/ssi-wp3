@@ -3,10 +3,6 @@ report_settings:
 
 reports:
   overall_metrics:
-    store_name:
-      - ah 
-      - lidl 
-      - jumbo
     metric: 
       - accuracy
       - balanced_accuracy
@@ -38,7 +34,7 @@ report_templates:
       output_filename: "Images/bootstraps/boxplot_lr_bootstraps_{{metric}}.png" 
       settings:
         plot_type: box_plot
-        x_column: "store"
+        x_column: "{{store_column}}"
         y_column: "{{metric}}"
         title: Boxplot of {{metric}} for all stores
     - type: plot
@@ -46,7 +42,7 @@ report_templates:
       output_filename: "Images/bootstraps/boxplot_lr_bootstraps_{{metric}}.png" 
       settings:
         plot_type: violin_plot
-        x_column: "store"
+        x_column: "{{store_column}}"
         y_column: "{{metric}}"
         title: Boxplot of {{metric}} for all stores
     
