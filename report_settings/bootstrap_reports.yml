@@ -125,6 +125,7 @@ report_templates:
           - "{{metric}}"
       settings:      
         plot_type: parallel_coordinates_plot
+        format: html
         dimensions: 
           - "{{store_column}}"
           - vectorizer__lowercase 
