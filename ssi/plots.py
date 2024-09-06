@@ -184,8 +184,7 @@ class PlotlyBackend(PlotBackend):
         def save(self, filename: str, format: str = "png"):
             # print("filename", filename)
             if format == "html":
-                # self.figure.write_html(filename)
-                plotly.offline.plot(self.figure, filename=filename)
+                self.figure.write_html(filename)
             else:
                 self.figure.write_image(filename)
 
