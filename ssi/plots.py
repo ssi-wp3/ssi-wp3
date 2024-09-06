@@ -296,7 +296,9 @@ class PlotlyBackend(PlotBackend):
                                   dimension_titles: List[str] = None,
                                   title: str = None,
                                   color_continuous_scale: str = px.colors.diverging.Tealrose,
-                                  color_continuous_midpoint: float = 2
+                                  color_continuous_midpoint: float = 2,
+                                  width: Optional[int] = None,
+                                  height: Optional[int] = None
                                   ) -> go.Figure:
         if not dimension_titles:
             figure = px.parallel_coordinates(dataframe,
@@ -304,7 +306,9 @@ class PlotlyBackend(PlotBackend):
                                              color=color_column,
                                              title=title,
                                              color_continuous_scale=color_continuous_scale,
-                                             color_continuous_midpoint=color_continuous_midpoint)
+                                             color_continuous_midpoint=color_continuous_midpoint,
+                                             width=width,
+                                             height=height)
         else:
             labels = {dim: title for dim, title in zip(
                 dimensions, dimension_titles)}
@@ -315,7 +319,9 @@ class PlotlyBackend(PlotBackend):
                                              title=title,
                                              color_continuous_scale=color_continuous_scale,
                                              color_continuous_midpoint=color_continuous_midpoint,
-                                             )
+                                             width=width,
+                                             height=height)
+
         return self.__figure_wrapper_for(figure)
 
     def __figure_wrapper_for(self, figure):
