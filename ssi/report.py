@@ -362,6 +362,8 @@ class DefaultReportFileManager(ReportFileManager):
         return open(filename, "r")
 
     def open_output_file(self, filename: str):
+        if filename.endswith(".html"):
+            return open(filename, "w", encoding="utf-8")
         return open(filename, "w")
 
 
