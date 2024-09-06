@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 import plotly.express as px
 import plotly.graph_objects as go
-import plotly
+import plotly.io as pio
 import pandas as pd
 
 
@@ -184,6 +184,7 @@ class PlotlyBackend(PlotBackend):
         def save(self, filename: str, format: str = "png"):
             # print("filename", filename)
             if format == "html":
+                pio.renderers.default = "notebook_connected"
                 self.figure.write_html(filename)
             else:
                 self.figure.write_image(filename)
