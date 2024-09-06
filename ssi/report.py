@@ -384,6 +384,8 @@ class LuigiReportFileManager(ReportFileManager):
         return self.luigi_input_targets[filename].open("r")
 
     def open_output_file(self, filename: str):
+        if filename.endswith(".html"):
+            return self.luigi_output_targets[filename].open("w", encoding="utf-8")
         return self.luigi_output_targets[filename].open("w")
 
 
