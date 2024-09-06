@@ -541,7 +541,7 @@ class ReportEngine:
             if preprocessing_settings["bool_to_int"]:
                 copied_dataframe.replace({False: 0, True: 1}, inplace=True)
         if "to_categorical" in preprocessing_settings:
-            columns = preprocessing_settings.get("columns", [])
+            columns = preprocessing_settings.get("to_categorical", [])
             for column in columns:
                 copied_dataframe[column] = copied_dataframe[column].astype(
                     "category").cat.codes
