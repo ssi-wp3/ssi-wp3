@@ -83,7 +83,61 @@ report_templates:
           - clf__max_iter
           - clf__solver
           - "{{metric}}"
-        # TODO: dimension titles cause an error, figure out why
+        dimension_titles:
+          - Store
+          - Lowercase
+          - Ngram Range
+          - Analyzer
+          - Max Df
+          - Max Features
+          - Penalty
+          - C
+          - Fit Intercept
+          - Max Iter
+          - Solver
+          - "{{metric}}"
+        color_column: "{{metric}}"
+        color_continuous_midpoint: 0.5
+        title: Parallel coordinates plot of {{metric}} for all stores
+        width: 1000
+    - type: plot
+      output_filename: "Images/bootstraps/parallel_coordinates_plot_lr_{{metric}}.html" 
+      preprocessing:
+        bool_to_int: true
+        to_categorical:
+          - "{{store_column}}"
+          - vectorizer__ngram_range
+          - vectorizer__analyzer
+          - clf__penalty
+          - clf__solver
+        select_columns: 
+          - "{{store_column}}"
+          - vectorizer__lowercase 
+          - vectorizer__ngram_range
+          - vectorizer__analyzer
+          - vectorizer__max_df
+          - vectorizer__max_features
+          - clf__penalty
+          - clf__C
+          - clf__fit_intercept
+          - clf__max_iter
+          - clf__solver
+          - "{{metric}}"
+      settings:      
+        plot_type: parallel_coordinates_plot
+        dimensions: 
+          - "{{store_column}}"
+          - vectorizer__lowercase 
+          - vectorizer__ngram_range
+          - vectorizer__analyzer
+          - vectorizer__max_df
+          - vectorizer__max_features
+          - clf__penalty
+          - clf__C
+          - clf__fit_intercept
+          - clf__max_iter
+          - clf__solver
+          - "{{metric}}"
         dimension_titles:
           - Store
           - Lowercase
