@@ -184,7 +184,7 @@ class PlotlyBackend(PlotBackend):
         def save(self, filename: str, format: str = "png"):
             # print("filename", filename)
             if format == "html":
-                pio.renderers.default = "notebook_connected"
+                pio.renderers.default = "notebook"
                 self.figure.write_html(filename)
             else:
                 self.figure.write_image(filename)
