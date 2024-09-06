@@ -309,6 +309,7 @@ class PlotlyBackend(PlotBackend):
             labels = {dim: title for dim, title in zip(
                 dimensions, dimension_titles)}
             figure = px.parallel_coordinates(dataframe,
+                                             dimensions=dimensions,
                                              color=color_column,
                                              labels=labels,
                                              title=title,
