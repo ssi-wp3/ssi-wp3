@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly
 import pandas as pd
 
 
@@ -183,7 +184,8 @@ class PlotlyBackend(PlotBackend):
         def save(self, filename: str, format: str = "png"):
             # print("filename", filename)
             if format == "html":
-                self.figure.write_html(filename)
+                # self.figure.write_html(filename)
+                plotly.offline.plot(self.figure, filename=filename)
             else:
                 self.figure.write_image(filename)
 
