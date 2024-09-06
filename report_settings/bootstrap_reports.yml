@@ -84,19 +84,19 @@ report_templates:
           - clf__solver
           - "{{metric}}"
         # TODO: dimension titles cause an error, figure out why
-        # dimension_titles:
-        #   - Store
-        #   - Lowercase
-        #   - Ngram Range
-        #   - Analyzer
-        #   - Max Df
-        #   - Max Features
-        #   - Penalty
-        #   - C
-        #   - Fit Intercept
-        #   - Max Iter
-        #   - Solver
-        #   - "{{metric}}"
+        dimension_titles:
+          - Store
+          - Lowercase
+          - Ngram Range
+          - Analyzer
+          - Max Df
+          - Max Features
+          - Penalty
+          - C
+          - Fit Intercept
+          - Max Iter
+          - Solver
+          - "{{metric}}"
         color_column: "{{metric}}"
         color_continuous_midpoint: 0.5
         title: Parallel coordinates plot of {{metric}} for all stores
