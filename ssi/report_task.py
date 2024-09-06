@@ -41,7 +41,9 @@ class ReportTask(luigi.Task):
                 if file_key in self.report_engine.reports.keys()}
 
     def output(self):
-        return {report.output_filename: self.output_target_for(os.path.join(self.output_directory, report.output_filename), binary_file=report.needs_binary_file)
+        return {report.output_filename: self.output_target_for(os.path.join(self.output_directory, report.output_filename), binary_file=False
+                                                               # TODO hack, should be fixed in the future
+                                                               if report.output_filename.endswith(".html") else report.needs_binary_file)
                 for report in self.report_engine.flattened_reports}
 
     def zip_output_files(self, filename: str):
