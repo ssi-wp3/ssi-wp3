@@ -100,3 +100,4 @@ report_templates:
         color_column: "{{metric}}"
         color_continuous_midpoint: 0.5
         title: Parallel coordinates plot of {{metric}} for all stores
+        width: 1000
