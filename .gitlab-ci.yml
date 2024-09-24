@@ -16,6 +16,8 @@ build_docs:
   artifacts:
     paths:
       - public
+  only:
+    - main
 
 pages:
   stage: deploy
