@@ -1,7 +1,6 @@
 image: python:3.9
 
 stages:
-  - build
   - deploy
 
 before_script:
@@ -10,7 +9,7 @@ before_script:
   - pip install sphinx sphinx_rtd_theme
 
 pages:
-  stage: build
+  stage: deploy
   script:
     - sphinx-build -b html docs/source/ public/
   artifacts:
