@@ -11,7 +11,7 @@ before_script:
 pages:
   stage: deploy
   script:
-    - cd docs/source/ && make html
+    - cd docs/ && make html
   artifacts:
     paths:
       - public
