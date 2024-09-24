@@ -5,6 +5,15 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
+import sys
+
+# Add the project root to the system path
+sys.path.insert(0, os.path.abspath('../..'))
+
+
+# parent = Path(__file__).parent
+# parents_parent = Path(__file__).parents[1]
 
 project = 'SSI'
 copyright = '2024, Tim De Jong, Chris Lam, Marco Puts'
