@@ -11,7 +11,7 @@ before_script:
 pages:
   stage: deploy
   script:
-    - sphinx-build -b html docs/source/ public/
+    - cd docs/source/ && make html
   artifacts:
     paths:
       - public
