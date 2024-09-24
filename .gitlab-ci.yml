@@ -9,18 +9,10 @@ before_script:
   #- pip install -r requirements.txt
   - pip install sphinx sphinx_rtd_theme
 
-build_docs:
+pages:
   stage: build
   script:
     - sphinx-build -b html docs/source/ public/
-  artifacts:
-    paths:
-      - public
-  only:
-    - main
-
-pages:
-  stage: deploy
   artifacts:
     paths:
       - public
