@@ -21,10 +21,8 @@ build_docs:
 
 pages:
   stage: deploy
-  script:
-    - mv public/ docs/
   artifacts:
     paths:
-      - docs
+      - public
   only:
     - main
