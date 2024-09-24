@@ -6,7 +6,7 @@ stages:
 before_script:
   - python -m pip install --upgrade pip
   #- pip install -r requirements.txt
-  - pip install sphinx sphinx_rtd_theme
+  - pip install sphinx sphinx-autodoc sphinx_rtd_theme
 
 pages:
   stage: deploy
