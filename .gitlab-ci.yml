@@ -12,7 +12,7 @@ before_script:
 build_docs:
   stage: build
   script:
-    - sphinx-build -b html docs/ public/
+    - sphinx-build -b html docs/source/ public/
   artifacts:
     paths:
       - public
