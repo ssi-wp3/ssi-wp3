@@ -12,6 +12,7 @@ pages:
   stage: deploy
   script:
     - cd docs/ && make html
+    - mv docs/build/html public
   artifacts:
     paths:
       - public
