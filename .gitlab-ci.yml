@@ -1,0 +1,28 @@
+image: python:3.9
+
+stages:
+  - build
+  - deploy
+
+before_script:
+  - python -m pip install --upgrade pip
+  - pip install -r requirements.txt
+  - pip install sphinx sphinx_rtd_theme
+
+build_docs:
+  stage: build
+  script:
+    - sphinx-build -b html docs/ public/
+  artifacts:
+    paths:
+      - public
+
+pages:
+  stage: deploy
+  script:
+    - mv public/ docs/
+  artifacts:
+    paths:
+      - docs
+  only:
+    - main
