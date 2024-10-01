@@ -170,6 +170,38 @@ class ExtractAllFeatures(luigi.WrapperTask):
 
 
 class CombineUniqueValues(luigi.Task):
+    """This task combines unique values from multiple feature extraction files into a single file.
+    It searches for all the files in the input directory that start with the filename_prefix (normally ssi) and contain the string ".parquet".
+    It then combines the unique values from these files into a single file. The key columns are the receipt text column and the coicop label column.
+    The output file is written to the output_directory.
+
+    Parameters
+    ----------
+
+    input_directory : luigi.PathParameter
+        The directory containing the feature extraction files.
+
+    output_directory : luigi.PathParameter
+        The directory where the output parquet file will be written.
+
+    filename_prefix : luigi.Parameter
+        The prefix of the feature extraction files. The default value is "ssi".
+
+    key_columns : luigi.ListParameter
+        The columns to use as key columns. The default value is [Constants.RECEIPT_TEXT_COLUMN, Constants.COICOP_LABEL_COLUMN].
+
+    feature_extractor : luigi.EnumParameter
+        The feature extractor to use. This is an instance of the FeatureExtractorType enum. Only values
+        from that enum are allowed as parameter. The default value is FeatureExtractorType.TF_IDF.
+
+    parquet_engine : luigi.Parameter
+        The parquet engine to use. The default value is "pyarrow".
+
+    drop_empty_receipts : luigi.BoolParameter
+        Whether to drop empty receipts. The default value is True.  
+
+    """
+    input_directory = luigi.PathParameter()
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     filename_prefix = luigi.Parameter()
