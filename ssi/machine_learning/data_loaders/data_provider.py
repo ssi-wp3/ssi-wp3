@@ -96,7 +96,6 @@ class DataProvider:
         pass
 
     @property
-    @abstractmethod
     def labels(self) -> pd.Series:
         """ Returns all labels from the label column.
 
@@ -106,6 +105,17 @@ class DataProvider:
             A pandas Series object with all labels from the label column.
         """
         return self[self.label_column]
+
+    @property
+    def features(self) -> pd.Series:
+        """ Returns all features from the feature column.
+
+        Returns
+        -------
+        pd.Series
+            A pandas Series object with all features from the feature column.
+        """
+        return self[self.features_column]
 
     @property
     def number_of_classes(self) -> int:
