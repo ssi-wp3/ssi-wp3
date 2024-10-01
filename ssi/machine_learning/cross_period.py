@@ -33,6 +33,8 @@ import os
 
 
 class TrainModelOnPeriod(TrainModelTask):
+    """ Train a model on a specific period.
+    """
     input_filename = luigi.PathParameter()
     period_column = luigi.Parameter()
     train_period = luigi.Parameter()
@@ -61,51 +63,135 @@ class TrainModelOnPeriod(TrainModelTask):
         }
 
     def requires(self):
+        """ Get the required inputs.
+
+        Returns
+        -------
+        ParquetFile
+            The required input
+        """
         return ParquetFile(self.input_filename)
 
     @property
     def feature_filename(self) -> str:
+        """ Get the feature filename.
+
+        Returns
+        -------
+        str
+            The feature filename
+        """
         feature_filename, _ = os.path.splitext(
             os.path.basename(self.input_filename))
         return feature_filename
 
     @property
     def training_predictions_filename(self) -> str:
+        """ Get the training predictions filename.
+
+        Returns
+        -------
+        str
+            The training predictions filename
+        """
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_predictions.parquet")
 
     @property
     def training_evaluation_filename(self) -> str:
+        """ Get the training evaluation filename.
+
+        Returns
+        -------
+        str
+            The training evaluation filename
+        """
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.training_evaluation.json")
 
     @property
     def predictions_filename(self) -> str:
+        """ Get the predictions filename.
+
+        Returns
+        -------
+        str
+            The predictions filename
+        """
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.predictions.parquet")
 
     @property
     def model_filename(self) -> str:
+        """ Get the model filename.
+
+        Returns
+        -------
+        str
+            The model filename
+        """
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.joblib")
 
     @property
     def evaluation_filename(self) -> str:
+        """ Get the evaluation filename.
+
+        Returns
+        -------
+        str
+            The evaluation filename
+        """
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.evaluation.json")
 
     @property
     def per_period_evaluation_key(self) -> str:
+        """ Get the per period evaluation key.
+
+        Returns
+        -------
+        str
+            The per period evaluation key
+        """
         return f"evaluation_per_period"
 
     @property
     def per_period_evaluation_filename(self) -> str:
+        """ Get the per period evaluation filename.
+
+        Returns
+        -------
+        str
+            The per period evaluation filename
+        """
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.per_period_evaluation.parquet")
 
     @property
     def per_period_coicop_evaluation_key(self) -> str:
+        """ Get the per period coicop evaluation key.
+
+        Returns
+        -------
+        str
+            The per period coicop evaluation key
+        """
         return f"evaluation_per_coicop_period"
 
     @property
     def per_period_coicop_evaluation_filename(self) -> str:
+        """ Get the per period coicop evaluation filename.
+
+        Returns
+        -------
+        str
+            The per period coicop evaluation filename
+        """
         return os.path.join(self.model_directory, f"{self.feature_filename}_{self.model_type}_{self.label_column}_{self.train_period}.per_period_coicop_evaluation.parquet")
 
     def output(self):
+        """ Get the output.
+
+        Returns
+        -------
+        dict
+            The output
+        """
         output_dict = super().output()
         output_dict[self.per_period_evaluation_key] = luigi.LocalTarget(
             self.per_period_evaluation_filename, format=luigi.format.Nop)
@@ -114,8 +200,18 @@ class TrainModelOnPeriod(TrainModelTask):
         return output_dict
 
     def get_data_for_period(self, input_file) -> pd.DataFrame:
-        print(
-            f"Reading data for {self.train_period} from {self.input_filename}")
+        """ Get the data for the period.
+
+        Parameters
+        ----------
+        input_file : file
+            The input file
+
+        Returns
+        -------
+        pd.DataFrame
+            The data for the period
+        """
         # dataframe = pd.read_parquet(input_file, engine=self.parquet_engine)
 
         dataframe = pa.parquet.read_table(
@@ -126,6 +222,13 @@ class TrainModelOnPeriod(TrainModelTask):
         return dataframe
 
     def prepare_data(self) -> pd.DataFrame:
+        """ Prepare the data.
+
+        Returns
+        -------
+        pd.DataFrame
+            The prepared data
+        """
         with self.input().open() as input_file:
             dataframe = self.get_data_for_period(input_file)
             return dataframe
@@ -188,6 +291,28 @@ class TrainModelOnPeriod(TrainModelTask):
                   num_epochs: int,
                   batch_size: int,
                   early_stopping_patience: int) -> Any:
+        """ Fit the model.
+
+        Parameters
+        ----------
+        train_dataframe : pd.DataFrame
+            The training dataframe
+        device : str
+            The device to use
+        learning_rate : float
+            The learning rate
+        num_epochs : int
+            The number of epochs
+        batch_size : int
+            The batch size
+        early_stopping_patience : int
+            The early stopping patience
+
+        Returns
+        -------
+        Any
+            The model
+        """
 
         # experiment = Experiment()
 
@@ -361,6 +486,27 @@ class TrainModelOnPeriod(TrainModelTask):
         return model
 
     def train_model(self, train_dataframe: torch.utils.data.Subset, training_predictions_file):
+        """ Train the model.
+
+        Parameters
+        ----------
+        train_dataframe : torch.utils.data.Subset
+            The training dataframe
+        training_predictions_file : str
+            The file to save the training predictions to
+        label_mapping : Dict[str, int]
+            The label mapping
+        device : torch.device
+            The device to use
+        learning_rate : float
+            The learning rate
+        num_epochs : int
+            The number of epochs
+        batch_size : int
+            The batch size
+        early_stopping_patience : int
+            The early stopping patience
+        """
         device = torch.device(
             self.gpu_device if torch.cuda.is_available() else "cpu")
         self.model_trainer.fit(train_dataframe,
@@ -375,6 +521,8 @@ class TrainModelOnPeriod(TrainModelTask):
                                )
 
     def run(self):
+        """ Run the task.
+        """
         print(
             f"Training model: {self.model_type} on period: {self.train_period}")
 
@@ -386,6 +534,8 @@ class TrainModelOnPeriod(TrainModelTask):
         self.write_per_period_evaluations()
 
     def write_per_period_evaluations(self):
+        """ Write the per period evaluations.
+        """
         evaluation_df = pd.read_parquet(
             self.predictions_filename, engine=self.parquet_engine)
         self.write_grouped_results(evaluation_df, group_columns=[
@@ -394,6 +544,17 @@ class TrainModelOnPeriod(TrainModelTask):
                                    self.period_column, self.label_column], results_key=self.per_period_coicop_evaluation_key)
 
     def write_grouped_results(self, evaluation_df, group_columns, results_key):
+        """ Write the grouped results.
+
+        Parameters
+        ----------
+        evaluation_df : pd.DataFrame
+            The evaluation dataframe
+        group_columns : list[str]
+            The columns to group by
+        results_key : str
+            The key to save the results to
+        """
         per_group_evaluations = calculate_metrics_per_group(dataframe=evaluation_df,
                                                             group_columns=group_columns,
                                                             label_column=self.label_column,
@@ -403,6 +564,8 @@ class TrainModelOnPeriod(TrainModelTask):
                 per_group_evaluation_file, engine=self.parquet_engine)
 
     def write_product_evaluations(self):
+        """ Write the product evaluations.
+        """
         evaluation_df = pd.read_parquet(
             self.predictions_filename, engine=self.parquet_engine)
         products_df = compare_products_per_period(
@@ -439,6 +602,8 @@ class TrainModelOnPeriod(TrainModelTask):
 
 
 class TrainModelOnAllPeriods(luigi.WrapperTask):
+    """ Train a model on all periods.
+    """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
@@ -455,12 +620,33 @@ class TrainModelOnAllPeriods(luigi.WrapperTask):
     period_columns = luigi.ListParameter()
 
     def identify_unique_periods(self, input_filename: str, period_column: str) -> pd.Series:
+        """ Identify the unique periods.
+
+        Parameters
+        ----------
+        input_filename : str
+            The input filename
+        period_column : str
+            The period column
+
+        Returns
+        -------
+        pd.Series
+            The unique periods
+        """
         print(
             f"Identifying unique periods for column {period_column} in {input_filename}")
 
         return pa.parquet.read_table(input_filename, columns=[period_column]).to_pandas()[period_column].unique()
 
     def requires(self):
+        """ Get the required tasks.
+
+        Returns
+        -------
+        list[TrainModelOnPeriod]
+            The required tasks
+        """
         return [TrainModelOnPeriod(input_filename=os.path.join(self.input_directory, feature_filename),
                                    output_directory=self.output_directory,
                                    feature_extractor=self.feature_extractor,
