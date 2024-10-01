@@ -3,19 +3,51 @@ import pandas as pd
 
 
 class DataLabelEncoder:
-    def init(self, label_mapping: OrderedDict = None):
+    """ Encodes labels to their encoded values. It also provides the inverse mapping.
+
+    """
+
+    def __init__(self, label_mapping: OrderedDict = None):
+        """ Initializes the label encoder.
+
+        Parameters
+        ----------
+        label_mapping : OrderedDict, optional
+            The mapping of the labels to their encoded values, by default None.
+        """
         self.__label_mapping = label_mapping
 
     @property
     def label_mapping(self) -> OrderedDict:
+        """ The mapping of the labels to their encoded values.
+
+        Returns
+        -------
+        OrderedDict
+            The mapping of the labels to their encoded values.
+        """
         return self.__label_mapping
 
     @label_mapping.setter
     def label_mapping(self, value: OrderedDict):
+        """ Sets the mapping of the labels to their encoded values.
+
+        Parameters
+        ----------
+        value : OrderedDict
+            The mapping of the labels to their encoded values.
+        """
         self.__label_mapping = value
 
     @property
     def inverse_label_mapping(self) -> OrderedDict:
+        """ The mapping of the encoded labels to their original values.
+
+        Returns
+        -------
+        OrderedDict
+            The mapping of the encoded labels to their original values.
+        """
         return OrderedDict([(v, k) for k, v in self.label_mapping.items()])
 
     def fit(self, labels: pd.Series):
@@ -23,7 +55,6 @@ class DataLabelEncoder:
 
         Parameters
         ----------
-
         labels : pd.Series
             The labels to encode.
         """
