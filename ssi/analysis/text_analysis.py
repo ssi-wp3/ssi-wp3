@@ -5,12 +5,40 @@ import os
 
 
 def clean_text(text: pd.Series) -> pd.Series:
-    """Cleans a text"""
+    """Cleans a text series by removing all non-alphanumeric characters,
+    stripping leading and trailing whitespace, and converting to lowercase.
+
+    Parameters
+    ----------
+
+    text : pd.Series
+        The text to clean.
+
+    Returns
+    -------
+    pd.Series
+        The cleaned text.
+    """
     return text.str.replace('[^0-9a-zA-Z.,-/ ]', "", regex=True).str.lstrip().str.rstrip().str.lower()
 
 
 def series_to_set(series: pd.Series, clean_text: bool = False) -> set:
-    """Converts a pandas series to a set"""
+    """Converts a pandas series to a set
+
+    Parameters
+    ----------
+
+    series : pd.Series
+        The series to convert to a set.
+
+    clean_text : bool
+        Whether to clean the text.
+
+    Returns
+    -------
+    set
+        The set of unique values from the series.
+    """
     if clean_text:
         return set(clean_text(series.drop_duplicates()).tolist())
     return set(series.drop_duplicates().tolist())
@@ -19,7 +47,17 @@ def series_to_set(series: pd.Series, clean_text: bool = False) -> set:
 
 
 def dataframe_to_set(dataframe: pd.DataFrame, clean_text: bool = False) -> pd.DataFrame:
-    """Converts a dataframe to a set"""
+    """Converts a dataframe to a set of unique values. The resulting dataframe will have a column for each column in the original dataframe. Each column will contain a set of unique values from the original dataframe.
+
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The dataframe to convert to a set.
+
+    clean_text : bool
+        Whether to clean the text.
+    """
     return pd.DataFrame({
         column: [series_to_set(dataframe[column], clean_text=clean_text)]
         for column in dataframe.columns
@@ -164,7 +202,17 @@ def unique_split_words_length_histogram(dataframe: pd.DataFrame, text_column: st
 
 
 def write_set_texts_to_file(set1, filename: str, delimiter=";", chunk_size: int = 80):
-    """ Writes a set of texts to a file """
+    """ Writes a set of texts to a file 
+
+    Parameters
+    ----------
+
+    set1 : set
+        The set of texts to write to the file
+
+    filename : str
+        The filename to write the texts to
+    """
     with open(filename, "w") as text_file:
         sorted_set = sorted(set1)
         for i in range(0, len(set1), chunk_size):
@@ -205,12 +253,53 @@ def detect_product_differences(receipt_texts_before: set, receipt_texts_after: s
 
 
 def group_unique_values_per_period(dataframe: pd.DataFrame, period_column: str, value_column: str) -> pd.DataFrame:
+    """Groups unique values per period
+
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    period_column : str
+        The column containing the period information
+
+    value_column : str
+        The column containing the values to group
+
+    Returns
+    ------- 
+    pd.DataFrame
+        A dataframe with the unique values per period
+    """
     grouped_texts_per_month = dataframe.groupby(
         by=period_column)[value_column].apply(series_to_set)
     return grouped_texts_per_month.reset_index()
 
 
 def get_unique_texts_and_eans_per_period(dataframe: pd.DataFrame, period_column: str, receipt_column: str, ean_column: str) -> pd.DataFrame:
+    """Gets the unique texts and eans per period
+
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    period_column : str
+        The column containing the period information
+
+    receipt_column : str
+        The column containing the receipt texts
+
+    ean_column : str
+        The column containing the eans
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe with the unique texts and eans per period
+    """
     grouped_texts_per_month = group_unique_values_per_period(
         dataframe, period_column, receipt_column)
     grouped_eans_per_month = group_unique_values_per_period(
@@ -219,7 +308,25 @@ def get_unique_texts_and_eans_per_period(dataframe: pd.DataFrame, period_column:
 
 
 def compare_receipt_texts_per_period(dataframe: pd.DataFrame, period_column: str, receipt_text_column: str) -> pd.DataFrame:
-    """Compares receipt texts per period"""
+    """Compares receipt texts per period
+
+    Parameters
+    ----------
+
+    dataframe : pd.DataFrame
+        The dataframe to process
+
+    period_column : str
+        The column containing the period information
+
+    receipt_text_column : str
+        The column containing the receipt texts
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe with the receipt texts per period
+    """
     receipt_texts_per_period = dataframe.groupby(
         period_column)[receipt_text_column].apply(series_to_set)
 
