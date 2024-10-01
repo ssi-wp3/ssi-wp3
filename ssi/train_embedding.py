@@ -1,14 +1,13 @@
 # %%
-from constants import Constants
 from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments, AutoConfig, AutoTokenizer
 from functools import partial
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 from typing import Tuple
-from machine_learning.evaluate import plot_confusion_matrix
-from preprocessing.combine_unique_values import drop_unknown
-from constants import Constants
+from .machine_learning.evaluate import plot_confusion_matrix
+from .preprocessing.combine_unique_values import drop_unknown
+from .constants import Constants
 import pandas as pd
 import numpy as np
 import evaluate
