@@ -16,6 +16,22 @@ import json
 
 
 def evaluate(y_true: np.array, y_pred: np.array, suffix: str = "") -> Dict[str, object]:
+    """ Evaluate the model.
+
+    Parameters
+    ----------
+    y_true : np.array
+        The true labels
+    y_pred : np.array
+        The predicted labels
+    suffix : str, optional
+        The suffix to add to the evaluation metrics, by default ""
+
+    Returns
+    -------
+    Dict[str, object]
+        The evaluation metrics
+    """
     return {
         f"accuracy{suffix}": accuracy_score(y_true, y_pred),
         f"precision{suffix}": precision_score(y_true, y_pred, average="macro"),
@@ -31,6 +47,24 @@ def fit_pipeline(train_dataframe: pd.DataFrame,
                  receipt_text_column: str,
                  label_column: str,
                  ) -> Pipeline:
+    """ Fit the pipeline.
+
+    Parameters
+    ----------
+    train_dataframe : pd.DataFrame
+        The training dataframe
+    pipeline : Pipeline
+        The pipeline to fit
+    receipt_text_column : str
+        The column name containing the receipt text
+    label_column : str
+        The column name containing the labels
+
+    Returns
+    -------
+    Pipeline
+        The fitted pipeline
+    """
     pipeline.fit(train_dataframe[receipt_text_column].values.tolist(),
                  train_dataframe[label_column].values.tolist())
 
@@ -43,6 +77,26 @@ def train_model(train_dataframe: pd.DataFrame,
                 label_column: str,
                 verbose: bool = False
                 ) -> Pipeline:
+    """ Train the model.
+
+    Parameters
+    ----------
+    train_dataframe : pd.DataFrame
+        The training dataframe
+    model_type : str
+        The model type
+    feature_column : str
+        The column name containing the features
+    label_column : str
+        The column name containing the labels
+    verbose : bool, optional
+        Whether to print verbose output, by default False
+
+    Returns
+    -------
+    Pipeline
+        The trained model pipeline
+    """
     model = ModelFactory.model_for(model_type, verbose=verbose)
     pipeline = Pipeline([
         ('classifier', model)
@@ -57,6 +111,28 @@ def train_model_with_feature_extractors(train_dataframe: pd.DataFrame,
                                         label_column: str,
                                         verbose: bool = False
                                         ) -> Pipeline:
+    """ Train the model with feature extractors.
+
+    Parameters
+    ----------
+    train_dataframe : pd.DataFrame
+        The training dataframe
+    model_type : str
+        The model type
+    feature_extractor : FeatureExtractorType
+        The feature extractor to use
+    receipt_text_column : str
+        The column name containing the receipt text
+    label_column : str
+        The column name containing the labels
+    verbose : bool, optional
+        Whether to print verbose output, by default False
+
+    Returns
+    -------
+    Pipeline
+        The trained model pipeline
+    """
     model = ModelFactory.model_for(model_type, verbose=verbose)
     pipeline = Pipeline([
         ('features', feature_extractor),
@@ -206,6 +282,20 @@ def evaluate_model(pipeline: Pipeline,
 
 
 def evaluate_hiclass(y_true: np.array, y_pred: np.array) -> Dict[str, Any]:
+    """Evaluate the hierarchical classifier.
+
+    Parameters
+    ----------
+    y_true : np.array
+        The true labels
+    y_pred : np.array
+        The predicted labels
+
+    Returns
+    -------
+    Dict[str, Any]
+        The evaluation dictionary containing the evaluation metrics
+    """
     evaluation_dict = []
     for i, coicop_level in enumerate(Constants.COICOP_LEVELS_COLUMNS[::-1]):
         y_true_level = [y[i] for y in y_true]
@@ -226,6 +316,31 @@ def train_model_with_feature_extractors(input_filename: str,
                                         number_of_jobs: int = -1,
                                         verbose: bool = False
                                         ):
+    """ Train the model with feature extractors.
+
+    Parameters
+    ----------
+    input_filename : str
+        The filename of the parquet file containing the data
+    receipt_text_column : str
+        The column name containing the receipt text
+    coicop_column : str
+        The column name containing the coicop column
+    label_extractor : LabelExtractor
+        The label extractor to use
+    feature_extractors : List[FeatureExtractorType]
+        The feature extractors to use
+    model_type : str
+        The model type to use
+    test_size : float
+        The test size for the train/test split
+    output_path : str
+        The path to save the model and evaluation to
+    number_of_jobs : int, optional
+        The number of jobs to use, by default -1
+    verbose : bool, optional
+        Whether to print verbose output, by default False
+    """
     dataframe = pd.read_parquet(input_filename, engine="pyarrow")
     extracted_label_column = "label"
     dataframe[extracted_label_column] = label_extractor.get_labels(
@@ -264,6 +379,31 @@ def train_models(input_filename: str,
                  output_path: str,
                  number_of_jobs: int = -1,
                  verbose: bool = False):
+    """ Train the models.
+
+    Parameters
+    ----------
+    input_filename : str
+        The filename of the parquet file containing the data
+    receipt_text_column : str
+        The column name containing the receipt text
+    coicop_column : str
+        The column name containing the coicop column
+    label_extractor : LabelExtractor
+        The label extractor to use
+    feature_extractors : List[FeatureExtractorType]
+        The feature extractors to use
+    model_types : List[str]
+        The model types to use
+    test_size : float
+        The test size for the train/test split
+    output_path : str
+        The path to save the model and evaluation to
+    number_of_jobs : int, optional
+        The number of jobs to use, by default -1
+    verbose : bool, optional
+        Whether to print verbose output, by default False
+    """
     progress_bar = tqdm.tqdm(model_types)
     for model_type in progress_bar:
         progress_bar.set_description(f"Training model {model_type}")
