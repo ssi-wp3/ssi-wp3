@@ -12,6 +12,21 @@ import numpy as np
 def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: str, number_of_texts: int) -> BootstrapSample:
     """ Perform OCR preprocessing augmentation.
 
+    Parameters
+    ----------
+    bootstrap_sample : BootstrapSample
+        The bootstrap sample to perform OCR preprocessing on.
+
+    receipt_text_column : str
+        The column containing the receipt text data.
+
+    number_of_texts : int
+        The number of texts to augment.
+
+    Returns
+    -------
+    BootstrapSample
+        The bootstrap sample with the augmented data.
     """
     def ocr_augment(dataframe: pd.DataFrame, receipt_text_column: str, number_of_texts: int) -> pd.DataFrame:
         aug = nac.OcrAug()
@@ -25,6 +40,21 @@ def ocr_preprocessing(bootstrap_sample: BootstrapSample, receipt_text_column: st
 
 
 def evaluate_model(y_true: np.array, y_pred: np.array) -> Dict[str, Any]:
+    """ Evaluate the model using sklearn metrics.
+
+    Parameters
+    ----------
+    y_true : np.array
+        The true labels.
+
+    y_pred : np.array
+        The predicted labels.
+
+    Returns
+    -------
+    Dict[str, Any]
+        The evaluation dictionary.
+    """
     eval_dict = dict()
     metrics = {
         'accuracy': accuracy_score,
@@ -70,6 +100,39 @@ def sklearn_evaluation_function(bootstrap_index: int,
                                 feature_column: str,
                                 label_column: str,
                                 progress_bar: tqdm.tqdm) -> Dict[str, Any]:
+    """ Evaluate an sklearn pipeline using bootstrap sampling.
+
+    Parameters
+    ----------
+    bootstrap_index : int
+        The index of the bootstrap.
+
+    total_number_bootstraps : int
+        The total number of bootstraps.
+
+    sample : BootstrapSample
+        The bootstrap sample to evaluate.
+
+    sklearn_pipeline : sklearn.pipeline.Pipeline
+        The sklearn pipeline to evaluate.
+
+    parameter_sampler : sklearn.model_selection.ParameterSampler
+        The parameter sampler to use.
+
+    feature_column : str
+        The column containing the feature data.
+
+    label_column : str
+        The column containing the label data.
+
+    progress_bar : tqdm.tqdm
+        The progress bar to update.
+
+    Returns
+    -------
+    Dict[str, Any]
+        The evaluation dictionary.
+    """
 
     # Train the model
     train_sample_df = sample.bootstrap_sample
@@ -111,6 +174,39 @@ def bootstrap_model(sklearn_pipeline,
                     feature_column: str,
                     label_column: str,
                     random_state: int = 42) -> pd.DataFrame:
+    """ Bootstrap the an sklearn pipeline.
+
+    Parameters
+    ----------
+    sklearn_pipeline : sklearn.pipeline.Pipeline
+        The sklearn pipeline to evaluate.
+
+    parameter_sampler : sklearn.model_selection.ParameterSampler
+        The parameter sampler to use.
+
+    dataframe : pd.DataFrame
+        The dataframe to bootstrap.
+
+    n_bootstraps : int
+        The number of bootstraps to perform.
+
+    n_samples_per_bootstrap : int
+        The number of samples per bootstrap.
+
+    feature_column : str
+        The column containing the feature data.
+
+    label_column : str
+        The column containing the label data.
+
+    random_state : int
+        The random state to use.
+
+    Returns
+    -------
+    pd.DataFrame
+        The dataframe with the bootstrap results.
+    """
     with tqdm.tqdm(total=n_bootstraps) as progress_bar:
         return perform_bootstrap(dataframe=dataframe,
                                  n_bootstraps=n_bootstraps,
