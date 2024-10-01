@@ -11,6 +11,7 @@ import os
 
 
 class TrainModelTask(luigi.Task, ABC):
+    """ Task to train a model. """
     output_directory = luigi.PathParameter()
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
     model_type = luigi.Parameter()
@@ -24,6 +25,7 @@ class TrainModelTask(luigi.Task, ABC):
     verbose = luigi.BoolParameter(default=False)
 
     def __init__(self, *args, **kwargs):
+        """ Initialize the task. """
         super().__init__(*args, **kwargs)
         self.__model_trainer = None
         self.__start_date_time = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
@@ -32,6 +34,13 @@ class TrainModelTask(luigi.Task, ABC):
 
     @property
     def model_trainer(self) -> ModelTrainer:
+        """ Get the model trainer.
+
+        Returns
+        -------
+        ModelTrainer
+            The model trainer
+        """
         if not self.__model_trainer:
             model_evaluator = ConfusionMatrixEvaluator()
             self.__model_trainer = ModelTrainer(
@@ -45,80 +54,210 @@ class TrainModelTask(luigi.Task, ABC):
 
     @property
     def start_date_time(self) -> str:
+        """ Get the start date time.
+
+        Returns
+        -------
+        str
+            The start date time
+        """
         return self.__start_date_time
 
     @property
     def training_predictions_key(self) -> str:
+        """ Get the training predictions key.
+
+        Returns
+        -------
+        str
+            The training predictions key
+        """
         return "training_predictions"
 
     @property
     def training_evaluation_key(self) -> str:
+        """ Get the training evaluation key.
+
+        Returns
+        -------
+        str
+            The training evaluation key
+        """
         return "training_evaluation"
 
     @property
     def predictions_key(self) -> str:
+        """ Get the predictions key.
+
+        Returns
+        -------
+        str
+            The predictions key
+        """
         return "predictions"
 
     @property
     def model_key(self) -> str:
+        """ Get the model key.
+
+        Returns
+        -------
+        str
+            The model key
+        """
         return f"model"
 
     @property
     def evaluation_key(self) -> str:
+        """ Get the evaluation key.
+
+        Returns
+        -------
+        str
+            The evaluation key
+        """
         return "evaluation"
 
     @property
     def model_directory(self) -> str:
+        """ Get the model directory.
+
+        Returns
+        -------
+        str
+            The model directory
+        """
         # Create directory for our models
         model_directory = os.path.join(self.output_directory, self.model_type)
         return os.path.join(model_directory, self.start_date_time)
 
     @property
     def train_label_mapping(self) -> OrderedDict[str, int]:
+        """ Get the train label mapping.
+
+        Returns
+        -------
+        OrderedDict[str, int]
+            The train label mapping
+        """
         return self.__train_label_mapping
 
     @train_label_mapping.setter
     def train_label_mapping(self, value: OrderedDict[str, int]):
+        """ Set the train label mapping.
+
+        Parameters
+        ----------
+        value : OrderedDict[str, int]
+            The train label mapping
+        """
         self.__train_label_mapping = value
 
     @property
     def test_label_mapping(self) -> OrderedDict[str, int]:
+        """ Get the test label mapping.
+
+        Returns
+        -------
+        OrderedDict[str, int]
+            The test label mapping
+        """
         return self.__test_label_mapping
 
     @test_label_mapping.setter
     def test_label_mapping(self, value: OrderedDict[str, int]):
+        """ Set the test label mapping.
+
+        Parameters
+        ----------
+        value : OrderedDict[str, int]
+            The test label mapping
+        """
         self.__test_label_mapping = value
 
     @property
     @abstractmethod
     def training_predictions_filename(self) -> str:
+        """ Get the training predictions filename.
+
+        Returns
+        -------
+        str
+            The training predictions filename
+        """
         pass
 
     @property
     @abstractmethod
     def training_evaluation_filename(self) -> str:
+        """ Get the training evaluation filename.
+
+        Returns
+        -------
+        str
+            The training evaluation filename
+        """
         pass
 
     @property
     @abstractmethod
     def predictions_filename(self) -> str:
+        """ Get the predictions filename.
+
+        Returns
+        -------
+        str
+            The predictions filename
+        """
         pass
 
     @property
     @abstractmethod
     def model_filename(self) -> str:
+        """ Get the model filename.
+
+        Returns
+        -------
+        str
+            The model filename
+        """
         pass
 
     @property
     @abstractmethod
     def evaluation_filename(self) -> str:
+        """ Get the evaluation filename.
+
+        Returns
+        -------
+        str
+            The evaluation filename
+        """
         pass
 
     @abstractmethod
     def prepare_data(self) -> pd.DataFrame:
+        """ Prepare the data.
+
+        Returns
+        -------
+        pd.DataFrame
+            The prepared data
+        """
         pass
 
     def retrieve_label_mappings(self, train_dataframe: pd.DataFrame, test_dataframe: pd.DataFrame, label_column: str):
+        """ Retrieve the label mappings.
+
+        Parameters
+        ----------
+        train_dataframe : pd.DataFrame
+            The training dataframe
+        test_dataframe : pd.DataFrame
+            The test dataframe
+        label_column : str
+            The label column
+        """
         self.train_label_mapping = OrderedDict([(original_label, index)
                                                 for index, original_label in enumerate(train_dataframe[self.label_column].unique())])
 
@@ -133,6 +272,20 @@ class TrainModelTask(luigi.Task, ABC):
         print(f"Test label mapping: {self.test_label_mapping}")
 
     def split_data(self, dataframe: pd.DataFrame, test_size: float) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """ Split the data.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The dataframe to split
+        test_size : float
+            The test size
+
+        Returns
+        -------
+        Tuple[pd.DataFrame, pd.DataFrame]
+            The training and test dataframes
+        """
         train_df, test_df = train_test_split(
             dataframe, test_size=test_size, stratify=dataframe[self.label_column])
         self.retrieve_label_mappings(train_df, test_df, self.label_column)
@@ -145,15 +298,40 @@ class TrainModelTask(luigi.Task, ABC):
 
     @abstractmethod
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
+        """ Train the model.
+
+        Parameters
+        ----------
+        train_dataframe : pd.DataFrame
+            The training dataframe
+        training_predictions_file : file
+            The file to write the training predictions to
+        """
         pass
 
     def predict(self, predictions_dataframe: pd.DataFrame, predictions_file):
+        """ Predict the labels for the test dataframe and write the predictions to a file.
+
+        Parameters
+        ----------
+        predictions_dataframe : pd.DataFrame
+            The dataframe to predict the labels for
+        predictions_file : file
+            The file to write the predictions to
+        """
         self.model_trainer.predict(predictions_dataframe,
                                    predictions_file,
                                    label_mapping=self.test_label_mapping,
                                    )
 
     def output(self):
+        """ Get the output.
+
+        Returns
+        -------
+        Dict[str, luigi.LocalTarget]
+            The output
+        """
         return {
             self.model_key: luigi.LocalTarget(self.model_filename, format=luigi.format.Nop),
             self.training_predictions_key: luigi.LocalTarget(self.training_predictions_filename, format=luigi.format.Nop),
@@ -164,6 +342,7 @@ class TrainModelTask(luigi.Task, ABC):
         }
 
     def run(self):
+        """ Run the task. """
         print("Preparing data")
         dataframe = self.prepare_data()
 
