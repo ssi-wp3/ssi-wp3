@@ -4,12 +4,16 @@ from enum import Enum
 
 
 class FeatureExtractorType(Enum):
+    """ The type of feature extractor.
+    """
     count_vectorizer = "CountVectorizer"
     hashing_vectorizer = "HashingVectorizer"
     tfidf_vectorizer = "TfidfVectorizer"
 
 
 class ModelType(Enum):
+    """ The type of model.
+    """
     logistic_regression = "LogisticRegression"
 
 
@@ -55,17 +59,61 @@ DISTRIBUTIONS_FOR_ALL_MODELS = {
 
 
 class ParamDistributions:
+    """ The class for the parameter distributions.
+    """
 
     @staticmethod
     def add_prefix_to_dict_keys(dictionary: Dict[str, Any], prefix: str) -> Dict[str, Any]:
+        """ Add a prefix to the keys of a dictionary.
+
+        Parameters
+        ----------
+        dictionary : Dict[str, Any]
+            The dictionary to add the prefix to.
+        prefix : str
+            The prefix to add to the keys.
+
+        Returns
+        -------
+        Dict[str, Any]
+            The dictionary with the prefix added to the keys.
+        """
         return {f"{prefix}{key}": value for key, value in dictionary.items()}
 
     @ staticmethod
     def distributions_for_model(model_type: ModelType, prefix: str = "") -> Dict[str, Any]:
+        """ Get the parameter distributions for the model.
+
+        Parameters
+        ----------
+        model_type : ModelType
+            The type of model.
+        prefix : str, optional
+            The prefix to add to the keys, by default "".
+
+        Returns
+        -------
+        Dict[str, Any]
+            The parameter distributions for the model.
+        """
         return ParamDistributions.add_prefix_to_dict_keys(DISTRIBUTIONS_FOR_ALL_MODELS[model_type.value], prefix)
 
     @staticmethod
     def distributions_for_feature_extraction(feature_extraction_type: FeatureExtractorType, prefix: str = "") -> Dict[str, Any]:
+        """ Get the parameter distributions for the feature extraction.
+
+        Parameters
+        ----------
+        feature_extraction_type : FeatureExtractorType
+            The type of feature extraction.
+        prefix : str, optional
+            The prefix to add to the keys, by default "".
+
+        Returns
+        -------
+        Dict[str, Any]
+            The parameter distributions for the feature extraction.
+        """
         return ParamDistributions.add_prefix_to_dict_keys(FEATURE_EXTRACTION_PARAMS[feature_extraction_type.value], prefix)
 
     @staticmethod
@@ -74,5 +122,23 @@ class ParamDistributions:
                                    feature_pipeline_prefix: str,
                                    model_prefix: str
                                    ) -> Dict[str, Any]:
+        """ Get the parameter distributions for the pipeline.
+
+        Parameters
+        ----------
+        feature_extraction_type : FeatureExtractorType
+            The type of feature extraction.
+        model_type : ModelType
+            The type of model.
+        feature_pipeline_prefix : str
+            The prefix for the feature extraction.
+        model_prefix : str
+            The prefix for the model.
+
+        Returns
+        -------
+        Dict[str, Any]
+            The parameter distributions for the pipeline.
+        """
         return {**ParamDistributions.distributions_for_feature_extraction(feature_extraction_type, feature_pipeline_prefix),
                 **ParamDistributions.distributions_for_model(model_type, model_prefix)}
