@@ -49,10 +49,11 @@ Files that do not need to pass through the first preprocessing step can be (manu
 For Statistics Netherlands, the preprocessing stage consists of the following
 steps:
 
-1. Cleaning the files (`luigi_preprocess_csvs.sh`)
-2. Converting the files to the Apache Parquet file format (`luigi_convert_receipts.sh`)
-3. Combine the separate files if there are more than one (`luigi_combine_files.sh` carries out step 2 & 3 for the CPI files)
-4. Preprocess the file content (`luigi_preprocess_files.sh`)
-5. Join the CPI files with the files containing the receipt texts (`luigi_add_receipts.sh`)
+1. Cleaning the files (`luigi_preprocess_csvs.sh`), the cleaned files are stored in the `01-cleaned` folder,
+2. Converting the files to the Apache Parquet file format (`luigi_convert_receipts.sh`), the converted files are stored in the `02-parquet` folder,
+3. Combine the separate files if there are more than one (`luigi_combine_files.sh` carries out step 2 & 3 for the CPI files), the combined files are stored in the `03-combined` folder,
+4. Preprocess the file content (`luigi_preprocess_files.sh`), the preprocessed files are stored in the `04-preprocessed` folder,
+5. Join the CPI files with the files containing the receipt texts (`luigi_add_receipts.sh`), the joined files are stored in the `05-final` folder.
 
-## Directory structure
+The files in the `05-final` folder are the files that can be used in the analysis, feature extraction, and machine learning stages.
+
