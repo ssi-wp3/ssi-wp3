@@ -3,7 +3,13 @@ export raw_directory=$data_directory/preprocessing/00-raw
 export cleaned_directory=$data_directory/preprocessing/01-cleaned
 
 #check if directories exist, otherwise create them
+if [ ! -d $raw_directory ]; then
+  mkdir -p $raw_directory
+fi
 
+if [ ! -d $cleaned_directory ]; then
+  mkdir -p $cleaned_directory
+fi
 
 
 export input_directory=~/shares/productie/primair/CPI/Output/BudgetOnderzoek/HBS2
