@@ -85,6 +85,15 @@ def huggingface_tokenize_strings(string_column: pd.Series, tokenizer_name: str =
 class Preprocessing:
     @property
     def all_preprocessing_functions(self) -> Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]:
+        """Returns the preprocessing functions for the product id and receipt text columns.
+
+        Returns
+        -------
+
+        Dict[str, Dict[str, Callable[[pd.Series], pd.Series]]]
+            The preprocessing functions for the product id and receipt text columns.
+
+        """
         return {
             Constants.PRODUCT_ID_COLUMN: {
                 "raw": lambda x: x
@@ -104,8 +113,26 @@ class Preprocessing:
 
     @property
     def ean_number_preprocessing_functions(self) -> Dict[str, Callable[[pd.Series], pd.Series]]:
+        """Returns the preprocessing functions for the product id column.
+
+        Returns
+        -------
+
+        Dict[str, Callable[[pd.Series], pd.Series]]
+            The preprocessing functions for the product id column.
+
+        """
         return self.all_preprocessing_functions[Constants.PRODUCT_ID_COLUMN]
 
     @property
     def receipt_text_preprocessing_functions(self) -> Dict[str, Callable[[pd.Series], pd.Series]]:
+        """Returns the preprocessing functions for the receipt text column.
+
+        Returns
+        -------
+
+        Dict[str, Callable[[pd.Series], pd.Series]]
+            The preprocessing functions for the receipt text column.
+
+        """
         return self.all_preprocessing_functions[Constants.RECEIPT_TEXT_COLUMN]

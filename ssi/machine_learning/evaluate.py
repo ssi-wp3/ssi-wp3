@@ -12,20 +12,94 @@ import numpy as np
 
 
 class ModelEvaluator(ABC):
+    """ An abstract class to evaluate a model. """
+
     @abstractmethod
     def evaluate_training(self, filename: str, y_true_column: str, y_pred_column: str, **kwargs) -> Dict[str, Any]:
+        """ Evaluate the model on the training data.
+
+        Parameters
+        ----------
+        filename : str
+            The filename of the data
+        y_true_column : str
+            The column name of the true labels
+        y_pred_column : str
+            The column name of the predicted labels
+        **kwargs : Dict[str, Any]
+            Additional keyword arguments
+
+        Returns
+        -------
+        Dict[str, Any]
+            The evaluation results
+        """
         pass
 
     @abstractmethod
     def evaluate(self, filename: str, y_true_column: str, y_pred_column: str, **kwargs) -> Dict[str, Any]:
+        """ Evaluate the model on the test data.
+
+        Parameters
+        ----------
+        filename : str
+            The filename of the data
+        y_true_column : str
+            The column name of the true labels
+        y_pred_column : str
+            The column name of the predicted labels
+        **kwargs : Dict[str, Any]
+            Additional keyword arguments
+
+        Returns
+        -------
+        Dict[str, Any]
+            The evaluation results
+        """
         pass
 
 
 class ConfusionMatrixEvaluator(ModelEvaluator):
     def evaluate_training(self, filename: str,  y_true_column: str, y_pred_column: str, **kwargs) -> Dict[str, Any]:
+        """ Evaluate the model on the training data.
+
+        Parameters
+        ----------
+        filename : str
+            The filename of the data
+        y_true_column : str
+            The column name of the true labels
+        y_pred_column : str
+            The column name of the predicted labels
+        **kwargs : Dict[str, Any]
+            Additional keyword arguments
+
+        Returns
+        -------
+        Dict[str, Any]
+            The evaluation results
+        """
         return self.evaluate(filename, y_true_column, y_pred_column)
 
     def evaluate(self, filename: str, y_true_column: str, y_pred_column: str, **kwargs) -> Dict[str, Any]:
+        """ Evaluate the model on the test data.
+
+        Parameters
+        ----------
+        filename : str
+            The filename of the data
+        y_true_column : str
+            The column name of the true labels
+        y_pred_column : str
+            The column name of the predicted labels
+        **kwargs : Dict[str, Any]
+            Additional keyword arguments
+
+        Returns
+        -------
+        Dict[str, Any]
+            The evaluation results
+        """
         dataframe = pd.read_parquet(
             filename, engine="pyarrow", columns=[y_true_column, y_pred_column])
 
@@ -47,11 +121,24 @@ class ConfusionMatrixEvaluator(ModelEvaluator):
 
         return evaluation_dict
 
-# TODO: there is a bug in the code, the confusion matrix is not calculated correctly!!!
-
 
 class ConfusionMatrix:
+    """ A class to calculate the confusion matrix in a multi-class classification problem. The class can
+    calculate the ConfusionMatrix in a distributed way.
+
+    TODO: there is a bug in the code, the confusion matrix is not calculated correctly!!!
+    """
+
     def __init__(self, confusion_matrix: np.array, label_mapping: Dict[str, int]):
+        """ Initialize the confusion matrix.
+
+        Parameters
+        ----------
+        confusion_matrix : np.array
+            The confusion matrix
+        label_mapping : Dict[str, int]
+            The label mapping
+        """
         # TODO: we have to seem N+1 classes, why?
         self.__label_mapping = label_mapping
         self.__true_positives, self.__false_positives, self.__true_negatives, self.__false_negatives = self._calculate_confusion_matrix_statistics(
@@ -59,22 +146,57 @@ class ConfusionMatrix:
 
     @property
     def label_mapping(self) -> Dict[str, int]:
+        """ Get the label mapping.
+
+        Returns
+        -------
+        Dict[str, int]
+            The label mapping
+        """
         return self.__label_mapping
 
     @property
     def true_positive(self) -> np.array:
+        """ Get the true positives.
+
+        Returns
+        -------
+        np.array
+            The true positives
+        """
         return self.__true_positives
 
     @property
     def false_positive(self) -> np.array:
+        """ Get the false positives.
+
+        Returns
+        -------
+        np.array
+            The false positives
+        """
         return self.__false_positives
 
     @property
     def true_negative(self) -> np.array:
+        """ Get the true negatives.
+
+        Returns
+        -------
+        np.array
+            The true negatives
+        """
         return self.__true_negatives
 
     @property
     def false_negative(self) -> np.array:
+        """ Get the false negatives.
+
+        Returns
+        -------
+        np.array
+            The false negatives
+        """
         return self.__false_negatives
 
     @property
@@ -175,6 +297,13 @@ class ConfusionMatrix:
         return (TP, FP, TN, FN)
 
     def to_dict(self) -> Dict[str, Any]:
+        """ Convert the confusion matrix to a dictionary.
+
+        Returns
+        -------
+        Dict[str, Any]
+            The confusion matrix
+        """
         return {
             "true_positive":  self.__add_labels(self.true_positive.tolist()),
             "false_positive": self.__add_labels(self.false_positive.tolist()),
@@ -187,12 +316,46 @@ class ConfusionMatrix:
 
 
 def get_labels_and_predictions(dataframe: pd.DataFrame, label_column: str, column_prefix: str = "predict_") -> pd.DataFrame:
+    """ Get the labels and predictions from the dataframe.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe
+    label_column : str
+        The column name of the true labels
+    column_prefix : str
+        The prefix of the predicted labels
+
+    Returns
+    -------
+    pd.DataFrame
+        The labels and predictions
+    """
     y_true = dataframe[label_column]
     y_pred = dataframe[f"{column_prefix}{label_column}"]
     return y_true, y_pred
 
 
 def calculate_metrics_per_group(dataframe: pd.DataFrame, group_columns: List[str], label_column: str, prediction_column: str) -> pd.DataFrame:
+    """ Calculate the metrics per group.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe
+    group_columns : List[str]
+        The column names of the groups
+    label_column : str
+        The column name of the true labels
+    prediction_column : str
+        The column name of the predicted labels
+
+    Returns
+    -------
+    pd.DataFrame
+        The metrics per group
+    """
     return dataframe.groupby(by=group_columns).apply(lambda x: pd.Series({
         "accuracy": accuracy_score(x[label_column], x[prediction_column]),
         "balanced_accuracy": balanced_accuracy_score(x[label_column], x[prediction_column]),
@@ -213,6 +376,20 @@ def calculate_metrics_per_group(dataframe: pd.DataFrame, group_columns: List[str
 
 
 def calculate_metrics(y_true, y_pred):
+    """ Calculate the metrics.
+
+    Parameters
+    ----------
+    y_true : np.array
+        The true labels
+    y_pred : np.array
+        The predicted labels
+
+    Returns
+    -------
+    Tuple[float, float, float, float, float]
+        The accuracy, precision, recall, F1 score, and AUC-ROC score
+    """
     # Calculate metrics
     accuracy = accuracy_score(y_true, y_pred)
     precision = precision_score(y_true, y_pred)
@@ -224,6 +401,23 @@ def calculate_metrics(y_true, y_pred):
 
 
 def save_metrics(accuracy, precision, recall, f1, auc_roc, output_path):
+    """ Save the metrics to disk.
+
+    Parameters
+    ----------
+    accuracy : float
+        The accuracy
+    precision : float
+        The precision
+    recall : float
+        The recall
+    f1 : float
+        The F1 score
+    auc_roc : float
+        The AUC-ROC score
+    output_path : str
+        The path to save the metrics
+    """
     # Save metrics to disk
     with open(os.path.join(output_path, 'evaluation_metrics.txt'), 'w') as f:
         f.write(
@@ -231,6 +425,19 @@ def save_metrics(accuracy, precision, recall, f1, auc_roc, output_path):
 
 
 def plot_confusion_matrix(y_true: np.array, y_pred: np.array, output_path: str, labels: List[str] = None):
+    """ Plot and save the confusion matrix.
+
+    Parameters
+    ----------
+    y_true : np.array
+        The true labels
+    y_pred : np.array
+        The predicted labels
+    output_path : str
+        The path to save the confusion matrix
+    labels : List[str]
+        The labels
+    """
     # Plot and save confusion matrix
     cm = confusion_matrix(y_true, y_pred)
     if labels:
@@ -245,6 +452,17 @@ def plot_confusion_matrix(y_true: np.array, y_pred: np.array, output_path: str, 
 
 
 def plot_roc_curve(y_true, y_pred, output_path):
+    """ Plot and save the ROC curve.
+
+    Parameters
+    ----------
+    y_true : np.array
+        The true labels
+    y_pred : np.array
+        The predicted labels
+    output_path : str
+        The path to save the ROC curve
+    """
     # Plot and save ROC curve
     fpr, tpr, _ = roc_curve(y_true, y_pred)
     auc_roc = auc(fpr, tpr)
@@ -261,6 +479,17 @@ def plot_roc_curve(y_true, y_pred, output_path):
 
 
 def plot_precision_recall_curve(y_true, y_pred, output_path):
+    """ Plot and save the Precision-Recall curve.
+
+    Parameters
+    ----------
+    y_true : np.array
+        The true labels
+    y_pred : np.array
+        The predicted labels
+    output_path : str
+        The path to save the Precision-Recall curve
+    """
     # Plot and save Precision-Recall curve
     precision, recall, _ = precision_recall_curve(y_true, y_pred)
     auc_score = auc(recall, precision)
@@ -275,6 +504,19 @@ def plot_precision_recall_curve(y_true, y_pred, output_path):
 
 
 def evaluate(dataframe: pd.DataFrame, label_column: str, output_path: str, column_prefix: str = "predict_"):
+    """ Evaluate the model on the test data.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The dataframe
+    label_column : str
+        The column name of the true labels
+    output_path : str
+        The path to save the evaluation results
+    column_prefix : str
+        The prefix of the predicted labels
+    """
     y_true, y_pred = get_labels_and_predictions(
         dataframe, label_column, column_prefix)
     accuracy, precision, recall, f1, auc_roc = calculate_metrics(

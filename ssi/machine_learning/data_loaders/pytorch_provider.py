@@ -6,7 +6,6 @@ import pyarrow.parquet as pq
 from ..model import Model
 from .label_encoder import DataLabelEncoder
 from .data_provider import DataProvider
-from skorch import NeuralNetClassifier
 from torch.nn import functional as F
 import pandas as pd
 import numpy as np
@@ -24,6 +23,21 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
                  label_column: str,
                  label_mapping: Dict[str, int],
                  memory_map: bool = False):
+        """ Initializes the ParquetDataset.
+
+        Parameters
+        ----------
+        filename : str
+            The filename of the Parquet file.
+        features_column : str
+            The name of the column containing the feature data.
+        label_column : str
+            The name of the column containing the label data.
+        label_mapping : Dict[str, int]
+            The mapping of the labels to their encoded values.
+        memory_map : bool, optional
+            Whether to memory map the Parquet file, by default False.
+        """
         super().__init__(filename, features_column,
                          label_column, DataLabelEncoder(label_mapping))
         self.__parquet_file = pq.ParquetFile(filename, memory_map=memory_map)
@@ -34,6 +48,13 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
 
     @property
     def cumulative_row_index(self) -> List[int]:
+        """ The cumulative row index of the Parquet file.
+
+        Returns
+        -------
+        List[int]
+            The cumulative row index of the Parquet file.
+        """
         if not self.__cumulative_row_index:
             self.__cumulative_row_index = [0]
             for row_group_index in range(self.number_of_row_groups):
@@ -44,15 +65,36 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         return self.__cumulative_row_index
 
     @property
-    def parquet_file(self):
+    def parquet_file(self) -> pq.ParquetFile:
+        """ The Parquet file.
+
+        Returns
+        -------
+        pq.ParquetFile
+            The Parquet file.
+        """
         return self.__parquet_file
 
     @property
     def number_of_row_groups(self) -> int:
+        """ The number of row groups in the Parquet file.
+
+        Returns
+        -------
+        int
+            The number of row groups in the Parquet file.
+        """
         return self.parquet_file.num_row_groups
 
     @property
     def current_row_group_index(self) -> int:
+        """ The index of the current row group.
+
+        Returns
+        -------
+        int
+            The index of the current row group.
+        """
         return self.__current_row_group_index
 
     @current_row_group_index.setter
@@ -61,10 +103,24 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
 
     @property
     def current_row_group(self) -> pd.DataFrame:
+        """ The current row group.
+
+        Returns
+        -------
+        pd.DataFrame
+            The current row group.
+        """
         return self.__current_row_group
 
     @current_row_group.setter
     def current_row_group(self, value: pd.DataFrame):
+        """ Sets the current row group.
+
+        Parameters
+        ----------
+        value : pd.DataFrame
+            The current row group.
+        """
         self.__current_row_group = value
 
     @property
@@ -162,7 +218,14 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
 
         return self.current_row_group
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """ The number of rows in the Parquet file.
+
+        Returns
+        -------
+        int
+            The number of rows in the Parquet file.
+        """
         return self.parquet_file.metadata.num_rows
 
     def process_sample(self, sample: pd.DataFrame) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -197,16 +260,52 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         return feature_tensor, label_tensor, additional_columns
 
     def get_column(self, column_name: str) -> pd.Series:
+        """ Get a column from the Parquet file.
+
+        Parameters
+        ----------
+        column_name : str
+            The name of the column to get.
+
+        Returns
+        -------
+        pd.Series
+            The column with the specified name.
+        """
         return self.parquet_file.read(columns=[column_name]).to_pandas()
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor, pd.DataFrame]:
+        """ Get a sample from the Parquet file.
+
+        Parameters
+        ----------
+        index : int
+            The index of the sample to get.
+
+        Returns
+        -------
+        Tuple[torch.Tensor, torch.Tensor, pd.DataFrame]
+            A tuple containing the feature tensor, the label tensor, and the additional columns.
+        """
         row_group_index, index_in_row_group = self.get_row_group_for_index(
             index)
         dataframe = self.get_data_for_row_group(row_group_index)
         sample = dataframe.iloc[index_in_row_group]
         return self.process_sample(sample)
 
-    def __getitems__(self, indices):
+    def __getitems__(self, indices: pd.Series) -> List[Tuple[torch.Tensor, torch.Tensor, pd.DataFrame]]:
+        """ Get multiple samples from the Parquet file.
+
+        Parameters
+        ----------
+        indices : pd.Series
+            The indices of the samples to get.
+
+        Returns
+        -------
+        List[Tuple[torch.Tensor, torch.Tensor, pd.DataFrame]]
+            A list of tuples containing the feature tensor, the label tensor, and the additional columns.
+        """
         # TODO training is really slow, see if PyTorch has some profiling
         # TODO see if selection of period makes training already faster
         # Return indices smaller than max index
@@ -231,36 +330,113 @@ class ParquetDataset(torch.utils.data.Dataset, DataProvider):
         return [items[sort_dict[original_index]] for original_index in indices]
 
     def load(self):
+        """ Load the data from the Parquet file. Does nothing because the data is already loaded in the constructor.
+        """
         pass
 
     def get_subset(self,
                    indices: pd.Series,
                    original_label_encoder: Optional[DataLabelEncoder] = None) -> DataProvider:
-        self.fit_or_refit_labels(original_label_encoder)
+        """ Get a subset of the ParquetDataset.
+
+        Parameters
+        ----------
+        indices : pd.Series
+            The indices of the samples to get.
+        original_label_encoder : DataLabelEncoder, optional
+            The original label encoder to use, by default None.
+
+        Returns
+        -------
+        DataProvider
+            A new DataProvider object with the specified subset of the data.
+        """
         subset_dataset = torch.utils.data.Subset(self, indices)
         # TODO figure out how to create a new ParquetDataset from the subset!!
         raise NotImplementedError("Method not implemented")
 
 
 class TorchLogisticRegression(nn.Module):
-    def __init__(self, input_dim, output_dim):
+    """ A logistic regression model implemented in PyTorch.
+    """
+
+    def __init__(self, input_dim: int, output_dim: int):
+        """ Initializes the logistic regression model.
+
+        Parameters
+        ----------
+        input_dim : int
+            The dimension of the input data.
+        output_dim : int
+            The dimension of the output data.
+        """
         super().__init__()
         self.linear = nn.Linear(in_features=input_dim, out_features=output_dim)
 
     def forward(self, x):
+        """ Forward pass of the logistic regression model.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The input data.
+
+        Returns
+        -------
+        torch.Tensor
+            The output of the logistic regression model.
+        """
         prediction = self.linear(x)
         return prediction
 
     def predict(self, x):
+        """ Predict the class of the input data.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The input data.
+
+        Returns
+        -------
+        torch.Tensor
+            The predicted class of the input data.
+        """
         y_proba = self.predict_proba(x)
         return y_proba.argmax(axis=1)  # dim=1, keepdim=True)
 
     def predict_proba(self, x):
+        """ Predict the probability of the input data.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The input data.
+
+        Returns
+        -------
+        torch.Tensor
+            The probability of the input data.
+        """
         return F.softmax(self.forward(torch.from_numpy(x).to("cuda:0")), dim=1).cpu().detach().numpy()
 
 
 class TorchMLP(nn.Module):
+    """ A multi-layer perceptron model implemented in PyTorch.
+    """
+
     def __init__(self, input_dim: int, output_dim: int, hidden_dim: int = 100):
+        """ Initializes the multi-layer perceptron model.
+
+        Parameters
+        ----------
+        input_dim : int
+            The dimension of the input data.
+        output_dim : int
+            The dimension of the output data.
+        hidden_dim : int, optional
+            The dimension of the hidden layer, by default 100.
+        """
         super().__init__()
         self.linear1 = nn.Linear(
             in_features=input_dim, out_features=hidden_dim)
@@ -268,89 +444,48 @@ class TorchMLP(nn.Module):
             in_features=hidden_dim, out_features=output_dim)
 
     def forward(self, x):
+        """ Forward pass of the multi-layer perceptron model.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The input data.
+
+        Returns
+        -------
+        torch.Tensor
+            The output of the multi-layer perceptron model.
+        """
         x = F.relu(self.linear1(x))
         x = self.linear2(x)
         return x
 
     def predict(self, x):
-        y_proba = self.predict_proba(x)
-        return y_proba.argmax(axis=1)
+        """ Predict the class of the input data.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The input data.
+
+        Returns
+        -------
+        torch.Tensor
+            The predicted class of the input data.
+        """
+        return self.predict_proba(x).argmax(axis=1)
 
     def predict_proba(self, x):
+        """ Predict the probability of the input data.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The input data.
+
+        Returns
+        -------
+        torch.Tensor
+            The probability of the input data.
+        """
         return F.softmax(self.forward(torch.from_numpy(x).to("cuda:0")), dim=1).cpu().detach().numpy()
-
-
-class PytorchModel(Model):
-    def __init__(self,
-                 model):
-        super().__init__(model)
-        self.__classifier = None
-
-    @ property
-    def classifier(self):
-        return self.__classifier
-
-    @ classifier.setter
-    def classifier(self, value):
-        self.__classifier = value
-
-    # TODO: this should use fit(dataset) instead of fit(X, y)
-    # See: https://skorch.readthedocs.io/en/stable/user/FAQ.html#faq-how-do-i-use-a-pytorch-dataset-with-skorch
-    def fit(self, X, y,
-            max_epochs: int,
-            batch_size: int,
-            lr: float,
-            test_size: float,
-            iterator_train__shuffle: bool = True,
-            **kwargs):
-        self.classifier = NeuralNetClassifier(
-            self.model,
-            max_epochs=max_epochs,
-            batch_size=batch_size,
-            lr=lr,
-            train_split=test_size,
-            iterator_train__shuffle=iterator_train__shuffle,
-            **kwargs
-        )
-        self.classifier.fit(X, y)
-        return self
-
-    def fit(self,
-            dataset: ParquetDataset,
-            max_epochs: int,
-            batch_size: int,
-            lr: float,
-            test_size: float,
-            iterator_train__shuffle: bool = True,
-            **kwargs):
-        self.classifier = NeuralNetClassifier(
-            self.model,
-            max_epochs=max_epochs,
-            batch_size=batch_size,
-            lr=lr,
-            train_split=test_size,
-            iterator_train__shuffle=iterator_train__shuffle,
-            **kwargs
-        )
-        self.classifier.fit(dataset)
-        return self
-
-    def predict(self, X):
-        self._check_classifier_trained()
-        return self.classifier.predict(X)
-
-    def predict_proba(self, X):
-        self._check_classifier_trained()
-        return self.classifier.predict_proba(X)
-
-    def score(self, X, y):
-        self._check_classifier_trained()
-        return self.classifier.score(X, y)
-
-    def _check_classifier_trained(self):
-        if not self.classifier:
-            raise ValueError(
-                "Cannot predict without fitting the model first. Call the fit method first.")
-
-    def load_data(self, filename: str, **kwargs) -> ParquetDataset:
-        return ParquetDataset(filename, **kwargs)

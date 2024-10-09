@@ -187,6 +187,19 @@ def evaluate_adversarial_pipeline(y_true: np.array,
                                   ) -> Dict[str, Any]:
     """
     Evaluate the adversarial pipeline.
+
+    Parameters
+    ----------
+    y_true : np.array
+        The true labels
+    y_pred : np.array
+        The predicted labels
+
+    Returns
+    -------
+    Dict[str, Any]
+        The evaluation metrics
+
     """
     label_encoder = LabelEncoder()
 
@@ -220,41 +233,106 @@ class TrainAdversarialModelTask(TrainModelTask):
 
     @property
     def training_predictions_filename(self) -> str:
+        """ Get the training predictions filename.
+
+        Returns
+        -------
+        str
+            The training predictions filename
+        """
         return os.path.join(
             self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_training_predictions.parquet")
 
     @property
     def training_evaluation_filename(self) -> str:
+        """ Get the training evaluation filename.
+
+        Returns
+        -------
+        str
+            The training evaluation filename
+        """
         return os.path.join(
             self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_training.evaluation.json")
 
     @property
     def predictions_filename(self) -> str:
+        """ Get the predictions filename.
+
+        Returns
+        -------
+        str
+            The predictions filename
+        """
         return os.path.join(
             self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_predictions.parquet")
 
     @property
     def model_filename(self) -> str:
+        """ Get the model filename.
+
+        Returns
+        -------
+        str
+            The model filename
+        """
         return os.path.join(
             self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}_model.joblib")
 
     @property
     def evaluation_filename(self) -> str:
+        """ Get the evaluation filename.
+
+        Returns
+        -------
+        str
+            The evaluation filename
+        """
         return os.path.join(
             self.output_directory, f"adversarial_{self.store1}_{self.store2}_{self.feature_extractor.value}_{self.model_type}.evaluation.json")
 
     @property
     def store1(self):
+        """ Get the store1 name.
+
+        Returns
+        -------
+        str
+            The store1 name
+        """
         return get_store_name_from_combined_filename(self.store1_filename)
 
     @property
     def store2(self):
+        """ Get the store2 name.
+
+        Returns
+        -------
+        str
+            The store2 name
+        """
         return get_store_name_from_combined_filename(self.store2_filename)
 
     def requires(self):
+        """ Get the required inputs.
+
+        Returns
+        -------
+        list[ParquetFile]
+            The required inputs
+        """
         return [ParquetFile(self.store1_filename), ParquetFile(self.store2_filename)]
 
     def get_adversarial_data(self, store_file, store_name: str) -> pd.DataFrame:
+        """ Get the adversarial data for the store.
+
+        Parameters
+        ----------
+        store_file : file
+            The store file
+        store_name : str
+            The store name
+        """
         store_dataframe = pd.read_parquet(
             store_file, engine=self.parquet_engine, columns=[self.receipt_text_column, self.store_id_column])
         store_dataframe = store_dataframe.drop_duplicates(
@@ -267,7 +345,24 @@ class TrainAdversarialModelTask(TrainModelTask):
         return store_dataframe
 
     def get_all_adversarial_data(self, store1: str, store2: str, store1_file, store2_file) -> pd.DataFrame:
-        store1_dataframe = self.get_adversarial_data(store1_file, store1)
+        """ Get the adversarial data for the store.
+
+        Parameters
+        ----------
+        store1 : str
+            The store1 name
+        store2 : str
+            The store2 name
+        store1_file : file
+            The store1 file
+        store2_file : file
+            The store2 file
+
+        Returns
+        -------
+        pd.DataFrame
+            The adversarial data for the store
+        """
         store2_dataframe = self.get_adversarial_data(store2_file, store2)
         return create_combined_and_filtered_dataframe(store1_dataframe,
                                                       store2_dataframe,
@@ -276,6 +371,13 @@ class TrainAdversarialModelTask(TrainModelTask):
                                                       self.features_column)
 
     def prepare_data(self) -> pd.DataFrame:
+        """ Prepare the data for the adversarial model.
+
+        Returns
+        -------
+        pd.DataFrame
+            The prepared data for the adversarial model
+        """
         with self.input()[0].open("r") as store1_file, self.input()[1].open("r") as store2_file:
             print("Reading parquet files")
             combined_dataframe = self.get_all_adversarial_data(
@@ -285,7 +387,15 @@ class TrainAdversarialModelTask(TrainModelTask):
                 combined_dataframe, self.label_column, min_samples=10)
 
     def train_model(self, train_dataframe: pd.DataFrame, training_predictions_file):
+        """ Train the adversarial model.
 
+        Parameters
+        ----------
+        train_dataframe : pd.DataFrame
+            The training data for the adversarial model
+        training_predictions_file : str
+            The file to save the training predictions to
+        """
         self.model_trainer.fit(train_dataframe,
                                self.train_adversarial_model,
                                training_predictions_file,
@@ -296,6 +406,8 @@ class TrainAdversarialModelTask(TrainModelTask):
                                verbose=self.verbose)
 
     def run(self):
+        """ Run the adversarial model training task.
+        """
         print(
             f"Running adversarial model training task for {self.store1_filename} and {self.store2_filename}")
         print(f"Store1: {self.store1}, Store2: {self.store2}")
@@ -316,6 +428,9 @@ class TrainAdversarialModelTask(TrainModelTask):
 
 
 class TrainAllAdversarialModels(luigi.WrapperTask):
+    """
+    Train all adversarial models for the given feature extractor and model type.
+    """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
@@ -330,6 +445,13 @@ class TrainAllAdversarialModels(luigi.WrapperTask):
     filename_prefix = luigi.Parameter()
 
     def requires(self):
+        """ Get the required inputs.
+
+        Returns
+        -------
+        list[TrainAdversarialModelTask]
+            The required inputs
+        """
         store_filenames = [os.path.join(self.input_directory, filename)
                            for filename in get_features_files_in_directory(
                                self.input_directory, self.filename_prefix)

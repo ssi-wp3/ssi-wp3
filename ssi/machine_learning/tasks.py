@@ -9,6 +9,7 @@ import pandas as pd
 
 
 class BootstrapModelTask(luigi.Task):
+    """ Task to bootstrap a model. """
     input_filename = luigi.PathParameter()
     output_filename = luigi.PathParameter()
     number_of_bootstraps = luigi.IntParameter(default=10)
@@ -23,12 +24,33 @@ class BootstrapModelTask(luigi.Task):
     delimiter = luigi.Parameter(default=';')
 
     def requires(self):
+        """ Get the requirements for the task.
+
+        Returns
+        -------
+        ParquetFile
+            The input file
+        """
         return ParquetFile(self.input_filename)
 
     def output(self):
+        """ Get the output for the task.
+
+        Returns
+        -------
+        luigi.LocalTarget
+            The output file
+        """
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
+        """ Run the task.
+
+        Raises
+        ------
+        Exception
+            If the task fails
+        """
         param_sampler, sklearn_pipeline = pipeline_and_sampler_for(self.feature_extractor_type,
                                                                    LogisticRegression(),
                                                                    self.number_of_bootstraps,

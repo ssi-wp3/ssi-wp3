@@ -14,6 +14,20 @@ import os
 
 
 class FeatureExtractorType(Enum):
+    """This enum contains all the feature extractor types that can be used in the feature extraction pipeline.
+    The following feature extractors are available:
+    - test_extractor: A test feature extractor that returns a counter for each text
+    - count_vectorizer: A vectorizer that counts the number of times a word appears in a text
+    - tfidf_word: A vectorizer that uses the term frequency-inverse document frequency (TF-IDF) to weigh the importance of a word in a text
+    - tfidf_char: A vectorizer that uses the term frequency-inverse document frequency (TF-IDF) to weigh the importance of a character in a text
+    - tfidf_char34: A vectorizer that uses the term frequency-inverse document frequency (TF-IDF) to weigh the importance of a character in a text
+    - count_char: A vectorizer that counts the number of times a character appears in a text
+    - spacy_nl_sm: A feature extractor that uses the spacy library to extract features from a text, using the small spacy model
+    - spacy_nl_md: A feature extractor that uses the spacy library to extract features from a text, using the medium spacy model
+    - spacy_nl_lg: A feature extractor that uses the spacy library to extract features from a text, using the large spacy model
+    - hf_all_mini_lm: A feature extractor that uses the HuggingFace SentenceTransformer library to extract features from a text, using the all-MiniLM-L6-v2 model
+    - hf_labse: A feature extractor that uses the HuggingFace SentenceTransformer library to extract features from a text, using the LaBSE model
+    """
     test_extractor = 'test_extractor'
     count_vectorizer = 'count_vectorizer'
     tfidf_word = 'tfidf_word'
@@ -28,14 +42,35 @@ class FeatureExtractorType(Enum):
 
 
 class TestFeatureExtractor:
+    """ This class is a test feature extractor that returns a automatically incremented counter for each text.
+    It is used for testing purposes.
+    """
+
     def __init__(self) -> None:
+        """ Constructor for the TestFeatureExtractor class.
+        """
         self._counter = 0
 
     @property
     def counter(self):
+        """ Returns the underlying counter.
+        """
         return self._counter
 
     def fit_transform(self, data):
+        """ This method uses the feature extractor to extract features from the data.
+        As the feature extractor is a test feature extractor, it just returns a counter for each text.
+
+        Parameters
+        ----------
+        data : List[str]
+            The list of strings to extract features from.
+
+        Returns
+        -------
+        List[np.array[float]]
+            A list of lists containing the feature vectors for each input string.
+        """
         vectors = []
         for text in data:
             vectors.append([self._counter, 0])
@@ -59,6 +94,8 @@ class SpacyFeatureExtractor:
 
     # To speed up: https://github.com/explosion/spaCy/discussions/8402
     def fit(self, X, y, **fit_params):
+        """ This method is not used for this feature extractor.
+        """
         pass
 
     def transform(self, X):
@@ -119,20 +156,43 @@ class HuggingFaceFeatureExtractor:
 
     @property
     def model(self):
+        """ Returns the model name.
+
+        Returns
+        -------
+        str
+            The name of the model.
+        """
         return self.__model
 
     @property
     def device(self):
+        """ Returns the device. For instance, "cuda:0" or "cpu".
+
+        Returns
+        -------
+        str
+            The device.
+        """
         return self.__device
 
     @property
     def embedding_model(self):
+        """ Returns the embedding model used for feature extraction.
+
+        Returns
+        -------
+        SentenceTransformer
+            The embedding model.
+        """
         if not self.__embedding_model:
             self.__embedding_model = SentenceTransformer(self.model)
             self.__embedding_model.to(self.device)
         return self.__embedding_model
 
     def fit(self, X, y, **fit_params):
+        """ This method is not used for this feature extractor.
+        """
         pass
 
     def transform(self, X):
@@ -171,11 +231,24 @@ class HuggingFaceFeatureExtractor:
 
 
 class FeatureExtractorFactory:
+    """ This class is a factory for the feature extractors.
+    It creates and returns the feature extractor for the given feature extractor type.
+    """
+
     def __init__(self):
+        """ Constructor for the FeatureExtractorFactory class.
+        """
         self._feature_extractors = None
 
     @property
     def feature_extractors(self) -> Dict[FeatureExtractorType, object]:
+        """ Returns the feature extractors.
+
+        Returns
+        -------
+        Dict[FeatureExtractorType, object]
+            A dictionary containing the feature extractors.
+        """
         if not self._feature_extractors:
             self._feature_extractors = {
                 FeatureExtractorType.test_extractor: TestFeatureExtractor(),
@@ -203,15 +276,33 @@ class FeatureExtractorFactory:
 
     @property
     def feature_extractor_types(self):
+        """ Returns the feature extractor types.
+
+        Returns
+        -------
+        List[FeatureExtractorType]
+            A list of feature extractor types.
+        """
         return [feature_extractor_type
                 for feature_extractor_type in self.feature_extractors.keys()
                 if feature_extractor_type != FeatureExtractorType.test_extractor]
 
     def create_feature_extractor(self, feature_extractor_type: FeatureExtractorType):
-        if feature_extractor_type in self.feature_extractors:
-            return self.feature_extractors[feature_extractor_type]
-        else:
+        """ Creates and returns the feature extractor for the given feature extractor type.
+
+        Parameters
+        ----------
+        feature_extractor_type : FeatureExtractorType
+            The type of feature extractor to create.
+
+        Returns
+        -------
+        object
+            The feature extractor.
+        """
+        if feature_extractor_type not in self.feature_extractors:
             raise ValueError("Invalid type")
+        return self.feature_extractors[feature_extractor_type]
 
     def add_feature_vectors(self,
                             dataframe: pd.DataFrame,
@@ -222,6 +313,28 @@ class FeatureExtractorFactory:
                             batch_size: int,
                             progress_bar: Optional[tqdm.tqdm] = None
                             ):
+        """ This method adds the feature vectors to the dataframe and saves it to a parquet file.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The dataframe to add the feature vectors to.
+
+        source_column : str
+            The column containing the text data to extract features from.
+
+        destination_column : str
+            The column to store the feature vectors in.
+
+        filename : str
+            The filename to save the feature vectors to.
+
+        batch_size : int
+            The number of rows to process at a time.
+
+        progress_bar : Optional[tqdm.tqdm]
+            The progress bar to update.
+        """
         feature_extractor = self.create_feature_extractor(
             feature_extractor_type)
 
@@ -263,6 +376,31 @@ class FeatureExtractorFactory:
                                   feature_extractor_type: FeatureExtractorType,
                                   batch_size: int = 1000,
                                   progress_bar: Optional[tqdm.tqdm] = None):
+        """ This method extracts the feature vectors from the dataframe and saves them to a parquet file.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The dataframe to extract features from.
+
+        source_column : str
+            The column containing the text data to extract features from.
+
+        destination_column : str
+            The column to store the feature vectors in.
+
+        filename : str
+            The filename to save the feature vectors to.
+
+        feature_extractor_type : FeatureExtractorType
+            The type of feature extractor to use.
+
+        batch_size : int
+            The number of rows to process at a time.
+
+        progress_bar : Optional[tqdm.tqdm]
+            The progress bar to update.
+        """
         self.add_feature_vectors(
             dataframe, source_column, destination_column, feature_extractor_type, filename=filename, batch_size=batch_size, progress_bar=progress_bar)
 
@@ -273,6 +411,25 @@ class FeatureExtractorFactory:
                                       output_directory: str,
                                       feature_extractors: Optional[List[FeatureExtractorType]] = None,
                                       batch_size: int = 1000):
+        """ This method extracts the feature vectors from the dataframe and saves them to a parquet file.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The dataframe to extract features from.
+
+        source_column : str
+            The column containing the text data to extract features from.
+
+        output_directory : str
+            The directory to save the feature vectors to.
+
+        feature_extractors : Optional[List[FeatureExtractorType]]
+            The list of feature extractor types to use. If not specified, all feature extractor types are used.
+
+        batch_size : int
+            The number of rows to process at a time.
+        """
         feature_extractors = self.feature_extractor_types if not feature_extractors else feature_extractors
         with tqdm.tqdm(total=len(self.feature_extractor_types), desc="Extracting features", unit="type") as progress_bar:
             for feature_extractor_type in feature_extractors:

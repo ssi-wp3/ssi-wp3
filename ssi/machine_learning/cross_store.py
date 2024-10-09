@@ -14,6 +14,7 @@ import os
 
 
 class CrossStoreEvaluation(luigi.Task):
+    """ Train a model on one store and evaluate it on another. """
     store1_filename = luigi.PathParameter()
     store2_filename = luigi.PathParameter()
     output_directory = luigi.PathParameter()
@@ -28,6 +29,13 @@ class CrossStoreEvaluation(luigi.Task):
     verbose = luigi.BoolParameter(default=False)
 
     def requires(self):
+        """ Get the required tasks.
+
+        Returns
+        -------
+        list[ParquetFile]
+            The required tasks
+        """
         return [(ParquetFile(combinations[0]), ParquetFile(combinations[1]))
                 for combinations in [
                     (self.store1_filename, self.store2_filename),
@@ -36,22 +44,52 @@ class CrossStoreEvaluation(luigi.Task):
         ]
 
     def get_model_filename(self, store1: str, store2: str) -> str:
+        """ Get the model filename.
+
+        Parameters
+        ----------
+        store1 : str
+            The first store
+        store2 : str
+            The second store
+        """
         return os.path.join(
             self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_model.joblib")
 
     def get_train_evaluation_filename(self, store1: str, store2: str) -> str:
+        """ Get the train evaluation filename.
+
+        Parameters
+        ----------
+        store1 : str
+            The first store
+        store2 : str
+            The second store
+        """
         return os.path.join(
             self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_train_evaluation.json")
 
     def get_evaluation_filename(self, store1: str, store2: str) -> str:
-        return os.path.join(
-            self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_evaluation.json")
+        """ Get the evaluation filename.
 
-    def get_evaluation_filename(self, store1: str, store2: str) -> str:
+        Parameters
+        ----------
+        store1 : str
+            The first store
+        store2 : str
+            The second store
+        """
         return os.path.join(
             self.output_directory, f"cross_store_{store1}_{store2}_{self.feature_extractor.value}_{self.model_type}_{self.label_column}_evaluation.json")
 
     def output(self):
+        """ Get the output.
+
+        Returns
+        -------
+        list[dict]
+            The output
+        """
         store1 = get_store_name_from_combined_filename(self.store1_filename)
         store2 = get_store_name_from_combined_filename(self.store2_filename)
         return [
@@ -66,6 +104,13 @@ class CrossStoreEvaluation(luigi.Task):
         ]
 
     def get_store_data(self, store_file) -> pd.DataFrame:
+        """ Get the store data.
+
+        Parameters
+        ----------
+        store_file : file
+            The store file
+        """
         return read_unique_rows(store_file,
                                 group_columns=[
                                     self.receipt_text_column, self.label_column],
@@ -74,12 +119,21 @@ class CrossStoreEvaluation(luigi.Task):
                                 )
 
     def get_all_store_data(self, store1_file, store2_file) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """ Get the store data for both stores.
+
+        Parameters
+        ----------
+        store1_file : file
+            The first store file
+        store2_file : file
+            The second store file
+        """
         store1_dataframe = self.get_store_data(store1_file)
         store2_dataframe = self.get_store_data(store2_file)
         return store1_dataframe, store2_dataframe
 
     def run(self):
-
+        """ Run the task. """
         print(
             f"Running cross store evaluation training task for {self.store1_filename} and {self.store2_filename}")
         for index, input_combinations in enumerate(self.input()):
@@ -136,6 +190,7 @@ class CrossStoreEvaluation(luigi.Task):
 
 
 class AllCrossStoreEvaluations(luigi.WrapperTask):
+    """ Train a model on one store and evaluate it on another for all store combinations. """
     input_directory = luigi.PathParameter()
     output_directory = luigi.PathParameter()
     feature_extractor = luigi.EnumParameter(enum=FeatureExtractorType)
@@ -150,6 +205,13 @@ class AllCrossStoreEvaluations(luigi.WrapperTask):
     filename_prefix = luigi.Parameter()
 
     def requires(self):
+        """ Get the required tasks.
+
+        Returns
+        -------
+        list[CrossStoreEvaluation]
+            The required tasks
+        """
         store_filenames = [os.path.join(self.input_directory, filename)
                            for filename in get_features_files_in_directory(
                                self.input_directory, self.filename_prefix)
