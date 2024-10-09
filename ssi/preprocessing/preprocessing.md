@@ -37,6 +37,13 @@ needs to be set. This can be done by running the following command:
 export data_directory=/path/to/data_directory
 ```
 
+Only the files that need to go through the `luigi_preprocess_csvs.sh` script need to be copied to
+the `00-raw` folder. These are the CPI files that have a `latin-1` encoding with a `utf-8` BOM.
+The `utf-8` BOM needs to be removed before the files can be used in the preprocessing stage.
+This is the first step in the preprocessing stage.
+
+Files that do not need to pass through the first preprocessing step can be (manually) copied to the `01-cleaned` folder.
+
 ## Preprocessing for Statistic Netherlands
 
 For Statistics Netherlands, the preprocessing stage consists of the following
