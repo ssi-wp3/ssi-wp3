@@ -14,15 +14,46 @@ differ at other NSIs, most likely, the files will contain similar information.
 It will most probably be possible to write a NSI specific preprocessing stage
 that delivers output files with the same columns.
 
-# TODO describe output file structure in more detail
+## Copying files into the 00-raw folder
+
+The preprocessing stage starts with the csv files in the 00-raw folder. The
+files in this folder are the original CPI files. The CPI files need to be
+copied manually into the 00-raw folder. Most CPI files need to be cleaned
+first, before they can be used in the preprocessing stage. To start the preprocessing
+first the `preprocessing` directory and the `preprocessing/00-raw` directory need to be
+created. This can be done by running the following commands:
+
+```cli
+cd /path/to/data_directory
+mkdir preprocessing
+cd preprocessing
+mkdir 00-raw
+```
+
+For the preprocessing scripts to work, furthermore the  `$data_directory` environment variable 
+needs to be set. This can be done by running the following command:
+
+```cli
+export data_directory=/path/to/data_directory
+```
+
+Only the files that need to go through the `luigi_preprocess_csvs.sh` script need to be copied to
+the `00-raw` folder. These are the CPI files that have a `latin-1` encoding with a `utf-8` BOM.
+The `utf-8` BOM needs to be removed before the files can be used in the preprocessing stage.
+This is the first step in the preprocessing stage.
+
+Files that do not need to pass through the first preprocessing step can be (manually) copied to the `01-cleaned` folder.
 
 ## Preprocessing for Statistic Netherlands
 
 For Statistics Netherlands, the preprocessing stage consists of the following
 steps:
 
-1. Cleaning the files (`luigi_preprocess_csvs.sh`)
-2. Converting the files to the Apache Parquet file format (`luigi_convert_receipts.sh`)
-3. Combine the separate files if there are more than one (`luigi_combine_files.sh` carries out step 2 & 3 for the CPI files)
-4. Preprocess the file content (`luigi_preprocess_files.sh`)
-5. Join the CPI files with the files containing the receipt texts (`luigi_add_receipts.sh`)
+1. Cleaning the files (`luigi_preprocess_csvs.sh`), the cleaned files are stored in the `01-cleaned` folder,
+2. Converting the files to the Apache Parquet file format (`luigi_convert_receipts.sh`), the converted files are stored in the `02-parquet` folder,
+3. Combine the separate files if there are more than one (`luigi_combine_files.sh` carries out step 2 & 3 for the CPI files), the combined files are stored in the `03-combined` folder,
+4. Preprocess the file content (`luigi_preprocess_files.sh`), the preprocessed files are stored in the `04-preprocessed` folder,
+5. Join the CPI files with the files containing the receipt texts (`luigi_add_receipts.sh`), the joined files are stored in the `05-final` folder.
+
+The files in the `05-final` folder are the files that can be used in the analysis, feature extraction, and machine learning stages.
+
