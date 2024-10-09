@@ -14,7 +14,28 @@ differ at other NSIs, most likely, the files will contain similar information.
 It will most probably be possible to write a NSI specific preprocessing stage
 that delivers output files with the same columns.
 
-# TODO describe output file structure in more detail
+## Copying files into the 00-raw folder
+
+The preprocessing stage starts with the csv files in the 00-raw folder. The
+files in this folder are the original CPI files. The CPI files need to be
+copied manually into the 00-raw folder. Most CPI files need to be cleaned
+first, before they can be used in the preprocessing stage. To start the preprocessing
+first the `preprocessing` directory and the `preprocessing/00-raw` directory need to be
+created. This can be done by running the following commands:
+
+```cli
+cd /path/to/data_directory
+mkdir preprocessing
+cd preprocessing
+mkdir 00-raw
+```
+
+For the preprocessing scripts to work, furthermore the  `$data_directory` environment variable 
+needs to be set. This can be done by running the following command:
+
+```cli
+export data_directory=/path/to/data_directory
+```
 
 ## Preprocessing for Statistic Netherlands
 
@@ -26,3 +47,5 @@ steps:
 3. Combine the separate files if there are more than one (`luigi_combine_files.sh` carries out step 2 & 3 for the CPI files)
 4. Preprocess the file content (`luigi_preprocess_files.sh`)
 5. Join the CPI files with the files containing the receipt texts (`luigi_add_receipts.sh`)
+
+## Directory structure
