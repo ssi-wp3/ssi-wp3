@@ -50,9 +50,6 @@ def convert_jumbo_receipts(input_file,
     jumbo_receipts_df = pd.read_csv(
         input_file, sep=delimiter, encoding=encoding)
 
-    print("separator", delimiter, "encoding", encoding)
-    print(jumbo_receipts_df.head())
-
     jumbo_receipts_df = jumbo_receipts_df.rename(columns={'NUM_ISO_JAARWEEK': 'year_week',
                                                           'NUM_VESTIGING': 'branch_id',
                                                           'NUM_EAN': Constants.PRODUCT_ID_COLUMN,

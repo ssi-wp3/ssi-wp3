@@ -62,17 +62,12 @@ class ConvertJumboReceipts(luigi.Task):
     csv_encoding = luigi.Parameter(default="latin1")
 
     def requires(self):
-        print("Requires", self.input_filename)
         return CsvFile(input_filename=self.input_filename)
 
     def output(self):
-        print("Output", self.output_filename)
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
-        print("Running ConvertJumboReceipts")
-        import pdb
-        pdb.set_trace()
         with self.input().open('r') as input_file:
             with self.output().open('w') as output_file:
                 jumbo_receipts_df = convert_jumbo_receipts(
@@ -114,11 +109,8 @@ class ConvertAllJumboReceipts(luigi.Task):
         return luigi.LocalTarget(os.path.join(self.output_directory, self.output_filename), format=luigi.format.Nop)
 
     def run(self):
-        import pdb
-
         for input_receipts in self.input():
             receipts_dfs = []
-            pdb.set_trace()
             with input_receipts.open('r') as input_file:
                 receipts_dfs.append(pd.read_parquet(
                     input_file, engine=self.parquet_engine))
