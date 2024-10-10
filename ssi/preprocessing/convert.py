@@ -115,9 +115,10 @@ class ConvertAllJumboReceipts(luigi.Task):
 
     def run(self):
         import pdb
-        pdb.set_trace()
+
         for input_receipts in self.input():
             receipts_dfs = []
+            pdb.set_trace()
             with input_receipts.open('r') as input_file:
                 receipts_dfs.append(pd.read_parquet(
                     input_file, engine=self.parquet_engine))
