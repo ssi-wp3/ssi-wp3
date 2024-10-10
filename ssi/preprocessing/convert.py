@@ -203,5 +203,4 @@ class ConvertAllCSVToParquet(luigi.WrapperTask):
                                     decimal=self.decimal,
                                     clean_cpi=self.clean_cpi)
                 for input_filename in os.listdir(self.input_directory)
-                if input_filename.endswith(self.extension)
-                ]
+                if input_filename.endswith(self.extension) and not input_filename.startswith("part")]
