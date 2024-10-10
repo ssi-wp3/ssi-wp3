@@ -114,6 +114,8 @@ class ConvertAllJumboReceipts(luigi.Task):
         return luigi.LocalTarget(os.path.join(self.output_directory, self.output_filename), format=luigi.format.Nop)
 
     def run(self):
+        import pdb
+        pdb.set_trace()
         for input_receipts in self.input():
             receipts_dfs = []
             with input_receipts.open('r') as input_file:
