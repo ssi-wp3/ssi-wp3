@@ -62,9 +62,11 @@ class ConvertJumboReceipts(luigi.Task):
     csv_encoding = luigi.Parameter(default="latin1")
 
     def requires(self):
+        print("Requires", self.input_filename)
         return CsvFile(input_filename=self.input_filename)
 
     def output(self):
+        print("Output", self.output_filename)
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
