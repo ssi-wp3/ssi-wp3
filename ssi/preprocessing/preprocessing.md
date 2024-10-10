@@ -21,13 +21,12 @@ files in this folder are the original CPI files. The CPI files need to be
 copied manually into the 00-raw folder. Most CPI files need to be cleaned
 first, before they can be used in the preprocessing stage. To start the preprocessing
 first the `preprocessing` directory and the `preprocessing/00-raw` directory need to be
-created. This can be done by running the following commands:
+created. Some files need to be copied to the `preprocessing/01-cleaned` directory.
+This can be done automatically by running the following command, in the root directory
+of this repository:
 
 ```cli
-cd /path/to/data_directory
-mkdir preprocessing
-cd preprocessing
-mkdir 00-raw
+./copy_input_files.sh
 ```
 
 For the preprocessing scripts to work, furthermore the  `$data_directory` environment variable 
