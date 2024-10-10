@@ -68,6 +68,7 @@ class ConvertJumboReceipts(luigi.Task):
         return luigi.LocalTarget(self.output_filename, format=luigi.format.Nop)
 
     def run(self):
+        print("Running ConvertJumboReceipts")
         with self.input().open('r') as input_file:
             with self.output().open('w') as output_file:
                 jumbo_receipts_df = convert_jumbo_receipts(
