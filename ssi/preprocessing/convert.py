@@ -71,6 +71,8 @@ class ConvertJumboReceipts(luigi.Task):
 
     def run(self):
         print("Running ConvertJumboReceipts")
+        import pdb
+        pdb.set_trace()
         with self.input().open('r') as input_file:
             with self.output().open('w') as output_file:
                 jumbo_receipts_df = convert_jumbo_receipts(
